@@ -17,7 +17,7 @@ const ResultPage: React.FC = () => {
   return (
     <div className="d-flex flex-column flex-lg-row vh-100 vw-100 mainParent" style={{ backgroundColor: '#050505', color: 'white' }}>
       {/* Sidebar - Always visible on desktop/tablet, mobile toggles */}
-      {/* <div
+      <div
         className="flex-shrink-0 d-none d-lg-block"
         style={{
           width: '256px',
@@ -27,7 +27,7 @@ const ResultPage: React.FC = () => {
         }}
       >
         <Sidebar />
-      </div> */}
+      </div>
 
       {/* Main Content Area */}
       <main
@@ -81,10 +81,10 @@ const ResultPage: React.FC = () => {
           {/* <DateSelector /> */}
           <StatsCards />
           {/* <PanchangComponent /> */}
-          <ReadingsSection />
+          {/* <ReadingsSection /> */}
           <LuckSection />
           <ExploreSection />
-          <DailyReportsSection />
+          {/* <DailyReportsSection /> */}
           {/* <PopularSection /> */}
         </div>
       </main>

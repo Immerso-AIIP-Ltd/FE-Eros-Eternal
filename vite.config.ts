@@ -7,5 +7,13 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    // ✅ Plugins only go here
   ],
+  // ✅ These are top-level options, NOT inside plugins
+  optimizeDeps: {
+    include: ['@mui/icons-material/ArrowDropDown'],
+  },
+  resolve: {
+    dedupe: ['@mui/material', '@mui/icons-material'],
+  },
 })
