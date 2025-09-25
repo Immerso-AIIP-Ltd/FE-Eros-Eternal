@@ -54,3 +54,13 @@
   margin: 2rem auto;
   width: fit-content;
 }
+
+#chat-input-textarea::placeholder,
+.chat-input::placeholder {
+  color: #b0b8c2;   /* light grey */
+  opacity: 1;       /* ensure not faded */
+}
+
+/* Optional cross-browser fallbacks */
+#chat-input-textarea::-ms-input-placeholder { color: white; }
+#chat-input-textarea:-ms-input-placeholder  { color: white; }
