@@ -100,27 +100,27 @@ const EternalAIPage: React.FC = () => {
           {/* Header */}
           <div className="mb-4" style={{ textAlign: "center" }}>
             <p
-              className="text-white mb-2"
-              style={{ opacity: 0.8, fontSize: "1.5rem" }}
+              className=" mb-2"
+              style={{ opacity: 0.8, fontSize: "1.5rem" ,color:"rgba(255, 255, 255, 1)",fontFamily:"Manrope"}}
             >
               Welcome to
             </p>
-            <h2 className="h4 fw-bold" style={{color: "#00A2FF",}}> Eternal AI</h2>
+            <h2  style={{color: "rgba(0, 184, 248, 1)",fontSize:"64px"}}> Eternal AI</h2>
           </div>
 
           {/* Subtitle */}
           <p
             className="text-white mb-3"
-            style={{ opacity: 0.9, fontSize: "1.1rem", lineHeight: 1.6 }}
+            style={{ opacity: 0.9, fontSize: "20px", lineHeight: 1.6 ,fontFamily:"Inter"}}
           >
             Decode your aura. Track your vibe. Align with your cosmic path.
           </p>
 
           {/* Features List */}
           <div className="mb-5 text-start">
-            <div className="d-flex align-items-center gap-2 mb-3 text-warning justify-content-center">
+            <div className="d-flex align-items-center gap-2 mb-3  justify-content-center" style={{fontFamily:"Inter"}}>
               <span style={{ fontSize: "1.2rem" }}>✨</span>
-              <span style={{ opacity: 0.9, fontSize: "0.9rem" }}>
+              <span style={{ opacity: 0.9, fontSize: "0.9rem",color:"" }}>
                 You'll unlock:
               </span>
             </div>
@@ -128,23 +128,23 @@ const EternalAIPage: React.FC = () => {
             <ul className="list-unstyled" style={{ opacity: 0.9 }}>
               <li className="d-flex align-items-center gap-3 mb-2">
                 <span style={{ opacity: 0.6, fontSize: "1.2rem" }}><BsStars /></span>
-                <span>Your Vibe Score (Energy now)</span>
+                <span>Your Vibe Score (Vibe Unlocked)</span>
               </li>
               <li className="d-flex align-items-center gap-3 mb-2">
                 <span style={{ opacity: 0.6, fontSize: "1.2rem" }}><BsStars /></span>
-                <span>Aura Mood & Color (emotions)</span>
+                <span>Aura Mood & Color (Farm your Aura)</span>
               </li>
               <li className="d-flex align-items-center gap-3 mb-2">
                 <span style={{ opacity: 0.6, fontSize: "1.2rem" }}><BsStars /></span>
-                <span>Star Map (Based on your birth)</span>
+                <span>Star Map (Sync with galaxy)</span>
               </li>
               <li className="d-flex align-items-center gap-3 mb-2">
                 <span style={{ opacity: 0.6, fontSize: "1.2rem" }}><BsStars /></span>
-                <span>Flame Score (Your Spiritual GPS)</span>
+                <span>Flame Score (Inner flame reveal)</span>
               </li>
               <li className="d-flex align-items-center gap-3">
                 <span style={{ opacity: 0.6, fontSize: "1.2rem" }}><BsStars /></span>
-                <span>Daily Food + Thoughts + Practic...</span>
+                <span>Health & Longevity Blueprint</span>
               </li>
             </ul>
           </div>
@@ -154,14 +154,16 @@ const EternalAIPage: React.FC = () => {
           <button
             onClick={() => navigate("/ques")}
 
-            className="btn btn-info text-white w-99 py-3 fs-5 rounded-4 fw-medium"
+            className="btn btn-info text-white  py-3 fs-5  fw-medium"
 
             style={{
-              backgroundColor: "#00b8f8",
-              borderColor: "#00b8f8",
+              backgroundColor: "rgba(0, 184, 248, 1)",
+              borderColor: "rgba(0, 184, 248, 1)",
               cursor: "pointer",
               position: "relative",
               zIndex: 10,
+              fontFamily:"Inter",
+              width:"480px"
             }}
           >
             Start Your Soul Journey
