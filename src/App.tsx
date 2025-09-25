@@ -48,11 +48,10 @@ const App: React.FC = () => {
           <Route path="/card" element={<TarotFlow />} />
           <Route path="/palmcard" element={<PalmFlow />}/>
           <Route path="/palm" element={<PalmReadingPage />}/>
-         <Route path='/vibrational-frequency' element={<VibrationTool/>}/>
-         <Route path='/report' element={<DailyReportsPage />}/>
 
-
-         <Route path="/card" element={<TarrotCard />} />
+          <Route path='/vibrational-frequency' element={<VibrationTool/>}/>
+          <Route path='/report' element={<DailyReportsPage />}/>
+          <Route path="/card" element={<TarrotCard />} />
           <Route path="/palm" element={<PalmReadingPage />}/>
           <Route path="/facereading" element={<FaceReading />}/>
           <Route path="/harmoneyi" element={<HarmonyIndex />}/>

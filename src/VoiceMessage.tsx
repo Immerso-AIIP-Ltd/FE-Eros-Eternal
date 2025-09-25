@@ -119,9 +119,9 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
         gap: 12,
         // background: "#00b8f8",
         color: "#fff",
-        padding: "10px 14px",
+        padding: "4px 4px",
         borderRadius: 24,
-        maxWidth: 480,
+        maxWidth: 250,
         cursor: "pointer",
         userSelect: "none",
         position: "relative", // so audio can be positioned offscreen
