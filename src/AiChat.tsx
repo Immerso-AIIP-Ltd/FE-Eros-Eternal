@@ -22,7 +22,7 @@ const AiChat: React.FC = () => {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const recordedChunksRef = useRef<Blob[]>([]);
     const [sidebarOpen, setSidebarOpen] = useState(false);
-
+    const [sessionId, setSessionId] = useState<number | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -31,9 +31,9 @@ const AiChat: React.FC = () => {
     const [attachedImages, setAttachedImages] = useState<string[]>([]);
     const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
-
-    // New state for voice preview
     const [attachedVoices, setAttachedVoices] = useState<Array<{ url: string, file: File, duration?: number }>>([]);
+    const [sessions, setSessions] = useState<any[]>([]);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
 
     interface Message {
         sender: "user" | "ai";
@@ -112,7 +112,6 @@ const AiChat: React.FC = () => {
             }
         };
 
-
         return (
             <div className="bg-gray-700 rounded-lg p-3 flex items-center gap-3 max-w-xs">
                 <audio ref={audioRef} src={voiceData.url} preload="metadata" />
@@ -149,6 +148,36 @@ const AiChat: React.FC = () => {
         );
     };
 
+    const formatTextWithBold = (text) => {
+        if (!text || typeof text !== 'string') return text;
+
+        // Split text by double asterisks first (**text**)
+        const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
+        return parts.map((part, index) => {
+            // Handle double asterisks
+            if (part.startsWith('**') && part.endsWith('**')) {
+                const boldText = part.slice(2, -2); // Remove ** from both ends
+                return <strong key={index}>{boldText}</strong>;
+            }
+
+            // Handle single asterisks within non-double-asterisk parts
+            const singleAsteriskParts = part.split(/(\*[^*]+\*)/g);
+
+            if (singleAsteriskParts.length === 1) {
+                return part; // No single asterisks found
+            }
+
+            return singleAsteriskParts.map((subPart, subIndex) => {
+                if (subPart.startsWith('*') && subPart.endsWith('*') && !subPart.startsWith('**')) {
+                    const boldText = subPart.slice(1, -1); // Remove * from both ends
+                    return <strong key={`${index}-${subIndex}`}>{boldText}</strong>;
+                }
+                return subPart;
+            });
+        });
+    };
+
     const [stars] = useState(() =>
         Array.from({ length: 50 }, () => ({
             x: Math.random() * 100,
@@ -167,8 +196,9 @@ const AiChat: React.FC = () => {
     useEffect(() => {
         if (!isInitialized && messages.length === 0) {
             initializeChat();
+            fetchSessions();
         }
-    }, []);
+    }, [isInitialized, messages.length])
 
     const initializeChat = async () => {
         if (isInitialized) return;
@@ -191,34 +221,58 @@ const AiChat: React.FC = () => {
         ]);
     };
 
-    const handleNewChat = () => {
+    const handleNewChat = async () => {
+        // Clear all states
         setMessages([]);
         setInputValue("");
         setAttachedImages([]);
         setAttachedFiles([]);
         setAttachedVoices([]);
         setIsLoading(false);
+        setSessionId(null);
         setIsInitialized(false);
 
-        setTimeout(() => {
-            setIsInitialized(true);
-            setMessages([
-                {
-                    sender: "ai",
-                    text: (
-                        <div className="text-center">
-                            <div className="text-2xl font-600 text-white">
-                                Hi, I'm Eternal AI
-                            </div>
-                            <div className="text-sm text-white mt-3">
-                                How can I help you today?
-                            </div>
-                        </div>
-                    ),
-                    centered: true
-                }
-            ]);
-        }, 50);
+        // Initialize with welcome message
+        initializeChat();
+        fetchSessions();
+    };
+
+    const fetchSessions = async () => {
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return;
+
+        try {
+            const response = await fetch(`http://192.168.29.154:6001/api/v1/chat/sessions/?user_id=${userId}`);
+            const data = await response.json();
+            if (data.success && data.data && data.data.sessions && Array.isArray(data.data.sessions)) {
+                setSessions(data.data.sessions);
+            } else {
+                setSessions([]);
+            }
+        } catch (error) {
+            console.error('Error fetching sessions:', error);
+            setSessions([]);
+        }
+    };
+
+    const loadConversation = async (sessionId: number | string) => {
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return;
+
+        try {
+            const response = await fetch(`http://192.168.29.154:6001/api/v1/chat/conversation/${sessionId}`);
+            const data = await response.json();
+            if (data.success && data.data && data.data.conversation_history && Array.isArray(data.data.conversation_history)) {
+                const formattedMessages = data.data.conversation_history.map((msg: any) => ({
+                    sender: msg.role === 'assistant' ? 'ai' : 'user',
+                    text: msg.content
+                }));
+                setMessages(formattedMessages);
+                setSessionId(typeof sessionId === 'string' ? parseInt(sessionId) : sessionId);
+            }
+        } catch (error) {
+            console.error('Error loading conversation:', error);
+        }
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -256,6 +310,7 @@ const AiChat: React.FC = () => {
 
         e.target.value = '';
     };
+
     const openCamera = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -323,7 +378,6 @@ const AiChat: React.FC = () => {
             mediaRecorderRef.current = recorder;
             setIsRecording(true);
 
-            // Timer
             setRecordingTime(0);
             timerRef.current = setInterval(() => {
                 setRecordingTime((prev) => prev + 1);
@@ -360,7 +414,6 @@ const AiChat: React.FC = () => {
         }
     };
 
-
     const cancelRecording = () => {
         if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop();
@@ -388,9 +441,6 @@ const AiChat: React.FC = () => {
         setMessages((prev) => [...prev, userMessage]);
 
         const currentInput = inputValue;
-        const hasVoice = attachedVoices.length > 0;
-        const hasImages = attachedImages.length > 0;
-
         setInputValue("");
         setAttachedImages([]);
         setAttachedFiles([]);
@@ -398,54 +448,74 @@ const AiChat: React.FC = () => {
         setIsLoading(true);
 
         try {
-            setTimeout(() => {
-                let responseText = "I understand your ";
-                if (hasVoice) responseText += "voice message";
-                if (hasImages) responseText += hasVoice ? " and images" : "images";
-                if (currentInput.trim()) responseText += (hasVoice || hasImages) ? " and text" : "question";
-                responseText += ". Let me provide you with spiritual guidance on this matter.";
+            const userId = localStorage.getItem('user_id');
+            if (!userId) {
+                setMessages((prev) => [...prev, { sender: "ai", text: "User ID not found. Please log in." }]);
+                setIsLoading(false);
+                return;
+            }
 
+            let currentSessionId = sessionId;
+
+            // If no session ID exists, initialize a new session
+            if (!currentSessionId) {
+                const initResponse = await fetch('http://192.168.29.154:6001/api/v1/chat/spiritual', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        user_id: userId,
+                        message: "start"
+                    })
+                });
+
+                const initData = await initResponse.json();
+                if (initData.success) {
+                    currentSessionId = initData.data.session_id;
+                    setSessionId(currentSessionId);
+                    // Optionally, fetch sessions to update the sidebar
+                    fetchSessions();
+                } else {
+                    setMessages((prev) => [...prev, { sender: "ai", text: "Failed to initialize chat session." }]);
+                    setIsLoading(false);
+                    return;
+                }
+            }
+
+            // Send the user's message
+            const response = await fetch('http://192.168.29.154:6001/api/v1/chat/spiritual', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    user_id: userId,
+                    message: currentInput,
+                    session_id: currentSessionId?.toString() || ""
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
                 setMessages((prev) => [
                     ...prev,
                     {
                         sender: "ai",
-                        text: responseText
+                        text: data.data.response
                     },
                 ]);
-                setIsLoading(false);
-            }, 1000);
-
+            } else {
+                setMessages((prev) => [...prev, { sender: "ai", text: "Failed to get response." }]);
+            }
         } catch (error) {
             console.error('Error:', error);
-            setTimeout(() => {
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        sender: "ai",
-                        text: "Sorry, there was an error processing your request. Please try again."
-                    },
-                ]);
-                setIsLoading(false);
-            }, 600);
+            setMessages((prev) => [
+                ...prev,
+                {
+                    sender: "ai",
+                    text: "Sorry, there was an error processing your request. Please try again."
+                },
+            ]);
         }
+        setIsLoading(false);
     };
-
-    // const formatTime = (secs: number) => {
-    //     const m = Math.floor(secs / 60)
-    //         .toString()
-    //         .padStart(2, "0");
-    //     const s = (secs % 60).toString().padStart(2, "0");
-    //     return `${m}:${s}`;
-    // };
-
-    // const formatTime = (secs) => {
-    //     if (!secs || isNaN(secs)) return '00:00';
-    //     const m = Math.floor(secs / 60)
-    //         .toString()
-    //         .padStart(2, "0");
-    //     const s = (secs % 60).toString().padStart(2, "0");
-    //     return `${m}:${s}`;
-    // };
 
     const formatTime = (secs) => {
         if (!secs || isNaN(secs) || secs === 0) return '0:00';
@@ -484,6 +554,13 @@ const AiChat: React.FC = () => {
         };
     }, [micStream]);
 
+    // Auto-scroll to bottom when new messages are added
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [messages, isLoading]);
+
     return (
         <div className="d-flex w-100 h-100 min-vh-100 min-vw-100 bg-black text-white overflow-hidden">
             <Stars />
@@ -505,7 +582,6 @@ const AiChat: React.FC = () => {
                 ))}
             </div>
 
-            {/* Camera Modal */}
             {showCamera && (
                 <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
                     <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
@@ -540,7 +616,6 @@ const AiChat: React.FC = () => {
                 </div>
             )}
 
-            {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
@@ -548,11 +623,32 @@ const AiChat: React.FC = () => {
                 />
             )}
 
-            {/* Sidebar */}
-            <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                } md:translate-x-0 fixed md:relative h-screen z-50 w-64 backdrop-blur-sm transition-transform duration-300 ease-in-out`} style={{ backgroundColor: '#1E2123' }}>
+            <div
+                className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative h-screen z-50 w-64 backdrop-blur-sm transition-transform duration-300 ease-in-out overflow-y-auto`}
+                style={{
+                    backgroundColor: '#1E2123',
+                    scrollbarWidth: 'thin', // Firefox
+                    scrollbarColor: '#4B5563 #1E2123' // Firefox
+                }}
+            >
+                {/* Add custom scrollbar styles for WebKit browsers */}
+                <style>{`
+    div::-webkit-scrollbar {
+      width: 6px;
+    }
+    div::-webkit-scrollbar-track {
+      background: #1E2123;
+    }
+    div::-webkit-scrollbar-thumb {
+      background: #4B5563;
+      border-radius: 3px;
+    }
+    div::-webkit-scrollbar-thumb:hover {
+      background: #6B7280;
+    }
+  `}</style>
 
-                {/* Sidebar Header */}
+
                 <div className="p-4 border-b border-gray-700">
                     <div className="flex items-center justify-between">
                         <h2 className="text-lg font-bold" style={{ color: '#00B8F8' }}>Eternal AI</h2>
@@ -565,38 +661,40 @@ const AiChat: React.FC = () => {
                     </div>
                 </div>
 
-                {/* New Chat Button */}
                 <div className="p-4">
                     <button
                         onClick={handleNewChat}
                         className="w-full flex items-center gap-3 px-4 py-3 bg-transparent rounded text-gray-300 hover:text-white hover:bg-gray-800 transition-all duration-200 group"
                         style={{ border: '1px solid grey' }}
+                        disabled={messages.length === 0 || (messages.length === 1 && messages[0].centered)}
                     >
                         <SquarePlus size={18} className="group-hover:scale-110 transition-transform duration-200" />
                         <span className="text-sm font-medium">New Chat</span>
                     </button>
                 </div>
 
-                {/* History Section */}
                 <div className="p-4 border-t border-gray-700">
                     <h5 className="font-medium text-gray-400 mb-3 text-sm">Recent Chats</h5>
                     <div className="space-y-2">
-                        {historyItems.map((item, index) => (
-                            <div
-                                key={index}
-                                className="text-sm text-gray-300 hover:text-white hover:bg-gray-800 cursor-pointer py-2 px-3 rounded-lg transition-all duration-200 truncate"
-                                title={item}
-                            >
-                                {item}
-                            </div>
-                        ))}
+                        {Array.isArray(sessions) && sessions.length > 0 ? (
+                            sessions.map((session) => (
+                                <div
+                                    key={session.id}
+                                    className="text-sm text-gray-300 hover:text-white hover:bg-gray-800 cursor-pointer py-2 px-3 rounded-lg transition-all duration-200 truncate"
+                                    title={session.session_name}
+                                    onClick={() => loadConversation(session.id)}
+                                >
+                                    {session.session_name}
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-xs text-gray-500">No recent chats</div>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col relative z-10">
-                {/* Header */}
+            <div className="flex-1 flex flex-col relative z-10 h-screen">
                 <div className="flex items-center justify-between p-4 border-gray-800">
                     <div className="flex items-center gap-3">
                         <button
@@ -617,104 +715,125 @@ const AiChat: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Chat Messages Area - Centered layout for initial message */}
-                <div className="flex-1 flex flex-col relative">
-                    {messages.length === 1 && messages[0].centered ? (
-                        // Centered initial greeting
-                        <div className="flex-1 flex items-center justify-center">
-                            <div className="text-center">
-                                <div className="mb-4">
-                                    <div className="w-16 h-16 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <span className="text-2xl font-semibold">AI</span>
+                <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+                    {/* Chat Messages Area - Scrollable */}
+                    <div
+                        ref={chatContainerRef}
+                        className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4"
+                        style={{
+                            maxWidth: '65%',
+                            margin: '0 auto',
+                            width: '100%',
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: '#4B5563 #1E2123'
+                        }}
+                    >
+                        <style>{`
+                        .custom-scrollbar::-webkit-scrollbar {
+                            width: 6px;
+                        }
+                        .custom-scrollbar::-webkit-scrollbar-track {
+                            background: #1E2123;
+                        }
+                        .custom-scrollbar::-webkit-scrollbar-thumb {
+                            background: #4B5563;
+                            border-radius: 3px;
+                        }
+                        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                            background: #6B7280;
+                        }
+                        `}</style>
+
+                        {messages.length === 1 && messages[0].centered ? (
+                            <div className="flex-1 flex items-center justify-center h-full min-h-[60vh]">
+                                <div className="text-center">
+                                    <div className="mb-4">
+                                        <div className="w-16 h-16 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <span className="text-2xl font-semibold">AI</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-white text-lg leading-relaxed whitespace-pre-line">
+                                        {messages[0].text}
                                     </div>
                                 </div>
-                                <div className="text-white text-lg leading-relaxed whitespace-pre-line">
-                                    {messages[0].text}
-                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        // Regular chat layout with updated styling
-                        <div className="flex-1 overflow-y-auto px-6 py-8 space-y-4" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
-                            {messages.map((message, index) => (
-                                <div key={index} className="w-full">
-                                    {message.sender === 'user' ? (
-                                        // User message - right aligned
-                                        <div className="flex flex-col items-end gap-2 mb-4">
-                                            <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                                <span className="text-xs font-semibold text-white"><User size={18} /></span>
-                                            </div>
-                                            <div className="bg-cyan-500 text-white rounded-2xl rounded-tr-md px-4 py-3 max-w-xs lg:max-w-md shadow-lg">
-                                                {message.imageList && message.imageList.length > 0 && (
-                                                    <div className="mb-2">
-                                                        {message.imageList.map((img, j) => (
-                                                            <img
-                                                                key={j}
-                                                                src={img}
-                                                                alt="attachment"
-                                                                className="rounded max-w-full h-auto cursor-pointer"
-                                                                style={{ maxWidth: "200px", maxHeight: "200px", objectFit: "cover" }}
-                                                                onClick={() => setPreviewImage(img)}
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {message.audio && (
-                                                    <VoiceMessage url={message.audio} duration={message.duration ?? 0} />
-                                                )}
-                                                {message.text && (
-                                                    <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
-                                                        {message.text}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        // AI message - left aligned with avatar
-                                        <div className="flex flex-col items-start gap-2 mb-4">
-                                            <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                                <span className="text-xs font-semibold text-white">AI</span>
-                                            </div>
-                                            <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg">
-                                                <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
-                                                    {message.isThinking ? (
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-cyan-500 border-t-transparent"></div>
-                                                            <span>{message.text}</span>
+                        ) : (
+                            <>
+                                {messages.map((message, index) => (
+                                    <div key={index} className="w-full">
+                                        {message.sender === 'user' ? (
+                                            <div className="flex flex-col items-end gap-2 mb-4">
+                                                <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                                    <span className="text-xs font-semibold text-white"><User size={18} /></span>
+                                                </div>
+                                                <div className="bg-cyan-500 text-white rounded-2xl rounded-tr-md px-4 py-3 max-w-xs lg:max-w-md shadow-lg">
+                                                    {message.imageList && message.imageList.length > 0 && (
+                                                        <div className="mb-2">
+                                                            {message.imageList.map((img, j) => (
+                                                                <img
+                                                                    key={j}
+                                                                    src={img}
+                                                                    alt="attachment"
+                                                                    className="rounded max-w-full h-auto cursor-pointer"
+                                                                    style={{ maxWidth: "200px", maxHeight: "200px", objectFit: "cover" }}
+                                                                    onClick={() => setPreviewImage(img)}
+                                                                />
+                                                            ))}
                                                         </div>
-                                                    ) : (
-                                                        message.text
+                                                    )}
+                                                    {message.audio && (
+                                                        <VoiceMessage url={message.audio} duration={message.duration ?? 0} />
+                                                    )}
+                                                    {message.text && (
+                                                        <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
+                                                            {message.text}
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-
-                            {isLoading && (
-                                <div className="flex flex-col items-start gap-2 mb-4">
-                                    <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                        <span className="text-xs font-semibold text-white">AI</span>
+                                        ) : (
+                                            <div className="flex flex-col items-start gap-2 mb-4">
+                                                <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                                    <span className="text-xs font-semibold text-white">AI</span>
+                                                </div>
+                                                <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg">
+                                                    <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
+                                                        {message.isThinking ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-cyan-500 border-t-transparent"></div>
+                                                                <span>{message.text}</span>
+                                                            </div>
+                                                        ) : (
+                                                            formatTextWithBold(message.text)
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 shadow-lg">
-                                        <div className="flex items-center gap-2">
-                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-cyan-500 border-t-transparent"></div>
-                                            <span className="text-sm">Thinking...</span>
+                                ))}
+                                {isLoading && (
+                                    <div className="flex flex-col items-start gap-2 mb-4">
+                                        <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                            <span className="text-xs font-semibold text-white">AI</span>
+                                        </div>
+                                        <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 shadow-lg">
+                                            <div className="flex items-center gap-2">
+                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-cyan-500 border-t-transparent"></div>
+                                                <span className="text-sm">Thinking...</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                )}
+                            </>
+                        )}
+                    </div>
 
-                    {/* Input Area - Updated positioning */}
-                    <div className="px-6 pb-6" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
-                        <div className="bg-gray-800 rounded-2xl p-4 shadow-lg">
-                            {/* Attached Files Preview */}
+                    {/* Fixed Input Area at Bottom */}
+                    <div className="sticky bottom-0 bg-black z-20 px-6 pb-4 pt-2 border-t border-gray-800">
+                        <div className="bg-gray-800 rounded-2xl p-4 shadow-lg" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
                             {(attachedImages.length > 0 || attachedVoices.length > 0) && (
                                 <div className="flex flex-col gap-3 mb-3">
-                                    {/* Images Preview */}
                                     {attachedImages.length > 0 && (
                                         <div className="flex flex-wrap gap-2">
                                             {attachedImages.map((img, idx) => (
@@ -739,7 +858,6 @@ const AiChat: React.FC = () => {
                                         </div>
                                     )}
 
-                                    {/* Voice Previews */}
                                     {attachedVoices.length > 0 && (
                                         <div className="flex flex-col gap-2">
                                             {attachedVoices.map((voice, idx) => (
@@ -769,9 +887,7 @@ const AiChat: React.FC = () => {
                                             />
                                         </div>
 
-                                        {/* Action buttons */}
                                         <div className="flex items-center gap-3">
-                                            {/* Image Upload */}
                                             <label className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent cursor-pointer">
                                                 <ImagePlus size={20} />
                                                 <input
@@ -783,7 +899,6 @@ const AiChat: React.FC = () => {
                                                 />
                                             </label>
 
-                                            {/* Camera */}
                                             <button
                                                 className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent"
                                                 onClick={openCamera}
@@ -791,7 +906,6 @@ const AiChat: React.FC = () => {
                                                 <Camera size={20} />
                                             </button>
 
-                                            {/* Audio Upload */}
                                             <label className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent cursor-pointer">
                                                 <Upload size={20} />
                                                 <input
@@ -802,7 +916,6 @@ const AiChat: React.FC = () => {
                                                 />
                                             </label>
 
-                                            {/* Audio Record */}
                                             <button
                                                 className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent"
                                                 onClick={startRecording}
@@ -822,7 +935,6 @@ const AiChat: React.FC = () => {
                                         </div>
                                     </>
                                 ) : (
-                                    // Recording UI
                                     <div className="flex items-center bg-gray-700 rounded-xl px-4 py-2 flex-grow-1 w-full">
                                         <MicVisualizer stream={micStream} height={40} />
                                         <span className="ml-4 text-red-400 font-bold text-lg">{formatTime(recordingTime)}</span>
@@ -845,43 +957,41 @@ const AiChat: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Footer */}
-                <div className="px-6 pb-4">
-                    <div className="text-center text-xs text-gray-500">
-                        <div className="flex items-center justify-between text-xs mb-2">
-                            <div>© 2025 EROS Universe. All Rights Reserved.</div>
-
-                            <div className="flex items-center gap-6">
-                                <a href="#" className="hover:text-gray-300 transition-colors">FAQs</a>
-                                <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
-                                <a href="#" className="hover:text-gray-300 transition-colors">Terms & Conditions</a>
-                                <a href="#" className="hover:text-gray-300 transition-colors">Refund Policy</a>
+                    {/* Footer - Fixed at very bottom */}
+                    <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-t border-gray-800">
+                        <div className="text-center text-xs text-gray-500" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
+                            <div className="flex items-center justify-between text-xs">
+                                <div>© 2025 EROS Universe. All Rights Reserved.</div>
+                                <div className="flex items-center gap-6">
+                                    <a href="#" className="hover:text-gray-300 transition-colors">FAQs</a>
+                                    <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
+                                    <a href="#" className="hover:text-gray-300 transition-colors">Terms & Conditions</a>
+                                    <a href="#" className="hover:text-gray-300 transition-colors">Refund Policy</a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Image Preview Modal */}
-            {previewImage && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="relative max-w-4xl max-h-4xl p-4">
-                        <button
-                            onClick={() => setPreviewImage(null)}
-                            className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
-                        >
-                            <X size={24} />
-                        </button>
-                        <img
-                            src={previewImage}
-                            alt="Preview"
-                            className="max-w-full max-h-full object-contain rounded-lg"
-                        />
+                {previewImage && (
+                    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                        <div className="relative max-w-4xl max-h-4xl p-4">
+                            <button
+                                onClick={() => setPreviewImage(null)}
+                                className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+                            >
+                                <X size={24} />
+                            </button>
+                            <img
+                                src={previewImage}
+                                alt="Preview"
+                                className="max-w-full max-h-full object-contain rounded-lg"
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };

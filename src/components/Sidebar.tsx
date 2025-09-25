@@ -21,7 +21,7 @@ export const Sidebar: React.FC = () => {
   const menuItems = [
     // { label: 'Home', path: '/home', iconClass: 'bi bi-house' },
     { label: 'Spiritual', path: '/result',  iconImage: spirtual, },
-    { label: 'Chat', path: '/ques',  iconImage: spirtual, },
+    { label: 'Chat', path: '/ai-chat',  iconImage: spirtual, },
   ];
 
   return (
