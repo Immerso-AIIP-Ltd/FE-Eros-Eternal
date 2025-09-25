@@ -1,0 +1,79 @@
+/* Custom Styles */
+body {
+  background-color: #000;
+  color: #fff;
+}
+
+.header {
+  padding: 2rem 1rem;
+  text-align: left;
+}
+
+.card {
+  background-color: #121212;
+  border: none;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.2);
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 123, 255, 0.3);
+  border-top: 3px solid #007bff;
+}
+
+.hover-card .card-body {
+  padding: 1.5rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.card-text {
+  font-size: 0.9rem;
+}
+
+.btn-outline-primary {
+  border-color: #007bff;
+  color: #007bff;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.fs-2 {
+  font-size: 2rem;
+}
+
+.text-primary {
+  color: #007bff;
+}
+
+.fas {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .card-title {
+    font-size: 1.3rem;
+  }
+}
