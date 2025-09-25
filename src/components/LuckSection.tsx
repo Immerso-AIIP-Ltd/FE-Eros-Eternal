@@ -28,7 +28,7 @@ interface PersonalMonthResponse {
   status: number;
 }
 
-const API_URL='http://192.168.29.154:8002';
+const API_URL='http://192.168.29.154:6001';
 
 export const LuckSection: React.FC = () => {
   const [flippedIndexes, setFlippedIndexes] = useState<Set<number>>(new Set());
@@ -41,7 +41,7 @@ export const LuckSection: React.FC = () => {
   // 🔹 Read user data from localStorage
   const userId = localStorage.getItem('user_id');
   const username = localStorage.getItem('username');
-  const dob = localStorage.getItem('date_of_birth'); // Expected format: "YYYY-MM-DD"
+  const dob = localStorage.getItem('date_of_birth'); 
 
   // ✅ Validate required data
   const hasUserData = userId && username && dob;
@@ -71,7 +71,7 @@ export const LuckSection: React.FC = () => {
         const response = await fetch(`${API_URL}/api/v1/numerology/planetary_horoscope`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, user_name: username, dob }),
+          body: JSON.stringify({ user_id: userId, user_name: username, dob}),
         });
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -132,42 +132,85 @@ export const LuckSection: React.FC = () => {
   }, [hasUserData, userId, username, dob]);
 
   // 🔁 Fetch Lucky Numbers (index 2)
+  // useEffect(() => {
+  //   const fetchLuckyNumbers = async () => {
+  //     const index = 2;
+  //     if (!hasUserData) {
+  //       setErrorState(index, "User data missing.");
+  //       return;
+  //     }
+
+  //     setLoadingState(index, true);
+  //     setErrorState(index, "");
+
+  //     try {
+  //       const response = await fetch(`${API_URL}/api/v1/numerology/lucky_numbers`, {
+  //         method: 'POST',
+  //         headers: { 'Content-Type': 'application/json' },
+  //         body: JSON.stringify({ user_id: userId, user_name: username, dob }),
+  //       });
+
+  //       if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+  //       const data = await response.json();
+  //       if (data.success && data.data?.lucky_numbers) {
+  //         setLuckyNumbers(data.data.lucky_numbers);
+  //       } else {
+  //         setErrorState(index, "No lucky numbers found.");
+  //       }
+  //     } catch (err) {
+  //       console.error("Lucky Numbers Error:", err);
+  //       setErrorState(index, "Failed to load lucky numbers.");
+  //     } finally {
+  //       setLoadingState(index, false);
+  //     }
+  //   };
+
+  //   fetchLuckyNumbers();
+  // }, [hasUserData, userId, username, dob]);
+
   useEffect(() => {
-    const fetchLuckyNumbers = async () => {
-      const index = 2;
-      if (!hasUserData) {
-        setErrorState(index, "User data missing.");
-        return;
+  const fetchLuckyNumbers = async () => {
+    const index = 2;
+    if (!hasUserData) {
+      setErrorState(index, "User data missing.");
+      return;
+    }
+
+    setLoadingState(index, true);
+    setErrorState(index, "");
+
+    try {
+      // Create FormData
+      const formData = new FormData();
+      formData.append('user_id', userId);
+      formData.append('user_name', username);
+      formData.append('dob', dob);
+
+      const response = await fetch(`${API_URL}/api/v1/numerology/lucky_numbers`, {
+        method: 'POST',
+        // ⚠️ Do NOT set Content-Type — browser sets it automatically with boundary
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json();
+      if (data.success && data.data?.lucky_numbers) {
+        setLuckyNumbers(data.data.lucky_numbers);
+      } else {
+        setErrorState(index, "No lucky numbers found.");
       }
+    } catch (err) {
+      console.error("Lucky Numbers Error:", err);
+      setErrorState(index, "Failed to load lucky numbers.");
+    } finally {
+      setLoadingState(index, false);
+    }
+  };
 
-      setLoadingState(index, true);
-      setErrorState(index, "");
-
-      try {
-        const response = await fetch(`${API_URL}/api/v1/numerology/lucky_numbers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, user_name: username, dob }),
-        });
-
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const data = await response.json();
-        if (data.success && data.data?.lucky_numbers) {
-          setLuckyNumbers(data.data.lucky_numbers);
-        } else {
-          setErrorState(index, "No lucky numbers found.");
-        }
-      } catch (err) {
-        console.error("Lucky Numbers Error:", err);
-        setErrorState(index, "Failed to load lucky numbers.");
-      } finally {
-        setLoadingState(index, false);
-      }
-    };
-
-    fetchLuckyNumbers();
-  }, [hasUserData, userId, username, dob]);
+  fetchLuckyNumbers();
+}, [/* your dependencies */]);
 
   // 🔁 Toggle flip on card click
   const toggleFlip = (index: number) => {
@@ -314,7 +357,7 @@ export const LuckSection: React.FC = () => {
       style={{
         padding: '20px 0',
         backgroundColor: '#000',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        // fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
       {/* Header */}
@@ -326,6 +369,7 @@ export const LuckSection: React.FC = () => {
             color: '#fff',
             margin: 0,
             letterSpacing: '-0.02em',
+            fontFamily:"Poppins"
           }}
         >
           Discover your luck
@@ -352,8 +396,8 @@ export const LuckSection: React.FC = () => {
             className={`flip-card ${flippedIndexes.has(index) ? 'flipped' : ''}`}
             onClick={() => toggleFlip(index)}
             style={{
-              width: '432px',
-              height: '432px',
+              width: '412px',
+              height: '480px',
               borderRadius: '12px',
               border: '1px solid #3a3d40',
               backgroundColor: '#2a2d30',
@@ -364,6 +408,7 @@ export const LuckSection: React.FC = () => {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
+              fontFamily:"Inter"
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#353a3e';
@@ -528,6 +573,7 @@ const cardTitleStyle: React.CSSProperties = {
   color: '#ffffff',
   margin: '0',
   lineHeight: '1.3',
+
 };
 
 const cardSubtitleStyle: React.CSSProperties = {

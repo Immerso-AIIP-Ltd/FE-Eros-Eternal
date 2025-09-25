@@ -60,11 +60,11 @@ const SplashScreen: React.FC = () => {
         <div className="mb-4">
           <div
             className="text-light opacity-70 fw-medium mb-1"
-            style={{ fontSize: "1rem", letterSpacing: "1px" }}
+            style={{ fontSize: "24px", letterSpacing: "1px",color:"rgba(255, 255, 255, 1)",fontFamily:"Manrope" }}
           >
             EROS Universe
           </div>
-           <h1 
+           {/* <h1 
     className=" fw-bold" 
     style={{
       background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
@@ -77,11 +77,12 @@ const SplashScreen: React.FC = () => {
     }}
   >
     Eternal AI
-  </h1>
+  </h1> */}
+              <h2 style={{ color: "rgba(0, 184, 248, 1)", fontSize: "64px",fontFamily:"Montserrat" ,}}> Eternal AI</h2>
           {/* <h2 className="h4 fw-bold" style={{color: "#00A2FF",}}> Eternal AI</h2> */}
           <p
             className="text-light opacity-80 mb-4"
-            style={{ fontSize: "1.9rem" }}
+            style={{ fontSize: "1.9rem",fontFamily:"Manrope"}}
           >
             Eternal AI is your personal companion for inner growth and
             exploration.
@@ -92,7 +93,7 @@ const SplashScreen: React.FC = () => {
             {/* Outline Button with Rocket Icon */}
             <button
               className="btn btn-outline-light rounded-pill px-4 py-2 d-flex align-items-center"
-              style={{ borderColor: "#ffffff" }}
+              style={{ borderColor: "#ffffff",fontFamily:"Poppins" }}
             >
               {/* <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -104,7 +105,7 @@ const SplashScreen: React.FC = () => {
               >
                 <path d="M14.5 3a1 1 0 0 1-1 1h-2.9l-1.7 1.1-2.5-2.5L8 4.4l1.1-1.7H6a1 1 0 0 1 0-2h6a1 1 0 0 1 1 1v2zM7.5 6.5l-1.5 1.5-2.5-2.5L4.5 4l1.5 1.5L8 3.5 7.5 6.5zm-5 5a1 1 0 0 1 1-1h6.4l1.5 1.5-1.5 1.5H2.5a1 1 0 0 1-1-1v-2zm6.5 3a1 1 0 0 1-1-1v-2.9l1.7 1.1 2.5-2.5 1.1 1.1-1.7 1.7H12a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H8z"/>
               </svg> */}
-              Start Demo
+             How it works
             </button>
 
             {/* Solid Info Button */}
@@ -113,7 +114,7 @@ const SplashScreen: React.FC = () => {
                 console.log("check its working");
                 navigate("/profile");
               }}
-              className="btn btn-info text-white rounded-pill px-4 py-2 fw-medium"
+              className="btn btn-info text-white rounded-pill px-4 py-2 fw-medium" style={{fontFamily:"Poppins"}}
             >
               Begin your journey
             </button>
