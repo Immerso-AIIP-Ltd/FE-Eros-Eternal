@@ -2,21 +2,37 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Import images
 import tarot from '../tarot.png';
 import harmonyindex from '../harmonyindex.png';
 import palm from '../palm.png';
 import facescan from '../facescan.png';
 import angel from '../vintage.png';
 
+interface ExploreItem {
+  title: string;
+  subtitle: string;
+  image: string;
+  onClick?: () => void;
+  locked: boolean;
+}
+
 export const ExploreSection: React.FC = () => {
   const navigate = useNavigate();
 
-  const items = [
+  const items: ExploreItem[] = [
     {
       title: "Tarot Reading",
       subtitle: "Love tarot reading for singles and couples",
       image: tarot,
       onClick: () => navigate('/card'),
+      locked: false,
+    },
+    {
+      title: "Palmistry",
+      subtitle: "Unlock insights and energy balance through the wisdom of your palms",
+      image: palm,
+      onClick: () => navigate('/palm'),
       locked: false,
     },
     {
@@ -27,24 +43,17 @@ export const ExploreSection: React.FC = () => {
       locked: false,
     },
     {
-      title: "Palmistry",
-      subtitle: "Unlock insights and energy balance through the wisdom of your palms",
-      image: palm,
-      onClick: () => navigate('/palm'),
+      title: "Face Scan",
+      subtitle: "Face Scan for your spiritual journey",
+      image: facescan,
+      onClick: undefined,
       locked: false,
     },
-    // {
-    //   title: "Face Scan",
-    //   subtitle: "Face Scan for your spiritual journey",
-    //   image: facescan,
-    //   onClick: null,
-    //   locked: true,
-    // },
     // {
     //   title: "Angel Cards",
     //   subtitle: "Angel guidance for your spiritual journey",
     //   image: angel,
-    //   onClick: null,
+    //   onClick: undefined,
     //   locked: true,
     // },
   ];
@@ -52,44 +61,50 @@ export const ExploreSection: React.FC = () => {
   return (
     <div>
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2
-          className="mb-0"
-          style={{
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            color: 'white',
-          }}
-        >
-          Explore
-        </h2>
-      </div>
-
-      {/* Cards */}
-      <div
-        className="d-flex gap-3 overflow-auto pb-3"
+      <h2
+        className="mb-0"
         style={{
+          fontSize: '1.25rem',
+          fontWeight: 600,
+          color: '#ffffff',
+        }}
+      >
+        Explore More
+      </h2>
+
+      {/* Horizontal Scroll Container */}
+      <div
+        className="horizontal-scroll"
+        style={{
+          display: 'flex',
+          overflowX: 'auto',
+          gap: '1rem',
+          padding: '0 0.5rem',
           scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          whiteSpace: 'nowrap',
+          marginTop: '1rem',
           paddingBottom: '1rem',
         }}
       >
-        <style>{`
-          .overflow-auto::-webkit-scrollbar { display: none; }
-        `}</style>
-
         {items.map((item, index) => (
           <div
             key={index}
-            className="rounded-4 overflow-hidden flex-shrink-0 position-relative"
+            className="card-item"
+            onClick={item.onClick}
+            role="button"
+            tabIndex={item.onClick ? 0 : -1}
+            aria-label={item.locked ? `${item.title} - Coming Soon` : item.title}
             style={{
-              width: '800px',
-              height: '400px', // Fixed height for consistency
+              minWidth: '300px',
+              flexShrink: 0,
+              borderRadius: '12px',
               backgroundColor: '#1e2123',
-              cursor: item.onClick ? 'pointer' : 'default',
-              transition: 'background-color 0.3s ease',
+              overflow: 'hidden',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              cursor: item.onClick ? 'pointer' : 'not-allowed',
               position: 'relative',
             }}
-            onClick={item.onClick || undefined}
             onMouseEnter={(e) => {
               if (item.onClick) {
                 e.currentTarget.style.backgroundColor = '#2a2e30';
@@ -107,37 +122,43 @@ export const ExploreSection: React.FC = () => {
               alt={item.title}
               style={{
                 width: '100%',
-                height: '300px',
+                height: '200px',
                 objectFit: 'cover',
               }}
             />
 
             {/* Text Content */}
-            <div className="p-3">
+            <div
+              className="text-content"
+              style={{
+                padding: '1rem',
+              }}
+            >
               <h3
-                className="mb-1"
                 style={{
-                  fontSize: '0.875rem',
+                  fontSize: '0.9rem',
                   fontWeight: 600,
                   color: 'white',
+                  marginBottom: '0.5rem',
                 }}
               >
                 {item.title}
               </h3>
               <p
-                className="mb-0"
                 style={{
                   fontSize: '0.75rem',
                   color: '#9ca3af',
+                  margin: 0,
                 }}
               >
                 {item.subtitle}
               </p>
             </div>
 
-            {/* 🔒 Lock Overlay for Locked Cards */}
+            {/* Lock Overlay */}
             {item.locked && (
               <div
+                className="lock-overlay"
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -157,11 +178,7 @@ export const ExploreSection: React.FC = () => {
               >
                 <i
                   className="bi bi-lock-fill"
-                  style={{
-                    fontSize: '2rem',
-                    color: '#ccc',
-                    marginBottom: '8px',
-                  }}
+                  style={{ fontSize: '2rem', color: '#ccc', marginBottom: '8px' }}
                 ></i>
                 <p
                   style={{
@@ -178,6 +195,71 @@ export const ExploreSection: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Injected Styles */}
+      <style jsx>{`
+        .horizontal-scroll::-webkit-scrollbar {
+          display: none;
+        }
+
+        .card-item:hover {
+          transform: scale(1.02);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-item img {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+        }
+
+        .card-item .text-content {
+          padding: 1rem;
+        }
+
+        .card-item h3 {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: white;
+          margin-bottom: 0.5rem;
+        }
+
+        .card-item p {
+          font-size: 0.75rem;
+          color: #9ca3af;
+          margin: 0;
+        }
+
+        .lock-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 70%);
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          align-items: center;
+          padding: 16px;
+          text-align: center;
+          color: white;
+          z-index: 10;
+        }
+
+        .lock-overlay i {
+          font-size: 2rem;
+          color: #ccc;
+          margin-bottom: 8px;
+        }
+
+        .lock-overlay p {
+          font-size: 0.95rem;
+          font-weight: 500;
+          margin: 0;
+          line-height: 1.4;
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../logo-sidebar.png';
-
+import spirtual from '../spirtual.png';
 export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,9 +19,9 @@ export const Sidebar: React.FC = () => {
 
   // Menu items data
   const menuItems = [
-    { label: 'Home', path: '/home', iconClass: 'bi bi-house' },
-    { label: 'Spiritual', path: '/result', iconClass: 'bi bi-stars' },
-    { label: 'Chat', path: '/ques', iconClass: 'bi bi-chat-dots' },
+    // { label: 'Home', path: '/home', iconClass: 'bi bi-house' },
+    { label: 'Spiritual', path: '/result',  iconImage: spirtual, },
+    { label: 'Chat', path: '/ques',  iconImage: spirtual, },
   ];
 
   return (
@@ -46,7 +46,8 @@ export const Sidebar: React.FC = () => {
           cursor: 'pointer',
           outline: 'none',
           transition: 'all 0.2s ease',
-          boxShadow: '0 4px 12px rgba(0, 184, 248, 0.3)',
+          // boxShadow: '0 4px 12px rgba(0, 184, 248, 0.3)',
+          fontFamily:"Poppins"
         }}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle Sidebar"
@@ -210,7 +211,7 @@ export const Sidebar: React.FC = () => {
 
         {/* Navigation */}
         <nav className="d-flex flex-column" style={{ gap: '1rem', flexGrow: 1 }}>
-          {menuItems.map(({ label, path, iconClass }) => {
+          {menuItems.map(({ label, path, iconImage }) => {
             const isActive = activePath === path;
             return (
               <div
@@ -243,11 +244,11 @@ export const Sidebar: React.FC = () => {
                 onClick={() => handleNavigation(path)}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <i className={iconClass} style={{ 
+                <img src={iconImage} className="menu-icon"  style={{ 
                   fontSize: '1.4rem', 
                   color: isActive ? '#00b8f8' : 'inherit',
                   minWidth: '24px'
-                }}></i>
+                }}></img>
                 <span style={{ fontWeight: isActive ? '500' : '400' }}>{label}</span>
               </div>
             );

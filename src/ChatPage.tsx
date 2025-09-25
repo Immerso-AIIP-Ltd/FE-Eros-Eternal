@@ -10,6 +10,13 @@ import sparkle from "./sparkle.png";
 import Stars from "./components/stars";
 import VoiceMessage from "./VoiceMessage";
 import MicVisualizer from "./MicVisualizer";
+import Fire from "./assets/webm/Fire.webm";
+import Earth from "./assets/webm/Earth Globe Looped Icon.webm";
+import Food from "./assets/webm/Food animation.webm";
+import Gym from "./assets/webm/Gym dubble.webm";
+import Magic from "./assets/webm/Magic Crystal Ball.webm";
+import Star from "./assets/webm/Star.webm";
+
 import "./header.css";
 
 interface Message {
@@ -22,116 +29,6 @@ interface Message {
   report?: any;
   isThinking?: boolean; // Add this line
 }
-
-// --- VoiceMessage component (no export needed if same file) ---
-// const VoiceMessage: React.FC<{ url: string; duration: number }> = ({ url, duration }) => {
-//   const [isPlaying, setIsPlaying] = React.useState(false);
-//   const audioRef = React.useRef<HTMLAudioElement | null>(null);
-
-//   const formatTime = (secs: number) => {
-//     const m = Math.floor(secs / 60).toString().padStart(2, "0");
-//     const s = (secs % 60).toString().padStart(2, "0");
-//     return `${m}:${s}`;
-//   };
-
-// const togglePlay = () => {
-//   debugger
-//   const audio = audioRef.current;
-//   if (!audio) {
-//     console.warn("⚠️ No audio element found");
-//     return;
-//   }
-
-//   console.log("🔊 Current audio state:", {
-//     paused: audio.paused,
-//     readyState: audio.readyState,
-//     src: audio.currentSrc,
-//   });
-
-//   if (audio.paused) {
-//     audio.play()
-//       .then(() => {
-//         console.log("▶️ Playing audio...");
-//       })
-//       .catch((err) => {
-//         console.error("❌ Play error:", err);
-//       });
-//   } else {
-//     audio.pause();
-//     console.log("⏸️ Paused audio");
-//   }
-// };
-
-//   React.useEffect(() => {
-//     const audio = audioRef.current;
-//     if (!audio) return;
-
-//     const handlePlay = () => setIsPlaying(true);
-//     const handlePause = () => setIsPlaying(false);
-//     const handleEnded = () => setIsPlaying(false);
-
-//     audio.addEventListener("play", handlePlay);
-//     audio.addEventListener("pause", handlePause);
-//     audio.addEventListener("ended", handleEnded);
-
-//     return () => {
-//       audio.removeEventListener("play", handlePlay);
-//       audio.removeEventListener("pause", handlePause);
-//       audio.removeEventListener("ended", handleEnded);
-//     };
-//   }, []);
-
-//   return (
-//     <div
-//       className="d-flex align-items-center rounded-pill px-3 py-2"
-//       style={{ background: "#00b8f8", color: "white", maxWidth: 420 }}
-//     >
-//       {/* ▶ / ❚❚ Button */}
-//       <button
-//         onClick={togglePlay}
-//         className="btn btn-sm rounded-circle me-2"
-//         style={{
-//           background: "white",
-//           color: "#00b8f8",
-//           width: 32,
-//           height: 32,
-//           lineHeight: "1.2",
-//         }}
-//       >
-//         {isPlaying ? "❚❚" : "▶"}
-//       </button>
-
-//       {/* Fake waveform */}
-//       <div className="flex-grow-1 mx-2" style={{ height: 18 }}>
-//         <div style={{ display: "flex", gap: 3, alignItems: "center", height: "100%" }}>
-//           {Array.from({ length: 40 }).map((_, i) => (
-//             <span
-//               key={i}
-//               style={{
-//                 display: "inline-block",
-//                 width: 2,
-//                 height: 6 + ((i * 7) % 12),
-//                 background: "rgba(255,255,255,0.85)",
-//                 borderRadius: 2,
-//               }}
-//             />
-//           ))}
-//         </div>
-//       </div>
-
-//       {/* Duration */}
-//       <span className="ms-1 me-2 fw-semibold">{formatTime(duration)}</span>
-//       <span role="img" aria-label="volume">🔊</span>
-
-//       {/* ✅ Actual audio element */}
-//       <audio ref={audioRef} preload="auto">
-//         <source src={url} type="audio/webm;codecs=opus" />
-//       </audio>
-//     </div>
-//   );
-// };
-
-// --- your ChatPage component follows here ---
 
 const ChatPage: React.FC = () => {
   const navigate = useNavigate();
@@ -150,6 +47,9 @@ const ChatPage: React.FC = () => {
   const [reportGenerated, setReportGenerated] = useState(false); // Track if report is generated
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [completedReports, setCompletedReports] = useState<string[]>([]);
 
   interface Message {
     sender: "user" | "ai";
@@ -181,149 +81,265 @@ const ChatPage: React.FC = () => {
   const [micStream, setMicStream] = useState<MediaStream | null>(null);
 
   // ✅ Fetch welcome message on mount
+  // useEffect(() => {
+  //   const userId = localStorage.getItem("user_id");
+  //   const fetchWelcome = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         "http://192.168.29.154:8002/api/v1/welcome/welcome/${userId}"
+  //       );
+  //       const data = await res.json();
+
+  //       if (data?.message) {
+  //         const intro = data.message.message;
+  //         const questions = data.message.questions || [];
+
+  //         // Build messages array
+  //         const welcomeMsgs = [
+  //           { sender: "ai", text: intro },
+  //           ...questions.map((q: string) => ({
+  //             sender: "ai",
+  //             text: q,
+  //             isSuggestion: true,
+  //           })),
+  //         ];
+
+  //         setMessages(welcomeMsgs);
+  //       }
+  //     } catch (err) {
+  //       console.error("Welcome fetch error:", err);
+  //       setMessages([
+  //         { sender: "ai", text: "👋 Welcome! I’m your AI assistant." },
+  //       ]);
+  //     }
+  //   };
+
+  //   fetchWelcome();
+  // }, []);
+
+  const ALL_REPORTS = [
+    "vibrational_frequency",
+    "aura_profile",
+    "star_map",
+    "kosha_map",
+    "flame_score",
+    "longevity_blueprint",
+  ];
+
+  const questions = [
+    { message: "What's my vibe right now?", icon: Star },
+    { message: "What's my aura saying?", icon: Magic },
+    { message: "What planet is affecting me?", icon: Earth },
+    { message: "What should I eat for energy today?", icon: Food },
+    { message: "How bright is my inner flame burning?", icon: Fire },
+    {
+      message: "Which of my energy bodies needs the most love today?",
+      icon: Gym,
+    },
+  ];
+
+  // Initialize the chat with welcome message and questions
   useEffect(() => {
-    const userId = localStorage.getItem("user_id");
-    const fetchWelcome = async () => {
-      try {
-        const res = await fetch(
-          "http://192.168.29.154:8002/api/v1/welcome/welcome/${userId}"
-        );
-        const data = await res.json();
+    const welcomeMessage = `👋 Hey ${localStorage.getItem(
+      "username"
+    )}!, What do you want from External AI.`;
+    const questionMessages = questions.map((question) => ({
+      sender: "ai",
+      text: question?.message,
+      icon: question?.icon,
+      isSuggestion: true,
+    }));
 
-        if (data?.message) {
-          const intro = data.message.message;
-          const questions = data.message.questions || [];
-
-          // Build messages array
-          const welcomeMsgs = [
-            { sender: "ai", text: intro },
-            ...questions.map((q: string) => ({
-              sender: "ai",
-              text: q,
-              isSuggestion: true,
-            })),
-          ];
-
-          setMessages(welcomeMsgs);
-        }
-      } catch (err) {
-        console.error("Welcome fetch error:", err);
-        setMessages([
-          { sender: "ai", text: "👋 Welcome! I’m your AI assistant." },
-        ]);
-      }
-    };
-
-    fetchWelcome();
+    setMessages([
+      { sender: "ai", text: welcomeMessage, aiAvatar: true },
+      ...questionMessages,
+    ]);
   }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      const urls = Array.from(files).map((file) => URL.createObjectURL(file));
-      setAttachedImages((prev) => [...prev, ...urls]);
-    }
+    if (!files || files.length === 0) return;
+
+    const filesArr = Array.from(files);
+    const urls = filesArr.map((f) => URL.createObjectURL(f));
+
+    // keep previews
+    setAttachedImages((prev) => [...prev, ...urls]);
+    // keep real files for FormData
+    setAttachedFiles((prev) => [...prev, ...filesArr]);
   };
 
-  const sendMessage = async (textArg?: string) => {
+  // const sendMessage = async (textArg?: string, file?: File) => {
+  //   debugger
+  //   const userId = localStorage.getItem("user_id");
+
+  //   // Determine the message (text or file)
+  //   const message = (textArg ?? inputValue ?? "").toString();
+  //   const BASE_URL = "http://192.168.29.154:6001";
+
+  //   // Don't proceed if there's no message and no file
+  //   if (!message.trim() && !file) return;
+
+  //   // Show the user's bubble
+  //   setMessages((prev) => [
+  //     ...prev,
+  //     { sender: "user", text: message, userAvatar: true },
+  //   ]);
+  //   setInputValue(""); // Reset input
+  //   setIsLoadingResponse(true); // Start loading
+
+  //   // Add thinking message
+  //   setMessages((prev) => [
+  //     ...prev,
+  //     { sender: "ai", text: "Thinking...", isThinking: true },
+  //   ]);
+
+  //   const form = new FormData();
+  //   form.append("report_type", reportType || "vibrational_frequency"); // Set report type
+
+  //   // If file exists, append it to the form; otherwise, append the message text
+  //   if (file) {
+  //     form.append("file", file);
+  //   } else {
+  //     form.append("answer", message);
+  //   }
+
+  //   try {
+  //     const res = await fetch(
+  //       `${BASE_URL}/api/v1/chat/answer_question/${userId}`,
+  //       {
+  //         method: "POST",
+  //         body: form,
+  //       }
+  //     );
+
+  //     const data = await res.json();
+
+  //     // Remove thinking message
+  //     setMessages((prev) => prev.filter((msg) => !msg.isThinking));
+
+  //     if (data?.message) {
+  //       if (data?.data?.assessment_status === "completed") {
+  //         setMessages((prev) => [
+  //           ...prev,
+  //           { sender: "ai", text: "Generating your report..." },
+  //         ]);
+  //         // Call generateReport AFTER storing last answer
+  //         await generateReport();
+  //       } else {
+  //         setMessages((prev) => [
+  //           ...prev,
+  //           { sender: "ai", text: data?.data?.current_question },
+  //         ]);
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.error("Process answer error:", err);
+  //     setMessages((prev) => [
+  //       ...prev,
+  //       {
+  //         sender: "ai",
+  //         text: "Sorry, something went wrong. Please try again.",
+  //       },
+  //     ]);
+  //   } finally {
+  //     setIsLoadingResponse(false);
+  //   }
+  // };
+
+  const sendMessage = async () => {
     const userId = localStorage.getItem("user_id");
-    
-    const message = (textArg ?? inputValue ?? "").toString();
-    const BASE_URL = "http://192.168.29.154:8002";
-    if (!message.trim()) return;
+    const BASE_URL = "http://192.168.29.154:6001";
 
-    // Show user bubble
-    setMessages((prev) => [...prev, { sender: "user", text: message }]);
+    const message = (inputValue ?? "").toString();
+    const hasText = message.trim().length > 0;
+    const hasFiles = attachedFiles.length > 0;
+
+    if (!hasText && !hasFiles) return;
+
+    // Show user bubble with text + previews (if any)
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "user",
+        text: message || undefined,
+        imageList: attachedImages.length ? [...attachedImages] : undefined,
+        userAvatar: true,
+      },
+    ]);
+
+    // Clear input + previews immediately for snappy UX
     setInputValue("");
-    setIsLoadingResponse(true); // Start loading
+    setAttachedImages([]);
+    setAttachedFiles([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
 
-    // Add thinking message
-    setMessages((prev) => [...prev, { sender: "ai", text: "Thinking...", isThinking: true }]);
+    setIsLoadingResponse(true);
+    setMessages((prev) => [
+      ...prev,
+      { sender: "ai", text: "Thinking...", isThinking: true },
+    ]);
 
-    if (conversationActive) {
-      // Always save the user's answer
-      setAnswers((prev) => [...prev, message]);
+    // Build form data
+    const form = new FormData();
+    debugger
+    form.append("report_type", reportType || "vibrational_frequency");
 
-      try {
-        const form = new FormData();
-        form.append("user_message", message);
+    if (hasFiles) {
+      // If backend accepts multiple files via repeated "file" fields:
+      attachedFiles.forEach((f) => form.append("file", f, f.name));
+      form.append("answer", "");
+      // If it only accepts ONE file, replace the loop with:
+      // form.append("file", attachedFiles[0], attachedFiles[0].name);
+      // and optionally also send text:
+      if (hasText) form.append("answer", message);
+    } else {
+      form.append("answer", message);
+    }
 
-        const res = await fetch(`${BASE_URL}/api/v1/welcome/process_message/${userId}`, {
+    try {
+      const res = await fetch(
+        `${BASE_URL}/api/v1/chat/answer_question/${userId}`,
+        {
           method: "POST",
           body: form,
-        });
-
-        const data = await res.json();
-
-        // Remove thinking message
-        setMessages((prev) => prev.filter(msg => !msg.isThinking));
-
-        if (data?.message) {
-          if (data.message.includes("Generating your detailed report")) {
-            setIsGeneratingReport(true);
-            setMessages((prev) => [...prev, { sender: "ai", text: data.message }]);
-            // Call generateReport AFTER storing last answer
-            await generateReport([...answers, message]);
-          } else {
-            setMessages((prev) => [...prev, { sender: "ai", text: data.message }]);
-          }
         }
-      } catch (err) {
-        // Remove thinking message on error
-        setMessages((prev) => prev.filter(msg => !msg.isThinking));
-        console.error("Process answer error:", err);
-        setMessages((prev) => [...prev, { sender: "ai", text: "Sorry, something went wrong. Please try again." }]);
-      } finally {
-        setIsLoadingResponse(false);
-      }
-    } else {
-      // Normal chat logic if outside the flow
-      // Remove thinking message and add response after delay (simulate API call)
-      setTimeout(() => {
-        setMessages((prev) => prev.filter(msg => !msg.isThinking));
-        setMessages((prev) => [...prev, { sender: "ai", text: "I'm here to help! What would you like to know?" }]);
-        setIsLoadingResponse(false);
-      }, 1000);
-    }
-  };
-
-  const generateReport = async (finalAnswers?: string[]) => {
-    try {
-      const BASE_URL = "http://192.168.29.154:8002";
-      const userId = localStorage.getItem("user_id") || "0";
-
-      const body = {
-        user_id: userId,
-        report_type: reportType,
-        process_message_report: finalAnswers ?? answers,
-      };
-
-      const res = await fetch(`${BASE_URL}/api/v1/welcome/generate_report`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
+      );
       const data = await res.json();
 
+      // remove thinking
+      setMessages((prev) => prev.filter((m) => !m.isThinking));
+
+      if (data?.message) {
+        if (data?.data?.assessment_status === "completed") {
+          setMessages((prev) => [
+            ...prev,
+            { sender: "ai", text: "Generating your report..." },
+          ]);
+          await generateReport();
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            { sender: "ai", text: data?.data?.current_question },
+          ]);
+        }
+      }
+    } catch (err) {
+      console.error("Process answer error:", err);
       setMessages((prev) => [
         ...prev,
-        { sender: "ai", report: data.report },
+        {
+          sender: "ai",
+          text: "Sorry, something went wrong. Please try again.",
+        },
       ]);
-
-      setConversationActive(false);
-      setReportGenerated(true);
-    } catch (err) {
-      console.error("Report generation error:", err);
-      setMessages((prev) => [...prev, { sender: "ai", text: "Failed to generate report. Please try again." }]);
     } finally {
-      setIsGeneratingReport(false);
+      setIsLoadingResponse(false);
     }
   };
 
-  // Navigate to result page
   const handleGoHome = () => {
-    navigate('/result');
+    navigate("/result");
   };
 
   const startRecording = async () => {
@@ -341,41 +357,6 @@ const ChatPage: React.FC = () => {
           chunks.push(e.data);
         }
       };
-
-      // recorder.onstop = () => {
-      //   if (chunks.length === 0) {
-      //     console.warn("No audio chunks recorded!");
-      //     return;
-      //   }
-
-      //   const audioBlob = new Blob(chunks, { type: "audio/webm;codecs=opus" });
-
-      //   // ✅ convert to base64
-      //   const reader = new FileReader();
-      //   reader.onloadend = () => {
-      //     const base64data = reader.result as string;
-
-      //     const audio = new Audio(base64data);
-      //     audio.onloadedmetadata = () => {
-      //       const duration = Math.floor(audio.duration) || 0;
-
-      //       // ✅ update chat messages
-      //       setMessages((prev) => [
-      //         ...prev,
-      //         { sender: "user", audio: base64data, duration },
-      //       ]);
-
-      //       // demo AI reply
-      //       setTimeout(() => {
-      //         setMessages((prev) => [
-      //           ...prev,
-      //           { sender: "ai", text: "🎧 Got your voice message!" },
-      //         ]);
-      //       }, 800);
-      //     };
-      //   };
-      //   reader.readAsDataURL(audioBlob);
-      // };
 
       recorder.onstop = () => {
         const audioBlob = new Blob(chunks, { type: "audio/webm;codecs=opus" });
@@ -606,58 +587,57 @@ const ChatPage: React.FC = () => {
     cancelAnimationFrame(animationId);
     setIsRecording(false);
   };
-  
 
-  const handleSuggestionClick = async (question: string) => {
-    const BASE_URL = "http://192.168.29.154:8002";
+  // const handleSuggestionClick = async (question: string) => {
+  //   const BASE_URL = "http://192.168.29.154:8002";
 
-    const reportTypes: Record<string, string> = {
-      "What's my vibe right now?": "vibrational_frequency",
-      "What's my aura saying?": "aura_profile",
-      "What planet is affecting me?": "star_map",
-      "What should I eat for energy today?": "longevity_blueprint",
-    };
+  //   const reportTypes: Record<string, string> = {
+  //     "What's my vibe right now?": "vibrational_frequency",
+  //     "What's my aura saying?": "aura_profile",
+  //     "What planet is affecting me?": "star_map",
+  //     "What should I eat for energy today?": "longevity_blueprint",
+  //   };
 
-    const type = reportTypes[question] ?? "vibrational_frequency";
-    setReportType(type);
-    setAnswers([]);
-    setConversationActive(true);
+  //   const type = reportTypes[question] ?? "vibrational_frequency";
+  //   setReportType(type);
+  //   setAnswers([]);
+  //   setConversationActive(true);
 
-    // Show user bubble
-    setMessages((prev) => [...prev, { sender: "user", text: question }]);
-    setIsLoadingResponse(true);
+  //   // Show user bubble
+  //   setMessages((prev) => [...prev, { sender: "user", text: question }]);
+  //   setIsLoadingResponse(true);
 
-    // Add thinking message
-    setMessages((prev) => [...prev, { sender: "ai", text: "Thinking...", isThinking: true }]);
+  //   // Add thinking message
+  //   setMessages((prev) => [...prev, { sender: "ai", text: "Thinking...", isThinking: true }]);
 
-    try {
-            const userId = localStorage.getItem("user_id") || "0";
+  //   try {
+  //           const userId = localStorage.getItem("user_id") || "0";
 
-      const form = new FormData();
-      form.append("user_message", question);
+  //     const form = new FormData();
+  //     form.append("user_message", question);
 
-      const res = await fetch(`${BASE_URL}/api/v1/welcome/process_message/${userId}`, {
-        method: "POST",
-        body: form,
-      });
+  //     const res = await fetch(`${BASE_URL}/api/v1/welcome/process_message/${userId}`, {
+  //       method: "POST",
+  //       body: form,
+  //     });
 
-      const data = await res.json();
+  //     const data = await res.json();
 
-      // Remove thinking message
-      setMessages((prev) => prev.filter(msg => !msg.isThinking));
+  //     // Remove thinking message
+  //     setMessages((prev) => prev.filter(msg => !msg.isThinking));
 
-      if (data?.message) {
-        setMessages((prev) => [...prev, { sender: "ai", text: data.message }]);
-      }
-    } catch (err) {
-      // Remove thinking message on error
-      setMessages((prev) => prev.filter(msg => !msg.isThinking));
-      console.error("Process message error:", err);
-      setMessages((prev) => [...prev, { sender: "ai", text: "Sorry, something went wrong. Please try again." }]);
-    } finally {
-      setIsLoadingResponse(false);
-    }
-  };
+  //     if (data?.message) {
+  //       setMessages((prev) => [...prev, { sender: "ai", text: data.message }]);
+  //     }
+  //   } catch (err) {
+  //     // Remove thinking message on error
+  //     setMessages((prev) => prev.filter(msg => !msg.isThinking));
+  //     console.error("Process message error:", err);
+  //     setMessages((prev) => [...prev, { sender: "ai", text: "Sorry, something went wrong. Please try again." }]);
+  //   } finally {
+  //     setIsLoadingResponse(false);
+  //   }
+  // };
 
   // Recursive renderer for any JSON value
   const renderValue = (val: any): JSX.Element | string => {
@@ -720,6 +700,283 @@ const ChatPage: React.FC = () => {
     );
   };
 
+  // Fetch the welcome message and questions
+  // useEffect(() => {
+  //   const userId = localStorage.getItem("user_id");
+  //   const fetchWelcome = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         `http://192.168.29.154:6001/api/v1/chat/welcome/${userId}`
+  //       );
+  //       const data = await res.json();
+  //       if (data?.message) {
+  //         const intro = data.message.message;
+  //         const questions = data.message.questions || [];
+  //         const welcomeMsgs = [
+  //           { sender: "ai", text: intro },
+  //           ...questions.map((q: string) => ({
+  //             sender: "ai",
+  //             text: q,
+  //             isSuggestion: true,
+  //           })),
+  //         ];
+  //         setMessages(welcomeMsgs);
+  //       }
+  //     } catch (err) {
+  //       console.error("Error fetching welcome:", err);
+  //       setMessages([
+  //         { sender: "ai", text: "👋 Welcome! I’m your AI assistant." },
+  //       ]);
+  //     }
+  //   };
+  //   fetchWelcome();
+  // }, []);
+
+  // Handle suggestion click to start the soul report flow
+  const handleSuggestionClick = async (question: string) => {
+    const reportTypes: Record<string, string> = {
+      "What's my vibe right now?": "vibrational_frequency",
+      "What's my aura saying?": "aura_profile",
+      "What planet is affecting me?": "star_map",
+      "What should I eat for energy today?": "longevity_blueprint",
+      "How bright is my inner flame burning?": "flame_score",
+      "Which of my energy bodies needs the most love today?": "kosha_map",
+    };
+
+    const type = reportTypes[question];
+    setReportType(type);
+    setAnswers([]); // Clear previous answers
+    setConversationActive(true);
+
+    // Show user message
+    setMessages((prev) => [...prev, { sender: "user", text: question }]);
+
+    // Call API to get the first question for the selected report type
+    const userId = localStorage.getItem("user_id") || "0";
+    const form = new FormData();
+    form.append("report_type", type);
+
+    try {
+      const res = await fetch(
+        `http://192.168.29.154:6001/api/v1/chat/select_soul_report/${userId}`,
+        { method: "POST", body: form }
+      );
+      const data = await res.json();
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: data?.data?.current_question },
+      ]);
+    } catch (err) {
+      console.error("Error starting report:", err);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "Sorry, something went wrong." },
+      ]);
+    }
+  };
+
+  // Handle user's text or file response
+  const handleAnswer = async (answer: string, file?: File) => {
+    const userId = localStorage.getItem("user_id") || "0";
+    const form = new FormData();
+    form.append("report_type", reportType);
+
+    if (file) {
+      form.append("file", file);
+    } else {
+      form.append("answer", answer);
+    }
+
+    try {
+      const res = await fetch(
+        `http://192.168.29.154:6001/api/v1/chat/answer_question/${userId}`,
+        { method: "POST", body: form }
+      );
+      const data = await res.json();
+
+      if (data?.assessment_status === "completed") {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "ai", text: "Generating your report..." },
+        ]);
+        await generateReport();
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "ai", text: data?.current_question },
+        ]);
+      }
+    } catch (err) {
+      console.error("Error answering question:", err);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "Sorry, something went wrong." },
+      ]);
+    }
+  };
+
+  // Generate the final report after all answers are provided
+  const generateReport = async () => {
+    const userId = localStorage.getItem("user_id") || "0";
+    const form = new FormData();
+    form.append("user_id", userId);
+    form.append("report_type", reportType);
+
+    try {
+      const res = await fetch(
+        `http://192.168.29.154:6001/api/v1/chat/generate_soul_report/${userId}`,
+        { method: "POST", body: form }
+      );
+      const data = await res.json();
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "Your soul report is ready!" },
+      ]);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", report: data?.data?.report },
+      ]);
+
+      if (data?.data?.assessment_status === "completed") {
+        setCompletedReports((prev) => [...prev, reportType]);
+
+        setMessages((prev) => [
+          ...prev.filter((m) => !m.isThinking),
+          { sender: "ai", text: "Your report is ready ✅" },
+        ]);
+
+        // now show remaining like initial
+        showRemainingQuestions();
+      }
+
+      setReportGenerated(true);
+    } catch (err) {
+      console.error("Error generating report:", err);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "Failed to generate report." },
+      ]);
+    }
+  };
+
+  const showRemainingQuestions = () => {
+    const remaining = questions.filter(
+      (q) => !completedReports.includes(q.report_type)
+    );
+
+    const questionMessages = remaining.map((question) => ({
+      sender: "ai",
+      text: question?.message,
+      icon: question?.icon,
+      isSuggestion: true,
+    }));
+
+    setMessages((prev) => [...prev, ...questionMessages]);
+  };
+
+  // Navigate to result page
+  // const handleGoHome = () => {
+  //   navigate('/result');
+  // };
+
+  const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    const audioUrl = URL.createObjectURL(file);
+
+    // Add message with audio preview
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "user",
+        audio: audioUrl,
+        audioBlob: file,
+        duration: 0, // no duration for uploads
+      },
+    ]);
+
+    // Call same API as mic recording
+    await handleVoiceAnalysis(file, audioUrl);
+  };
+
+  const handleVoiceAnalysis = async (audioBlob: Blob, audioUrl: string) => {
+    try {
+      const userId = localStorage.getItem("user_id") || "0";
+      console.log("=== Voice Analysis Debug Info ===");
+      console.log("Audio URL:", audioUrl);
+      console.log("Audio blob size:", audioBlob.size, "bytes");
+      console.log("Audio blob type:", audioBlob.type);
+      console.log("Recording duration:", recordingTime, "seconds");
+
+      const formData = new FormData();
+      const fileExtension = audioBlob.type.includes("wav")
+        ? ".wav"
+        : audioBlob.type.includes("mp3")
+        ? ".mp3"
+        : ".webm";
+      const fileName = `voice_recording${fileExtension}`;
+
+      formData.append("file", audioBlob, fileName);
+      formData.append("user_id", userId || "123"); // Assuming you get user_id from localStorage or context
+      formData.append("report_type", reportType || "vibrational_frequency"); // Add report_type
+      formData.append("answer", ""); // Add report_type
+
+      console.log("Sending converted audio file:", fileName);
+      console.log("File size:", audioBlob.size, "bytes");
+
+      // API URL for answering the question with the voice file
+      const voiceUrl = `http://192.168.29.154:6001/api/v1/chat/answer_question/${userId}`;
+      const response = await fetch(voiceUrl, {
+        method: "POST",
+        body: formData,
+      });
+
+      console.log("Response status:", response.status);
+      const voiceData = await response.json();
+      console.log("Voice API response:", voiceData);
+
+      if (voiceData.success && voiceData.data) {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "ai", text: voiceData?.data?.current_question },
+        ]);
+
+        // setMessages((prev) => [
+        //   ...prev,
+        //   {
+        //     sender: "ai",
+        //     text: "Perfect! Now I need to ask you a few questions to complete your healing prescription.",
+        //   },
+        // ]);
+
+        // Continue with further questions if needed
+        // await generateHealingPrescription();
+      } else {
+        console.error("Voice analysis failed:", voiceData);
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "ai",
+            text:
+              voiceData.message ||
+              "Voice analysis failed. Please try a longer recording with clear speech.",
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Voice API error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "ai",
+          text: "Network error during voice analysis. Please try again.",
+        },
+      ]);
+    }
+  };
+
   return (
     <div className="d-flex w-100 h-100 min-vh-100 min-vw-100 bg-black text-white overflow-hidden">
       {/* Sidebar */}
@@ -746,17 +1003,22 @@ const ChatPage: React.FC = () => {
 
         {/* Header */}
         <div className="position-relative z-10 d-flex justify-content-between align-items-center p-4">
-          <h2 className="h4 fw-bold eternal-header" style={{color: "#00A2FF",}}> Eternal AI</h2>
+          <h2
+            className="h4 fw-bold eternal-header"
+            style={{ color: "#00A2FF" }}
+          >
+            {" "}
+            Eternal AI
+          </h2>
         </div>
 
         {/* Main Content Area */}
         <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center position-relative z-10 px-3">
           {/* Only show if input is empty */}
-          {inputValue === "" && messages.length === 0 && (
+          {/* {inputValue === "" && messages.length === 0 && (
             <>
               <div className="text-center mb-5">
                 <div className="d-flex flex-column align-items-center mb-3">
-                  {/* Main Sparkle Logo */}
                   <img
                     src={sparkle}
                     alt="Sparkle Logo"
@@ -767,8 +1029,6 @@ const ChatPage: React.FC = () => {
                       filter: "drop-shadow(0 0 8px rgba(0, 184, 248, 0.5))",
                     }}
                   />
-
-                  {/* Optional: Small Green Star (if not in image) */}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -790,8 +1050,6 @@ const ChatPage: React.FC = () => {
                 </div>
                 <h3 className="h5 fw-semibold">Your Daily AI Assistant</h3>
               </div>
-
-              {/* Feature Cards - Responsive Grid */}
               <Row
                 className="g-3 mb-5 w-100 justify-content-center h-45"
                 style={{ maxWidth: "1200px" }}
@@ -820,7 +1078,75 @@ const ChatPage: React.FC = () => {
                       }}
                       onClick={() => console.log(`${card.label} clicked!`)}
                     >
-                      {/* Icon with Color */}
+                      <div className="d-flex flex-column align-items-center">
+                        <img
+                          src={card.icon}
+                          alt={card.label}
+                          style={{
+                            width: "24px",
+                            height: "24px",
+                            marginBottom: "6px",
+                          }}
+                        />
+                        <p
+                          className="text-secondary small m-0"
+                          style={{ whiteSpace: "nowrap" }}
+                        >
+                          {card.label}
+                        </p>
+                      </div>
+                    </div>
+                  </Col>
+                ))}
+              </Row>
+            </>
+          )} */}
+          {inputValue === "" && messages.length === 0 && (
+            <>
+              <div className="text-center mb-5">
+                <div className="d-flex flex-column align-items-center mb-3">
+                  <img
+                    src={sparkle}
+                    alt="Sparkle Logo"
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      objectFit: "cover",
+                      filter: "drop-shadow(0 0 8px rgba(0, 184, 248, 0.5))",
+                    }}
+                  />
+                </div>
+                <h3 className="h5 fw-semibold">Your Daily AI Assistant</h3>
+              </div>
+
+              <Row
+                className="g-3 mb-5 w-100 justify-content-center h-45"
+                style={{ maxWidth: "1200px" }}
+              >
+                {[
+                  { icon: starone, label: "Eternal Echo", color: "yellow" },
+                  { icon: startwo, label: "Aether Chat", color: "red" },
+                  { icon: starthree, label: "Nexus Eternal", color: "blue" },
+                  { icon: starfour, label: "Timeless Words", color: "green" },
+                ].map((card, idx) => (
+                  <Col
+                    key={idx}
+                    xs={12}
+                    sm={6}
+                    md={3}
+                    style={{ height: "200px" }}
+                  >
+                    <div
+                      className="bg-dark bg-opacity-75 text-white p-3 rounded-4 d-flex flex-column align-items-center justify-content-center h-100"
+                      style={{
+                        width: "100%",
+                        height: "100px",
+                        transition: "all 0.2s ease",
+                        cursor: "pointer",
+                        border: "none",
+                      }}
+                      onClick={() => handleSuggestionClick(card.label)}
+                    >
                       <div className="d-flex flex-column align-items-center">
                         <img
                           src={card.icon}
@@ -846,7 +1172,7 @@ const ChatPage: React.FC = () => {
           )}
         </div>
 
-        {messages.length > 0 && (
+        {/* {messages.length > 0 && (
           <div className="flex-grow-1 container d-flex flex-column px-3 mb-3 overflow-auto">
             {messages.length > 0 && (
               <div className="flex-grow-1 container d-flex flex-column px-3 mb-3 overflow-auto">
@@ -885,7 +1211,7 @@ const ChatPage: React.FC = () => {
                           }
                         }}
                       >
-                        {/* ✅ Images */}
+                       
                         {msg.imageList && msg.imageList.length > 0 && (
                           <div
                             className="d-flex flex-wrap gap-2 mb-2"
@@ -912,17 +1238,15 @@ const ChatPage: React.FC = () => {
                           </div>
                         )}
 
-                        {/* ✅ Text */}
+                        
                         {msg.text && <div>{msg.text}</div>}
 
                         {msg.report && (
                           <div className="mt-2">
                             {renderReportDynamic(msg.report)}{" "}
-                            {/* ✅ our dynamic formatter */}
                           </div>
                         )}
 
-                        {/* ✅ Voice Message */}
                         {msg.audio && (
                           <VoiceMessage
                             url={msg.audio}
@@ -964,6 +1288,156 @@ const ChatPage: React.FC = () => {
                 )}
               </div>
             )}
+          </div>
+        )} */}
+
+        {messages.length > 0 && (
+          <div className="flex-grow-1 container d-flex flex-column px-3 mb-3 overflow-auto">
+            {messages.map((msg, i) => {
+              const isUser = msg.sender === "user";
+              const isSuggestion = msg.isSuggestion;
+
+              return (
+                <div
+                  key={i}
+                  className={`d-flex mb-2 ${
+                    isUser ? "justify-content-end" : "justify-content-start"
+                  }`}
+                >
+                  <div
+                    className={`px-3 py-2 rounded-3`}
+                    style={{
+                      maxWidth: "80%",
+                      minWidth: isSuggestion ? "40%" : "auto",
+                      whiteSpace: "pre-wrap",
+                      background: isUser
+                        ? "#00b8f8"
+                        : isSuggestion
+                        ? "#1d1d1d"
+                        : "#1d1d1d",
+                      color: isUser
+                        ? "white"
+                        : isSuggestion
+                        ? "white"
+                        : "white",
+                      border: "1px solid #4a4a4a",
+                      cursor: isSuggestion ? "pointer" : "default",
+                      userSelect: "none", // prevent text selection blocking click
+                      display: "flex",
+                      alignItems: "center", // Align text and icon
+                      position: "relative", // Make the container position relative for the arrow
+                    }}
+                    onClick={() => {
+                      if (isSuggestion) {
+                        handleSuggestionClick(msg.text!);
+                      }
+                    }}
+                  >
+                    {/* WebM Icon */}
+                    {isSuggestion && (
+                      <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        width="30px"
+                        style={{ marginRight: "3%", mixBlendMode: "screen" }}
+                      >
+                        <source src={msg.icon} type="video/webm" />
+                      </video>
+                    )}
+
+                    {/* Text */}
+                    <div>{msg.text}</div>
+
+                    {/* Render images if present */}
+                    {msg.imageList && msg.imageList.length > 0 && (
+                      <div
+                        className="d-flex flex-wrap gap-2 mb-2"
+                        style={{ maxWidth: "100%" }}
+                      >
+                        {msg.imageList.map((img, j) => (
+                          <img
+                            key={j}
+                            src={img}
+                            alt="attachment"
+                            className="rounded"
+                            style={{
+                              width: "120px",
+                              height: "120px",
+                              objectFit: "cover",
+                              cursor: "pointer",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewImage(img);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {msg.audio && (
+                      <VoiceMessage
+                        url={msg.audio}
+                        duration={msg.duration ?? 0}
+                      />
+                    )}
+
+                    {/* Right Arrow for Suggestions - Positioned at the end of the message container */}
+                    {isSuggestion && (
+                      <span
+                        style={{
+                          position: "absolute", // Position the arrow absolutely at the end
+                          right: "8px", // 8px from the right edge
+                          backgroundColor: "#00b8f8", // Cyan background
+                          color: "white", // White color for the arrow
+                          borderRadius: "50%", // Round shape
+                          padding: "3px 6px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <i className="bi bi-arrow-right"></i>{" "}
+                        {/* Right arrow icon */}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {reportGenerated && (
+          <div className="d-flex justify-content-center mt-4 mb-3">
+            <Button
+              variant="primary"
+              size="lg"
+              className="px-5 py-3 rounded-pill fw-semibold"
+              style={{
+                backgroundColor: "#00b8f8",
+                borderColor: "#00b8f8",
+                fontSize: "1.1rem",
+                boxShadow: "0 4px 12px rgba(0, 184, 248, 0.3)",
+                transition: "all 0.2s ease",
+              }}
+              onClick={handleGoHome}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 6px 16px rgba(0, 184, 248, 0.4)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 12px rgba(0, 184, 248, 0.3)";
+              }}
+            >
+              <i className="bi bi-house-door me-2"></i>
+              Start your soul journey
+            </Button>
           </div>
         )}
 
@@ -1016,10 +1490,9 @@ const ChatPage: React.FC = () => {
               )}
 
               {/* ✅ Input + Buttons Row */}
-              <div className="d-flex align-items-end w-100">
+              {/* <div className="d-flex align-items-end w-100">
                 {!isRecording ? (
                   <>
-                    {/* ✨ Normal Chat Input Mode */}
                     <Form.Control
                       id="chat-input-textarea"
                       as="textarea"
@@ -1046,9 +1519,8 @@ const ChatPage: React.FC = () => {
                       }
                     />
 
-                    {/* Icons + Send */}
                     <div className="d-flex align-items-center ms-2">
-                      {/* <Button
+                      <Button
                         as="label"
                         variant="link"
                         className="border-0 p-2"
@@ -1066,28 +1538,26 @@ const ChatPage: React.FC = () => {
                           multiple
                           onChange={handleImageUpload}
                         />
-                      </Button> */}
+                      </Button>
 
-                      {/* <Button
+                      <Button
                         variant="link"
                         className="border-0 p-2"
                         style={{ color: "#ccc", fontSize: "1.2rem" }}
                         onClick={openCamera}
                       >
                         <i className="bi bi-camera"></i>
-                      </Button> */}
+                      </Button>
 
-                      {/* 🎙️ Mic button */}
-                      {/* <Button
+                      <Button
                         variant="link"
                         className="border-0 p-2"
                         style={{ color: "#ccc", fontSize: "1.2rem" }}
                         onClick={startRecording}
                       >
                         <i className="bi bi-mic"></i>
-                      </Button> */}
+                      </Button>
 
-                      {/* Send Button */}
                       <Button
                         variant="info"
                         className="rounded-pill px-3 py-2 ms-2"
@@ -1104,7 +1574,10 @@ const ChatPage: React.FC = () => {
                         onClick={sendMessage}
                       >
                         {isLoadingResponse ? (
-                          <div className="spinner-border spinner-border-sm" role="status">
+                          <div
+                            className="spinner-border spinner-border-sm"
+                            role="status"
+                          >
                             <span className="visually-hidden">Loading...</span>
                           </div>
                         ) : (
@@ -1114,7 +1587,6 @@ const ChatPage: React.FC = () => {
                     </div>
                   </>
                 ) : (
-                  /* ✨ Recording Mode (WhatsApp style) */
                   <div className="d-flex align-items-center bg-dark rounded-3 px-3 py-2 flex-grow-1">
                     <MicVisualizer stream={micStream} height={40} />
 
@@ -1122,7 +1594,6 @@ const ChatPage: React.FC = () => {
                       {formatTime(recordingTime)}
                     </span>
 
-                    {/* ✅ OK / Cancel buttons styled */}
                     <Button
                       variant="success"
                       className="ms-3 rounded-circle d-flex align-items-center justify-content-center"
@@ -1137,6 +1608,160 @@ const ChatPage: React.FC = () => {
                       className="ms-2 rounded-circle d-flex align-items-center justify-content-center"
                       style={{ width: 36, height: 36 }}
                       onClick={cancelRecording}
+                    >
+                      <i className="bi bi-x-lg"></i>
+                    </Button>
+                  </div>
+                )}
+              </div> */}
+              <div className="d-flex align-items-end w-100">
+                {!isRecording ? (
+                  <>
+                    {/* Text Input Mode */}
+                    <Form.Control
+                      id="chat-input-textarea"
+                      as="textarea"
+                      rows={1}
+                      placeholder="Enter a prompt here"
+                      className="bg-transparent text-white border-0 shadow-none flex-grow-1"
+                      style={{
+                        resize: "none",
+                        overflow: "hidden",
+                        minHeight: "40px",
+                        maxHeight: "150px",
+                      }}
+                      value={inputValue}
+                      onChange={(e) => {
+                        setInputValue(e.target.value);
+                        e.currentTarget.style.height = "40px"; // reset first
+                        e.currentTarget.style.height =
+                          e.currentTarget.scrollHeight + "px";
+                      }}
+                      onKeyDown={
+                        (e) =>
+                          e.key === "Enter" &&
+                          !e.shiftKey &&
+                          (e.preventDefault(), sendMessage(inputValue)) // Call sendMessage with text
+                      }
+                    />
+
+                    {/* Icons + Send */}
+                    <div className="d-flex align-items-center ms-2">
+                      <Button
+                        as="label"
+                        variant="link"
+                        className="border-0 p-2"
+                        style={{
+                          color: "#ccc",
+                          fontSize: "1.2rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <i className="bi bi-image"></i>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          hidden
+                          multiple
+                          onChange={handleImageUpload} // Handle file upload
+                        />
+                      </Button>
+
+                      <Button
+                        variant="link"
+                        className="border-0 p-2"
+                        style={{ color: "#ccc", fontSize: "1.2rem" }}
+                        onClick={openCamera}
+                      >
+                        <i className="bi bi-camera"></i>
+                      </Button>
+
+                      {/* 🎙️ Mic button */}
+                      <Button
+                        variant="link"
+                        className="border-0 p-2"
+                        style={{ color: "#ccc", fontSize: "1.2rem" }}
+                        onClick={startRecording} // Start recording
+                      >
+                        <i className="bi bi-mic"></i>
+                      </Button>
+
+                      <Button
+                        as="label"
+                        variant="link"
+                        className="border-0 p-2"
+                        style={{
+                          color: "#ccc",
+                          fontSize: "1.2rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <i className="bi bi-music-note"></i>
+                        <input
+                          type="file"
+                          accept=".mp3,.wav"
+                          hidden
+                          onChange={handleAudioUpload}
+                        />
+                      </Button>
+
+                      {/* Send Button */}
+                      <Button
+                        variant="info"
+                        className="rounded-pill px-3 py-2 ms-2"
+                        disabled={
+                          !inputValue.trim() && attachedImages.length === 0
+                        }
+                        style={{
+                          backgroundColor: "#00b8f8",
+                          borderColor: "#00b8f8",
+                          color: "white",
+                          fontSize: "1.1rem",
+                          fontWeight: "600",
+                          minWidth: "40px",
+                          height: "40px",
+                        }}
+                        // onClick={() => sendMessage(inputValue)} // Send message
+                        onClick={sendMessage}
+                      >
+                        {isLoadingResponse ? (
+                          <div
+                            className="spinner-border spinner-border-sm"
+                            role="status"
+                          >
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                        ) : (
+                          <i className="bi bi-send"></i>
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  /* 🎙️ Recording Mode */
+                  <div className="d-flex align-items-center bg-dark rounded-3 px-3 py-2 flex-grow-1">
+                    <MicVisualizer stream={micStream} height={40} />
+
+                    <span className="ms-3 text-danger fw-bold">
+                      {formatTime(recordingTime)}
+                    </span>
+
+                    {/* ✅ OK / Cancel buttons styled */}
+                    <Button
+                      variant="success"
+                      className="ms-3 rounded-circle d-flex align-items-center justify-content-center"
+                      style={{ width: 36, height: 36 }}
+                      onClick={stopRecording} // Stop recording
+                    >
+                      <i className="bi bi-check-lg"></i>
+                    </Button>
+
+                    <Button
+                      variant="danger"
+                      className="ms-2 rounded-circle d-flex align-items-center justify-content-center"
+                      style={{ width: 36, height: 36 }}
+                      onClick={cancelRecording} // Cancel recording
                     >
                       <i className="bi bi-x-lg"></i>
                     </Button>
