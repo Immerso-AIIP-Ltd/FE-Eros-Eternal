@@ -885,14 +885,14 @@ const VibrationTool: React.FC = () => {
                           onChange={handleAudioUpload}
                         />
                       </Button>
-                                            {/* <Button
+                                            <Button
                                                 variant="link"
                                                 className="border-0 p-2"
                                                 style={{ color: "#ccc", fontSize: "1.2rem" }}
                                                 onClick={startRecording}
                                             >
                                                 <i className="bi bi-mic"></i>
-                                            </Button> */}
+                                            </Button>
                                             <Button
                                                 variant="info"
                                                 className="rounded-pill px-3 py-2 ms-2"

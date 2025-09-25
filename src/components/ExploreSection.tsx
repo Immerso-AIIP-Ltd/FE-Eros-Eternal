@@ -32,21 +32,21 @@ export const ExploreSection: React.FC = () => {
       title: "Palmistry",
       subtitle: "Unlock insights and energy balance through the wisdom of your palms",
       image: palm,
-      onClick: () => navigate('/palm'),
+      onClick: () => navigate('/palmcard'),
       locked: false,
     },
     {
       title: "Harmony Index",
       subtitle: "Discover your true biological age and vitality",
       image: harmonyindex,
-      onClick: () => navigate('/harmony'),
+      onClick: () => navigate('/harmoneyi'),
       locked: false,
     },
     {
       title: "Face Scan",
       subtitle: "Face Scan for your spiritual journey",
       image: facescan,
-      onClick: undefined,
+      onClick: () => navigate('/facereading'),
       locked: false,
     },
     // {
@@ -67,6 +67,7 @@ export const ExploreSection: React.FC = () => {
           fontSize: '1.25rem',
           fontWeight: 600,
           color: '#ffffff',
+          fontFamily:"Poppins"
         }}
       >
         Explore More
@@ -104,6 +105,8 @@ export const ExploreSection: React.FC = () => {
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               cursor: item.onClick ? 'pointer' : 'not-allowed',
               position: 'relative',
+              fontFamily:"DM Sans",
+              fontSize:"16px",
             }}
             onMouseEnter={(e) => {
               if (item.onClick) {
