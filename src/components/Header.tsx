@@ -1,8 +1,10 @@
 // src/components/Header.tsx
 import React, { useState, } from "react";
+import { useNavigate } from 'react-router-dom';
 import headerBg from "../header-bg.png"; // Ensure this path is correct
 
 export const Header: React.FC = () => {
+  const navigate = useNavigate();
   const [chartUrls, setChartUrls] = useState({
     rasi: "",
     navamsha: "",
@@ -310,7 +312,8 @@ export const Header: React.FC = () => {
               e.currentTarget.style.backgroundColor =
                 "rgba(255, 255, 255, 0.2)";
             }}
-            onClick={fetchAstrologyData}
+            // onClick={fetchAstrologyData}
+             onClick={() => navigate('/rasi-chart')}
           >
             View Your Rasi Chart
           </button>

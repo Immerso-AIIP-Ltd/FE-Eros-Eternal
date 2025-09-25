@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { format } from 'date-fns';
 
 // 💡 Replace this with your actual API URL
 const API_URL = 'http://192.168.29.154:6001';
@@ -21,41 +18,19 @@ interface ApiResponse {
 
 const RelationshipCompatibility: React.FC = () => {
   const [yourName, setYourName] = useState('');
-  const [yourDob, setYourDob] = useState<Date | null>(null);
+  const [yourDob, setYourDob] = useState('');
   const [partnerName, setPartnerName] = useState('');
-  const [partnerDob, setPartnerDob] = useState<Date | null>(null);
+  const [partnerDob, setPartnerDob] = useState('');
 
   // 📊 State for API result
   const [compatibilityResult, setCompatibilityResult] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 🗃️ Load from localStorage on mount
+  // 🗃️ Load from memory on mount (using state instead of localStorage)
   useEffect(() => {
-    const savedData = localStorage.getItem('relationshipCompatibility');
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        setYourName(parsed.yourName || '');
-        setYourDob(parsed.yourDob ? new Date(parsed.yourDob) : null);
-        setPartnerName(parsed.partnerName || '');
-        setPartnerDob(parsed.partnerDob ? new Date(parsed.partnerDob) : null);
-      } catch (e) {
-        console.warn('Failed to parse saved data from localStorage');
-      }
-    }
+    // Data persists in component state during session
   }, []);
-
-  // 💾 Save to localStorage whenever any field changes
-  useEffect(() => {
-    const saveData = {
-      yourName,
-      yourDob: yourDob ? yourDob.toISOString() : null,
-      partnerName,
-      partnerDob: partnerDob ? partnerDob.toISOString() : null,
-    };
-    localStorage.setItem('relationshipCompatibility', JSON.stringify(saveData));
-  }, [yourName, yourDob, partnerName, partnerDob]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,16 +43,12 @@ const RelationshipCompatibility: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
-    // ✅ Format dates to YYYY-MM-DD
-    const yourDobStr = format(yourDob, 'yyyy-MM-dd');
-    const partnerDobStr = format(partnerDob, 'yyyy-MM-dd');
-
     // 📦 Create FormData
     const formData = new FormData();
-    formData.append("user_id", "7b274190-1893-44df-80aa-20708e94f693"); // Replace if dynamic
+    formData.append("user_id", "7b274190-1893-44df-80aa-20708e94f693");
     formData.append("user_name", yourName);
-    formData.append("dob", yourDobStr);
-    formData.append("dob_partner", partnerDobStr);
+    formData.append("dob", yourDob);
+    formData.append("dob_partner", partnerDob);
 
     try {
       const response = await fetch(
@@ -105,12 +76,11 @@ const RelationshipCompatibility: React.FC = () => {
     }
   };
 
-  // 🧮 Generate compatibility score (example logic - adjust as needed)
+  // 🧮 Generate compatibility score
   const getCompatibilityScore = () => {
     if (!compatibilityResult?.data) return 0;
-    // Example: If same sign → high score
     const isSameSign = compatibilityResult.data.sign_main === compatibilityResult.data.sign_partner;
-    return isSameSign ? 90 : 75; // You can make this smarter based on API or astrology rules
+    return isSameSign ? 90 : 75;
   };
 
   // 💬 Render results UI
@@ -121,49 +91,59 @@ const RelationshipCompatibility: React.FC = () => {
     const score = getCompatibilityScore();
 
     return (
-      <div className="w-100" style={{ maxWidth: 900 }}>
+      <div className="w-full max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-4">
-          <div
-            className="rounded-circle d-inline-flex justify-content-center align-items-center mb-2"
-            style={{ width: 80, height: 80, backgroundColor: "#00B8F8", fontSize: '1.5rem', fontWeight: 'bold' }}
-          >
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white text-2xl font-bold mb-4 shadow-lg">
             {score}%
           </div>
-          <h2 className="fw-bold">Relationship Compatibility</h2>
-          <p className="text-white">
-            <strong>{yourName} & {partnerName}</strong> — {data.match_for}
+          <h2 className="text-3xl font-bold text-white mb-2">Relationship Compatibility</h2>
+          <p className="text-gray-300 text-lg">
+            <span className="text-cyan-400 font-semibold">{yourName}</span> & <span className="text-cyan-400 font-semibold">{partnerName}</span> — {data.match_for}
           </p>
         </div>
 
+        {/* Compatibility Score Bar */}
+        <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-gray-800 to-gray-700 border border-gray-600 shadow-xl">
+          <h5 className="text-xl font-semibold text-white mb-4">Compatibility Score</h5>
+          <div className="w-full bg-gray-600 rounded-full h-4 mb-3">
+            <div 
+              className="bg-gradient-to-r from-cyan-400 to-blue-500 h-4 rounded-full transition-all duration-1000 ease-out"
+              style={{ width: `${score}%` }}
+            ></div>
+          </div>
+          <p className="text-gray-300 text-sm">Your compatibility score indicates a {score >= 80 ? 'strong' : score >= 60 ? 'good' : 'moderate'} connection</p>
+        </div>
+
         {/* Relationship Strengths */}
-        <div className="mb-4 p-4 rounded" style={{ backgroundColor: '#121212', border: '1px solid #333' }}>
-          <h5 className="mb-3">Relationship Strengths</h5>
-          <div className="text-white">
-            <p>{data.match_summary}</p>
+        <div className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600 shadow-xl">
+          <h5 className="text-xl font-semibold text-white mb-4 flex items-center">
+            <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div>
+            Relationship Strengths
+          </h5>
+          <div className="text-gray-300 leading-relaxed">
+            <p className="text-base">{data.match_summary}</p>
           </div>
         </div>
 
-        {/* Growth Opportunities */}
-        {/* <div className="mb-4 p-4 rounded" style={{ backgroundColor: '#121212', border: '1px solid #333' }}>
-          <h5 className="mb-3">Growth Opportunities</h5>
-          <ul className="list-unstyled text-muted">
-            <li>• Communicate openly about expectations.</li>
-            <li>• Respect each other’s need for structure and routine.</li>
-            <li>• Schedule regular check-ins to avoid silent resentment.</li>
-            <li>• Celebrate small wins together to reinforce connection.</li>
-            <li>• Consider joint spiritual or mindfulness practices.</li>
-          </ul>
-        </div> */}
+        {/* Zodiac Signs */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-purple-800 to-purple-700 border border-purple-500 shadow-xl text-center">
+            <h6 className="text-lg font-semibold text-white mb-2">{yourName}'s Sign</h6>
+            <div className="text-3xl font-bold text-purple-300">{data.sign_main}</div>
+          </div>
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-pink-800 to-pink-700 border border-pink-500 shadow-xl text-center">
+            <h6 className="text-lg font-semibold text-white mb-2">{partnerName}'s Sign</h6>
+            <div className="text-3xl font-bold text-pink-300">{data.sign_partner}</div>
+          </div>
+        </div>
 
         {/* Back Button */}
-        <div className="d-flex justify-content-center mt-4">
+        <div className="text-center">
           <button
-            className="btn btn-outline-light"
+            className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full font-semibold hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             onClick={() => {
               setCompatibilityResult(null);
-              // Optionally reset form too
-              // setYourName(''); setYourDob(null); setPartnerName(''); setPartnerDob(null);
             }}
           >
             ← Try Another Pair
@@ -174,149 +154,191 @@ const RelationshipCompatibility: React.FC = () => {
   };
 
   return (
-    <div className="text-white vh-100 vw-100 d-flex flex-column align-items-center p-4" style={{ backgroundColor: "rgb(5, 5, 5)" }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white flex flex-col vw-100">
       {/* Header */}
-      <div className="d-flex align-items-center mb-4 w-100" style={{ maxWidth: 900 }}>
-        <button className="btn btn-link text-white" onClick={() => window.history.back()}>
-          &larr;
+      <div className="flex items-center justify-between p-4 w-full max-w-4xl mx-auto">
+        <button 
+          className="p-2 text-gray-400 hover:text-white transition-colors duration-200"
+          onClick={() => window.history.back()}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
-        <h5 className="mb-0 ms-3 flex-grow-1">Harmony Index</h5>
-        <button className="btn btn-link text-white" onClick={() => window.location.reload()}>
-          &#x21bb;
+        <h1 className="text-xl font-bold text-center flex-grow">Harmony Index</h1>
+        <button 
+          className="p-2 text-gray-400 hover:text-white transition-colors duration-200"
+          onClick={() => window.location.reload()}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
         </button>
       </div>
 
-      {/* Show Form OR Results */}
-      {!compatibilityResult ? (
-        <>
-          {/* Intro */}
-          <div className="text-center mb-4">
-            <div
-              className="rounded-circle d-inline-flex justify-content-center align-items-center mb-2"
-              style={{ width: 60, height: 60, backgroundColor: "#00B8F8" }}
-            >
-              <i className="bi bi-people-fill fs-3 text-white"></i>
+      <div className="flex-grow flex items-center justify-center p-4">
+        {/* Show Form OR Results */}
+        {!compatibilityResult ? (
+          <div className="w-full max-w-4xl mx-auto">
+            {/* Intro */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 mb-6 shadow-lg">
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                </svg>
+              </div>
+              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                Relationship Compatibility
+              </h2>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
+                Discover your spiritual and emotional compatibility with your partner using vedic astrology
+              </p>
             </div>
-            <h2 className="fw-bold">Relationship Compatibility</h2>
-            <p className="text-muted" style={{ maxWidth: 600, margin: 'auto' }}>
-              Discover your spiritual and emotional compatibility with your partner using vedic astrology
-            </p>
+
+            {/* Form */}
+            <div className="mb-12">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                {/* Your Details */}
+                <div className="p-8 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600 shadow-xl">
+                  <h5 className="text-2xl font-semibold mb-6 text-cyan-400">Enter Your Details</h5>
+                  
+                  <div className="mb-6">
+                    <label htmlFor="yourName" className="block text-sm font-medium text-gray-300 mb-2">
+                      Enter Your Name
+                    </label>
+                    <input
+                      type="text"
+                      id="yourName"
+                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Your full name"
+                      value={yourName}
+                      onChange={(e) => setYourName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-6">
+                    <label htmlFor="yourDob" className="block text-sm font-medium text-gray-300 mb-2">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      id="yourDob"
+                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
+                      value={yourDob}
+                      onChange={(e) => setYourDob(e.target.value)}
+                      max={new Date().toISOString().split('T')[0]}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Partner Details */}
+                <div className="p-8 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600 shadow-xl">
+                  <h5 className="text-2xl font-semibold mb-6 text-pink-400">Enter Partner's Details</h5>
+                  
+                  <div className="mb-6">
+                    <label htmlFor="partnerName" className="block text-sm font-medium text-gray-300 mb-2">
+                      Enter Partner's Name
+                    </label>
+                    <input
+                      type="text"
+                      id="partnerName"
+                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Partner's full name"
+                      value={partnerName}
+                      onChange={(e) => setPartnerName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-6">
+                    <label htmlFor="partnerDob" className="block text-sm font-medium text-gray-300 mb-2">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      id="partnerDob"
+                      className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200"
+                      value={partnerDob}
+                      onChange={(e) => setPartnerDob(e.target.value)}
+                      max={new Date().toISOString().split('T')[0]}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* How It Works */}
+              <div className="p-8 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600 shadow-xl mb-8">
+                <h5 className="text-xl font-semibold text-white mb-6">How It Works</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="flex items-center text-gray-300">
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 flex-shrink-0"></div>
+                    <span>Analyzes birth dates using vedic astrology</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 flex-shrink-0"></div>
+                    <span>Calculates spiritual compatibility scores</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 flex-shrink-0"></div>
+                    <span>Provides personalized relationship insights</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 flex-shrink-0"></div>
+                    <span>Identifies relationship strengths</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 flex-shrink-0"></div>
+                    <span>Suggests growth opportunities</span>
+                  </div>
+                  <div className="flex items-center text-gray-300">
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3 flex-shrink-0"></div>
+                    <span>Based on ancient wisdom traditions</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="text-center">
+                <button
+                  onClick={handleSubmit}
+                  disabled={!yourName || !yourDob || !partnerName || !partnerDob || isLoading}
+                  className="px-12 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-lg font-semibold rounded-full hover:from-cyan-600 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:transform-none"
+                >
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Generating Compatibility...
+                    </span>
+                  ) : (
+                    'Start Compatibility Reading'
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
+        ) : (
+          // 👇 Show Results
+          renderResults()
+        )}
 
-          {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="d-flex justify-content-between w-100"
-            style={{ maxWidth: 900 }}
-            noValidate
-          >
-            <div className="flex-fill me-4">
-              <h5 className="mb-3">Enter Your Details</h5>
-              <div className="mb-3">
-                <label htmlFor="yourName" className="form-label">
-                  Enter Your Name
-                </label>
-                <input
-                  type="text"
-                  id="yourName"
-                  className="form-control"
-                  placeholder="Name"
-                  value={yourName}
-                  onChange={(e) => setYourName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="yourDob" className="form-label">
-                  Date of birth
-                </label>
-                <DatePicker
-                  id="yourDob"
-                  className="form-control"
-                  selected={yourDob}
-                  onChange={(date) => setYourDob(date)}
-                  dateFormat="yyyy-MM-dd"
-                  showYearDropdown
-                  showMonthDropdown
-                  dropdownMode="select"
-                  maxDate={new Date()}
-                  placeholderText="Select your date of birth"
-                  required
-                />
-              </div>
+        {/* Global Error Message */}
+        {error && (
+          <div className="fixed bottom-4 right-4 max-w-sm p-4 bg-red-600 text-white rounded-xl shadow-xl border border-red-500">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+              </svg>
+              <span className="text-sm">{error}</span>
             </div>
-
-            <div className="flex-fill">
-              <h5 className="mb-3">Enter Partner’s Detail</h5>
-              <div className="mb-3">
-                <label htmlFor="partnerName" className="form-label">
-                  Enter Name
-                </label>
-                <input
-                  type="text"
-                  id="partnerName"
-                  className="form-control"
-                  placeholder="Name"
-                  value={partnerName}
-                  onChange={(e) => setPartnerName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="partnerDob" className="form-label">
-                  Date of birth
-                </label>
-                <DatePicker
-                  id="partnerDob"
-                  className="form-control"
-                  selected={partnerDob}
-                  onChange={(date) => setPartnerDob(date)}
-                  dateFormat="yyyy-MM-dd"
-                  showYearDropdown
-                  showMonthDropdown
-                  dropdownMode="select"
-                  maxDate={new Date()}
-                  placeholderText="Select partner's date of birth"
-                  required
-                />
-              </div>
-            </div>
-          </form>
-
-          <div className="w-100 mt-4" style={{ maxWidth: 900 }}>
-            <h5>How It Works</h5>
-            <ul className="list-unstyled text-muted">
-              <li>• Lorem ipsum dolor sit amet consectetur.</li>
-              <li>• Lorem ipsum dolor sit amet consectetur.</li>
-              <li>• Lorem ipsum dolor sit amet consectetur.</li>
-              <li>• Lorem ipsum dolor sit amet consectetur.</li>
-              <li>• Lorem ipsum dolor sit amet consectetur.</li>
-            </ul>
           </div>
-
-          <button
-            type="submit"
-            className="btn rounded-pill mt-4 px-5"
-            disabled={!yourName || !yourDob || !partnerName || !partnerDob}
-            onClick={handleSubmit}
-            style={{ maxWidth: 300, backgroundColor: "#00B8F8" }}
-          >
-            {isLoading ? 'Generating...' : 'Start Palm Reading'}
-          </button>
-        </>
-      ) : (
-        // 👇 Show Results
-        renderResults()
-      )}
-
-      {/* Global Error Message */}
-      {error && (
-        <div className="alert alert-danger mt-3" style={{ maxWidth: 900 }}>
-          {error}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

@@ -4,12 +4,11 @@ import planetIcon from "../planet.png";
 import Month from "../Month.png";
 import number from "../number.png";
 
-interface LuckyNumbersResponse {
+interface LuckyNumbers {
   destiny_number: number;
-  inner_dream_number: number;
   life_path_number: number;
-  lucky_number: number;
   soul_number: number;
+  lucky_number: number;
   soul_urge_number: number;
 }
 
@@ -218,69 +217,56 @@ export const LuckSection: React.FC = () => {
   //   fetchLuckyNumbers();
   // }, [hasUserData, userId, username, dob]);
 
-  useEffect(
-    () => {
-      const fetchLuckyNumbers = async () => {
-        const index = 2;
-        if (!hasUserData) {
-          setErrorState(index, "User data missing.");
-          return;
+useEffect(() => {
+  const fetchLuckyNumbers = async () => {
+    const index = 2;
+    if (!hasUserData) {
+      setErrorState(index, "User data missing.");
+      return;
+    }
+
+    setLoadingState(index, true);
+    setErrorState(index, "");
+
+    try {
+      const formData = new FormData();
+      formData.append("user_id", userId);
+      formData.append("user_name", username);
+      
+      if (dob) {
+        const [day, month, year] = dob.split("-");
+        const formattedDob = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        formData.append("dob", formattedDob);
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/v1/numerology/lucky_numbers`,
+        {
+          method: "POST",
+          body: formData,
         }
+      );
 
-        setLoadingState(index, true);
-        setErrorState(index, "");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-        try {
-          // Create FormData
-          const formData = new FormData();
-          formData.append("user_id", userId);
-          formData.append("user_name", username);
-          formData.append("dob", dob);
+      const result = await response.json(); // renamed to `result` to avoid confusion
 
-          if (dob) {
-            // Split dd-mm-yyyy into parts
-            const [day, month, year] = dob.split("-");
+      // ✅ FIX: result.data is the LuckyNumbers object
+      if (result.success && result.data) {
+        setLuckyNumbers(result.data); // ← directly assign result.data
+      } else {
+        setErrorState(index, "No lucky numbers found.");
+      }
+    } catch (err) {
+      console.error("Lucky Numbers Error:", err);
+      setErrorState(index, "Failed to load lucky numbers.");
+    } finally {
+      setLoadingState(index, false);
+    }
+  };
 
-            // Reformat to yyyy-mm-dd (with zero-padding for safety)
-            const formattedDob = `${year}-${month.padStart(
-              2,
-              "0"
-            )}-${day.padStart(2, "0")}`;
-
-            formData.append("dob", formattedDob); // Now sends "1990-08-15"
-          }
-
-          const response = await fetch(
-            `${API_URL}/api/v1/numerology/lucky_numbers`,
-            {
-              method: "POST",
-              // ⚠️ Do NOT set Content-Type — browser sets it automatically with boundary
-              body: formData,
-            }
-          );
-
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-          const data = await response.json();
-          if (data.success && data.data?.lucky_number) {
-            setLuckyNumbers(data.data.lucky_number);
-          } else {
-            setErrorState(index, "No lucky numbers found.");
-          }
-        } catch (err) {
-          console.error("Lucky Numbers Error:", err);
-          setErrorState(index, "Failed to load lucky numbers.");
-        } finally {
-          setLoadingState(index, false);
-        }
-      };
-
-      fetchLuckyNumbers();
-    },
-    [
-      /* your dependencies */
-    ]
-  );
+  fetchLuckyNumbers();
+}, [hasUserData, userId, username, dob]);
 
   // 🔁 Toggle flip on card click
   const toggleFlip = (index: number) => {
