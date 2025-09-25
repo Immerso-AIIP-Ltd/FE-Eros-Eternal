@@ -75,14 +75,15 @@ const StatsCards = () => {
         {reportCards.map((card) => (
           <div key={card.id} className="col-md-6 mb-4">
             <div className="card border-0 rounded-4 shadow-lg bg-dark hover-card  top-outline-primary  custom-top-border">
-              <div className="card-body p-4" 
-              style={{
-  borderImage: 'linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1',
-  borderTop: '3px solid transparent', // Required for border-image to work
-  borderRadius: '18px'
-}}
-    
-    >
+              <div
+                className="card-body p-4"
+                style={{
+                  borderImage:
+                    "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",
+                  borderTop: "3px solid transparent", // Required for border-image to work
+                  borderRadius: "18px",
+                }}
+              >
                 <div className="d-flex justify-content-between align-items-start mb-3">
                   {/* <span className="fs-2">{card.icon}</span> */}
                   <video
@@ -99,6 +100,7 @@ const StatsCards = () => {
                       borderRadius: "4px",
                       objectFit: "contain",
                       background: "transparent",
+                      mixBlendMode: 'screen'
                     }}
                   />
                   <ArrowForwardIosIcon
@@ -152,11 +154,7 @@ const StatsCards = () => {
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         .custom-top-border {
-       
-        
-          border: #0d6efd
-        
-         
+          border: #0d6efd;
         }
       `}</style>
     </div>
