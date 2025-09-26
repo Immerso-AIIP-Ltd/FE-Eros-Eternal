@@ -1,5 +1,6 @@
 // src/pages/TarotFlow.tsx
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import "bootstrap/dist/css/bootstrap.min.css";
 import TarotCard from "./TarrotCard"; 
 import "./face.css"
@@ -16,7 +17,8 @@ interface TarotReading {
   reading: TarotCard[];
 }
 const FaceReading: React.FC = () => {
-  const [step, setStep] = useState(1); // 1 = intro, 2 = form, 3 = tarot
+  const [step, setStep] = useState(1);
+  const navigate = useNavigate(); // 1 = intro, 2 = form, 3 = tarot
   const [formData, setFormData] = useState({
     name: "",
     gender: "",
@@ -98,7 +100,7 @@ const FaceReading: React.FC = () => {
       </button> */}
 
       {step === 1 && (
-        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 tarot-intro">
+        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 tarot-introf">
           {/* Tarot Cards */}
           <a
             href="/result"
@@ -130,7 +132,7 @@ const FaceReading: React.FC = () => {
             <button
               className="btn btn-primary rounded-pill px-4 py-2 mt-4 w-full"
               style={{ backgroundColor: "#00B8F8" }}
-              onClick={() => setStep(2)}
+              onClick={() => navigate('/face-upload')}
             >
               Start Face Reading
             </button>
