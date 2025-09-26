@@ -79,7 +79,7 @@ const PalmUploadPage: React.FC = () => {
       formData.append("image_data", selectedFile); // 👈 Use selectedFile directly
 
       const response = await fetch(
-        'http://192.168.29.154:6001/api/v1/analysis/palm',
+        'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/analysis/palm',
         {
           method: 'POST',
           body: formData,

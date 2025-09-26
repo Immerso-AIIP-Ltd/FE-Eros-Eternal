@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // 💡 Replace this with your actual API URL
-const API_URL = 'http://192.168.29.154:6001';
+const API_URL = 'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai';
 
 interface CompatibilityData {
   match_for: string;
@@ -94,9 +94,9 @@ const RelationshipCompatibility: React.FC = () => {
       <div className="w-full max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white text-2xl font-bold mb-4 shadow-lg">
+          {/* <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white text-2xl font-bold mb-4 shadow-lg">
             {score}%
-          </div>
+          </div> */}
           <h2 className="text-3xl font-bold text-white mb-2">Relationship Compatibility</h2>
           <p className="text-gray-300 text-lg">
             <span className="text-cyan-400 font-semibold">{yourName}</span> & <span className="text-cyan-400 font-semibold">{partnerName}</span> — {data.match_for}
@@ -104,7 +104,7 @@ const RelationshipCompatibility: React.FC = () => {
         </div>
 
         {/* Compatibility Score Bar */}
-        <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-gray-800 to-gray-700 border border-gray-600 shadow-xl">
+        {/* <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-gray-800 to-gray-700 border border-gray-600 shadow-xl">
           <h5 className="text-xl font-semibold text-white mb-4">Compatibility Score</h5>
           <div className="w-full bg-gray-600 rounded-full h-4 mb-3">
             <div 
@@ -113,7 +113,7 @@ const RelationshipCompatibility: React.FC = () => {
             ></div>
           </div>
           <p className="text-gray-300 text-sm">Your compatibility score indicates a {score >= 80 ? 'strong' : score >= 60 ? 'good' : 'moderate'} connection</p>
-        </div>
+        </div> */}
 
         {/* Relationship Strengths */}
         <div className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600 shadow-xl">
@@ -158,7 +158,7 @@ const RelationshipCompatibility: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 w-full max-w-4xl mx-auto">
         <button 
-          className="p-2 text-gray-400 hover:text-white transition-colors duration-200"
+          className="p-2 text-gray-400 hover:text-white transition-colors duration-200 bg-transparent"
           onClick={() => window.history.back()}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,7 +167,7 @@ const RelationshipCompatibility: React.FC = () => {
         </button>
         <h1 className="text-xl font-bold text-center flex-grow">Harmony Index</h1>
         <button 
-          className="p-2 text-gray-400 hover:text-white transition-colors duration-200"
+          className="p-2 text-gray-400 hover:text-white transition-colors duration-200 bg-transparent"
           onClick={() => window.location.reload()}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,7 +176,7 @@ const RelationshipCompatibility: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex-grow flex items-center justify-center p-4">
+      <div className="flex-grow flex my-4 p-4">
         {/* Show Form OR Results */}
         {!compatibilityResult ? (
           <div className="w-full max-w-4xl mx-auto">

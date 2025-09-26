@@ -1,5 +1,5 @@
 // src/pages/TarotFlow.tsx
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import TarotCard from "./TarrotCard"; // your third screen
 import "./Tarot.css";
@@ -7,6 +7,7 @@ import { BsArrowLeft } from "react-icons/bs";
 import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "./components/Tarot/TarotCardSelector";
 import Stars from "./components/stars";
+import { Calendar } from 'lucide-react';
 
 interface TarotReading {
   card_backcover: string;
@@ -23,8 +24,16 @@ const TarotFlow: React.FC = () => {
     dob: "",
   });
   const [cardData, setCardData] = useState<TarotReading | null>(null);
-  const API_URL = "http://192.168.29.154:6001";
+  const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
   const userId = localStorage.getItem("user_id");
+
+  const dateInputRef = useRef(null);
+
+  const openDatePicker = () => {
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker();
+    }
+  };
 
   // Handle input changes
   const handleChange = (
@@ -51,7 +60,7 @@ const TarotFlow: React.FC = () => {
   };
 
   const fetchTarot = async () => {
-    debugger;
+
     try {
       const formDataSet = new FormData();
       formDataSet.append("user_id", userId);
@@ -76,7 +85,7 @@ const TarotFlow: React.FC = () => {
   };
 
   const stepChange = (step: number) => {
-    debugger;
+
     setStep(step);
     setFormData({ name: "", gender: "", dob: "" });
   };
@@ -177,9 +186,8 @@ const TarotFlow: React.FC = () => {
                 <label className="form-label">Enter Your Name</label>
                 <input
                   type="text"
-                  className={`form-control tarot-input ${
-                    formData.name ? "has-value" : ""
-                  }`}
+                  className={`form-control tarot-input ${formData.name ? "has-value" : ""
+                    }`}
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
@@ -190,9 +198,8 @@ const TarotFlow: React.FC = () => {
               <div className="mb-3">
                 <label className="form-label">Gender</label>
                 <select
-                  className={`form-select tarot-input ${
-                    formData.gender ? "has-value" : ""
-                  }`}
+                  className={`form-select tarot-input ${formData.gender ? "has-value" : ""
+                    }`}
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
@@ -204,17 +211,21 @@ const TarotFlow: React.FC = () => {
                 </select>
               </div>
 
-              <div className="mb-3">
+              <div className="mb-3 position-relative">
                 <label className="form-label">Date of Birth</label>
-                <input
-                  type="date"
-                  className={`form-control tarot-input ${
-                    formData.dob ? "has-value" : ""
-                  }`}
-                  name="dob"
-                  value={formData.dob}
-                  onChange={handleChange}
-                />
+                <div className="input-group">
+                  <input
+                    type="date"
+                    className={`form-control tarot-input ${formData.dob ? "has-value" : ""}`}
+                    name="dob"
+                    value={formData.dob}
+                    onChange={handleChange}
+                    ref={dateInputRef}
+                  />
+                  <span className="input-group-text" onClick={openDatePicker} style={{ cursor: 'pointer' }}>
+                    <Calendar size={20} />
+                  </span>
+                </div>
               </div>
 
               <button

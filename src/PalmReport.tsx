@@ -48,7 +48,7 @@ const PalmReadingReportPage: React.FC = () => {
   const { palm_reading_detail } = data;
 
   return (
-    <div className="vh-100 vw-100 d-flex flex-column p-4" style={{ backgroundColor: '#000',  margin: 0, minHeight: '100vh'}}>
+    <div className="vw-100 d-flex flex-column p-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button
@@ -88,15 +88,15 @@ const PalmReadingReportPage: React.FC = () => {
       {/* Report Sections */}
       <Container>
         <Row>
-          <Col md={6}>
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff",height:""}}>
+          {/* <Col md={6}> */}
+          {/* <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff",height:""}}>
               <Card.Body>
                 <Card.Title>Hand Shape</Card.Title>
                 <Card.Text>{palm_reading_detail.hand_shape}</Card.Text>
               </Card.Body>
-            </Card>
+            </Card> */}
 
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff" }}>
+          {/* <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff" }}>
               <Card.Body>
                 <Card.Title>Finger Analysis</Card.Title>
                 <Card.Text>{palm_reading_detail.finger_analysis}</Card.Text>
@@ -115,17 +115,16 @@ const PalmReadingReportPage: React.FC = () => {
                 <Card.Title>Characteristics</Card.Title>
                 <Card.Text>{palm_reading_detail.characteristics}</Card.Text>
               </Card.Body>
-            </Card>
-          </Col>
+            </Card> */}
+          {/* </Col> */}
 
-          <Col md={6}>
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff" }}>
+          <Col md={12}>
+            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333', color: "#ffffff" }}>
               <Card.Body>
                 <Card.Title>Personality Traits</Card.Title>
                 <ul className="list-unstyled">
                   {palm_reading_detail.personality_traits.map((trait, i) => (
                     <li key={i} className="mb-2">
-                      <Badge bg="info" className="me-2">•</Badge>
                       {trait}
                     </li>
                   ))}
@@ -133,13 +132,13 @@ const PalmReadingReportPage: React.FC = () => {
               </Card.Body>
             </Card>
 
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff" }}>
+            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333', color: "#ffffff" }}>
               <Card.Body>
                 <Card.Title>Life Patterns</Card.Title>
                 <ul className="list-unstyled">
                   {palm_reading_detail.life_patterns.map((pattern, i) => (
                     <li key={i} className="mb-2">
-                      <Badge bg="info" className="me-2">•</Badge>
+
                       {pattern}
                     </li>
                   ))}
@@ -147,13 +146,13 @@ const PalmReadingReportPage: React.FC = () => {
               </Card.Body>
             </Card>
 
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff" }}>
+            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333', color: "#ffffff" }}>
               <Card.Body>
                 <Card.Title>Career Insights</Card.Title>
                 <ul className="list-unstyled">
                   {palm_reading_detail.career_insights.map((insight, i) => (
                     <li key={i} className="mb-2">
-                      <Badge bg="info" className="me-2">•</Badge>
+
                       {insight}
                     </li>
                   ))}
@@ -161,13 +160,13 @@ const PalmReadingReportPage: React.FC = () => {
               </Card.Body>
             </Card>
 
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333' ,color:"#ffffff"}}>
+            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333', color: "#ffffff" }}>
               <Card.Body>
                 <Card.Title>Health Observations</Card.Title>
                 <ul className="list-unstyled">
                   {palm_reading_detail.health_observations.map((obs, i) => (
                     <li key={i} className="mb-2">
-                      <Badge bg="info" className="me-2">•</Badge>
+
                       {obs}
                     </li>
                   ))}
@@ -192,21 +191,48 @@ const PalmReadingReportPage: React.FC = () => {
         </Row>
 
         {/* Raw Analysis */}
-        <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff",}}>
+        <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333', color: "#ffffff", }}>
           <Card.Body>
             <Card.Title>Raw Analysis</Card.Title>
-            <pre className="bg-dark text-white p-3 rounded" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-              {data.raw_analysis}
+            <pre
+              className="bg-dark text-white p-3 rounded"
+              style={{
+                whiteSpace: 'pre-wrap',
+                fontFamily: 'sans-serif',
+                overflowWrap: 'break-word',
+                fontSize: '16px',
+                lineHeight: '2'
+              }}
+            >
+              {data.raw_analysis
+                ?.split('\n')
+                .filter(line => !/^[=-]+\s*$/.test(line)) // Remove lines with only = or -
+                .map(line => {
+                  // Replace *text* with <strong>text</strong> for bold
+                  const formattedLine = line.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+                  // Use dangerouslySetInnerHTML to render HTML
+                  return <span dangerouslySetInnerHTML={{ __html: formattedLine }} />;
+                })
+                .map((line, index) => (
+                  <span key={index}>
+                    {line}
+                    <br />
+                  </span>
+                )) || ''}
             </pre>
+
+            {/* <pre className="bg-dark text-white p-3 rounded" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+              {data.raw_analysis}
+            </pre> */}
           </Card.Body>
         </Card>
 
         {/* Footer */}
-        <div className="d-flex justify-content-center mt-4">
+        {/* <div className="d-flex justify-content-center mt-4">
           <Button variant="outline-light" onClick={() => navigate('/')}>
             ← Start Over
           </Button>
-        </div>
+        </div> */}
       </Container>
     </div>
   );

@@ -189,10 +189,8 @@ const LongevityTool: React.FC = () => {
         }))
     );
 
-    // Initialize assessment when component mounts or route changes
     useEffect(() => {
         const initializeAssessment = async () => {
-            // Get report type from URL or default
             const pathname = location.pathname;
             let reportType = 'vibrational_frequency';
 
@@ -205,7 +203,19 @@ const LongevityTool: React.FC = () => {
             setCurrentReportType(reportType);
             setActiveMenuItem(reportType.replace('_', '-'));
 
-            await startSoulReportAssessment(reportType);
+            const reportExists = await checkReportExists(reportType);
+
+            if (reportExists) {
+                navigate('/view-report', {
+                    state: {
+                        reportType: reportType,
+                        userId: localStorage.getItem('user_id'),
+                        title: sidebarMenuItems.find(item => item.reportType === reportType)?.label
+                    }
+                });
+            } else {
+                await startSoulReportAssessment(reportType);
+            }
         };
 
         initializeAssessment();
@@ -224,7 +234,7 @@ const LongevityTool: React.FC = () => {
                 return;
             }
 
-            const response = await fetch(`http://192.168.29.154:6001/api/v1/chat/select_soul_report/${userId}`, {
+            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/select_soul_report/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
@@ -307,7 +317,7 @@ const LongevityTool: React.FC = () => {
             }
 
             const response = await fetch(
-                `http://192.168.29.154:6001/api/v1/chat/answer_question/${userId}`,
+                `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/answer_question/${userId}`,
                 {
                     method: "POST",
                     body: formData,
@@ -375,7 +385,7 @@ const LongevityTool: React.FC = () => {
         setIsGeneratingReport(true);
 
         try {
-            const response = await fetch(`http://192.168.29.154:6001/api/v1/chat/generate_soul_report/${userId}`, {
+            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/generate_soul_report/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
@@ -651,6 +661,21 @@ const LongevityTool: React.FC = () => {
         setAttachedVoices(prev => prev.filter((_, i) => i !== index));
     };
 
+    const checkReportExists = async (reportType: string) => {
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return false;
+
+        try {
+            const response = await fetch(
+                `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
+            );
+            return response.ok && response.status === 200;
+        } catch (error) {
+            console.error('Error checking report:', error);
+            return false;
+        }
+    };
+
     useEffect(() => {
         return () => {
             if (timerRef.current) {
@@ -775,9 +800,21 @@ const LongevityTool: React.FC = () => {
                                     ? 'btn-info text-white'
                                     : 'btn-dark text-white hover-bg-dark'
                                     }`}
-                                onClick={() => {
+                                onClick={async () => {
                                     setActiveMenuItem(item.id);
-                                    navigate(`/${item.id}`);
+                                    const reportExists = await checkReportExists(item.reportType);
+
+                                    if (reportExists) {
+                                        navigate('/view-report', {
+                                            state: {
+                                                reportType: item.reportType,
+                                                userId: localStorage.getItem('user_id'),
+                                                title: item.label
+                                            }
+                                        });
+                                    } else {
+                                        navigate(`/${item.id}`);
+                                    }
                                 }}
                                 style={{ padding: '0.5rem 1rem', borderRadius: '8px' }}
                             >
@@ -803,12 +840,12 @@ const LongevityTool: React.FC = () => {
                         </h3>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button
-                            onClick={handleNewChat}
-                            className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold hover:bg-gray-600 transition-colors"
+                        <div
+                            className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer"
+                            onClick={() => navigate("/result")} style={{ cursor: 'pointer' }}
                         >
-                            <SquarePlus size={18} />
-                        </button>
+                            <LogOut size={18} />
+                        </div>
                         <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center text-sm font-semibold ms-2">
                             A
                         </div>

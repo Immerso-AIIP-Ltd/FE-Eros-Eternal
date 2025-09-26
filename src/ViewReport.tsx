@@ -42,7 +42,7 @@ const ViewReport = () => {
     const location = useLocation();
     const recommendationsRef = useRef(null);
 
-    const baseApiUrl = "http://192.168.29.154:6001/api/v1/reports/individual_report/";
+    const baseApiUrl = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/reports/individual_report/";
 
 
     // Fetch report data from API
@@ -120,7 +120,7 @@ const ViewReport = () => {
             assessment.kosha_alignment ||
             assessment.star_magnitude ||
             assessment.longevity_score ||
-           'N/A';
+            'N/A';
     };
 
     // Extract level from assessment
@@ -317,70 +317,68 @@ const ViewReport = () => {
                 <div className="row justify-content-center">
                     <div className="col-12 col-md-10 col-lg-8 col-xl-6">
 
-                        {/* Gauge Card */}
-                        <div className="card mb-4" style={{
-                            background: 'linear-gradient(135deg, #1a2332 0%, #0d1117 100%)',
-                            border: '1px solid #30363d',
-                            borderRadius: '16px'
-                        }}>
-                            <div className="card-body p-4 text-center">
-                                <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                                    <Box position="relative" display="inline-flex">
-                                        <Gauge
-                                            width={400}
-                                            height={200}
-                                            value={gaugeValue}
-                                            startAngle={-110}
-                                            endAngle={110}
-                                            cornerRadius="50%"
-                                            sx={{
-                                                "& .MuiGauge-valueText": { display: "none" },
-                                                "& .MuiGauge-valueArc": { fill: "#00B8F8" },
-                                            }}
-                                        />
-
-                                        <Box
-                                            position="absolute"
-                                            top={26}
-                                            left={0}
-                                            width="100%"
-                                            height="100%"
-                                            display="flex"
-                                            flexDirection="column"
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            color="white"
-                                        >
-                                            <Typography fontSize="1.5em" mb={1}>
-                                                🔥
-                                            </Typography>
-                                            <Typography fontWeight="bold" mb={1}>
-                                                {level}
-                                            </Typography>
-                                            <Typography variant="h4" fontWeight="bold" mb={1}>
-                                                {frequency}
-                                                <span style={{ fontSize: "0.6em" }}>
-                                                    {location.state?.reportType?.includes('frequency') ? 'Hz' : ''}
-                                                </span>
-                                            </Typography>
-                                            <Typography variant="body2">
-                                                test
-                                            </Typography>
+                        {frequency !== 'N/A' && (
+                            <div className="card mb-4" style={{
+                                background: 'linear-gradient(135deg, #1a2332 0%, #0d1117 100%)',
+                                border: '1px solid #30363d',
+                                borderRadius: '16px'
+                            }}>
+                                <div className="card-body p-4 text-center">
+                                    <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
+                                        <Box position="relative" display="inline-flex">
+                                            <Gauge
+                                                width={400}
+                                                height={200}
+                                                value={gaugeValue}
+                                                startAngle={-110}
+                                                endAngle={110}
+                                                cornerRadius="50%"
+                                                sx={{
+                                                    "& .MuiGauge-valueText": { display: "none" },
+                                                    "& .MuiGauge-valueArc": { fill: "#00B8F8" },
+                                                }}
+                                            />
+                                            <Box
+                                                position="absolute"
+                                                top={26}
+                                                left={0}
+                                                width="100%"
+                                                height="100%"
+                                                display="flex"
+                                                flexDirection="column"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                color="white"
+                                            >
+                                                <Typography fontSize="1.5em" mb={1}>
+                                                    🔥
+                                                </Typography>
+                                                <Typography fontWeight="bold" mb={1}>
+                                                    {level}
+                                                </Typography>
+                                                <Typography variant="h4" fontWeight="bold" mb={1}>
+                                                    {frequency}
+                                                    <span style={{ fontSize: "0.6em" }}>
+                                                        {location.state?.reportType?.includes('frequency') ? 'Hz' : ''}
+                                                    </span>
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    {displayTitle}
+                                                </Typography>
+                                            </Box>
                                         </Box>
                                     </Box>
-                                </Box>
-
-                                {/* Card footer */}
-                                <div className="text-start">
-                                    <h6 className="mb-1" style={{ color: 'white', fontWeight: '600' }}>
-                                        {displayTitle}
-                                    </h6>
-                                    <small style={{ color: '#00bcd4', fontSize: '12px' }}>
-                                        Report • {new Date(reportData.timestamp).toLocaleDateString()}
-                                    </small>
+                                    <div className="text-start">
+                                        <h6 className="mb-1" style={{ color: 'white', fontWeight: '600' }}>
+                                            {displayTitle}
+                                        </h6>
+                                        <small style={{ color: '#00bcd4', fontSize: '12px' }}>
+                                            Report • {new Date(reportData.timestamp).toLocaleDateString()}
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Assessment Section */}
                         {assessmentSections.length > 0 && (

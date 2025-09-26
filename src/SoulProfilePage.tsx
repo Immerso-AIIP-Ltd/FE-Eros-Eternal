@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
-const API_URL = "http://192.168.29.154:6001";
+const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
 
 interface FormData {
   firstName: string;
@@ -261,10 +261,10 @@ const SoulProfilePage: React.FC = () => {
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  if (!formData.firstName.trim()) {
-    alert("Please enter your first name.");
-    return;
-  }
+  // if (!formData.firstName.trim()) {
+  //   alert("Please enter your first name.");
+  //   return;
+  // }
   if (!formData.name.trim()) {
     alert("Please enter your name.");
     return;
@@ -422,7 +422,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           >
             <h1 style={{ marginBottom: "1rem",fontFamily:"Montserrat",fontWeight:"700"}}>Create Your Soul Profile</h1>
 
-            <TextField
+            {/* <TextField
               label="First Name"
               variant="outlined"
               value={formData.firstName}
@@ -444,7 +444,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   },
                 },
               }}
-            />
+            /> */}
 
             <TextField
               label="Name"
@@ -481,7 +481,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 displayEmpty
                 IconComponent={() => null}
               >
-                <MenuItem value="" disabled>
+                <MenuItem value="" disabled style={{opacity: '1'}}>
                   Select Gender
                 </MenuItem>
                 <MenuItem value="Male">Male</MenuItem>

@@ -79,7 +79,7 @@ const FaceUploadPage: React.FC = () => {
       formData.append("image", selectedFile); // 👈 Use selectedFile directly
 
       const response = await fetch(
-        'http://192.168.29.154:6001/api/v1/face_reading/analyze',
+        'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/face_reading/analyze',
         {
           method: 'POST',
           body: formData,
@@ -104,7 +104,7 @@ const FaceUploadPage: React.FC = () => {
   };
 
   return (
-    <div className="vh-100 vw-100 d-flex flex-column p-4" style={{ backgroundColor: '#000' }}>
+    <div className="vw-100 d-flex flex-column p-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button

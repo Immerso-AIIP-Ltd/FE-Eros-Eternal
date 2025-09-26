@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 const FounderMsg = () => {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className='tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white' style={{ alignItems: 'start', justifyContent: 'start' }}>
       {/* Back Button */}
       <div className="p-6">
-        <button className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors">
+        <button className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors bg-transparent">
           <ArrowLeft size={20} />
           <span className="text-lg">Back</span>
         </button>

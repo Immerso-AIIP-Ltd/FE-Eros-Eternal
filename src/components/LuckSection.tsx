@@ -27,7 +27,7 @@ interface PersonalMonthResponse {
   status: number;
 }
 
-const API_URL = "http://192.168.29.154:6001";
+const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
 
 export const LuckSection: React.FC = () => {
   const [flippedIndexes, setFlippedIndexes] = useState<Set<number>>(new Set());
@@ -336,9 +336,9 @@ useEffect(() => {
             <strong>Theme:</strong> {personalMonth.meaning}
           </p>
           <p style={backQuote}>"{personalMonth.detailed_meaning}"</p>
-          <p style={smallText}>
+          {/* <p style={smallText}>
             <strong>Target:</strong> {personalMonth.target_date}
-          </p>
+          </p> */}
         </>
       ) : null}
     </div>

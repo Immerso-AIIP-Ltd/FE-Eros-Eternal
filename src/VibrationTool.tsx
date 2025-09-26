@@ -113,6 +113,8 @@ const VibrationTool: React.FC = () => {
             }
         };
 
+
+
         const formatTime = (secs) => {
             if (!secs || isNaN(secs) || secs === 0) return '0:00';
             let totalSeconds = Math.floor(secs);
@@ -189,10 +191,8 @@ const VibrationTool: React.FC = () => {
         }))
     );
 
-    // Initialize assessment when component mounts or route changes
     useEffect(() => {
         const initializeAssessment = async () => {
-            // Get report type from URL or default
             const pathname = location.pathname;
             let reportType = 'vibrational_frequency';
 
@@ -205,7 +205,19 @@ const VibrationTool: React.FC = () => {
             setCurrentReportType(reportType);
             setActiveMenuItem(reportType.replace('_', '-'));
 
-            await startSoulReportAssessment(reportType);
+            const reportExists = await checkReportExists(reportType);
+
+            if (reportExists) {
+                navigate('/view-report', {
+                    state: {
+                        reportType: reportType,
+                        userId: localStorage.getItem('user_id'),
+                        title: sidebarMenuItems.find(item => item.reportType === reportType)?.label
+                    }
+                });
+            } else {
+                await startSoulReportAssessment(reportType);
+            }
         };
 
         initializeAssessment();
@@ -224,7 +236,7 @@ const VibrationTool: React.FC = () => {
                 return;
             }
 
-            const response = await fetch(`http://192.168.29.154:6001/api/v1/chat/select_soul_report/${userId}`, {
+            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/select_soul_report/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
@@ -307,7 +319,7 @@ const VibrationTool: React.FC = () => {
             }
 
             const response = await fetch(
-                `http://192.168.29.154:6001/api/v1/chat/answer_question/${userId}`,
+                `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/answer_question/${userId}`,
                 {
                     method: "POST",
                     body: formData,
@@ -375,7 +387,7 @@ const VibrationTool: React.FC = () => {
         setIsGeneratingReport(true);
 
         try {
-            const response = await fetch(`http://192.168.29.154:6001/api/v1/chat/generate_soul_report/${userId}`, {
+            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/generate_soul_report/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
@@ -651,6 +663,21 @@ const VibrationTool: React.FC = () => {
         setAttachedVoices(prev => prev.filter((_, i) => i !== index));
     };
 
+    const checkReportExists = async (reportType: string) => {
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return false;
+
+        try {
+            const response = await fetch(
+                `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
+            );
+            return response.ok && response.status === 200;
+        } catch (error) {
+            console.error('Error checking report:', error);
+            return false;
+        }
+    };
+
     useEffect(() => {
         return () => {
             if (timerRef.current) {
@@ -775,9 +802,21 @@ const VibrationTool: React.FC = () => {
                                     ? 'btn-info text-white'
                                     : 'btn-dark text-white hover-bg-dark'
                                     }`}
-                                onClick={() => {
+                                onClick={async () => {
                                     setActiveMenuItem(item.id);
-                                    navigate(`/${item.id}`);
+                                    const reportExists = await checkReportExists(item.reportType);
+
+                                    if (reportExists) {
+                                        navigate('/view-report', {
+                                            state: {
+                                                reportType: item.reportType,
+                                                userId: localStorage.getItem('user_id'),
+                                                title: item.label
+                                            }
+                                        });
+                                    } else {
+                                        navigate(`/${item.id}`);
+                                    }
                                 }}
                                 style={{ padding: '0.5rem 1rem', borderRadius: '8px' }}
                             >
@@ -803,12 +842,12 @@ const VibrationTool: React.FC = () => {
                         </h3>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button
-                            onClick={handleNewChat}
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm hover:bg-gray-600 bg-transparent "
+                        <div
+                            className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer"
+                            onClick={() => navigate("/result")} style={{ cursor: 'pointer' }}
                         >
                             <LogOut size={18} />
-                        </button>
+                        </div>
                         <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center text-sm font-semibold ms-2">
                             A
                         </div>
@@ -831,20 +870,20 @@ const VibrationTool: React.FC = () => {
                     </div>
                 )} */}
 
-               <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+                <div className="flex-1 flex flex-col h-full relative overflow-hidden">
                     {/* Chat Messages Area - Scrollable */}
-                             <div
-            ref={chatContainerRef}
-            className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar"
-            style={{
-              maxWidth: "65%",
-              margin: "0 auto",
-              width: "100%",
-              // scrollbarWidth: 'thin',
-              // scrollbarColor: '#4B5563 #1E2123'
-            }}
-          >
-            <style>{`
+                    <div
+                        ref={chatContainerRef}
+                        className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar"
+                        style={{
+                            maxWidth: "65%",
+                            margin: "0 auto",
+                            width: "100%",
+                            // scrollbarWidth: 'thin',
+                            // scrollbarColor: '#4B5563 #1E2123'
+                        }}
+                    >
+                        <style>{`
                         // .custom-scrollbar::-webkit-scrollbar {
                         //     width: 6px;
                         // }

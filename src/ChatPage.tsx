@@ -194,7 +194,7 @@ const ChatPage: React.FC = () => {
 
   // const sendMessage = async () => {
   //   const userId = localStorage.getItem("user_id");
-  //   const BASE_URL = "http://192.168.29.154:6001";
+  //   const BASE_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
 
   //   const message = (inputValue ?? "").toString();
   //   const hasText = message.trim().length > 0;
@@ -230,7 +230,7 @@ const ChatPage: React.FC = () => {
 
   //   // Build form data
   //   const form = new FormData();
-  //   debugger;
+  // 
   //   form.append("report_type", reportType || "vibrational_frequency");
 
   //   if (hasFiles) {
@@ -291,9 +291,9 @@ const ChatPage: React.FC = () => {
   // };
 
   const sendMessage = async () => {
-    debugger;
+  
     const userId = localStorage.getItem("user_id");
-    const BASE_URL = "http://192.168.29.154:6001";
+    const BASE_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
 
     const message = (inputValue ?? "").toString();
     const hasText = message.trim().length > 0;
@@ -681,7 +681,7 @@ const ChatPage: React.FC = () => {
   //   const fetchWelcome = async () => {
   //     try {
   //       const res = await fetch(
-  //         `http://192.168.29.154:6001/api/v1/chat/welcome/${userId}`
+  //         `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/welcome/${userId}`
   //       );
   //       const data = await res.json();
   //       if (data?.message) {
@@ -738,7 +738,7 @@ const ChatPage: React.FC = () => {
 
     try {
       const res = await fetch(
-        `http://192.168.29.154:6001/api/v1/chat/select_soul_report/${userId}`,
+        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/select_soul_report/${userId}`,
         { method: "POST", body: form }
       );
       const data = await res.json();
@@ -764,7 +764,7 @@ const ChatPage: React.FC = () => {
 
     try {
       const res = await fetch(
-        `http://192.168.29.154:6001/api/v1/chat/generate_soul_report/${userId}`,
+        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/generate_soul_report/${userId}`,
         { method: "POST", body: form }
       );
       const data = await res.json();
@@ -810,7 +810,7 @@ const ChatPage: React.FC = () => {
   };
 
   const showRemainingQuestions = () => {
-    debugger;
+  
     const remaining = questions.filter(
       (q) => !completedReports.includes(reportTypes[q.message])
     );
@@ -884,7 +884,7 @@ const ChatPage: React.FC = () => {
       const userId = localStorage.getItem("user_id") || "0";
       const form = new FormData();
       form.append("user_id", userId);
-      form.append("message", "explore"); // static first message
+      form.append("message", "hi");
 
       if (spiritualSessionId) {
         form.append("session_id", spiritualSessionId);
@@ -893,7 +893,7 @@ const ChatPage: React.FC = () => {
       setReportGenerated(false);
       try {
         const res = await fetch(
-          "http://192.168.29.154:6001/api/v1/chat/spiritual",
+          "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual",
           {
             method: "POST",
             body: form,
@@ -963,7 +963,7 @@ const ChatPage: React.FC = () => {
       console.log("File size:", audioBlob.size, "bytes");
 
       // API URL for answering the question with the voice file
-      const voiceUrl = `http://192.168.29.154:6001/api/v1/chat/answer_question/${userId}`;
+      const voiceUrl = `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/answer_question/${userId}`;
       const response = await fetch(voiceUrl, {
         method: "POST",
         body: formData,
@@ -1582,7 +1582,7 @@ const ChatPage: React.FC = () => {
                 )}
 
                 {/* ✅ Input + Buttons Row */}
-                <div className="d-flex align-items-end w-100">
+                <div className="bottom-0 d-flex align-items-end w-100">
                   {!isRecording ? (
                     <>
                       {/* Text Input Mode */}
@@ -1673,13 +1673,13 @@ const ChatPage: React.FC = () => {
                               cursor: "pointer",
                             }}
                           >
-                            <i className="bi bi-music-note"></i>
+                            {/* <i className="bi bi-music-note"></i>
                             <input
                               type="file"
                               accept=".mp3,.wav"
                               hidden
                               onChange={handleAudioUpload}
-                            />
+                            /> */}
                           </Button>
                         )}
 

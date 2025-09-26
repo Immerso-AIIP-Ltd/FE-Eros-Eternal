@@ -253,24 +253,33 @@ const StarMap: React.FC = () => {
     }))
   );
 
-  // Initialize assessment when component mounts or route changes
   useEffect(() => {
     const initializeAssessment = async () => {
-      // Get report type from URL or default
       const pathname = location.pathname;
-      let reportType = "star_map";
+      let reportType = 'vibrational_frequency';
 
-      if (pathname.includes("aura-profile")) reportType = "aura_profile";
-      else if (pathname.includes("star-map")) reportType = "star_map";
-      else if (pathname.includes("kosha-map")) reportType = "kosha_map";
-      else if (pathname.includes("flame-score")) reportType = "flame_score";
-      else if (pathname.includes("longevity-blueprint"))
-        reportType = "longevity_blueprint";
+      if (pathname.includes('aura-profile')) reportType = 'aura_profile';
+      else if (pathname.includes('star-map')) reportType = 'star_map';
+      else if (pathname.includes('kosha-map')) reportType = 'kosha_map';
+      else if (pathname.includes('flame-score')) reportType = 'flame_score';
+      else if (pathname.includes('longevity-blueprint')) reportType = 'longevity_blueprint';
 
       setCurrentReportType(reportType);
-      setActiveMenuItem(reportType.replace("_", "-"));
+      setActiveMenuItem(reportType.replace('_', '-'));
 
-      await startSoulReportAssessment(reportType);
+      const reportExists = await checkReportExists(reportType);
+
+      if (reportExists) {
+        navigate('/view-report', {
+          state: {
+            reportType: reportType,
+            userId: localStorage.getItem('user_id'),
+            title: sidebarMenuItems.find(item => item.reportType === reportType)?.label
+          }
+        });
+      } else {
+        await startSoulReportAssessment(reportType);
+      }
     };
 
     initializeAssessment();
@@ -292,7 +301,7 @@ const StarMap: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://192.168.29.154:6001/api/v1/chat/select_soul_report/${userId}`,
+        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -394,7 +403,7 @@ const StarMap: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://192.168.29.154:6001/api/v1/chat/answer_question/${userId}`,
+        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -464,7 +473,7 @@ const StarMap: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://192.168.29.154:6001/api/v1/chat/generate_soul_report/${userId}`,
+        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -768,6 +777,21 @@ const StarMap: React.FC = () => {
     setAttachedVoices((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const checkReportExists = async (reportType: string) => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return false;
+
+    try {
+      const response = await fetch(
+        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
+      );
+      return response.ok && response.status === 200;
+    } catch (error) {
+      console.error('Error checking report:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (timerRef.current) {
@@ -854,9 +878,8 @@ const StarMap: React.FC = () => {
       )}
 
       <div
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 fixed md:relative h-screen z-50 w-64 backdrop-blur-sm transition-transform duration-300 ease-in-out overflow-y-auto`}
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 fixed md:relative h-screen z-50 w-64 backdrop-blur-sm transition-transform duration-300 ease-in-out overflow-y-auto`}
         style={{
           backgroundColor: "#1E2123",
           scrollbarWidth: "thin",
@@ -896,16 +919,27 @@ const StarMap: React.FC = () => {
             {sidebarMenuItems.map((item) => (
               <button
                 key={item.id}
-                className={`btn d-flex align-items-center my-2 gap-2 w-100 text-start ${
-                  activeMenuItem === item.id
-                    ? "btn-info text-white"
-                    : "btn-dark text-white hover-bg-dark"
-                }`}
-                onClick={() => {
+                className={`btn d-flex align-items-center my-2 gap-2 w-100 text-start ${activeMenuItem === item.id
+                  ? 'btn-info text-white'
+                  : 'btn-dark text-white hover-bg-dark'
+                  }`}
+                onClick={async () => {
                   setActiveMenuItem(item.id);
-                  navigate(`/${item.id}`);
+                  const reportExists = await checkReportExists(item.reportType);
+
+                  if (reportExists) {
+                    navigate('/view-report', {
+                      state: {
+                        reportType: item.reportType,
+                        userId: localStorage.getItem('user_id'),
+                        title: item.label
+                      }
+                    });
+                  } else {
+                    navigate(`/${item.id}`);
+                  }
                 }}
-                style={{ padding: "0.5rem 1rem", borderRadius: "8px" }}
+                style={{ padding: '0.5rem 1rem', borderRadius: '8px' }}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -931,12 +965,12 @@ const StarMap: React.FC = () => {
             </h3>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleNewChat}
-              className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold hover:bg-gray-600 transition-colors"
+            <div
+              className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer"
+              onClick={() => navigate("/result")} style={{ cursor: 'pointer' }}
             >
-              <SquarePlus size={18} />
-            </button>
+              <LogOut size={18} />
+            </div>
             <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center text-sm font-semibold ms-2">
               A
             </div>

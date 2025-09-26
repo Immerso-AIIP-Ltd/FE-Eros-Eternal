@@ -25,7 +25,7 @@ const HarmonyIndex: React.FC = () => {
     dob: "",
   });
   const [cardData, setCardData] = useState<TarotReading | null>(null);
-  const API_URL = "http://192.168.29.154:6001";
+  const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
   const userId = localStorage.getItem("user_id");
 
   // Handle input changes
@@ -53,7 +53,7 @@ const HarmonyIndex: React.FC = () => {
   };
 
   const fetchTarot = async () => {
-    debugger;
+  
     try {
       const formDataSet = new FormData();
       formDataSet.append("user_id", userId);
@@ -78,7 +78,7 @@ const HarmonyIndex: React.FC = () => {
   };
 
   const stepChange = (step: number) => {
-    debugger;
+  
     setStep(step);
     setFormData({ name: "", gender: "", dob: "" });
   };

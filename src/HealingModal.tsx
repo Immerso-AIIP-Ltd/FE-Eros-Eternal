@@ -852,7 +852,7 @@ console.log("baseApiUrl", baseApiUrl);
   };
 
   const handleSuggestionClick = (question: string) => {
-    debugger;
+  
     // Add user message
     setMessages((prev) => [...prev, { sender: "user", text: question }]);
 

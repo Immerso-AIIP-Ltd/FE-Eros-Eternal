@@ -47,7 +47,7 @@ const FaceReadingReportPage: React.FC = () => {
   const { data } = report;
 
   return (
-    <div className="vh-100 vw-100 d-flex flex-column p-4" style={{ backgroundColor: '#000', backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02) 25%), linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02) 25%)', backgroundSize: '20px 20px' }}>
+    <div className="vw-100 d-flex flex-column p-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button
@@ -69,29 +69,52 @@ const FaceReadingReportPage: React.FC = () => {
       {/* Title */}
       <div className="text-center mb-4">
         <h2 className="fw-bold text-white">Face Reading Report</h2>
-        <p className="text-white">
+        {/* <p className="text-white">
           Generated for User ID: {data.user_id}
-        </p>
+        </p> */}
       </div>
 
       {/* Face Analysis Text */}
       <Container>
         <Row>
           <Col md={12}>
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333' ,color:"#ffffff"}}>
+            {/* <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333', color: "#ffffff" }}>
               <Card.Body>
                 <Card.Title>Comprehensive Model Analysis</Card.Title>
                 <pre className="bg-dark text-white p-3 rounded" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
                   {data.face_analysis_text}
                 </pre>
               </Card.Body>
-            </Card>
+            </Card> */}
 
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff"}}>
+            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333', color: "#ffffff" }}>
               <Card.Body>
                 <Card.Title>Spiritual Interpretation & Wellness Guidance</Card.Title>
-                <pre className="bg-dark text-white p-3 rounded" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-                  {data.spiritual_interpretation}
+                <pre
+                  className="bg-dark text-white p-3 rounded"
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: 'sans-serif',
+                    overflowWrap: 'break-word',
+                    fontSize: '16px',
+                    lineHeight: '2'
+                  }}
+                >
+                  {data.raw_analysis
+                    ?.split('\n')
+                    .filter(line => !/^[=-]+\s*$/.test(line)) // Remove lines with only = or -
+                    .map(line => {
+                      // Replace *text* with <strong>text</strong> for bold
+                      const formattedLine = line.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+                      // Use dangerouslySetInnerHTML to render HTML
+                      return <span dangerouslySetInnerHTML={{ __html: formattedLine }} />;
+                    })
+                    .map((line, index) => (
+                      <span key={index}>
+                        {line}
+                        <br />
+                      </span>
+                    )) || ''}
                 </pre>
               </Card.Body>
             </Card>
@@ -99,11 +122,11 @@ const FaceReadingReportPage: React.FC = () => {
         </Row>
 
         {/* Footer */}
-        <div className="d-flex justify-content-center mt-4">
+        {/* <div className="d-flex justify-content-center mt-4">
           <Button variant="outline-light" onClick={() => navigate('/')}>
             ← Start Over
           </Button>
-        </div>
+        </div> */}
       </Container>
     </div>
   );
