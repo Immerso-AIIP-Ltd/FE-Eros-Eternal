@@ -88,6 +88,7 @@ const StatsCards = () => {
                   borderImage:
                     "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",
                   borderTop: "3px solid transparent",
+
                   borderRadius: "18px",
                 }}
               >
@@ -106,6 +107,7 @@ const StatsCards = () => {
                       borderRadius: "4px",
                       objectFit: "contain",
                       background: "transparent",
+                      mixBlendMode: 'screen'
                     }}
                   />
                   <ArrowForwardIosIcon
@@ -158,6 +160,10 @@ const StatsCards = () => {
         .hover-card:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .custom-top-border {
+          border: #0d6efd;
         }
       `}</style>
     </div>
