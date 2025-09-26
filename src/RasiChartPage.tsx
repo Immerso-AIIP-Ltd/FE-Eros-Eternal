@@ -22,8 +22,11 @@ const RasiChartPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+    const userId = localStorage.getItem("user_id");
+
   const fetchAstrologyData = async () => {
     try {
+      const user_id =localStorage.getItem("user_id");
       const placeOfBirth = localStorage.getItem("place_of_birth") || "Chennai, India";
       const dateOfBirth = localStorage.getItem("date_of_birth") || "07/04/2002"; // MM/DD/YYYY
       const timeOfBirth = localStorage.getItem("time_of_birth") || "01:55";
@@ -33,6 +36,7 @@ const RasiChartPage: React.FC = () => {
       }
 
       const payload = {
+        user_id:user_id,
         location: placeOfBirth,
         dob: dateOfBirth,
         tob: timeOfBirth,
@@ -222,7 +226,7 @@ const RasiChartPage: React.FC = () => {
         <Col md={6}>
   <Card className="bg-dark text-white border-secondary h-100">
     <Card.Body className="d-flex flex-column">
-      <Card.Title className="text-info">Rasi Chart (D1)</Card.Title>
+      <Card.Title className="text-white">Rasi Chart (D1)</Card.Title>
       <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
       <iframe
   src={rasiChart}
@@ -230,7 +234,7 @@ const RasiChartPage: React.FC = () => {
   width="100%"
   height="400"
   style={{
-    border: '2px solid #FF8C00',
+    // border: '2px solid #FF8C00',
     borderRadius: '8px',
     backgroundColor: '#fff',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
@@ -263,7 +267,7 @@ const RasiChartPage: React.FC = () => {
 <Col md={6}>
   <Card className="bg-dark text-white border-secondary h-100">
     <Card.Body className="d-flex flex-column">
-      <Card.Title className="text-info">Navamsha Chart (D9)</Card.Title>
+      <Card.Title className="text-white">Navamsha Chart (D9)</Card.Title>
       <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
         <iframe
           src={navamshaChart}
