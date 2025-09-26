@@ -27,6 +27,9 @@ import PalmUploadPage from "./PalmUpload";
 import PalmReadingReportPage from "./PalmReport";
 import FaceUploadPage from "./FaceUpload";
 import FaceReadingReportPage from "./FaceReportPage";
+import LongevityTool from "./longevityTool";
+import ViewReport from "./ViewReport";
+
 import RasiChartPage from "./RasiChartPage";
 import StarMap from "./StarMap";
 import KoshaMap from "./KoshaMap";
@@ -93,6 +96,7 @@ const App: React.FC = () => {
           <Route path='/Healing' element={<HealingModal />} />
           <Route path='/ai-chat' element={<AiChat />} />
           <Route path="/age-tracker" element={<AgeTrack />} />
+          <Route path="/view-report" element={<ViewReport />} />
 
 
           <Route path="/harmony" element={<HarmonyIndexPage />} />
