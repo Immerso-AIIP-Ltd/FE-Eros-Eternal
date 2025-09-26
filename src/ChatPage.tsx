@@ -50,6 +50,7 @@ const ChatPage: React.FC = () => {
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [completedReports, setCompletedReports] = useState<string[]>([]);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
   interface Message {
     sender: "user" | "ai";
@@ -156,6 +157,23 @@ const ChatPage: React.FC = () => {
     ]);
   }, []);
 
+  const getDisplayName = () => {
+    const raw = localStorage.getItem("username") || "Guest";
+    // Capitalize each word
+    return raw
+      .trim()
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  const displayName = getDisplayName();
+  const initials = displayName
+    .split(/\s+/)
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -168,84 +186,6 @@ const ChatPage: React.FC = () => {
     // keep real files for FormData
     setAttachedFiles((prev) => [...prev, ...filesArr]);
   };
-
-  // const sendMessage = async (textArg?: string, file?: File) => {
-  //   debugger
-  //   const userId = localStorage.getItem("user_id");
-
-  //   // Determine the message (text or file)
-  //   const message = (textArg ?? inputValue ?? "").toString();
-  //   const BASE_URL = "http://192.168.29.154:6001";
-
-  //   // Don't proceed if there's no message and no file
-  //   if (!message.trim() && !file) return;
-
-  //   // Show the user's bubble
-  //   setMessages((prev) => [
-  //     ...prev,
-  //     { sender: "user", text: message, userAvatar: true },
-  //   ]);
-  //   setInputValue(""); // Reset input
-  //   setIsLoadingResponse(true); // Start loading
-
-  //   // Add thinking message
-  //   setMessages((prev) => [
-  //     ...prev,
-  //     { sender: "ai", text: "Thinking...", isThinking: true },
-  //   ]);
-
-  //   const form = new FormData();
-  //   form.append("report_type", reportType || "vibrational_frequency"); // Set report type
-
-  //   // If file exists, append it to the form; otherwise, append the message text
-  //   if (file) {
-  //     form.append("file", file);
-  //   } else {
-  //     form.append("answer", message);
-  //   }
-
-  //   try {
-  //     const res = await fetch(
-  //       `${BASE_URL}/api/v1/chat/answer_question/${userId}`,
-  //       {
-  //         method: "POST",
-  //         body: form,
-  //       }
-  //     );
-
-  //     const data = await res.json();
-
-  //     // Remove thinking message
-  //     setMessages((prev) => prev.filter((msg) => !msg.isThinking));
-
-  //     if (data?.message) {
-  //       if (data?.data?.assessment_status === "completed") {
-  //         setMessages((prev) => [
-  //           ...prev,
-  //           { sender: "ai", text: "Generating your report..." },
-  //         ]);
-  //         // Call generateReport AFTER storing last answer
-  //         await generateReport();
-  //       } else {
-  //         setMessages((prev) => [
-  //           ...prev,
-  //           { sender: "ai", text: data?.data?.current_question },
-  //         ]);
-  //       }
-  //     }
-  //   } catch (err) {
-  //     console.error("Process answer error:", err);
-  //     setMessages((prev) => [
-  //       ...prev,
-  //       {
-  //         sender: "ai",
-  //         text: "Sorry, something went wrong. Please try again.",
-  //       },
-  //     ]);
-  //   } finally {
-  //     setIsLoadingResponse(false);
-  //   }
-  // };
 
   const sendMessage = async () => {
     const userId = localStorage.getItem("user_id");
@@ -270,6 +210,9 @@ const ChatPage: React.FC = () => {
 
     // Clear input + previews immediately for snappy UX
     setInputValue("");
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = "40px";
+    }
     setAttachedImages([]);
     setAttachedFiles([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -282,7 +225,7 @@ const ChatPage: React.FC = () => {
 
     // Build form data
     const form = new FormData();
-    debugger
+    debugger;
     form.append("report_type", reportType || "vibrational_frequency");
 
     if (hasFiles) {
@@ -390,94 +333,6 @@ const ChatPage: React.FC = () => {
       console.error("Microphone error:", err);
     }
   };
-
-  // const startRecording = async () => {
-  //   try {
-  //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  //     const recorder = new MediaRecorder(stream, {
-  //       mimeType: "audio/webm;codecs=opus",
-  //     });
-
-  //     const chunks: Blob[] = [];
-  //     recorder.ondataavailable = (e) => {
-  //       if (e.data.size > 0) chunks.push(e.data);
-  //     };
-
-  //     recorder.onstop = () => {
-  //       const audioBlob = new Blob(chunks, { type: "audio/webm;codecs=opus" });
-  //       const audioUrl = URL.createObjectURL(audioBlob);
-
-  //       const tempAudio = new Audio(audioUrl);
-  //       tempAudio.onloadedmetadata = () => {
-  //         const duration = Math.floor(tempAudio.duration) || 0;
-  //         setMessages((prev) => [
-  //           ...prev,
-  //           { sender: "user", audio: audioUrl, duration },
-  //         ]);
-  //       };
-
-  //       // ✅ stop visualization
-  //       cancelAnimationFrame(animationId);
-  //       if (audioContextRef.current) audioContextRef.current.close();
-
-  //       setIsRecording(false);
-  //     };
-
-  //     recorder.start();
-  //     setMediaRecorder(recorder);
-  //     setIsRecording(true);
-
-  //     // ✅ waveform setup
-  //     audioContextRef.current = new (window.AudioContext ||
-  //       (window as any).webkitAudioContext)();
-  //     analyserRef.current = audioContextRef.current.createAnalyser();
-  //     sourceRef.current =
-  //       audioContextRef.current.createMediaStreamSource(stream);
-  //     sourceRef.current.connect(analyserRef.current);
-
-  //     analyserRef.current.fftSize = 256;
-  //     const bufferLength = analyserRef.current.frequencyBinCount;
-  //     const dataArray = new Uint8Array(bufferLength);
-
-  //     const canvas = waveformRef.current;
-  //     const ctx = canvas?.getContext("2d");
-
-  //     const draw = () => {
-  //       if (!ctx || !canvas || !analyserRef.current) return;
-
-  //       analyserRef.current.getByteTimeDomainData(dataArray);
-
-  //       ctx.fillStyle = "black";
-  //       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  //       ctx.lineWidth = 2;
-  //       ctx.strokeStyle = "#00b8f8";
-  //       ctx.beginPath();
-
-  //       const sliceWidth = (canvas.width * 1.0) / bufferLength;
-  //       let x = 0;
-
-  //       for (let i = 0; i < bufferLength; i++) {
-  //         const v = dataArray[i] / 128.0;
-  //         const y = (v * canvas.height) / 2;
-
-  //         if (i === 0) ctx.moveTo(x, y);
-  //         else ctx.lineTo(x, y);
-
-  //         x += sliceWidth;
-  //       }
-
-  //       ctx.lineTo(canvas.width, canvas.height / 2);
-  //       ctx.stroke();
-
-  //       animationId = requestAnimationFrame(draw);
-  //     };
-
-  //     draw();
-  //   } catch (err) {
-  //     console.error("Microphone error:", err);
-  //   }
-  // };
 
   useEffect(() => {
     console.log("messages:", messages);
@@ -747,7 +602,9 @@ const ChatPage: React.FC = () => {
     setReportType(type);
     setAnswers([]); // Clear previous answers
     setConversationActive(true);
-
+    setReportGenerated(false);
+    setMessages((prev) => prev.filter((m) => !m.isSuggestion));
+    // setCompletedReports((prev) => [...prev, question]);
     // Show user message
     setMessages((prev) => [...prev, { sender: "user", text: question }]);
 
@@ -768,46 +625,6 @@ const ChatPage: React.FC = () => {
       ]);
     } catch (err) {
       console.error("Error starting report:", err);
-      setMessages((prev) => [
-        ...prev,
-        { sender: "ai", text: "Sorry, something went wrong." },
-      ]);
-    }
-  };
-
-  // Handle user's text or file response
-  const handleAnswer = async (answer: string, file?: File) => {
-    const userId = localStorage.getItem("user_id") || "0";
-    const form = new FormData();
-    form.append("report_type", reportType);
-
-    if (file) {
-      form.append("file", file);
-    } else {
-      form.append("answer", answer);
-    }
-
-    try {
-      const res = await fetch(
-        `http://192.168.29.154:6001/api/v1/chat/answer_question/${userId}`,
-        { method: "POST", body: form }
-      );
-      const data = await res.json();
-
-      if (data?.assessment_status === "completed") {
-        setMessages((prev) => [
-          ...prev,
-          { sender: "ai", text: "Generating your report..." },
-        ]);
-        await generateReport();
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          { sender: "ai", text: data?.current_question },
-        ]);
-      }
-    } catch (err) {
-      console.error("Error answering question:", err);
       setMessages((prev) => [
         ...prev,
         { sender: "ai", text: "Sorry, something went wrong." },
@@ -837,7 +654,7 @@ const ChatPage: React.FC = () => {
         { sender: "ai", report: data?.data?.report },
       ]);
 
-      if (data?.data?.assessment_status === "completed") {
+      if (data?.data?.report) {
         setCompletedReports((prev) => [...prev, reportType]);
 
         setMessages((prev) => [
@@ -859,25 +676,35 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const showRemainingQuestions = () => {
-    const remaining = questions.filter(
-      (q) => !completedReports.includes(q.report_type)
-    );
+  const reportTypes: Record<string, string> = {
+    "What's my vibe right now?": "vibrational_frequency",
+    "What's my aura saying?": "aura_profile",
+    "What planet is affecting me?": "star_map",
+    "What should I eat for energy today?": "longevity_blueprint",
+    "How bright is my inner flame burning?": "flame_score",
+    "Which of my energy bodies needs the most love today?": "kosha_map",
+  };
 
+  const showRemainingQuestions = () => {
+    debugger;
+    const remaining = questions.filter(
+      (q) => !completedReports.includes(reportTypes[q.message])
+    );
+    console.log("remaining", remaining);
     const questionMessages = remaining.map((question) => ({
       sender: "ai",
-      text: question?.message,
-      icon: question?.icon,
+      text: question.message,
+      icon: question.icon,
       isSuggestion: true,
     }));
 
-    setMessages((prev) => [...prev, ...questionMessages]);
-  };
+    const introText = {
+      sender: "ai",
+      text: "Here are the remaining questions for your report:",
+    };
 
-  // Navigate to result page
-  // const handleGoHome = () => {
-  //   navigate('/result');
-  // };
+    setMessages((prev) => [...prev, introText, ...questionMessages]);
+  };
 
   const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -984,123 +811,54 @@ const ChatPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-grow-1 d-flex flex-column position-relative">
-        {/* ✅ Starfield Background - Positions now stable */}
-        {/* <div className="position-absolute w-100 h-100 overflow-hidden">
-          {stars.map((pos, i) => (
-            <div
-              key={i}
-              className="position-absolute bg-white rounded-circle"
-              style={{
-                width: "4px",
-                height: "4px",
-                opacity: pos.opacity,
-                top: `${pos.y}%`,
-                left: `${pos.x}%`,
-              }}
-            ></div>
-          ))}
-        </div> */}
-
-        {/* Header */}
-        <div className="position-relative z-10 d-flex justify-content-between align-items-center p-4">
+        <div className=" container position-relative z-10 d-flex justify-content-between align-items-center p-4">
           <h2
-            className="h4 fw-bold eternal-header"
-            style={{ color: "#00A2FF" }}
+            className="h4 fw-bold"
+            style={{
+              color:
+                "linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))",
+            }}
           >
             {" "}
             Eternal AI
           </h2>
+
+          <button
+            type="button"
+            className="btn d-flex align-items-center gap-2 px-3 py-2"
+            style={{
+              // background: "rgba(255,255,255,0.06)",
+              // border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "999px",
+              color: "#fff",
+            }}
+            aria-label={`Open profile for ${displayName}`}
+          >
+            <span
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 700,
+                // avatar color
+                // background: "#00A2FF",
+                background:
+                  "linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))",
+                color: "#0B1117",
+              }}
+            >
+              {initials}
+            </span>
+            {/* <span style={{ fontWeight: 600 }}>{displayName}</span> */}
+          </button>
         </div>
 
         {/* Main Content Area */}
         <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center position-relative z-10 px-3">
           {/* Only show if input is empty */}
-          {/* {inputValue === "" && messages.length === 0 && (
-            <>
-              <div className="text-center mb-5">
-                <div className="d-flex flex-column align-items-center mb-3">
-                  <img
-                    src={sparkle}
-                    alt="Sparkle Logo"
-                    style={{
-                      width: "48px",
-                      height: "48px",
-                      objectFit: "cover",
-                      filter: "drop-shadow(0 0 8px rgba(0, 184, 248, 0.5))",
-                    }}
-                  />
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    style={{
-                      position: "absolute",
-                      top: "-12px",
-                      right: "12px",
-                      filter: "drop-shadow(0 0 4px rgba(100, 255, 100, 0.6))",
-                    }}
-                  >
-                    <polygon
-                      points="12,2 16,8 12,14 8,8"
-                      fill="#00ff00"
-                      opacity="0.8"
-                    />
-                  </svg>
-                </div>
-                <h3 className="h5 fw-semibold">Your Daily AI Assistant</h3>
-              </div>
-              <Row
-                className="g-3 mb-5 w-100 justify-content-center h-45"
-                style={{ maxWidth: "1200px" }}
-              >
-                {[
-                  { icon: starone, label: "Eternal Echo", color: "yellow" },
-                  { icon: startwo, label: "Aether Chat", color: "red" },
-                  { icon: starthree, label: "Nexus Eternal", color: "blue" },
-                  { icon: starfour, label: "Timeless Words", color: "green" },
-                ].map((card, idx) => (
-                  <Col
-                    key={idx}
-                    xs={12}
-                    sm={6}
-                    md={3}
-                    style={{ height: "200px" }}
-                  >
-                    <div
-                      className="bg-dark bg-opacity-75 text-white p-3 rounded-4 d-flex flex-column align-items-center justify-content-center h-100"
-                      style={{
-                        width: "100%",
-                        height: "100px",
-                        transition: "all 0.2s ease",
-                        cursor: "pointer",
-                        border: "none",
-                      }}
-                      onClick={() => console.log(`${card.label} clicked!`)}
-                    >
-                      <div className="d-flex flex-column align-items-center">
-                        <img
-                          src={card.icon}
-                          alt={card.label}
-                          style={{
-                            width: "24px",
-                            height: "24px",
-                            marginBottom: "6px",
-                          }}
-                        />
-                        <p
-                          className="text-secondary small m-0"
-                          style={{ whiteSpace: "nowrap" }}
-                        >
-                          {card.label}
-                        </p>
-                      </div>
-                    </div>
-                  </Col>
-                ))}
-              </Row>
-            </>
-          )} */}
           {inputValue === "" && messages.length === 0 && (
             <>
               <div className="text-center mb-5">
@@ -1172,125 +930,7 @@ const ChatPage: React.FC = () => {
           )}
         </div>
 
-        {/* {messages.length > 0 && (
-          <div className="flex-grow-1 container d-flex flex-column px-3 mb-3 overflow-auto">
-            {messages.length > 0 && (
-              <div className="flex-grow-1 container d-flex flex-column px-3 mb-3 overflow-auto">
-                {messages.map((msg, i) => {
-                  const isUser = msg.sender === "user";
-                  const isSuggestion = msg.isSuggestion;
-
-                  return (
-                    <div
-                      key={i}
-                      className={`d-flex mb-2 ${isUser ? "justify-content-end" : "justify-content-start"
-                        }`}
-                    >
-                      <div
-                        className={`px-3 py-2 rounded-3`}
-                        style={{
-                          maxWidth: "70%",
-                          whiteSpace: "pre-wrap",
-                          background: isUser
-                            ? "#00b8f8"
-                            : isSuggestion
-                              ? "#e9ecef"
-                              : "#6c757d",
-                          color: isUser
-                            ? "white"
-                            : isSuggestion
-                              ? "black"
-                              : "white",
-                          cursor: isSuggestion ? "pointer" : "default",
-                          userSelect: "none", // prevent text selection blocking click
-                        }}
-                        onClick={() => {
-                          if (isSuggestion) {
-                            console.log("Suggestion clicked:", msg.text); // debug
-                            handleSuggestionClick(msg.text!);
-                          }
-                        }}
-                      >
-                       
-                        {msg.imageList && msg.imageList.length > 0 && (
-                          <div
-                            className="d-flex flex-wrap gap-2 mb-2"
-                            style={{ maxWidth: "100%" }}
-                          >
-                            {msg.imageList.map((img, j) => (
-                              <img
-                                key={j}
-                                src={img}
-                                alt="attachment"
-                                className="rounded"
-                                style={{
-                                  width: "120px",
-                                  height: "120px",
-                                  objectFit: "cover",
-                                  cursor: "pointer",
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation(); // ✅ prevent interfering with bubble click
-                                  setPreviewImage(img);
-                                }}
-                              />
-                            ))}
-                          </div>
-                        )}
-
-                        
-                        {msg.text && <div>{msg.text}</div>}
-
-                        {msg.report && (
-                          <div className="mt-2">
-                            {renderReportDynamic(msg.report)}{" "}
-                          </div>
-                        )}
-
-                        {msg.audio && (
-                          <VoiceMessage
-                            url={msg.audio}
-                            duration={msg.duration ?? 0}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {reportGenerated && (
-                  <div className="d-flex justify-content-center mt-4 mb-3">
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      className="px-5 py-3 rounded-pill fw-semibold"
-                      style={{
-                        backgroundColor: "#00b8f8",
-                        borderColor: "#00b8f8",
-                        fontSize: "1.1rem",
-                        boxShadow: "0 4px 12px rgba(0, 184, 248, 0.3)",
-                        transition: "all 0.2s ease",
-                      }}
-                      onClick={handleGoHome}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style.boxShadow = "0 6px 16px rgba(0, 184, 248, 0.4)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 184, 248, 0.3)";
-                      }}
-                    >
-                      <i className="bi bi-house-door me-2"></i>
-                      Go Home
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )} */}
-
+        {/* Messages */}
         {messages.length > 0 && (
           <div className="flex-grow-1 container d-flex flex-column px-3 mb-3 overflow-auto">
             {messages.map((msg, i) => {
@@ -1383,6 +1023,11 @@ const ChatPage: React.FC = () => {
                         duration={msg.duration ?? 0}
                       />
                     )}
+                    {msg.report && (
+                      <div className="mt-2">
+                        {renderReportDynamic(msg.report)}{" "}
+                      </div>
+                    )}
 
                     {/* Right Arrow for Suggestions - Positioned at the end of the message container */}
                     {isSuggestion && (
@@ -1435,7 +1080,7 @@ const ChatPage: React.FC = () => {
                   "0 4px 12px rgba(0, 184, 248, 0.3)";
               }}
             >
-              <i className="bi bi-house-door me-2"></i>
+              {/* <i className="bi bi-house-door me-2"></i> */}
               Start your soul journey
             </Button>
           </div>
@@ -1490,130 +1135,6 @@ const ChatPage: React.FC = () => {
               )}
 
               {/* ✅ Input + Buttons Row */}
-              {/* <div className="d-flex align-items-end w-100">
-                {!isRecording ? (
-                  <>
-                    <Form.Control
-                      id="chat-input-textarea"
-                      as="textarea"
-                      rows={1}
-                      placeholder="Enter a prompt here"
-                      className="bg-transparent text-white border-0 shadow-none flex-grow-1"
-                      style={{
-                        resize: "none",
-                        overflow: "hidden",
-                        minHeight: "40px",
-                        maxHeight: "150px",
-                      }}
-                      value={inputValue}
-                      onChange={(e) => {
-                        setInputValue(e.target.value);
-                        e.currentTarget.style.height = "40px"; // reset first
-                        e.currentTarget.style.height =
-                          e.currentTarget.scrollHeight + "px";
-                      }}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" &&
-                        !e.shiftKey &&
-                        (e.preventDefault(), sendMessage())
-                      }
-                    />
-
-                    <div className="d-flex align-items-center ms-2">
-                      <Button
-                        as="label"
-                        variant="link"
-                        className="border-0 p-2"
-                        style={{
-                          color: "#ccc",
-                          fontSize: "1.2rem",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <i className="bi bi-image"></i>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          hidden
-                          multiple
-                          onChange={handleImageUpload}
-                        />
-                      </Button>
-
-                      <Button
-                        variant="link"
-                        className="border-0 p-2"
-                        style={{ color: "#ccc", fontSize: "1.2rem" }}
-                        onClick={openCamera}
-                      >
-                        <i className="bi bi-camera"></i>
-                      </Button>
-
-                      <Button
-                        variant="link"
-                        className="border-0 p-2"
-                        style={{ color: "#ccc", fontSize: "1.2rem" }}
-                        onClick={startRecording}
-                      >
-                        <i className="bi bi-mic"></i>
-                      </Button>
-
-                      <Button
-                        variant="info"
-                        className="rounded-pill px-3 py-2 ms-2"
-                        disabled={!inputValue || isLoadingResponse}
-                        style={{
-                          backgroundColor: "#00b8f8",
-                          borderColor: "#00b8f8",
-                          color: "white",
-                          fontSize: "1.1rem",
-                          fontWeight: "600",
-                          minWidth: "40px",
-                          height: "40px",
-                        }}
-                        onClick={sendMessage}
-                      >
-                        {isLoadingResponse ? (
-                          <div
-                            className="spinner-border spinner-border-sm"
-                            role="status"
-                          >
-                            <span className="visually-hidden">Loading...</span>
-                          </div>
-                        ) : (
-                          <i className="bi bi-send"></i>
-                        )}
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="d-flex align-items-center bg-dark rounded-3 px-3 py-2 flex-grow-1">
-                    <MicVisualizer stream={micStream} height={40} />
-
-                    <span className="ms-3 text-danger fw-bold">
-                      {formatTime(recordingTime)}
-                    </span>
-
-                    <Button
-                      variant="success"
-                      className="ms-3 rounded-circle d-flex align-items-center justify-content-center"
-                      style={{ width: 36, height: 36 }}
-                      onClick={stopRecording}
-                    >
-                      <i className="bi bi-check-lg"></i>
-                    </Button>
-
-                    <Button
-                      variant="danger"
-                      className="ms-2 rounded-circle d-flex align-items-center justify-content-center"
-                      style={{ width: 36, height: 36 }}
-                      onClick={cancelRecording}
-                    >
-                      <i className="bi bi-x-lg"></i>
-                    </Button>
-                  </div>
-                )}
-              </div> */}
               <div className="d-flex align-items-end w-100">
                 {!isRecording ? (
                   <>
@@ -1630,6 +1151,7 @@ const ChatPage: React.FC = () => {
                         minHeight: "40px",
                         maxHeight: "150px",
                       }}
+                      ref={textAreaRef}
                       value={inputValue}
                       onChange={(e) => {
                         setInputValue(e.target.value);

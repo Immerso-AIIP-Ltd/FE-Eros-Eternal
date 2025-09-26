@@ -1,374 +1,207 @@
+// src/ErosChatUI.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Row, Col, Button, Card, Form } from "react-bootstrap";
-import ReactMarkdown from "react-markdown"; // Add this import
+import { useNavigate } from "react-router-dom";
+import { Menu, X, SendHorizontal, Mic, Camera, ImagePlus, LogOut, SquarePlus, User, Upload, Play, Pause, Check } from "lucide-react";
+import { Row, Col, Button, Form } from "react-bootstrap";
 import starone from "./star1.png";
 import startwo from "./star2.png";
 import starthree from "./star3.png";
 import starfour from "./star4.png";
-import aura from "./aura profile.png";
-import star from "./star.png";
-import vibrational from "./vibrational.png";
-import kosha from "./kosha.png";
-import flame from "./flame.png";
-import longevity from "./longevity.png";
 import sparkle from "./sparkle.png";
 import Stars from "./components/stars";
 import VoiceMessage from "./VoiceMessage";
 import MicVisualizer from "./MicVisualizer";
-import ChatMediaControls from "./ChatInput";
+import Fire from "./assets/webm/Fire.webm";
+import Earth from "./assets/webm/Earth Globe Looped Icon.webm";
+import Food from "./assets/webm/Food animation.webm";
+import Gym from "./assets/webm/Gym dubble.webm";
+import Magic from "./assets/webm/Magic Crystal Ball.webm";
+import Star from "./assets/webm/Star.webm";
+import "./header.css";
+
+// Define the structure for the sidebar menu items
+const sidebarMenuItems = [
+  { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} /> },
+  { id: 'aura-profile', label: 'Aura Profile', icon: <User size={16} /> },
+  { id: 'vibrational-frequency', label: 'Vibrational Frequency', icon: <ImagePlus size={16} /> },
+  { id: 'kosha-map', label: 'Kosha Map', icon: <Camera size={16} /> },
+  { id: 'flame-score', label: 'Flame Score', icon: <Upload size={16} /> },
+  { id: 'longevity-blueprint', label: 'Longevity Blueprint', icon: <Mic size={16} /> },
+];
+
+interface Message {
+  sender: "user" | "ai";
+  text?: string;
+  imageList?: string[];
+  audio?: string;
+  duration?: number;
+  isSuggestion?: boolean;
+  report?: any;
+  isThinking?: boolean;
+  aiAvatar?: boolean;
+  userAvatar?: boolean;
+  icon?: string; // For suggestion icons
+}
 
 const ErosChatUI: React.FC = () => {
   const navigate = useNavigate();
-  const [activeItem, setActiveItem] = useState<string | null>(
-    "Frequency Alignment"
-  );
   const [inputValue, setInputValue] = useState<string>("");
   const [isRecording, setIsRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-    null
-  );
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  interface Message {
-    sender: "user" | "ai";
-    text?: string;
-    imageList?: string[];
-    audio?: string; // blob URL for audio messages
-  }
-
-  const [messages, setMessages] = useState<
-    { sender: "user" | "ai"; text: string }[]
-  >([]);
-
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  let animationId: number;
+  const [conversationActive, setConversationActive] = useState(false);
+  const [reportType, setReportType] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [reportGenerated, setReportGenerated] = useState(false);
+  const [isLoadingResponse, setIsLoadingResponse] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [completedReports, setCompletedReports] = useState<string[]>([]);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [spiritualSessionId, setSpiritualSessionId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [showCamera, setShowCamera] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<string[]>([]);
-
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const [micStream, setMicStream] = useState<MediaStream | null>(null);
-  const [questions, setQuestions] = useState<string[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [currentReportType, setCurrentReportType] = useState<string>("vibrational_frequency");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const navigationItems = [
-    { name: "Frequency Alignment", icon: vibrational, reportType: "vibrational_frequency" },
-    { name: "Aura Profile", icon: aura, reportType: "aura_profile" },
-    { name: "Star Map", icon: star, reportType: "star_map" },
-    { name: "Kosha Map", icon: kosha, reportType: "kosha_map" },
-    { name: "Flame Score", icon: flame, reportType: "flame_score" },
-    { name: "Longevity Blueprint", icon: longevity, reportType: "longevity_blueprint" },
+  const questions = [
+    { message: "What's my vibe right now?", icon: Star },
+    { message: "What's my aura saying?", icon: Magic },
+    { message: "What planet is affecting me?", icon: Earth },
+    { message: "What should I eat for energy today?", icon: Food },
+    { message: "How bright is my inner flame burning?", icon: Fire },
+    {
+      message: "Which of my energy bodies needs the most love today?",
+      icon: Gym,
+    },
   ];
 
-  const location = useLocation();
+  const reportTypes: Record<string, string> = {
+    "What's my vibe right now?": "vibrational_frequency",
+    "What's my aura saying?": "aura_profile",
+    "What planet is affecting me?": "star_map",
+    "What should I eat for energy today?": "longevity_blueprint",
+    "How bright is my inner flame burning?": "flame_score",
+    "Which of my energy bodies needs the most love today?": "kosha_map",
+  };
 
-  // Get report type from URL params and find matching navigation item
+  // Initialize the chat with welcome message and questions
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const reportTypeFromUrl = urlParams.get('reportType');
-    const titleFromUrl = urlParams.get('title');
+    const welcomeMessage = `👋 Hey ${localStorage.getItem("username") || "Guest"}!, What do you want from Eternal AI.`;
+    const questionMessages = questions.map((question) => ({
+      sender: "ai",
+      text: question.message,
+      icon: question.icon,
+      isSuggestion: true,
+    }));
+    setMessages([
+      { sender: "ai", text: welcomeMessage, aiAvatar: true },
+      ...questionMessages,
+    ]);
+  }, []);
 
-    if (reportTypeFromUrl) {
-      // Find the matching navigation item
-      const matchingItem = navigationItems.find(item => item.reportType === reportTypeFromUrl);
-      if (matchingItem) {
-        setActiveItem(matchingItem.name);
-        setCurrentReportType(reportTypeFromUrl);
+  const getDisplayName = () => {
+    const raw = localStorage.getItem("username") || "Guest";
+    return raw
+      .trim()
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
 
-        // Reset chat state and fetch questions for the selected report type
-        setMessages([]);
-        setUserAnswers([]);
-        setCurrentQuestionIndex(0);
-        setQuestions([]);
-        fetchQuestionsForReportType(reportTypeFromUrl);
-      }
-    }
-  }, [location]);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const reportTypeFromUrl = urlParams.get('reportType');
-    const titleFromUrl = urlParams.get('title');
-
-    if (reportTypeFromUrl) {
-      // Find the matching navigation item
-      const matchingItem = navigationItems.find(item => item.reportType === reportTypeFromUrl);
-      if (matchingItem) {
-        setActiveItem(matchingItem.name);
-        setCurrentReportType(reportTypeFromUrl);
-
-        // Reset chat state and fetch questions for the selected report type
-        setMessages([]);
-        setUserAnswers([]);
-        setCurrentQuestionIndex(0);
-        setQuestions([]);
-        fetchQuestionsForReportType(reportTypeFromUrl);
-      }
-    }
-  }, [location.search]); // Add this dependency
+  const displayName = getDisplayName();
+  const initials = displayName
+    .split(/\s+/)
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      const urls = Array.from(files).map((file) => URL.createObjectURL(file));
-      setAttachedImages((prev) => [...prev, ...urls]);
-    }
-  };
-
-  // Helper function to format the report data into a readable format
-  // Helper function to format the report data into a readable format
-  const formatReportData = (report: any) => {
-    let formattedText = "";
-
-    // Report Title
-    if (report.report_title) {
-      formattedText += `# ${report.report_title}\n\n`;
-    }
-
-    if (report.timestamp) {
-      formattedText += `**Generated:** ${new Date(report.timestamp).toLocaleDateString()}\n\n`;
-    }
-
-    // Current Assessment Section
-    if (report.current_assessment) {
-      formattedText += `## Current Assessment\n\n`;
-
-      if (report.current_assessment.vf_score) {
-        formattedText += `**Vibrational Frequency Score**\n${report.current_assessment.vf_score}\n\n`;
-      }
-
-      if (report.current_assessment.hz_frequency) {
-        formattedText += `**Frequency Level**\n${report.current_assessment.hz_frequency}\n\n`;
-      }
-
-      if (report.current_assessment.energy_level) {
-        formattedText += `**Energy Level**\n${report.current_assessment.energy_level}\n\n`;
-      }
-
-      if (report.current_assessment.sleep_impact) {
-        formattedText += `**Sleep Impact Analysis**\n${report.current_assessment.sleep_impact}\n\n`;
-      }
-
-      if (report.current_assessment.environmental_factors) {
-        formattedText += `**Environmental Factors**\n${report.current_assessment.environmental_factors}\n\n`;
-      }
-    }
-
-    // Detailed Analysis Section
-    if (report.detailed_analysis) {
-      formattedText += `## Detailed Analysis\n\n${report.detailed_analysis}\n\n`;
-    }
-
-    // Predictive Analysis Section
-    if (report.predictive_analysis) {
-      formattedText += `## Predictive Analysis\n\n`;
-
-      if (report.predictive_analysis.next_3_days && Array.isArray(report.predictive_analysis.next_3_days)) {
-        formattedText += `**Next 3 Days Forecast**\n`;
-        report.predictive_analysis.next_3_days.forEach((day: string, index: number) => {
-          const cleanDay = day.replace(/^Day \d+:\s*/, '');
-          formattedText += `• **Day ${index + 1}:** ${cleanDay}\n`;
-        });
-        formattedText += `\n`;
-      }
-
-      if (report.predictive_analysis.optimal_timing) {
-        formattedText += `**Optimal Timing**\n${report.predictive_analysis.optimal_timing}\n\n`;
-      }
-
-      if (report.predictive_analysis.warning_signs) {
-        formattedText += `**Warning Signs**\n${report.predictive_analysis.warning_signs}\n\n`;
-      }
-    }
-
-    // Spiritual Insights Section
-    if (report.spiritual_insights) {
-      formattedText += `## Spiritual Insights\n\n`;
-
-      if (report.spiritual_insights.soul_lessons) {
-        formattedText += `**Soul Lessons**\n${report.spiritual_insights.soul_lessons}\n\n`;
-      }
-
-      if (report.spiritual_insights.past_life_connections) {
-        formattedText += `**Past Life Connections**\n${report.spiritual_insights.past_life_connections}\n\n`;
-      }
-
-      if (report.spiritual_insights.growth_opportunities) {
-        formattedText += `**Growth Opportunities**\n${report.spiritual_insights.growth_opportunities}\n\n`;
-      }
-    }
-
-    // Recommendations Section
-    if (report.recommendations) {
-      formattedText += `## Recommendations\n\n`;
-
-      if (report.recommendations.immediate_actions && Array.isArray(report.recommendations.immediate_actions)) {
-        formattedText += `**Immediate Actions**\n`;
-        report.recommendations.immediate_actions.forEach((action: string, index: number) => {
-          formattedText += `${index + 1}. ${action}\n`;
-        });
-        formattedText += `\n`;
-      }
-
-      if (report.recommendations.mantras && Array.isArray(report.recommendations.mantras)) {
-        formattedText += `**Daily Mantras**\n`;
-        report.recommendations.mantras.forEach((mantra: string, index: number) => {
-          formattedText += `${index + 1}. ${mantra}\n`;
-        });
-        formattedText += `\n`;
-      }
-
-      if (report.recommendations.energy_practices && Array.isArray(report.recommendations.energy_practices)) {
-        formattedText += `**Energy Practices**\n`;
-        report.recommendations.energy_practices.forEach((practice: string, index: number) => {
-          formattedText += `${index + 1}. ${practice}\n`;
-        });
-        formattedText += `\n`;
-      }
-
-      if (report.recommendations.avoidance_list && Array.isArray(report.recommendations.avoidance_list)) {
-        formattedText += `**Things to Avoid**\n`;
-        report.recommendations.avoidance_list.forEach((item: string, index: number) => {
-          formattedText += `${index + 1}. ${item}\n`;
-        });
-        formattedText += `\n`;
-      }
-    }
-
-    formattedText += `---\n\n✨ **Your Vibrational Frequency Report is complete!** Use this guidance for your spiritual growth journey.\n\n`;
-
-    return formattedText;
+    if (!files || files.length === 0) return;
+    const filesArr = Array.from(files);
+    const urls = filesArr.map((f) => URL.createObjectURL(f));
+    setAttachedImages((prev) => [...prev, ...urls]);
+    setAttachedFiles((prev) => [...prev, ...filesArr]);
   };
 
   const sendMessage = async () => {
-    if (!inputValue.trim() && attachedImages.length === 0) return;
+    const userId = localStorage.getItem("user_id");
+    const BASE_URL = "http://192.168.29.154:6001";
+    const message = inputValue.trim();
+    const hasText = message.length > 0;
+    const hasFiles = attachedFiles.length > 0;
+    if (!hasText && !hasFiles) return;
 
-    // Append the user's answer
     setMessages((prev) => [
       ...prev,
-      { sender: "user", text: inputValue, imageList: attachedImages },
+      {
+        sender: "user",
+        text: message || undefined,
+        imageList: attachedImages.length ? [...attachedImages] : undefined,
+        userAvatar: true,
+      },
     ]);
 
-    // Store the user's answer
-    const newAnswers = [...userAnswers, inputValue];
-    setUserAnswers(newAnswers);
-
     setInputValue("");
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = "40px";
+    }
     setAttachedImages([]);
+    setAttachedFiles([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setIsLoadingResponse(true);
+    setMessages((prev) => [
+      ...prev,
+      { sender: "ai", text: "Thinking...", isThinking: true },
+    ]);
 
-    // After a small delay, show the next question or generate report
-    setTimeout(async () => {
-      const nextIndex = currentQuestionIndex + 1;
-      if (questions[nextIndex]) {
-        setMessages((prev) => [...prev, { sender: "ai", text: questions[nextIndex] }]);
-        setCurrentQuestionIndex(nextIndex);
+    const form = new FormData();
+    form.append("report_type", reportType || "vibrational_frequency");
+    if (hasFiles) {
+      attachedFiles.forEach((f) => form.append("file", f, f.name));
+      if (hasText) form.append("answer", message);
+    } else {
+      form.append("answer", message);
+    }
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/v1/chat/answer_question/${userId}`, {
+        method: "POST",
+        body: form,
+      });
+      const data = await res.json();
+      setMessages((prev) => prev.filter((m) => !m.isThinking));
+      if (data?.data?.assessment_status === "completed") {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "ai", text: "Generating your report...", aiAvatar: true },
+        ]);
+        await generateReport();
       } else {
-        // All questions answered, call the generate report API
-        // Replace the report generation section in your sendMessage function with this:
-
-        // All questions answered, call the generate report API
-        try {
-          // Get user_id from localStorage
-          const userId = localStorage.getItem('user_id');
-
-          if (!userId) {
-            console.error('User ID not found in localStorage');
-            setMessages((prev) => [...prev, { sender: "ai", text: "Error: User not found. Please login again." }]);
-            return;
-          }
-
-          // Show loading message
-          setMessages((prev) => [...prev, { sender: "ai", text: "Generating your report..." }]);
-
-          const reportResponse = await fetch('http://192.168.29.154:8002/api/v1/welcome/generate_report', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            // In the sendMessage function, replace the hardcoded report_type
-            body: JSON.stringify({
-              user_id: parseInt(userId),
-              report_type: currentReportType, // Use dynamic report type instead of "vibrational_frequency"
-              process_message_report: newAnswers,
-            })
-          });
-
-          if (!reportResponse.ok) {
-            throw new Error('Failed to generate report');
-          }
-
-          const reportData = await reportResponse.json();
-          console.log('Report Response:', reportData); // Debug log
-
-          // ✅ CORRECTED: Check for success and handle the nested report structure
-          if (reportData.report) {
-            // Since the API response has the report content in reportData.report object,
-            // we'll create a readable text from the detailed_analysis field or combine key sections
-            let directResponse = '';
-
-            const report = reportData.report;
-
-            // Option 1: Use just the detailed_analysis (most comprehensive single field)
-            if (report.detailed_analysis) {
-              directResponse = report.detailed_analysis;
-            }
-            // Option 2: Create a simple summary combining key fields
-            else {
-              directResponse = `Vibrational Frequency Report\n\n`;
-
-              if (report.current_assessment) {
-                directResponse += `Your current vibrational frequency is ${report.current_assessment.vf_score} at ${report.current_assessment.hz_frequency}.\n`;
-                directResponse += `Energy Level: ${report.current_assessment.energy_level}\n\n`;
-              }
-
-              if (report.detailed_analysis) {
-                directResponse += `Analysis: ${report.detailed_analysis}\n\n`;
-              }
-
-              if (report.spiritual_insights && report.spiritual_insights.soul_lessons) {
-                directResponse += `Soul Lessons: ${report.spiritual_insights.soul_lessons}\n\n`;
-              }
-            }
-
-            // Fallback if no content found
-            if (!directResponse.trim()) {
-              directResponse = JSON.stringify(report, null, 2);
-            }
-
-            console.log('Direct Response:', directResponse); // Debug log
-
-            // Update the loading message with the direct response
-            setMessages((prev) => {
-              const updatedMessages = [...prev];
-              updatedMessages[updatedMessages.length - 1] = {
-                sender: "ai",
-                text: directResponse
-              };
-              return updatedMessages;
-            });
-          } else {
-            throw new Error(reportData.message || 'Report generation failed');
-          }
-
-        } catch (error) {
-          console.error('Error generating report:', error);
-          // Update the loading message with error
-          setMessages((prev) => {
-            const updatedMessages = [...prev];
-            updatedMessages[updatedMessages.length - 1] = {
-              sender: "ai",
-              text: "❌ Sorry, there was an error generating your report. Please try again."
-            };
-            return updatedMessages;
-          });
-        }
+        setMessages((prev) => [
+          ...prev,
+          { sender: "ai", text: data?.data?.current_question, aiAvatar: true },
+        ]);
       }
-    }, 600);
+    } catch (err) {
+      console.error("Process answer error:", err);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "Sorry, something went wrong. Please try again." },
+      ]);
+    } finally {
+      setIsLoadingResponse(false);
+    }
+  };
+
+  const handleGoHome = () => {
+    navigate("/result");
   };
 
   const startRecording = async () => {
@@ -378,25 +211,19 @@ const ErosChatUI: React.FC = () => {
       const recorder = new MediaRecorder(stream, {
         mimeType: "audio/webm;codecs=opus",
       });
-
       const chunks: Blob[] = [];
-
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           chunks.push(e.data);
         }
       };
-
       recorder.onstop = () => {
         const audioBlob = new Blob(chunks, { type: "audio/webm;codecs=opus" });
         const audioUrl = URL.createObjectURL(audioBlob);
-
         setMessages((prev) => [
           ...prev,
-          { sender: "user", audio: audioUrl, duration: 0 }, // duration handled later
+          { sender: "user", audio: audioUrl, duration: 0, userAvatar: true },
         ]);
-
-        // extract duration
         const tempAudio = new Audio(audioUrl);
         tempAudio.onloadedmetadata = () => {
           const duration = Math.floor(tempAudio.duration);
@@ -405,12 +232,9 @@ const ErosChatUI: React.FC = () => {
           );
         };
       };
-
       recorder.start();
       setMediaRecorder(recorder);
       setIsRecording(true);
-
-      // timer
       setRecordingTime(0);
       timerRef.current = setInterval(() => {
         setRecordingTime((prev) => prev + 1);
@@ -420,74 +244,27 @@ const ErosChatUI: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    fetchQuestionsForReportType(currentReportType);
-  }, []); // Remove the hardcoded call
-
-  useEffect(() => {
-    console.log("messages:", messages);
-  }, [messages]);
-
   const stopRecording = () => {
     if (mediaRecorder && isRecording) {
       mediaRecorder.stop();
       setIsRecording(false);
+      if (timerRef.current) clearInterval(timerRef.current);
     }
-    cancelAnimationFrame(animationId);
+  };
+
+  const cancelRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+    }
+    if (timerRef.current) clearInterval(timerRef.current);
+    setIsRecording(false);
+    setRecordingTime(0);
   };
 
   const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60)
-      .toString()
-      .padStart(2, "0");
+    const m = Math.floor(secs / 60).toString().padStart(2, "0");
     const s = (secs % 60).toString().padStart(2, "0");
     return `${m}:${s}`;
-  };
-
-  // ✅ Generate star positions only once on component mount
-  const [stars] = useState(() =>
-    Array.from({ length: 12 }, () => ({
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      opacity: 0.3 + Math.random() * 0.5,
-    }))
-  );
-
-  const handleItemClick = (itemName: string, reportType: string) => {
-    setActiveItem(itemName);
-    setCurrentReportType(reportType);
-    // Reset chat state when switching tabs
-    setMessages([]);
-    setUserAnswers([]);
-    setCurrentQuestionIndex(0);
-    setQuestions([]);
-
-    // Fetch new questions for the selected report type
-    fetchQuestionsForReportType(reportType);
-  };
-
-
-  const fetchQuestionsForReportType = async (reportType: string) => {
-    try {
-      const res = await fetch(
-        `http://192.168.29.154:8002/api/v1/reports/questions/${reportType}`
-      );
-      if (!res.ok) throw new Error("Network response was not ok");
-      const json = await res.json();
-
-      if (json.success && Array.isArray(json.data)) {
-        setQuestions(json.data);
-        setCurrentQuestionIndex(0);
-        // Display the first question
-        if (json.data.length > 0) {
-          setMessages([{ sender: "ai", text: json.data[0] }]);
-        }
-      } else {
-        console.error("Unexpected API response", json);
-      }
-    } catch (err) {
-      console.error("Error fetching questions:", err);
-    }
   };
 
   const openCamera = async () => {
@@ -505,347 +282,470 @@ const ErosChatUI: React.FC = () => {
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
-
     const video = videoRef.current;
     const canvas = canvasRef.current;
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext("2d");
     if (ctx) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const imageUrl = canvas.toDataURL("image/png");
-
-    // Attach to preview and send
-    setAttachedImages([imageUrl]);
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        const imageUrl = URL.createObjectURL(blob);
+        setAttachedImages([imageUrl]);
+        const file = new File([blob], 'camera-photo.png', { type: 'image/png' });
+        setAttachedFiles([file]);
+        // Auto-send
+        setMessages((prev) => [
+          ...prev,
+          { sender: "user", text: "", imageList: [imageUrl], userAvatar: true },
+        ]);
+        setInputValue("");
+        setAttachedImages([]);
+        setTimeout(() => {
+          setMessages((prev) => [
+            ...prev,
+            { sender: "ai", text: "📷 Nice photo! AI is ready to chat.", aiAvatar: true },
+          ]);
+        }, 600);
+      }
+    }, "image/png");
     setShowCamera(false);
-
-    // stop stream
     const stream = video.srcObject as MediaStream;
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
     }
-
-    // auto-send message
-    setMessages((prev) => [
-      ...prev,
-      { sender: "user", text: inputValue || "", imageList: [imageUrl] },
-    ]);
-    setInputValue("");
-    setAttachedImages([]);
-
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { sender: "ai", text: "📷 Nice photo! AI is ready to chat." },
-      ]);
-    }, 600);
   };
 
   const closeCamera = () => {
     if (videoRef.current && videoRef.current.srcObject) {
-      (videoRef.current.srcObject as MediaStream)
-        .getTracks()
-        .forEach((t) => t.stop());
+      (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
     }
     setShowCamera(false);
   };
 
-  const cancelRecording = () => {
-    if (mediaRecorder) {
-      mediaRecorder.stop();
+  const renderValue = (val: any): JSX.Element | string => {
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string" || typeof val === "number" || typeof val === "boolean") {
+      return String(val);
     }
-    cancelAnimationFrame(animationId);
-    setIsRecording(false);
+    if (Array.isArray(val)) {
+      return (
+        <ul>
+          {val.map((item, idx) => (
+            <li key={idx}>{renderValue(item)}</li>
+          ))}
+        </ul>
+      );
+    }
+    if (typeof val === "object") {
+      return (
+        <div style={{ marginLeft: "10px" }}>
+          {Object.entries(val).map(([k, v]) => (
+            <div key={k} className="mb-2">
+              <b>{formatKey(k)}:</b> {typeof v === "object" ? renderValue(v) : String(v)}
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return String(val);
   };
+
+  const formatKey = (key: string) => {
+    return key
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  const renderReportDynamic = (report: any) => {
+    if (!report) return null;
+    return (
+      <div style={{ whiteSpace: "pre-wrap" }}>
+        {Object.entries(report).map(([key, value]) => (
+          <div key={key} className="mb-3">
+            <h6 className="fw-semibold">{formatKey(key)}</h6>
+            <div>{renderValue(value)}</div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const handleSuggestionClick = async (question: string) => {
+    const type = reportTypes[question];
+    if (!type) return;
+
+    setReportType(type);
+    setAnswers([]);
+    setConversationActive(true);
+    setReportGenerated(false);
+    setMessages((prev) => prev.filter((m) => !m.isSuggestion));
+    setMessages((prev) => [...prev, { sender: "user", text: question, userAvatar: true }]);
+
+    const userId = localStorage.getItem("user_id") || "0";
+    const form = new FormData();
+    form.append("report_type", type);
+    try {
+      const res = await fetch(`http://192.168.29.154:6001/api/v1/chat/select_soul_report/${userId}`, {
+        method: "POST",
+        body: form,
+      });
+      const data = await res.json();
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: data?.data?.current_question, aiAvatar: true },
+      ]);
+    } catch (err) {
+      console.error("Error starting report:", err);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "Sorry, something went wrong." },
+      ]);
+    }
+  };
+
+  const generateReport = async () => {
+    const userId = localStorage.getItem("user_id") || "0";
+    const form = new FormData();
+    form.append("user_id", userId);
+    form.append("report_type", reportType || "");
+    try {
+      const res = await fetch(`http://192.168.29.154:6001/api/v1/chat/generate_soul_report/${userId}`, {
+        method: "POST",
+        body: form,
+      });
+      const data = await res.json();
+      if (data?.data?.report) {
+        setCompletedReports((prev) => [...prev, reportType || ""]);
+        setMessages((prev) => [
+          ...prev.filter((m) => !m.isThinking),
+          { sender: "ai", text: "Your report is ready ✅", aiAvatar: true },
+          { sender: "ai", report: data.data.report },
+        ]);
+        showPostReportOptions();
+        setReportGenerated(true);
+      }
+    } catch (err) {
+      console.error("Error generating report:", err);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "Failed to generate report." },
+      ]);
+    }
+  };
+
+  const showPostReportOptions = () => {
+    const newSuggestions = [
+      { sender: "ai", text: "Explore Current Report", isSuggestion: true },
+      { sender: "ai", text: "See More Reports", isSuggestion: true },
+      { sender: "ai", text: "Continue to Spiritual Journey", isSuggestion: true },
+    ];
+    setMessages((prev) => [...prev, ...newSuggestions]);
+  };
+
+  const handleNewSuggestionClick = async (choice: string) => {
+    if (choice === "Explore Current Report") {
+      const userId = localStorage.getItem("user_id") || "0";
+      const form = new FormData();
+      form.append("user_id", userId);
+      form.append("message", "explore");
+      if (spiritualSessionId) {
+        form.append("session_id", spiritualSessionId);
+      }
+      try {
+        const res = await fetch("http://192.168.29.154:6001/api/v1/chat/spiritual", {
+          method: "POST",
+          body: form,
+        });
+        const data = await res.json();
+        if (data?.data?.session_id && !spiritualSessionId) {
+          setSpiritualSessionId(data.data.session_id);
+        }
+        setMessages((prev) => [
+          ...prev,
+          { sender: "user", text: choice, userAvatar: true },
+          { sender: "ai", text: data?.message || "Received response", aiAvatar: true },
+        ]);
+      } catch (err) {
+        console.error("Error calling spiritual API:", err);
+      }
+    }
+    if (choice === "See More Reports") {
+      setMessages((prev) => [...prev, { sender: "user", text: choice, userAvatar: true }]);
+      // Could show remaining reports here if needed
+    }
+    if (choice === "Continue to Spiritual Journey") {
+      setMessages((prev) => [...prev, { sender: "user", text: choice, userAvatar: true }]);
+      navigate("/result");
+    }
+  };
+
+  const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    const audioUrl = URL.createObjectURL(file);
+    setMessages((prev) => [
+      ...prev,
+      { sender: "user", audio: audioUrl, audioBlob: file, duration: 0, userAvatar: true },
+    ]);
+    // You can add voice analysis logic here if needed
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (micStream) micStream.getTracks().forEach(track => track.stop());
+      attachedImages.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [micStream]);
 
   return (
     <div className="d-flex w-100 h-100 min-vh-100 min-vw-100 bg-black text-white overflow-hidden">
-      {/* Sidebar */}
       <Stars />
+      {/* Sidebar */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
       <div
-        className="d-flex flex-column text-white m-3 rounded-lg"
-        style={{
-          width: "286px",
-          backgroundColor: "#1E2123",
-          zIndex: 10,
-          color: "white",
-        }}
+        className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative h-screen z-50 w-64 backdrop-blur-sm transition-transform duration-300 ease-in-out overflow-y-auto`}
+        style={{ backgroundColor: '#1E2123' }}
       >
-        <div className="p-2">
-          <button
-            className="btn btn-info"
-            style={{
-              color: "white",
-              fontSize: "14px",
-              display: "flex",
-              alignItems: "center",
-            }}
-            onClick={() => window.history.back()} // Go back functionality
-          >
-            <i className="bi bi-arrow-left me-2"></i> {/* FontAwesome or Bootstrap icon */}
-            Go Back
-          </button>
-        </div>
-        {/* Header */}
-        <div className="p-4 border-bottom border-secondary">
-          {/* <h1 className="text-info fw-bold fs-4">Eternal Reports</h1> */}
-           <h2 
-    className="h4 fw-bold" 
-    style={{
-      background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text',
-      color: 'transparent',
-      margin: 0,
-      fontFamily: "'Poppins', sans-serif"
-    }}
-  >
-    Eternal Reports
-  </h2>
-        </div>
-
-        {/* Navigation */}
-        <div className="p-3 flex-grow-1">
-          {navigationItems.map((item) => (
+        <div className="p-4 border-b border-gray-700">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold" style={{ color: '#00B8F8' }}>Eternal Reports</h2>
             <button
-              key={item.name}
-              className="d-flex align-items-center p-3 border-0 w-100 text-start"
-              style={{
-                fontSize: "0.9rem",
-                cursor: "pointer",
-                backgroundColor: activeItem === item.name ? "#00b8f8" : "transparent",
-                color: activeItem === item.name ? "white" : "#cccccc",
-                borderRadius: "8px",
-                outline: "none",
-                border: "none",
-                width: "100%",
-                transition: "background-color 0.2s ease, color 0.2s ease",
-              }}
-              onClick={() => handleItemClick(item.name, item.reportType)}
+              className="md:hidden text-gray-400 hover:text-white"
+              onClick={() => setSidebarOpen(false)}
             >
-              <img
-                src={item.icon}
-                alt={item.name}
-                style={{ width: "16px", height: "16px", marginRight: "12px" }}
-              />
-              {item.name}
+              <X size={20} />
             </button>
-          ))}
+          </div>
+        </div>
+        <div className="p-3">
+          <nav className="d-flex flex-column gap-2">
+            {sidebarMenuItems.map((item) => (
+              <button
+                key={item.id}
+                className={`btn d-flex align-items-center gap-2 text-start w-100 px-3 py-2 rounded ${
+                  item.id === "vibrational-frequency"
+                    ? "btn-info text-white"
+                    : "btn-dark text-secondary"
+                }`}
+                // Optional: Add onClick to navigate or trigger report flow
+                // onClick={() => handleSuggestionClick(questions.find(q => reportTypes[q.message] === item.id.replace(/-/g, '_'))?.message || "")}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-grow-1 d-flex flex-column position-relative">
-        {/* ✅ Starfield Background - Positions now stable */}
-        <div className="position-absolute w-100 h-100 overflow-hidden">
-          {stars.map((pos, i) => (
-            <div
-              key={i}
-              className="position-absolute bg-white rounded-circle"
+        <div className="container position-relative z-10 d-flex justify-content-between align-items-center p-4">
+          <div className="d-flex align-items-center gap-3">
+            <button
+              className="md:hidden text-gray-400 hover:text-white"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu size={20} />
+            </button>
+            <h2 className="h4 fw-bold" style={{ color: '#00B8F8' }}>Eternal AI</h2>
+          </div>
+          <button
+            type="button"
+            className="btn d-flex align-items-center gap-2 px-3 py-2 rounded-circle"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff" }}
+          >
+            <span
               style={{
-                width: "4px",
-                height: "4px",
-                opacity: pos.opacity,
-                top: `${pos.y}%`,
-                left: `${pos.x}%`,
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 700,
+                background: "linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))",
+                color: "#0B1117",
               }}
-            ></div>
-          ))}
+            >
+              {initials}
+            </span>
+          </button>
         </div>
 
-        {/* Header */}
-        <div className="position-relative z-10 d-flex justify-content-between align-items-center p-4">
-          {/* <h2 className="h4 fw-bold" style={{ color: "#00A2FF", }}> Eternal AI</h2> */}
-           <h2 
-    className="h4 fw-bold" 
-    style={{
-      background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text',
-      color: 'transparent',
-      margin: 0,
-      fontFamily: "'Poppins', sans-serif"
-    }}
-  >
-    Eternal AI
-  </h2>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center position-relative z-10 px-3">
-          {/* Only show if input is empty */}
-          {inputValue === "" && messages.length === 0 && (
-            <>
-              <div className="text-center mb-5">
-                <div className="d-flex flex-column align-items-center mb-3">
-                  {/* Main Sparkle Logo */}
-                  <img
-                    src={sparkle}
-                    alt="Sparkle Logo"
-                    style={{
-                      width: "48px",
-                      height: "48px",
-                      objectFit: "cover",
-                      filter: "drop-shadow(0 0 8px rgba(0, 184, 248, 0.5))",
-                    }}
-                  />
-
-                  {/* Optional: Small Green Star (if not in image) */}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    style={{
-                      position: "absolute",
-                      top: "-12px",
-                      right: "12px",
-                      filter: "drop-shadow(0 0 4px rgba(100, 255, 100, 0.6))",
-                    }}
-                  >
-                    <polygon
-                      points="12,2 16,8 12,14 8,8"
-                      fill="#00ff00"
-                      opacity="0.8"
-                    />
-                  </svg>
-                </div>
-                <h3 className="h5 fw-semibold">Your Daily AI Assistant</h3>
-              </div>
-
-              {/* Feature Cards - Responsive Grid */}
-              <Row
-                className="g-3 mb-5 w-100 justify-content-center h-45"
-                style={{ maxWidth: "1200px" }}
-              >
-                {[
-                  { icon: starone, label: "Eternal Echo", color: "yellow" },
-                  { icon: startwo, label: "Aether Chat", color: "red" },
-                  { icon: starthree, label: "Nexus Eternal", color: "blue" },
-                  { icon: starfour, label: "Timeless Words", color: "green" },
-                ].map((card, idx) => (
-                  <Col
-                    key={idx}
-                    xs={12}
-                    sm={6}
-                    md={3}
-                    style={{ height: "200px" }}
-                  >
-                    <div
-                      className="bg-dark bg-opacity-75 text-white p-3 rounded-4 d-flex flex-column align-items-center justify-content-center h-100"
-                      style={{
-                        width: "100%",
-                        height: "100px",
-                        transition: "all 0.2s ease",
-                        cursor: "pointer",
-                        border: "none",
-                      }}
-                      onClick={() => console.log(`${card.label} clicked!`)}
-                    >
-                      {/* Icon with Color */}
-                      <div className="d-flex flex-column align-items-center">
-                        <img
-                          src={card.icon}
-                          alt={card.label}
-                          style={{
-                            width: "24px",
-                            height: "24px",
-                            marginBottom: "6px",
-                          }}
-                        />
-                        <p
-                          className="text-secondary small m-0"
-                          style={{ whiteSpace: "nowrap" }}
-                        >
-                          {card.label}
-                        </p>
-                      </div>
-                    </div>
-                  </Col>
-                ))}
-              </Row>
-            </>
-          )}
-        </div>
-
-        {messages.length > 0 && (
-          <div className="flex-grow-1 container d-flex flex-column px-3 mb-3 overflow-auto">
-            {messages.map((msg, i) => (
+        {/* Messages Area */}
+        <div className="flex-grow-1 container d-flex flex-column px-3 mb-3 overflow-auto">
+          {messages.map((msg, i) => {
+            const isUser = msg.sender === "user";
+            const isSuggestion = msg.isSuggestion;
+            return (
               <div
                 key={i}
-                className={`d-flex mb-2 ${msg.sender === "user"
-                  ? "justify-content-end"
-                  : "justify-content-start"
-                  }`}
+                className={`d-flex flex-column mb-4 ${isUser ? "align-items-end" : "align-items-start"}`}
               >
+                {/* Avatar */}
+                {(msg.aiAvatar || msg.userAvatar) && (
+                  <div
+                    className="mb-1 d-flex align-items-center justify-content-center"
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "50%",
+                      backgroundImage: isUser 
+                        ? "linear-gradient(90deg, rgb(0, 198, 255), rgb(0, 114, 255))"
+                        : "linear-gradient(45deg, rgb(0, 198, 255), rgb(0, 114, 255))",
+                      color: "white",
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {msg.aiAvatar ? <span>AI</span> : <span>{initials}</span>}
+                  </div>
+                )}
+                {/* Message Bubble */}
                 <div
-                  className={`px-3 py-2 rounded-3 ${msg.sender === "user"
-                    ? "bg-info text-white"
-                    : "bg-secondary text-white"
-                    }`}
-                  style={{ maxWidth: "70%" }}
+                  className="px-3 py-2"
+                  style={{
+                    maxWidth: "80%",
+                    minWidth: isSuggestion ? "40%" : "auto",
+                    whiteSpace: "pre-wrap",
+                    background: isUser
+                      ? "linear-gradient(90deg, #00c6ff, #0072ff)"
+                      : "#1d1d1d",
+                    color: "white",
+                    border: "1px solid #4a4a4a",
+                    cursor: isSuggestion ? "pointer" : "default",
+                    userSelect: "none",
+                    display: "flex",
+                    alignItems: "center",
+                    position: "relative",
+                    borderRadius: msg.aiAvatar 
+                      ? "0px 10px 10px 10px" 
+                      : (msg.userAvatar ? "10px 0px 10px 10px" : "10px"),
+                  }}
+                  onClick={() => {
+                    if (isSuggestion && msg.text) {
+                      if (["Explore Current Report", "See More Reports", "Continue to Spiritual Journey"].includes(msg.text)) {
+                        handleNewSuggestionClick(msg.text);
+                      } else {
+                        handleSuggestionClick(msg.text);
+                      }
+                    }
+                  }}
                 >
-                  {/* Images first (side by side) */}
-                  {msg.imageList && msg.imageList.length > 0 && (
-                    <div
-                      className="d-flex flex-wrap gap-2 mb-2"
-                      style={{ maxWidth: "100%" }}
+                  {/* Suggestion Icon */}
+                  {isSuggestion && msg.icon && (
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      width="30px"
+                      style={{ marginRight: "3%", mixBlendMode: "screen" }}
                     >
+                      <source src={msg.icon} type="video/webm" />
+                    </video>
+                  )}
+                  {/* Text */}
+                  <div>{msg.text}</div>
+                  {msg.imageList && msg.imageList.length > 0 && (
+                    <div className="d-flex flex-wrap gap-2 mt-2" style={{ maxWidth: "100%" }}>
                       {msg.imageList.map((img, j) => (
                         <img
                           key={j}
                           src={img}
                           alt="attachment"
                           className="rounded"
-                          style={{
-                            width: "120px",
-                            height: "120px",
-                            objectFit: "cover",
-                            cursor: "pointer",
+                          style={{ width: "120px", height: "120px", objectFit: "cover", cursor: "pointer" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewImage(img);
                           }}
-                          onClick={() => setPreviewImage(img)}
                         />
                       ))}
                     </div>
                   )}
-
-                  {/* Text with markdown support for AI messages */}
-                  {msg.text && (
-                    <div>
-                      {msg.sender === "ai" && msg.text.includes('#') ? (
-                        <ReactMarkdown
-                          components={{
-                            h1: ({ children }) => <h1 style={{ color: '#00b8f8', fontSize: '1.5rem', marginBottom: '10px' }}>{children}</h1>,
-                            h2: ({ children }) => <h2 style={{ color: '#00b8f8', fontSize: '1.3rem', marginBottom: '8px', marginTop: '15px' }}>{children}</h2>,
-                            h3: ({ children }) => <h3 style={{ color: '#ccc', fontSize: '1.1rem', marginBottom: '5px', marginTop: '10px' }}>{children}</h3>,
-                            p: ({ children }) => <p style={{ lineHeight: '1.6', marginBottom: '10px' }}>{children}</p>,
-                            strong: ({ children }) => <strong style={{ color: '#fff' }}>{children}</strong>,
-                            ul: ({ children }) => <ul style={{ paddingLeft: '20px', marginBottom: '10px' }}>{children}</ul>,
-                            ol: ({ children }) => <ol style={{ paddingLeft: '20px', marginBottom: '10px' }}>{children}</ol>,
-                            li: ({ children }) => <li style={{ marginBottom: '5px' }}>{children}</li>,
-                            hr: () => <hr style={{ border: '1px solid #444', margin: '15px 0' }} />
-                          }}
-                        >
-                          {msg.text}
-                        </ReactMarkdown>
-                      ) : (
-                        <div>{msg.text}</div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Voice Message */}
                   {msg.audio && (
-                    <VoiceMessage
-                      url={msg.audio}
-                      duration={msg.duration ?? 0}
-                    />
+                    <VoiceMessage url={msg.audio} duration={msg.duration ?? 0} />
+                  )}
+                  {msg.report && (
+                    <div className="mt-2">{renderReportDynamic(msg.report)}</div>
+                  )}
+                  {/* Suggestion Arrow */}
+                  {isSuggestion && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        right: "8px",
+                        backgroundColor: "#00b8f8",
+                        color: "white",
+                        borderRadius: "50%",
+                        padding: "3px 6px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <i className="bi bi-arrow-right"></i>
+                    </span>
                   )}
                 </div>
               </div>
-            ))}
+            );
+          })}
+          {isLoadingResponse && (
+            <div className="d-flex flex-column align-items-start mb-4">
+              <div
+                className="mb-1 d-flex align-items-center justify-content-center"
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "50%",
+                  backgroundImage: "linear-gradient(45deg, rgb(0, 198, 255), rgb(0, 114, 255))",
+                  color: "white",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                }}
+              >
+                <span>AI</span>
+              </div>
+              <div className="px-3 py-2 bg-gray-800 text-white rounded-2xl rounded-tl-md">
+                <div className="d-flex align-items-center gap-2">
+                  <div className="spinner-border spinner-border-sm" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <span>Thinking...</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {reportGenerated && (
+          <div className="d-flex justify-content-center mt-4 mb-3">
+            <Button
+              variant="primary"
+              size="lg"
+              className="px-5 py-3 rounded-pill fw-semibold"
+              style={{
+                backgroundColor: "#00b8f8",
+                borderColor: "#00b8f8",
+                fontSize: "1.1rem",
+                boxShadow: "0 4px 12px rgba(0, 184, 248, 0.3)",
+              }}
+              onClick={handleGoHome}
+            >
+              Start your soul journey
+            </Button>
           </div>
         )}
 
@@ -856,7 +756,6 @@ const ErosChatUI: React.FC = () => {
               className="bg-dark bg-opacity-75 rounded-4 p-2 shadow-sm"
               style={{ width: "100%", maxWidth: "1000px" }}
             >
-              {/* ✅ Image Previews Row */}
               {attachedImages.length > 0 && (
                 <div className="d-flex flex-wrap gap-2 mb-2">
                   {attachedImages.map((img, idx) => (
@@ -869,26 +768,14 @@ const ErosChatUI: React.FC = () => {
                         src={img}
                         alt="preview"
                         className="rounded"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       />
                       <Button
                         variant="light"
                         size="sm"
                         className="position-absolute top-0 end-0 rounded-circle p-0"
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                          lineHeight: "1",
-                        }}
-                        onClick={() =>
-                          setAttachedImages((prev) =>
-                            prev.filter((_, i) => i !== idx)
-                          )
-                        }
+                        style={{ width: "20px", height: "20px", lineHeight: "1" }}
+                        onClick={() => setAttachedImages((prev) => prev.filter((_, i) => i !== idx))}
                       >
                         ✕
                       </Button>
@@ -896,44 +783,68 @@ const ErosChatUI: React.FC = () => {
                   ))}
                 </div>
               )}
-
-              {/* ✅ Input + Buttons Row */}
               <div className="d-flex align-items-end w-100">
                 {!isRecording ? (
                   <>
-                    {/* ✨ Normal Chat Input Mode */}
                     <Form.Control
-                      id="chat-input-textarea"
                       as="textarea"
                       rows={1}
                       placeholder="Enter a prompt here"
                       className="bg-transparent text-white border-0 shadow-none flex-grow-1"
-                      style={{
-                        resize: "none",
-                        overflow: "hidden",
-                        minHeight: "40px",
-                        maxHeight: "150px",
-                      }}
+                      style={{ resize: "none", overflow: "hidden", minHeight: "40px", maxHeight: "150px" }}
+                      ref={textAreaRef}
                       value={inputValue}
                       onChange={(e) => {
                         setInputValue(e.target.value);
-                        e.currentTarget.style.height = "40px"; // reset first
-                        e.currentTarget.style.height =
-                          e.currentTarget.scrollHeight + "px";
+                        e.currentTarget.style.height = "40px";
+                        e.currentTarget.style.height = e.currentTarget.scrollHeight + "px";
                       }}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" &&
-                        !e.shiftKey &&
-                        (e.preventDefault(), sendMessage())
-                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
                     />
-
-                    {/* Icons + Send */}
                     <div className="d-flex align-items-center ms-2">
-                      {/* Send Button */}
+                      <label className="border-0 p-2" style={{ color: "#ccc", fontSize: "1.2rem", cursor: "pointer" }}>
+                        <ImagePlus size={20} />
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          hidden
+                          multiple
+                          onChange={handleImageUpload}
+                        />
+                      </label>
+                      <button
+                        className="border-0 p-2"
+                        style={{ color: "#ccc", fontSize: "1.2rem" }}
+                        onClick={openCamera}
+                      >
+                        <Camera size={20} />
+                      </button>
+                      <label className="border-0 p-2" style={{ color: "#ccc", fontSize: "1.2rem", cursor: "pointer" }}>
+                        <Upload size={20} />
+                        <input
+                          type="file"
+                          accept="audio/*,.mp3,.wav,.m4a"
+                          hidden
+                          onChange={handleAudioUpload}
+                        />
+                      </label>
+                      <button
+                        className="border-0 p-2"
+                        style={{ color: "#ccc", fontSize: "1.2rem" }}
+                        onClick={startRecording}
+                      >
+                        <Mic size={20} />
+                      </button>
                       <Button
                         variant="info"
                         className="rounded-pill px-3 py-2 ms-2"
+                        disabled={!inputValue.trim() && attachedImages.length === 0}
                         style={{
                           backgroundColor: "#00b8f8",
                           borderColor: "#00b8f8",
@@ -945,36 +856,35 @@ const ErosChatUI: React.FC = () => {
                         }}
                         onClick={sendMessage}
                       >
-                        <i className="bi bi-send"></i>
+                        {isLoadingResponse ? (
+                          <div className="spinner-border spinner-border-sm" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                        ) : (
+                          <SendHorizontal size={20} />
+                        )}
                       </Button>
                     </div>
                   </>
                 ) : (
-                  /* ✨ Recording Mode (WhatsApp style) */
                   <div className="d-flex align-items-center bg-dark rounded-3 px-3 py-2 flex-grow-1">
                     <MicVisualizer stream={micStream} height={40} />
-
-                    <span className="ms-3 text-danger fw-bold">
-                      {formatTime(recordingTime)}
-                    </span>
-
-                    {/* ✅ OK / Cancel buttons styled */}
+                    <span className="ms-3 text-danger fw-bold">{formatTime(recordingTime)}</span>
                     <Button
                       variant="success"
                       className="ms-3 rounded-circle d-flex align-items-center justify-content-center"
                       style={{ width: 36, height: 36 }}
                       onClick={stopRecording}
                     >
-                      <i className="bi bi-check-lg"></i>
+                      <Check size={16} />
                     </Button>
-
                     <Button
                       variant="danger"
                       className="ms-2 rounded-circle d-flex align-items-center justify-content-center"
                       style={{ width: 36, height: 36 }}
                       onClick={cancelRecording}
                     >
-                      <i className="bi bi-x-lg"></i>
+                      <X size={16} />
                     </Button>
                   </div>
                 )}
@@ -983,69 +893,44 @@ const ErosChatUI: React.FC = () => {
           </div>
         </div>
 
+        {/* Modals */}
         {previewImage && (
           <div
             className="modal fade show d-block"
-            tabIndex={-1}
-            role="dialog"
             style={{ background: "rgba(0,0,0,0.7)" }}
             onClick={() => setPreviewImage(null)}
           >
-            <div
-              className="modal-dialog modal-dialog-centered"
-              role="document"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="modal-content bg-transparent border-0 shadow-none">
+            <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-content bg-transparent border-0">
                 <div className="modal-body text-center p-0">
                   <img
                     src={previewImage}
                     alt="preview"
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "80vh",
-                      borderRadius: "8px",
-                    }}
+                    style={{ maxWidth: "100%", maxHeight: "80vh", borderRadius: "8px" }}
                   />
                 </div>
                 <div className="modal-footer border-0 d-flex justify-content-center">
-                  <Button variant="light" onClick={() => setPreviewImage(null)}>
-                    Close
-                  </Button>
+                  <Button variant="light" onClick={() => setPreviewImage(null)}>Close</Button>
                 </div>
               </div>
             </div>
           </div>
         )}
-
         {showCamera && (
           <div
             className="modal fade show d-block"
-            tabIndex={-1}
-            role="dialog"
             style={{ background: "rgba(0,0,0,0.8)" }}
             onClick={closeCamera}
           >
-            <div
-              className="modal-dialog modal-dialog-centered"
-              role="document"
-              onClick={(e) => e.stopPropagation()}
-            >
+            <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
               <div className="modal-content bg-dark text-white rounded-3">
                 <div className="modal-body text-center">
-                  <video
-                    ref={videoRef}
-                    style={{ width: "100%", borderRadius: "8px" }}
-                  />
+                  <video ref={videoRef} style={{ width: "100%", borderRadius: "8px" }} />
                   <canvas ref={canvasRef} style={{ display: "none" }} />
                 </div>
                 <div className="modal-footer border-0 d-flex justify-content-between">
-                  <Button variant="secondary" onClick={closeCamera}>
-                    Cancel
-                  </Button>
-                  <Button variant="info" onClick={capturePhoto}>
-                    Capture
-                  </Button>
+                  <Button variant="secondary" onClick={closeCamera}>Cancel</Button>
+                  <Button variant="info" onClick={capturePhoto}>Capture</Button>
                 </div>
               </div>
             </div>
@@ -1055,9 +940,7 @@ const ErosChatUI: React.FC = () => {
         {/* Footer */}
         <div className="position-relative z-10 px-3 pb-3">
           <div className="d-flex flex-wrap justify-content-center align-items-center text-secondary small">
-            <span className="mb-2 mb-md-0">
-              © 2025 EROS Universe. All Rights Reserved.
-            </span>
+            <span className="mb-2 mb-md-0">© 2025 EROS Universe. All Rights Reserved.</span>
           </div>
         </div>
       </div>

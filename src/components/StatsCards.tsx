@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from 'react-router-dom';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./StatsCard.css";
 import fire from "../Fire.webm";
@@ -7,6 +8,7 @@ import crystal from "../Magic Crystal Ball.webm";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const StatsCards = () => {
+    const navigate = useNavigate();
   const reportCards = [
     {
       id: 1,
@@ -16,6 +18,7 @@ const StatsCards = () => {
       // icon: "✨",
       iconVideo: fire,
       type: "report",
+      route:"/vibrational-frequency"
     },
     {
       id: 2,
@@ -25,6 +28,7 @@ const StatsCards = () => {
       // icon: "🌠",
       iconVideo: crystal,
       type: "generate",
+      route:"/star-map"
     },
     {
       id: 3,
@@ -33,6 +37,7 @@ const StatsCards = () => {
       action: "Recommendations",
       iconVideo: fire,
       type: "report",
+      route:"/flame-score"
     },
     {
       id: 4,
@@ -41,6 +46,7 @@ const StatsCards = () => {
       action: "Generate Report",
       iconVideo: crystal,
       type: "generate",
+      route:"/aura-profile"
     },
     {
       id: 5,
@@ -49,6 +55,7 @@ const StatsCards = () => {
       action: "Recommendations",
       iconVideo: crystal,
       type: "report",
+      route:"/kosha-map"
     },
     {
       id: 6,
@@ -74,15 +81,40 @@ const StatsCards = () => {
       <div className="row g-4">
         {reportCards.map((card) => (
           <div key={card.id} className="col-md-6 mb-4">
-            <div className="card border-0 rounded-4 shadow-lg bg-dark hover-card  top-outline-primary  custom-top-border">
-              <div className="card-body p-4" 
-              style={{
-  borderImage: 'linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1',
-  borderTop: '3px solid transparent', // Required for border-image to work
-  borderRadius: '18px'
-}}
-    
+             <div
+      className="card border-0 rounded-4 shadow-lg bg-dark hover-card top-outline-primary custom-top-border"
+      onClick={(e) => {
+        // Prevent navigation if the button was clicked
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+          return;
+        }
+        // Navigate to the card's specific route
+        if (card.route) {
+          navigate(card.route);
+        } else {
+          // Fallback if route is missing (e.g., for Longevity Blueprint)
+          const slug = card.title.toLowerCase().replace(/\s+/g, '-');
+          navigate(`/${slug}`);
+        }
+      }}
+      style={{
+        borderImage:
+          "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",
+        borderTop: "3px solid transparent",
+        borderRadius: "18px",
+        cursor: "pointer", // Optional: improves UX
+      }}
     >
+              <div
+                className="card-body p-4"
+                //  onClick={() => navigate('/chat')}
+                style={{
+                  borderImage:
+                    "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",
+                  borderTop: "3px solid transparent", // Required for border-image to work
+                  borderRadius: "18px",
+                }}
+              >
                 <div className="d-flex justify-content-between align-items-start mb-3">
                   {/* <span className="fs-2">{card.icon}</span> */}
                   <video
@@ -99,6 +131,7 @@ const StatsCards = () => {
                       borderRadius: "4px",
                       objectFit: "contain",
                       background: "transparent",
+                      mixBlendMode: 'screen'
                     }}
                   />
                   <ArrowForwardIosIcon
@@ -152,11 +185,7 @@ const StatsCards = () => {
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         .custom-top-border {
-       
-        
-          border: #0d6efd
-        
-         
+          border: #0d6efd;
         }
       `}</style>
     </div>
