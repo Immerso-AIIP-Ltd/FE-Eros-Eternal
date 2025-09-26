@@ -182,11 +182,11 @@ const RelationshipCompatibility: React.FC = () => {
           <div className="w-full max-w-4xl mx-auto">
             {/* Intro */}
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 mb-6 shadow-lg">
+              {/* <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 mb-6 shadow-lg">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                 </svg>
-              </div>
+              </div> */}
               <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                 Relationship Compatibility
               </h2>

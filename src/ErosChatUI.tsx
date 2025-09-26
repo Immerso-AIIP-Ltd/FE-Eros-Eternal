@@ -480,17 +480,17 @@ const ErosChatUI: React.FC = () => {
     }
   }, [messages, isLoading]);
 
-  const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    const file = files[0];
-    const audioUrl = URL.createObjectURL(file);
-    setMessages((prev) => [
-      ...prev,
-      { sender: "user", audio: audioUrl, audioBlob: file, duration: 0, userAvatar: true },
-    ]);
-    // You can add voice analysis logic here if needed
-  };
+  // const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = e.target.files;
+  //   if (!files || files.length === 0) return;
+  //   const file = files[0];
+  //   const audioUrl = URL.createObjectURL(file);
+  //   setMessages((prev) => [
+  //     ...prev,
+  //     { sender: "user", audio: audioUrl, audioBlob: file, duration: 0, userAvatar: true },
+  //   ]);
+   
+  // };
 
   // Cleanup on unmount
   useEffect(() => {

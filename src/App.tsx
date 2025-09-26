@@ -34,6 +34,7 @@ import AuraProfile from "./AuraProfile";
 import FlameScore from "./FlameScore";
 
 import LongevityTool from "./longevityTool";
+import FounderMsg from "./FounderMsg";
 
 const App: React.FC = () => {
   return (
@@ -75,6 +76,7 @@ const App: React.FC = () => {
           <Route path="/kosha-map" element={<KoshaMap />}/>
           <Route path="/aura-profile" element={<AuraProfile />}/>
           <Route path="/flame-score" element={<FlameScore />}/>
+          <Route path="/founder" element={<FounderMsg />}/>
         
 
           <Route path="/harmony" element={<HarmonyIndexPage />} />

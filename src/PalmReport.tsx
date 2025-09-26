@@ -48,7 +48,7 @@ const PalmReadingReportPage: React.FC = () => {
   const { palm_reading_detail } = data;
 
   return (
-    <div className="vh-100 vw-100 d-flex flex-column p-4" style={{ backgroundColor: '#000', backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02) 25%), linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02) 25%)', backgroundSize: '20px 20px' }}>
+    <div className="vh-100 vw-100 d-flex flex-column p-4" style={{ backgroundColor: '#000',  margin: 0, minHeight: '100vh'}}>
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button
@@ -89,7 +89,7 @@ const PalmReadingReportPage: React.FC = () => {
       <Container>
         <Row>
           <Col md={6}>
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff"}}>
+            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff",height:""}}>
               <Card.Body>
                 <Card.Title>Hand Shape</Card.Title>
                 <Card.Text>{palm_reading_detail.hand_shape}</Card.Text>
@@ -175,7 +175,7 @@ const PalmReadingReportPage: React.FC = () => {
               </Card.Body>
             </Card>
 
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff"}}>
+            {/* <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff"}}>
               <Card.Body>
                 <Card.Title>Spiritual Guidance</Card.Title>
                 <ul className="list-unstyled">
@@ -187,12 +187,12 @@ const PalmReadingReportPage: React.FC = () => {
                   ))}
                 </ul>
               </Card.Body>
-            </Card>
+            </Card> */}
           </Col>
         </Row>
 
         {/* Raw Analysis */}
-        <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff"}}>
+        <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff",}}>
           <Card.Body>
             <Card.Title>Raw Analysis</Card.Title>
             <pre className="bg-dark text-white p-3 rounded" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
