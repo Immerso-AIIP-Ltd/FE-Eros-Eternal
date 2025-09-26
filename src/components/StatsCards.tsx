@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -9,70 +9,149 @@ import crystal from "../Magic Crystal Ball.webm";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const StatsCards = () => {
-
   const navigate = useNavigate();
+  const [reportStatuses, setReportStatuses] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
+  const baseApiUrl = "http://192.168.29.154:6001/api/v1/reports/individual_report/";
 
   const reportCards = [
     {
       id: 1,
       title: "Vibrational Frequency",
-      subtitle: "View Report",
-      action: "Recommendations",
       iconVideo: fire,
-      type: "report",
-      route:"/vibrational-frequency"
-
+      route: "/vibrational-frequency",
+      reportType: "vibrational_frequency"
     },
     {
       id: 2,
       title: "Star Map",
-      subtitle: "Report",
-      action: "Generate Report",
       iconVideo: crystal,
-      type: "generate",
-      route:"/star-map"
-
+      route: "/star-map",
+      reportType: "star_map"
     },
     {
       id: 3,
       title: "Flame Score",
-      subtitle: "View Report",
-      action: "Recommendations",
       iconVideo: fire,
-      type: "report",
-      route:"/flame-score"
-
+      route: "/flame-score",
+      reportType: "flame_score"
     },
     {
       id: 4,
       title: "Aura Profile",
-      subtitle: "Report",
-      action: "Generate Report",
       iconVideo: crystal,
-      type: "generate",
-      route:"/aura-profile"
-
+      route: "/aura-profile",
+      reportType: "aura_profile"
     },
     {
       id: 5,
       title: "Kosha Map",
-      subtitle: "View Report",
-      action: "Recommendations",
       iconVideo: crystal,
-      type: "report",
-      route:"/kosha-map"
-
+      route: "/kosha-map",
+      reportType: "kosha_map"
     },
     {
       id: 6,
       title: "Longevity Blueprint",
-      subtitle: "Report",
-      action: "Generate Report",
       iconVideo: gym,
-      type: "generate",
-      path: "/longevity-blueprint",
+      route: "/longevity-blueprint",
+      reportType: "longevity_blueprint"
     },
   ];
+
+  // Check report status for each report type
+  useEffect(() => {
+    const checkReportStatuses = async () => {
+      setLoading(true);
+      const statuses = {};
+
+      try {
+        // Check all reports concurrently
+        const promises = reportCards.map(async (card) => {
+          try {
+            const response = await fetch(
+              `${baseApiUrl}?user_id=${userId}&report_type=${card.reportType}`
+            );
+            const data = await response.json();
+
+            // Check if report exists and has data
+            const hasReport = data.success && data.data && data.data.report_data;
+            return { reportType: card.reportType, hasReport };
+          } catch (error) {
+            console.error(`Error checking ${card.reportType}:`, error);
+            return { reportType: card.reportType, hasReport: false };
+          }
+        });
+
+        const results = await Promise.all(promises);
+        results.forEach(result => {
+          statuses[result.reportType] = result.hasReport;
+        });
+
+        setReportStatuses(statuses);
+      } catch (error) {
+        console.error("Error checking report statuses:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkReportStatuses();
+  }, [userId]);
+
+  const handleCardClick = (card, e) => {
+    // Prevent navigation if the button was clicked
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+      return;
+    }
+
+    const hasReport = reportStatuses[card.reportType];
+
+    if (hasReport) {
+      // Navigate to view report page with report data
+      navigate('/view-report', {
+        state: {
+          reportType: card.reportType,
+          userId: userId,
+          title: card.title
+        }
+      });
+    } else {
+      // Navigate to generation page or show generation UI
+      navigate(card.route);
+    }
+  };
+
+  const handleButtonClick = (card) => {
+    const hasReport = reportStatuses[card.reportType];
+
+    if (hasReport) {
+      // Navigate to view report page and scroll to recommendations
+      navigate('/view-report', {
+        state: {
+          reportType: card.reportType,
+          userId: userId,
+          title: card.title,
+          scrollToRecommendations: true // This will trigger scroll to recommendations
+        }
+      });
+    } else {
+      // Navigate to generation page
+      navigate(card.route);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container-fluid p-0 m-0 d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-fluid p-0 m-0">
@@ -86,103 +165,90 @@ const StatsCards = () => {
       </div>
 
       <div className="row g-4">
-        {reportCards.map((card) => (
-          <div key={card.id} className="col-md-6 mb-4">
-             <div
-      className="card border-0 rounded-4 shadow-lg bg-dark hover-card top-outline-primary custom-top-border"
-      onClick={(e) => {
-        // Prevent navigation if the button was clicked
-        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
-          return;
-        }
-        // Navigate to the card's specific route
-        if (card.route) {
-          navigate(card.route);
-        } else {
-          // Fallback if route is missing (e.g., for Longevity Blueprint)
-          const slug = card.title.toLowerCase().replace(/\s+/g, '-');
-          navigate(`/${slug}`);
-        }
-      }}
-      style={{
-        borderImage:
-          "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",
-        borderTop: "3px solid transparent",
-        borderRadius: "18px",
-        cursor: "pointer", // Optional: improves UX
-      }}
-    >
+        {reportCards.map((card) => {
+          const hasReport = reportStatuses[card.reportType];
 
+          return (
+            <div key={card.id} className="col-md-6 mb-4">
               <div
-                className="card-body p-4"
-                //  onClick={() => navigate('/chat')}
+                className="card border-0 rounded-4 shadow-lg bg-dark hover-card top-outline-primary custom-top-border"
+                onClick={(e) => handleCardClick(card, e)}
                 style={{
                   borderImage:
                     "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",
                   borderTop: "3px solid transparent",
-
                   borderRadius: "18px",
+                  cursor: "pointer",
                 }}
               >
-                <div className="d-flex justify-content-between align-items-start mb-3">
-                  <video
-                    src={card.iconVideo}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="icon-video"
-                    style={{
-                      width: "2.5em",
-                      height: "2.5em",
-                      verticalAlign: "middle",
-                      borderRadius: "4px",
-                      objectFit: "contain",
-                      background: "transparent",
-                      mixBlendMode: 'screen'
-                    }}
-                  />
-                  <ArrowForwardIosIcon
-                    sx={{
-                      color: "rgba(102, 102, 102, 1)",
-                      fontSize: "1.25rem",
-                    }}
-                  />
-                </div>
-
-                <h5
-                  className="card-title text-white mb-2"
+                <div
+                  className="card-body p-4"
                   style={{
-                    fontFamily: "Inter",
-                    fontWeight: "600",
-                    fontSize: "28px",
+                    borderImage:
+                      "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",
+                    borderTop: "3px solid transparent",
+                    borderRadius: "18px",
                   }}
                 >
-                  {card.title}
-                </h5>
-                <p
-                  className="card-text mb-3 small"
-                  style={{ color: "#00B8F8", fontFamily: "Inter" }}
-                >
-                  {card.subtitle}
-                </p>
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <video
+                      src={card.iconVideo}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="icon-video"
+                      style={{
+                        width: "2.5em",
+                        height: "2.5em",
+                        verticalAlign: "middle",
+                        borderRadius: "4px",
+                        objectFit: "contain",
+                        background: "transparent",
+                        mixBlendMode: 'screen'
+                      }}
+                    />
+                    <ArrowForwardIosIcon
+                      sx={{
+                        color: "rgba(102, 102, 102, 1)",
+                        fontSize: "1.25rem",
+                      }}
+                    />
+                  </div>
 
-                <button
-                  className={`btn btn-outline-primary btn-sm text-white rounded-pill px-4 ${
-                    card.type === "report" ? "border-blue-500" : ""
-                  }`}
-                  onClick={() => navigate(card.path)} // 👈 navigate instead of alert
-                  style={{ fontFamily: "Poppins" }}
-                >
-                  {card.action}
-                </button>
+                  <h5
+                    className="card-title text-white mb-2"
+                    style={{
+                      fontFamily: "Inter",
+                      fontWeight: "600",
+                      fontSize: "28px",
+                    }}
+                  >
+                    {card.title}
+                  </h5>
+                  <p
+                    className="card-text mb-3 small"
+                    style={{ color: "#00B8F8", fontFamily: "Inter" }}
+                  >
+                    {hasReport ? "View Report" : "Report"}
+                  </p>
+
+                  <button
+                    className={`btn btn-outline-primary btn-sm text-white rounded-pill px-4 ${hasReport ? "border-blue-500" : ""
+                      }`}
+                    onClick={() => handleButtonClick(card)}
+                    style={{ fontFamily: "Poppins" }}
+                  >
+                    {hasReport ? "Recommendations" : "Generate Report"}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .top-outline-primary {
           box-shadow: 0 -2px 0 0 #0d6efd;
           border-top-left-radius: 0.5rem;

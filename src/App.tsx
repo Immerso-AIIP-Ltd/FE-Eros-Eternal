@@ -27,7 +27,6 @@ import PalmUploadPage from "./PalmUpload";
 import PalmReadingReportPage from "./PalmReport";
 import FaceUploadPage from "./FaceUpload";
 import FaceReadingReportPage from "./FaceReportPage";
-import LongevityTool from "./longevityTool";
 import ViewReport from "./ViewReport";
 
 import RasiChartPage from "./RasiChartPage";

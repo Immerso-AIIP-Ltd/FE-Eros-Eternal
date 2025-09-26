@@ -7,111 +7,234 @@ import {
     Typography,
 } from "@mui/material";
 
+
+interface ReportData {
+    timestamp: string;
+    report_data: {
+        report_title: string;
+        assessment: {
+            vibrational_frequency?: number;
+            current_energy_state?: string;
+            current_flame_score?: string;
+            flame_score?: string;
+            aura_intensity?: string;
+            kosha_alignment?: string;
+            star_magnitude?: string;
+            longevity_score?: string;
+        };
+        detailed_analysis?: string;
+        recommendations?: {
+            practices?: string[];
+            guidance?: string[];
+            considerations?: string[];
+        };
+        // Add other fields as needed
+    };
+    // Add other top-level fields as needed
+}
+
 const ViewReport = () => {
     const [expandedFaq, setExpandedFaq] = useState(null);
-    const [reportData, setReportData] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [reportData, setReportData] = useState<ReportData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
     const location = useLocation();
     const recommendationsRef = useRef(null);
 
-    // Get report data from navigation state
-    useEffect(() => {
-        if (location.state?.reportData) {
-            setReportData(location.state.reportData);
+    const baseApiUrl = "http://192.168.29.154:6001/api/v1/reports/individual_report/";
 
-            // Scroll to recommendations if requested
-            if (location.state.scrollToRecommendations) {
-                setTimeout(() => {
-                    recommendationsRef.current?.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }, 500);
+
+    // Fetch report data from API
+    useEffect(() => {
+        const fetchReportData = async () => {
+            if (!location.state?.reportType || !location.state?.userId) {
+                setError("Missing report information");
+                setLoading(false);
+                return;
             }
-        } else {
-            // If no data in state, redirect back to reports hub
-            navigate('/');
-        }
-    }, [location.state, navigate]);
+
+            try {
+                setLoading(true);
+                const response = await fetch(
+                    `${baseApiUrl}?user_id=${location.state.userId}&report_type=${location.state.reportType}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success && data.data && data.data.report_data) {
+                    setReportData(data.data);
+
+                    // Scroll to recommendations if requested
+                    // Scroll to recommendations if requested
+                    if (location.state.scrollToRecommendations) {
+                        setTimeout(() => {
+                            recommendationsRef.current?.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }, 500);
+                    }
+                } else {
+                    throw new Error(data.message || "No report data found");
+                }
+            } catch (error) {
+                console.error("Error fetching report data:", error);
+                setError(error.message || "Failed to load report");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchReportData();
+    }, [location.state]);
 
     const toggleFaq = (index) => {
         setExpandedFaq(expandedFaq === index ? null : index);
     };
 
-    // Parse report data to extract different sections
-    const parseReportData = (data) => {
-        if (!data) return { items: [], recommendations: [], frequency: null, level: null };
+    // Get display title from report type
+    const getDisplayTitle = () => {
+        if (location.state?.title) return location.state.title;
+        if (reportData?.report_data?.report_title) return reportData.report_data.report_title;
 
-        // Try to parse if it's a string
-        let parsedData = data;
-        if (typeof data === 'string') {
-            try {
-                parsedData = JSON.parse(data);
-            } catch (error) {
-                // If not JSON, treat as plain text and split into sections
-                const sections = data.split('\n').filter(line => line.trim());
-                return {
-                    items: sections.slice(0, Math.ceil(sections.length / 2)),
-                    recommendations: sections.slice(Math.ceil(sections.length / 2)),
-                    frequency: extractFrequency(data),
-                    level: extractLevel(data)
-                };
-            }
+        // Fallback to formatted report type
+        const reportType = location.state?.reportType || reportData?.report_type || '';
+        return reportType.split('_').map(word =>
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+    };
+
+    // Extract frequency/score from assessment
+    const getFrequencyValue = () => {
+        const assessment = reportData?.report_data?.assessment;
+        if (!assessment) return 'N/A    ';
+
+        return assessment.vibrational_frequency ||
+            assessment.current_flame_score ||
+            assessment.flame_score ||
+            assessment.aura_intensity ||
+            assessment.kosha_alignment ||
+            assessment.star_magnitude ||
+            assessment.longevity_score ||
+           'N/A';
+    };
+
+    // Extract level from assessment
+    const getLevel = () => {
+        const assessment = reportData?.report_data?.assessment;
+        if (!assessment) return 'High';
+
+        const energyState = assessment.current_energy_state || '';
+        if (energyState.toLowerCase().includes('high')) return 'High';
+        if (energyState.toLowerCase().includes('low')) return 'Low';
+        if (energyState.toLowerCase().includes('medium')) return 'Medium';
+
+        // Default based on frequency/score value
+        const frequency = getFrequencyValue();
+        if (frequency > 70) return 'High';
+        if (frequency > 40) return 'Medium';
+        return 'Low';
+    };
+
+    // Get gauge value (0-100 scale)
+    const getGaugeValue = () => {
+        const frequency = getFrequencyValue();
+        // Convert to 0-100 scale
+        return Math.max(0, Math.min(100, frequency));
+    };
+
+    // Get assessment sections
+    const getAssessmentSections = () => {
+        const assessment = reportData?.report_data?.assessment;
+        if (!assessment) return [];
+
+        const sections = [];
+
+        // Personal Context
+        if (assessment.personal_context) {
+            sections.push({
+                title: "Personal Context",
+                content: assessment.personal_context
+            });
         }
 
-        // If it's already an object
-        return {
-            items: parsedData.report_items || parsedData.items || [],
-            recommendations: parsedData.recommendations || [],
-            frequency: parsedData.frequency || extractFrequency(JSON.stringify(parsedData)),
-            level: parsedData.level || extractLevel(JSON.stringify(parsedData))
-        };
-    };
-
-    // Extract frequency from text (look for Hz patterns)
-    const extractFrequency = (text) => {
-        const frequencyMatch = text.match(/(\d+)\s*Hz/i);
-        return frequencyMatch ? parseInt(frequencyMatch[1]) : 528;
-    };
-
-    // Extract level from text (look for level indicators)
-    const extractLevel = (text) => {
-        const levelMatch = text.match(/(high|medium|low)/i);
-        return levelMatch ? levelMatch[1].charAt(0).toUpperCase() + levelMatch[1].slice(1) : 'High';
-    };
-
-    // Get gauge value based on frequency
-    const getGaugeValue = (frequency) => {
-        // Convert frequency to gauge value (0-100)
-        // Common frequencies: 174Hz-963Hz, 528Hz is considered optimal
-        const minFreq = 100;
-        const maxFreq = 1000;
-        const normalizedValue = ((frequency - minFreq) / (maxFreq - minFreq)) * 100;
-        return Math.max(0, Math.min(100, normalizedValue));
-    };
-
-    // Default fallback data
-    const defaultReportItems = [
-        "Your vibrational frequency indicates a strong connection to positive energy.",
-        "Current readings show alignment with your higher self and spiritual purpose.",
-        "Energy centers are functioning optimally with good flow throughout your system.",
-        "Recommendations include maintaining current practices and exploring deeper meditation.",
-    ];
-
-    const defaultRecommendations = [
-        {
-            question: "How to increase my vibration?",
-            answer: "Focus on positive thoughts, practice gratitude daily, spend time in nature, and engage in activities that bring you joy and fulfillment."
-        },
-        {
-            question: "What affects my frequency?",
-            answer: "Your thoughts, emotions, diet, environment, relationships, and daily practices all contribute to your vibrational frequency."
-        },
-        {
-            question: "How often should I check my frequency?",
-            answer: "Monthly assessments are recommended to track your progress and make necessary adjustments to your spiritual practices."
+        // Astrological Insights
+        if (assessment.astrological_insights) {
+            sections.push({
+                title: "Astrological Insights",
+                content: assessment.astrological_insights
+            });
         }
-    ];
+
+        // Karmic Life Path
+        if (assessment.karmic_life_path) {
+            sections.push({
+                title: "Karmic Life Path",
+                content: assessment.karmic_life_path
+            });
+        }
+
+        // Actionable Recommendations
+        if (assessment.actionable_recommendations) {
+            sections.push({
+                title: "Actionable Recommendations",
+                content: assessment.actionable_recommendations
+            });
+        }
+
+        return sections;
+    };
+
+    // Parse detailed analysis into bullet points
+    const getReportItems = () => {
+        const detailedAnalysis = reportData?.report_data?.detailed_analysis;
+        if (!detailedAnalysis) return [];
+
+        // Split by sentences and filter meaningful ones
+        return detailedAnalysis
+            .split(/[.!?]+/)
+            .map(sentence => sentence.trim())
+            .filter(sentence => sentence.length > 20)
+            .slice(0, 6); // Limit to 6 items
+    };
+
+    // Parse recommendations into expandable sections
+    const getRecommendations = () => {
+        const recommendations = reportData?.report_data?.recommendations;
+        if (!recommendations) return [];
+
+        const sections = [];
+
+        // Add practices
+        if (recommendations.practices && recommendations.practices.length > 0) {
+            sections.push({
+                title: "Practices",
+                items: recommendations.practices
+            });
+        }
+
+        // Add guidance
+        if (recommendations.guidance && recommendations.guidance.length > 0) {
+            sections.push({
+                title: "Guidance",
+                items: recommendations.guidance
+            });
+        }
+
+        // Add considerations
+        if (recommendations.considerations && recommendations.considerations.length > 0) {
+            sections.push({
+                title: "Considerations",
+                items: recommendations.considerations
+            });
+        }
+
+        return sections;
+    };
 
     if (loading) {
         return (
@@ -123,11 +246,11 @@ const ViewReport = () => {
         );
     }
 
-    if (!reportData) {
+    if (error || !reportData) {
         return (
             <div className='tarot-container d-flex justify-content-center align-items-center min-vh-100'>
                 <div className="text-center text-white">
-                    <h3>No Report Data Found</h3>
+                    <h3>{error || "No Report Data Found"}</h3>
                     <button
                         className="btn btn-primary mt-3"
                         onClick={() => navigate('/')}
@@ -139,21 +262,21 @@ const ViewReport = () => {
         );
     }
 
-    const parsedReport = parseReportData(reportData);
-    const reportItems = parsedReport.items.length > 0 ? parsedReport.items : defaultReportItems;
-    const recommendations = parsedReport.recommendations.length > 0
-        ? parsedReport.recommendations.map((rec, idx) => ({
-            question: rec.title || rec.question || `Recommendation ${idx + 1}`,
-            answer: rec.content || rec.answer || rec
-        }))
-        : defaultRecommendations;
+    const displayTitle = getDisplayTitle();
+    const frequency = getFrequencyValue();
+    const level = getLevel();
+    const gaugeValue = getGaugeValue();
+    const assessmentSections = getAssessmentSections();
+    const reportItems = getReportItems();
+    const recommendationSections = getRecommendations();
 
-    const frequency = parsedReport.frequency;
-    const level = parsedReport.level;
-    const gaugeValue = getGaugeValue(frequency);
-
+    const reportTimestamp = new Date(reportData?.timestamp || '');
+    const currentTimestamp = new Date();
+    const reportDateStr = reportTimestamp.toISOString().split('T')[0];
+    const currentDateStr = currentTimestamp.toISOString().split('T')[0];
+    const shouldShowContinueChat = reportDateStr > currentDateStr;
     return (
-        <div className='tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white'>
+        <div className='tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white' style={{ alignItems: 'start', justifyContent: 'start' }}>
             {/* Header */}
             <div className="container-fluid px-3 py-3">
                 <div className="row align-items-center">
@@ -168,14 +291,18 @@ const ViewReport = () => {
                             </svg>
                         </button>
                         <span
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate('/result')}
                             style={{ fontSize: '18px', fontWeight: '500', cursor: 'pointer' }}
                         >
                             Go Back
                         </span>
                     </div>
                     <div className="col-auto ms-auto">
-                        <button className="btn p-0" style={{ background: 'none', border: 'none', color: '#666' }}>
+                        <button
+                            className="btn p-0"
+                            style={{ background: 'none', border: 'none', color: '#666' }}
+                            onClick={() => window.location.reload()}
+                        >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                                 <path d="M3 3v5h5" />
@@ -190,6 +317,7 @@ const ViewReport = () => {
                 <div className="row justify-content-center">
                     <div className="col-12 col-md-10 col-lg-8 col-xl-6">
 
+                        {/* Gauge Card */}
                         <div className="card mb-4" style={{
                             background: 'linear-gradient(135deg, #1a2332 0%, #0d1117 100%)',
                             border: '1px solid #30363d',
@@ -231,10 +359,12 @@ const ViewReport = () => {
                                             </Typography>
                                             <Typography variant="h4" fontWeight="bold" mb={1}>
                                                 {frequency}
-                                                <span style={{ fontSize: "0.6em" }}>Hz</span>
+                                                <span style={{ fontSize: "0.6em" }}>
+                                                    {location.state?.reportType?.includes('frequency') ? 'Hz' : ''}
+                                                </span>
                                             </Typography>
                                             <Typography variant="body2">
-                                                {location.state?.reportType?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Vibrational Frequency'}
+                                                test
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -243,105 +373,159 @@ const ViewReport = () => {
                                 {/* Card footer */}
                                 <div className="text-start">
                                     <h6 className="mb-1" style={{ color: 'white', fontWeight: '600' }}>
-                                        {location.state?.reportType?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Vibrational Frequency'}
+                                        {displayTitle}
                                     </h6>
-                                    <small style={{ color: '#00bcd4', fontSize: '12px' }}>Report</small>
+                                    <small style={{ color: '#00bcd4', fontSize: '12px' }}>
+                                        Report • {new Date(reportData.timestamp).toLocaleDateString()}
+                                    </small>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Report Section */}
-                        <div className="mb-5">
-                            <h5 className="mb-3" style={{ fontWeight: '600', color: 'white' }}>Report</h5>
-                            <ul className="list-unstyled">
-                                {reportItems.map((item, index) => (
-                                    <li key={index} className="mb-2 d-flex align-items-start">
-                                        <span className="me-2" style={{ color: '#00bcd4', fontSize: '12px', marginTop: '6px' }}>•</span>
-                                        <span style={{ color: '#a0aec0', fontSize: '14px', lineHeight: '1.5' }}>
-                                            {typeof item === 'string' ? item : item.content || item.description || 'Report item'}
-                                        </span>
-                                    </li>
+                        {/* Assessment Section */}
+                        {assessmentSections.length > 0 && (
+                            <div className="mb-5">
+                                <h4 className="mb-4" style={{ fontWeight: '600', color: 'white' }}>Report</h4>
+                                {assessmentSections.map((section, index) => (
+                                    <div key={index} className="mb-4">
+                                        <div className="card" style={{
+                                            background: 'rgba(255,255,255,0.03)',
+                                            border: '1px solid #30363d',
+                                            borderRadius: '12px'
+                                        }}>
+                                            <div className="card-body p-4">
+                                                <h6 className="mb-3" style={{
+                                                    color: '#00bcd4',
+                                                    fontWeight: '600',
+                                                    fontSize: '16px'
+                                                }}>
+                                                    {section.title}
+                                                </h6>
+                                                <p style={{
+                                                    color: '#e6edf3',
+                                                    fontSize: '14px',
+                                                    lineHeight: '1.6',
+                                                    margin: '0'
+                                                }}>
+                                                    {section.content}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 ))}
-                            </ul>
-                        </div>
+                            </div>
+                        )}
+
+                        {/* Report Section */}
+                        {reportItems.length > 0 && (
+                            <div className="mb-5">
+                                <h5 className="mb-3" style={{ fontWeight: '600', color: 'white' }}>Detailed Analysis</h5>
+                                <ul className="list-unstyled">
+                                    {reportItems.map((item, index) => (
+                                        <li key={index} className="mb-2 d-flex align-items-start">
+                                            <span className="me-2" style={{ color: '#00bcd4', fontSize: '12px', marginTop: '6px' }}>•</span>
+                                            <span style={{ color: '#a0aec0', fontSize: '14px', lineHeight: '1.5' }}>
+                                                {item}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
 
                         {/* Recommendations Section */}
-                        <div className="mb-4" ref={recommendationsRef}>
-                            <h5 className="mb-4" style={{ fontWeight: '600', color: 'white' }}>Recommendations</h5>
+                        {recommendationSections.length > 0 && (
+                            <div className="mb-4" ref={recommendationsRef}>
+                                <h4 className="mb-4" style={{ fontWeight: '600', color: 'white' }}>Recommendations</h4>
 
-                            {recommendations.map((item, index) => (
-                                <div key={index} className="mb-3">
-                                    <button
-                                        className="btn w-100 text-start p-3 d-flex justify-content-between align-items-center"
-                                        style={{
-                                            background: 'rgba(255,255,255,0.05)',
-                                            border: '1px solid #30363d',
-                                            borderRadius: '8px',
-                                            color: '#e6edf3',
-                                            fontSize: '14px'
-                                        }}
-                                        onClick={() => toggleFaq(index)}
-                                    >
-                                        <span>{item.question}</span>
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            style={{
-                                                transform: expandedFaq === index ? 'rotate(180deg)' : 'rotate(0deg)',
-                                                transition: 'transform 0.2s ease'
-                                            }}
-                                        >
-                                            <polyline points="6,9 12,15 18,9"></polyline>
-                                        </svg>
-                                    </button>
+                                {recommendationSections.map((section, sectionIndex) => (
+                                    <div key={sectionIndex} className="mb-4">
+                                        <div className="mb-3">
+                                            <button
+                                                className="btn w-100 text-start p-3 d-flex justify-content-between align-items-center"
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.05)',
+                                                    border: '1px solid #30363d',
+                                                    borderRadius: '8px',
+                                                    color: '#e6edf3',
+                                                    fontSize: '14px',
+                                                    fontWeight: '600'
+                                                }}
+                                                onClick={() => toggleFaq(sectionIndex)}
+                                            >
+                                                <span>{section.title}</span>
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    style={{
+                                                        transform: expandedFaq === sectionIndex ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                        transition: 'transform 0.2s ease'
+                                                    }}
+                                                >
+                                                    <polyline points="6,9 12,15 18,9"></polyline>
+                                                </svg>
+                                            </button>
 
-                                    {expandedFaq === index && (
-                                        <div
-                                            className="mt-2 p-3"
-                                            style={{
-                                                background: 'rgba(255,255,255,0.02)',
-                                                border: '1px solid #30363d',
-                                                borderRadius: '8px',
-                                                fontSize: '13px',
-                                                color: '#a0aec0',
-                                                lineHeight: '1.6'
-                                            }}
-                                        >
-                                            {item.answer}
+                                            {expandedFaq === sectionIndex && (
+                                                <div
+                                                    className="mt-2 p-3"
+                                                    style={{
+                                                        background: 'rgba(255,255,255,0.02)',
+                                                        border: '1px solid #30363d',
+                                                        borderRadius: '8px'
+                                                    }}
+                                                >
+                                                    <ul className="list-unstyled mb-0">
+                                                        {section.items.map((item, itemIndex) => (
+                                                            <li key={itemIndex} className="mb-2 d-flex align-items-start">
+                                                                <span className="me-2" style={{ color: '#00bcd4', fontSize: '12px', marginTop: '6px' }}>•</span>
+                                                                <span style={{
+                                                                    color: '#a0aec0',
+                                                                    fontSize: '13px',
+                                                                    lineHeight: '1.6'
+                                                                }}>
+                                                                    {item}
+                                                                </span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Bottom Section */}
                         <div className="text-center mb-4">
                             <p style={{ color: '#718096', fontSize: '13px', lineHeight: '1.5', maxWidth: '400px', margin: '0 auto' }}>
-                                Discover More insights into your {location.state?.reportType?.replace('_', ' ') || 'Vibrational frequency'} and Interact to get more deeper insights
+                                Discover More insights into your {displayTitle.toLowerCase()} and Interact to get more deeper insights
                             </p>
 
-                            <button
-                                className="btn mt-3 px-4 py-2"
-                                style={{
-                                    background: '#00bcd4',
-                                    border: 'none',
-                                    borderRadius: '25px',
-                                    color: 'white',
-                                    fontSize: '14px',
-                                    fontWeight: '600',
-                                    minWidth: '140px'
-                                }}
-                                onClick={() => {
-                                    // Navigate to chat or relevant page
-                                    console.log('Continue Chat clicked');
-                                }}
-                            >
-                                Continue Chat
-                            </button>
+                            {shouldShowContinueChat && (
+                                <button
+                                    className="btn mt-3 px-4 py-2"
+                                    style={{
+                                        background: '#00bcd4',
+                                        border: 'none',
+                                        borderRadius: '25px',
+                                        color: 'white',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        minWidth: '140px'
+                                    }}
+                                    onClick={() => {
+                                        console.log('Continue Chat clicked');
+                                    }}
+                                >
+                                    Continue Chat
+                                </button>
+                            )}
                         </div>
 
                     </div>

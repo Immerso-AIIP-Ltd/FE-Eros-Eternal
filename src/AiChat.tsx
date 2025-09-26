@@ -34,6 +34,7 @@ const AiChat: React.FC = () => {
     const [attachedVoices, setAttachedVoices] = useState<Array<{ url: string, file: File, duration?: number }>>([]);
     const [sessions, setSessions] = useState<any[]>([]);
     const chatContainerRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
 
     interface Message {
         sender: "user" | "ai";
@@ -706,7 +707,10 @@ const AiChat: React.FC = () => {
                         <h3 className="text-xl font-semibold">Eternal AI</h3>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold">
+                        <div
+                            className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer"
+                            onClick={() => navigate("/result")} style={{ cursor: 'pointer' }}
+                        >
                             <LogOut size={18} />
                         </div>
                         <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center text-sm font-semibold ms-2">
@@ -719,29 +723,39 @@ const AiChat: React.FC = () => {
                     {/* Chat Messages Area - Scrollable */}
                     <div
                         ref={chatContainerRef}
-                        className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4"
+                        className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar"
                         style={{
-                            maxWidth: '65%',
-                            margin: '0 auto',
-                            width: '100%',
-                            scrollbarWidth: 'thin',
-                            scrollbarColor: '#4B5563 #1E2123'
+                            maxWidth: "65%",
+                            margin: "0 auto",
+                            width: "100%",
+                            // scrollbarWidth: 'thin',
+                            // scrollbarColor: '#4B5563 #1E2123'
                         }}
                     >
                         <style>{`
-                        .custom-scrollbar::-webkit-scrollbar {
-                            width: 6px;
-                        }
-                        .custom-scrollbar::-webkit-scrollbar-track {
-                            background: #1E2123;
-                        }
-                        .custom-scrollbar::-webkit-scrollbar-thumb {
-                            background: #4B5563;
-                            border-radius: 3px;
-                        }
-                        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                            background: #6B7280;
-                        }
+                        // .custom-scrollbar::-webkit-scrollbar {
+                        //     width: 6px;
+                        // }
+                        // .custom-scrollbar::-webkit-scrollbar-track {
+                        //     background: #1E2123;
+                        // }
+                        // .custom-scrollbar::-webkit-scrollbar-thumb {
+                        //     background: #4B5563;
+                        //     border-radius: 3px;
+                        // }
+                        // .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                        //     background: #6B7280;
+                        // }
+                         /* Hide scrollbar for Chrome, Safari and Opera */
+                            .hide-scrollbar::-webkit-scrollbar {
+                            display: none;
+                            }
+
+                            /* Hide scrollbar for Firefox */
+                            .hide-scrollbar {
+                            scrollbar-width: none; /* Firefox */
+                            -ms-overflow-style: none; /* IE and Edge */
+                            }
                         `}</style>
 
                         {messages.length === 1 && messages[0].centered ? (
@@ -888,7 +902,7 @@ const AiChat: React.FC = () => {
                                         </div>
 
                                         <div className="flex items-center gap-3">
-                                            <label className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent cursor-pointer">
+                                            {/* <label className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent cursor-pointer">
                                                 <ImagePlus size={20} />
                                                 <input
                                                     type="file"
@@ -921,7 +935,7 @@ const AiChat: React.FC = () => {
                                                 onClick={startRecording}
                                             >
                                                 <Mic size={20} />
-                                            </button>
+                                            </button> */}
 
                                             <div className="border-l border-gray-600 pl-3">
                                                 <button
