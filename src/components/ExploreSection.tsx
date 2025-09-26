@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Import images
-import tarot from '../tarot.png';
+import tarot from '../tarrotfull.png';
 import harmonyindex from '../harmonyindex.png';
 import palm from '../palm.png';
 import facescan from '../facescan.png';
@@ -126,7 +126,8 @@ export const ExploreSection: React.FC = () => {
               style={{
                 width: '100%',
                 height: '200px',
-                objectFit: 'cover',
+                objectFit: 'contain',
+                marginTop:"20px"
               }}
             />
 
@@ -213,7 +214,7 @@ export const ExploreSection: React.FC = () => {
         .card-item img {
           width: 100%;
           height: 200px;
-          object-fit: cover;
+          object-fit: conatin;
         }
 
         .card-item .text-content {

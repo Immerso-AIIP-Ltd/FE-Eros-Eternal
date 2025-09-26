@@ -1,4 +1,6 @@
+// src/ErosChatUI.tsx
 import React, { useEffect, useRef, useState } from "react";
+
 import { Menu, X, SendHorizontal, Mic, Camera, ImagePlus, LogOut, SquarePlus, User, Upload, Play, Pause, Check } from "lucide-react";
 import { Row, Col, Button, Form } from "react-bootstrap";
 import ReactMarkdown from "react-markdown";
@@ -10,6 +12,7 @@ import sparkle from "./sparkle.png";
 import Stars from "./components/stars";
 import VoiceMessage from "./VoiceMessage";
 import MicVisualizer from "./MicVisualizer";
+
 import { useNavigate } from "react-router-dom";
 
 const sidebarMenuItems = [
@@ -27,6 +30,7 @@ const ErosChatUI: React.FC = () => {
   const [recordingTime, setRecordingTime] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [isInitialized, setIsInitialized] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
@@ -40,6 +44,7 @@ const ErosChatUI: React.FC = () => {
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [micStream, setMicStream] = useState<MediaStream | null>(null);
+
   const [attachedVoices, setAttachedVoices] = useState<Array<{ url: string, file: File, duration?: number }>>([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [activeMenuItem, setActiveMenuItem] = useState('vibrational-frequency');
@@ -294,12 +299,14 @@ const ErosChatUI: React.FC = () => {
       const recorder = new MediaRecorder(stream, {
         mimeType: "audio/webm;codecs=opus",
       });
+
       recordedChunksRef.current = [];
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           recordedChunksRef.current.push(e.data);
         }
       };
+
       recorder.start();
       mediaRecorderRef.current = recorder;
       setIsRecording(true);
@@ -328,6 +335,7 @@ const ErosChatUI: React.FC = () => {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       if (timerRef.current) clearInterval(timerRef.current);
+
       if (micStream) {
         micStream.getTracks().forEach(track => track.stop());
         setMicStream(null);
@@ -472,9 +480,31 @@ const ErosChatUI: React.FC = () => {
     }
   }, [messages, isLoading]);
 
+  const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    const audioUrl = URL.createObjectURL(file);
+    setMessages((prev) => [
+      ...prev,
+      { sender: "user", audio: audioUrl, audioBlob: file, duration: 0, userAvatar: true },
+    ]);
+    // You can add voice analysis logic here if needed
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (micStream) micStream.getTracks().forEach(track => track.stop());
+      attachedImages.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [micStream]);
+
   return (
     <div className="d-flex w-100 h-100 min-vh-100 min-vw-100 bg-black text-white overflow-hidden">
       <Stars />
+
       <div className="absolute inset-0 overflow-hidden">
         {stars.map((star, i) => (
           <div
@@ -535,6 +565,7 @@ const ErosChatUI: React.FC = () => {
       )}
 
 
+
       <div
         className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative h-screen z-50 w-64 backdrop-blur-sm transition-transform duration-300 ease-in-out overflow-y-auto`}
         style={{
@@ -562,12 +593,14 @@ const ErosChatUI: React.FC = () => {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold" style={{ color: '#00B8F8' }}>Eternal Reports</h2>
             <button
+
               className="md:hidden text-gray-400 hover:text-white bg-transparent"
               onClick={() => setSidebarOpen(false)}
             >
               <X size={20} />
             </button>
           </div>
+
         </div>
         <div className="p-3">
           <nav className="d-flex flex-column gap-2">
@@ -598,6 +631,7 @@ const ErosChatUI: React.FC = () => {
             >
               <Menu size={20} />
             </button>
+
             <h3 className="text-xl font-semibold">Eternal AI</h3>
           </div>
           <div className="flex items-center gap-2">
@@ -764,6 +798,7 @@ const ErosChatUI: React.FC = () => {
                   )}
                 </div>
               )}
+
               <div className="flex items-end gap-4">
                 {!isRecording ? (
                   <>
@@ -790,11 +825,13 @@ const ErosChatUI: React.FC = () => {
                         />
                       </label>
                       <button
+
                         className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent"
                         onClick={openCamera}
                       >
                         <Camera size={20} />
                       </button>
+
                       <label className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent cursor-pointer">
                         <Upload size={20} />
                         <input
@@ -805,6 +842,7 @@ const ErosChatUI: React.FC = () => {
                         />
                       </label>
                       <button
+
                         className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent"
                         onClick={startRecording}
                       >
@@ -845,6 +883,7 @@ const ErosChatUI: React.FC = () => {
             </div>
           </div>
 
+
           {/* Footer - Fixed at very bottom */}
           <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-t border-gray-800">
             <div className="text-center text-xs text-gray-500" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
@@ -859,6 +898,7 @@ const ErosChatUI: React.FC = () => {
               </div>
             </div>
           </div>
+
         </div>
 
         {previewImage && (

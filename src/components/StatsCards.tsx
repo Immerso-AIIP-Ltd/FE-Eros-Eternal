@@ -1,5 +1,6 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; // <-- Import useNavigate
+import { useNavigate } from 'react-router-dom';
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./StatsCard.css";
 import fire from "../Fire.webm";
@@ -8,6 +9,7 @@ import crystal from "../Magic Crystal Ball.webm";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const StatsCards = () => {
+
   const navigate = useNavigate();
 
   const reportCards = [
@@ -18,7 +20,8 @@ const StatsCards = () => {
       action: "Recommendations",
       iconVideo: fire,
       type: "report",
-      path: "/vibrational-frequency", // 👈 Path for navigation
+      route:"/vibrational-frequency"
+
     },
     {
       id: 2,
@@ -27,7 +30,8 @@ const StatsCards = () => {
       action: "Generate Report",
       iconVideo: crystal,
       type: "generate",
-      path: "/star-map",
+      route:"/star-map"
+
     },
     {
       id: 3,
@@ -36,7 +40,8 @@ const StatsCards = () => {
       action: "Recommendations",
       iconVideo: fire,
       type: "report",
-      path: "/flame-score",
+      route:"/flame-score"
+
     },
     {
       id: 4,
@@ -45,7 +50,8 @@ const StatsCards = () => {
       action: "Generate Report",
       iconVideo: crystal,
       type: "generate",
-      path: "/aura-profile",
+      route:"/aura-profile"
+
     },
     {
       id: 5,
@@ -54,7 +60,8 @@ const StatsCards = () => {
       action: "Recommendations",
       iconVideo: crystal,
       type: "report",
-      path: "/kosha-map",
+      route:"/kosha-map"
+
     },
     {
       id: 6,
@@ -81,9 +88,34 @@ const StatsCards = () => {
       <div className="row g-4">
         {reportCards.map((card) => (
           <div key={card.id} className="col-md-6 mb-4">
-            <div className="card border-0 rounded-4 shadow-lg bg-dark hover-card top-outline-primary custom-top-border">
+             <div
+      className="card border-0 rounded-4 shadow-lg bg-dark hover-card top-outline-primary custom-top-border"
+      onClick={(e) => {
+        // Prevent navigation if the button was clicked
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+          return;
+        }
+        // Navigate to the card's specific route
+        if (card.route) {
+          navigate(card.route);
+        } else {
+          // Fallback if route is missing (e.g., for Longevity Blueprint)
+          const slug = card.title.toLowerCase().replace(/\s+/g, '-');
+          navigate(`/${slug}`);
+        }
+      }}
+      style={{
+        borderImage:
+          "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",
+        borderTop: "3px solid transparent",
+        borderRadius: "18px",
+        cursor: "pointer", // Optional: improves UX
+      }}
+    >
+
               <div
                 className="card-body p-4"
+                //  onClick={() => navigate('/chat')}
                 style={{
                   borderImage:
                     "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",

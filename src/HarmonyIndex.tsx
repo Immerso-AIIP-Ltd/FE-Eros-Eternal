@@ -1,6 +1,7 @@
 // src/pages/TarotFlow.tsx
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useNavigate } from 'react-router-dom';
 import TarotCard from "./TarrotCard"; 
 import "./harmony.css";
 import { BsArrowLeft } from "react-icons/bs";
@@ -16,6 +17,7 @@ interface TarotReading {
   reading: TarotCard[];
 }
 const HarmonyIndex: React.FC = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1 = intro, 2 = form, 3 = tarot
   const [formData, setFormData] = useState({
     name: "",
@@ -130,7 +132,7 @@ const HarmonyIndex: React.FC = () => {
             <button
               className="btn btn-primary rounded-pill px-4 py-2 mt-4 w-full"
               style={{ backgroundColor: "#00B8F8" }}
-              onClick={() => setStep(2)}
+           onClick={() => navigate('/relation')}
             >
               Start Harmoney Index Reading
             </button>

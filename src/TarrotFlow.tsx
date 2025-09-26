@@ -98,7 +98,7 @@ const TarotFlow: React.FC = () => {
       </button> */}
 
       {step === 1 && (
-        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 tarot-intro">
+        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 tarot-introt">
           {/* Tarot Cards */}
           <a
             href="/result"

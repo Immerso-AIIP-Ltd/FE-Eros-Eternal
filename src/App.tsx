@@ -13,7 +13,7 @@ import HomePage from "./HomePage";
 import TarrotCard from "./TarrotCard";
 import HarmonyIndexPage from "./HarmonyIndexPage";
 import PalmReadingPage from "./PalmReadingPage";
-import VibrationTool from './VibrationTool';
+import VibrationTool from "./VibrationTool";
 import DailyReportsPage from "./DailyReportsPage";
 import HealingModal from "./HealingModal";
 import AiChat from "./AiChat";
@@ -27,9 +27,13 @@ import PalmUploadPage from "./PalmUpload";
 import PalmReadingReportPage from "./PalmReport";
 import FaceUploadPage from "./FaceUpload";
 import FaceReadingReportPage from "./FaceReportPage";
+import RasiChartPage from "./RasiChartPage";
+import StarMap from "./StarMap";
+import KoshaMap from "./KoshaMap";
+import AuraProfile from "./AuraProfile";
+import FlameScore from "./FlameScore";
+
 import LongevityTool from "./longevityTool";
-
-
 
 const App: React.FC = () => {
   return (
@@ -50,6 +54,9 @@ const App: React.FC = () => {
           <Route path="/palmcard" element={<PalmFlow />} />
           <Route path="/palm" element={<PalmReadingPage />} />
 
+
+          <Route path="/vibrational-frequency" element={<VibrationTool />} />
+          <Route path="/report" element={<DailyReportsPage />} />
           <Route path='/vibrational-frequency' element={<VibrationTool />} />
           <Route path="/longevity-blueprint" element={<LongevityTool />} />
 
@@ -63,6 +70,20 @@ const App: React.FC = () => {
           <Route path="/palm-report" element={<PalmReadingReportPage />} />
           <Route path="/face-upload" element={<FaceUploadPage />} />
           <Route path="/face-report" element={<FaceReadingReportPage />} />
+          <Route path="/rasi-chart" element={<RasiChartPage />} />
+          <Route path="/star-map" element={<StarMap />}/>
+          <Route path="/kosha-map" element={<KoshaMap />}/>
+          <Route path="/aura-profile" element={<AuraProfile />}/>
+          <Route path="/flame-score" element={<FlameScore />}/>
+        
+
+          <Route path="/harmony" element={<HarmonyIndexPage />} />
+
+
+          <Route path='/vibrational-frequency' element={<VibrationTool/>}/>
+          <Route path='/Healing' element={<HealingModal/>}/>
+          <Route path='/ai-chat' element={<AiChat/>}/>
+          <Route path="/age-tracker" element={<AgeTrack/>} />
 
 
           <Route path="/harmony" element={<HarmonyIndexPage />} />
@@ -71,8 +92,8 @@ const App: React.FC = () => {
           <Route path='/ai-chat' element={<AiChat />} />
           <Route path="/age-tracker" element={<AgeTrack />} />
 
-          <Route path="/harmony" element={<HarmonyIndexPage />} />
 
+          <Route path="/harmony" element={<HarmonyIndexPage />} />
         </Routes>
       </div>
     </Router>

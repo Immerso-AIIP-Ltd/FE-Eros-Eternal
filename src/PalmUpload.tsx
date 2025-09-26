@@ -1,16 +1,10 @@
 // PalmUploadPage.tsx
 import React, { useState, useRef, useCallback } from 'react';
-import { Card, Button, Form, Alert, Spinner } from 'react-bootstrap';
+import { Card, Button, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-interface FileData {
-  name: string;
-  size: number;
-  type: string;
-}
-
 const PalmUploadPage: React.FC = () => {
-  const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // 👈 Store File, not just metadata
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,11 +24,7 @@ const PalmUploadPage: React.FC = () => {
     }
 
     setError(null);
-    setSelectedFile({
-      name: file.name,
-      size: file.size,
-      type: file.type,
-    });
+    setSelectedFile(file); // 👈 Store the actual File
   };
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -59,11 +49,7 @@ const PalmUploadPage: React.FC = () => {
     }
 
     setError(null);
-    setSelectedFile({
-      name: file.name,
-      size: file.size,
-      type: file.type,
-    });
+    setSelectedFile(file); // 👈 Store the actual File
   }, []);
 
   const handleBrowseClick = () => {
@@ -89,8 +75,8 @@ const PalmUploadPage: React.FC = () => {
 
     try {
       const formData = new FormData();
-      formData.append("user_id", "1eb41064-025e-434d-aa1d-c9738a37ce1d"); // Replace with real user ID if available
-      formData.append("image_data", fileInputRef.current?.files?.[0] as File);
+      formData.append("user_id", "1eb41064-025e-434d-aa1d-c9738a37ce1d");
+      formData.append("image_data", selectedFile); // 👈 Use selectedFile directly
 
       const response = await fetch(
         'http://192.168.29.154:6001/api/v1/analysis/palm',
@@ -105,7 +91,6 @@ const PalmUploadPage: React.FC = () => {
       const result = await response.json();
 
       if (result.success) {
-        // Navigate to report page with data
         navigate('/palm-report', { state: result });
       } else {
         setError(result.message || 'Failed to generate palm reading.');
@@ -119,7 +104,7 @@ const PalmUploadPage: React.FC = () => {
   };
 
   return (
-    <div className="vh-100 vw-100 d-flex flex-column p-4" style={{ backgroundColor: '#000', backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02) 25%), linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02) 25%)', backgroundSize: '20px 20px' }}>
+    <div className="vh-100 vw-100 d-flex flex-column p-4" style={{ backgroundColor: '#000' }}>
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button
@@ -141,7 +126,7 @@ const PalmUploadPage: React.FC = () => {
       {/* Title */}
       <div className="text-center mb-4">
         <h2 className="fw-bold text-white">Capture Your Palm</h2>
-        <p className="text-muted" style={{ maxWidth: 600, margin: 'auto' }}>
+        <p className="text-white" style={{ maxWidth: 600, margin: 'auto' }}>
           Discover insights into your personality, relationship, and future with our AI-powered palm reading technology
         </p>
       </div>
@@ -176,8 +161,8 @@ const PalmUploadPage: React.FC = () => {
               <div className="mb-3">
                 <i className="bi bi-upload fs-2 text-info"></i>
               </div>
-              <p className="mb-1">Drag and Drop files</p>
-              <p className="mb-1">or</p>
+              <p className="mb-1 text-white">Drag and Drop files</p>
+              <p className="mb-1 text-white">or</p>
               <span
                 className="text-info fw-bold"
                 style={{ textDecoration: 'underline', cursor: 'pointer' }}
@@ -188,23 +173,70 @@ const PalmUploadPage: React.FC = () => {
               >
                 Browse file
               </span>
-              <span className="text-muted"> from your computer</span>
+              <span className="text-white"> from your computer</span>
             </div>
 
             {/* Supported Formats */}
-            <div className="mt-3 text-muted">
+            <div className="mt-3 text-white">
               <small>Supported format : JPG, JPEG, PNG</small>
             </div>
 
-            {/* Selected File Info */}
+            {/* Image Preview + Delete Button */}
             {selectedFile && (
-              <div className="mt-3 p-2 bg-dark rounded">
-                <p className="mb-1">
-                  <strong>Selected:</strong> {selectedFile.name}
-                </p>
-                <p className="mb-0">
-                  <small>{(selectedFile.size / 1024).toFixed(1)} KB</small>
-                </p>
+              <div className="mt-3 position-relative">
+                <div
+                  className="rounded overflow-hidden"
+                  style={{
+                    width: '100%',
+                    height: '200px',
+                    backgroundColor: '#222',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                  }}
+                >
+                  <img
+                    src={URL.createObjectURL(selectedFile)}
+                    alt="Palm Preview"
+                    style={{
+                      maxHeight: '100%',
+                      maxWidth: '100%',
+                      objectFit: 'contain',
+                    }}
+                  />
+                  {/* Delete Button */}
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCancel();
+                    }}
+                    style={{
+                      padding: '0.25rem 0.5rem',
+                      fontSize: '0.75rem',
+                      borderRadius: '50%',
+                      minWidth: '24px',
+                      minHeight: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {/* File Info */}
+                <div className="mt-2 p-2 bg-dark rounded">
+                  <p className="mb-1">
+                    <strong>Selected:</strong> {selectedFile.name}
+                  </p>
+                  <p className="mb-0">
+                    <small>{(selectedFile.size / 1024).toFixed(1)} KB</small>
+                  </p>
+                </div>
               </div>
             )}
 
