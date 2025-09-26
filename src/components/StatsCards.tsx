@@ -5,7 +5,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./StatsCard.css";
 import fire from "../Fire.webm";
 import gym from "../Gym dubble.webm";
+import vibe from '../vibe.webm';
+import star from '../starmap.webm'
 import crystal from "../Magic Crystal Ball.webm";
+import galaxy from "../galaxy.webm"
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const StatsCards = () => {
@@ -20,16 +23,18 @@ const StatsCards = () => {
     {
       id: 1,
       title: "Vibrational Frequency",
-      iconVideo: fire,
+      iconVideo: vibe,
       route: "/vibrational-frequency",
       reportType: "vibrational_frequency"
+
     },
     {
       id: 2,
       title: "Star Map",
-      iconVideo: crystal,
+      iconVideo: galaxy,
       route: "/star-map",
       reportType: "star_map"
+
     },
     {
       id: 3,
@@ -48,9 +53,10 @@ const StatsCards = () => {
     {
       id: 5,
       title: "Kosha Map",
-      iconVideo: crystal,
+      iconVideo: star,
       route: "/kosha-map",
       reportType: "kosha_map"
+
     },
     {
       id: 6,

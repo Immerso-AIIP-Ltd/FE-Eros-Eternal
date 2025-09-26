@@ -112,7 +112,7 @@ const SplashScreen: React.FC = () => {
             <button
               onClick={() => {
                 console.log("check its working");
-                navigate("/profile");
+                navigate("/founder");
               }}
               className="btn btn-info text-white rounded-pill px-4 py-2 fw-medium" style={{fontFamily:"Poppins"}}
             >

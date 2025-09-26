@@ -126,8 +126,8 @@ export const ExploreSection: React.FC = () => {
               style={{
                 width: '100%',
                 height: '200px',
-                objectFit: 'contain',
-                marginTop:"20px"
+                objectFit: 'cover',
+                // marginTop:"20px"
               }}
             />
 
