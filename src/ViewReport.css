@@ -1,0 +1,73 @@
+/* src/pages/RasiChart.css */
+
+/* Gauge Styles */
+.gauge {
+  width: 200px;
+  height: 100px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.gauge-circle {
+  width: 200px;
+  height: 200px;
+  border: 10px solid #444;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  clip: rect(0, 200px, 100px, 0);
+}
+
+.gauge-progress {
+  width: 200px;
+  height: 200px;
+  border: 10px solid #00B8F8;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  clip: rect(0, 200px, 100px, 0);
+  transform: rotate(0deg); /* Adjust based on value, e.g., for 432 Hz assuming max 1000 Hz, calculate angle */
+}
+
+.gauge-value {
+  width: 100%;
+  text-align: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+  .gauge {
+    width: 150px;
+    height: 75px;
+  }
+  .gauge-circle, .gauge-progress {
+    width: 150px;
+    height: 150px;
+    border-width: 8px;
+  }
+  .gauge-circle, .gauge-progress {
+    clip: rect(0, 150px, 75px, 0);
+  }
+}
+
+/* Additional custom styles for inputs, etc., if needed */
+.rasi-chart-container {
+  background-color: #000;
+  color: #fff;
+}
+
+.text-primary {
+  color: #00B8F8 !important;
+}
+
+/* Ensure accordion buttons match the dark theme */
+.accordion-button:not(.collapsed) {
+  background-color: #222 !important;
+  color: #fff !important;
+}
+
+.accordion-button:focus {
+  box-shadow: none;
+}

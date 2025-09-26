@@ -130,7 +130,7 @@ const VibrationTool: React.FC = () => {
                 <audio ref={audioRef} src={voiceData.url} preload="metadata" />
                 <button
                     onClick={togglePlay}
-                    className="bg-cyan-500 hover:bg-cyan-600 text-white rounded-full p-2 transition-colors flex-shrink-0"
+                    className="bg-cyan-500 hover:bg-cyan-600 text-white rounded-full p-2 transition-colors flex-shrink-0 bg-transparent "
                 >
                     {isPlaying ? <Pause size={16} /> : <Play size={16} />}
                 </button>
@@ -150,7 +150,7 @@ const VibrationTool: React.FC = () => {
                 </div>
                 <button
                     onClick={onRemove}
-                    className="text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
+                    className="text-gray-400 hover:text-red-400 transition-colors flex-shrink-0 bg-transparent "
                 >
                     <X size={16} />
                 </button>
@@ -336,10 +336,10 @@ const VibrationTool: React.FC = () => {
 
                     setMessages((prev) => [
                         ...prev,
-                        {
-                            sender: "ai",
-                            text: data.message || "Thank you for your response.",
-                        },
+                        // {
+                        //     sender: "ai",
+                        //     text: data.message || "Thank you for your response.",
+                        // },
                         {
                             sender: "ai",
                             text: data.data.current_question,
@@ -805,9 +805,9 @@ const VibrationTool: React.FC = () => {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={handleNewChat}
-                            className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold hover:bg-gray-600 transition-colors"
+                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm hover:bg-gray-600 bg-transparent "
                         >
-                            <SquarePlus size={18} />
+                            <LogOut size={18} />
                         </button>
                         <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center text-sm font-semibold ms-2">
                             A
@@ -961,7 +961,7 @@ const VibrationTool: React.FC = () => {
                                     fontWeight: 'bold',
                                     cursor: 'pointer'
                                 }}
-                                onClick={() => navigate('/spiritual')}
+                                onClick={() => navigate('/result')}
                             >
                                 Back to Spiritual
                             </Button>
@@ -988,7 +988,7 @@ const VibrationTool: React.FC = () => {
                                                             className="rounded object-cover w-full h-full"
                                                         />
                                                         <button
-                                                            className="absolute -top-2 -right-2 bg-danger text-white flex items-center justify-center text-xs hover:bg-red-600 p-1 rounded-full rounded-circle"
+                                                            className="absolute -top-2 -right-2 bg-danger text-white flex items-center justify-center text-xs hover:bg-red-600 p-1 rounded-full rounded-circle bg-transparent "
                                                             onClick={() => removeAttachedImage(idx)}
                                                         >
                                                             <X size={12} />
