@@ -27,6 +27,7 @@ import PalmUploadPage from "./PalmUpload";
 import PalmReadingReportPage from "./PalmReport";
 import FaceUploadPage from "./FaceUpload";
 import FaceReadingReportPage from "./FaceReportPage";
+import LongevityTool from "./longevityTool";
 
 
 
@@ -46,27 +47,29 @@ const App: React.FC = () => {
           <Route path="/home" element={<HomePage />} />
           {/* <Route path="/card" element={<TarrotCard />} /> */}
           <Route path="/card" element={<TarotFlow />} />
-          <Route path="/palmcard" element={<PalmFlow />}/>
-          <Route path="/palm" element={<PalmReadingPage />}/>
+          <Route path="/palmcard" element={<PalmFlow />} />
+          <Route path="/palm" element={<PalmReadingPage />} />
 
-          <Route path='/vibrational-frequency' element={<VibrationTool/>}/>
-          <Route path='/report' element={<DailyReportsPage />}/>
+          <Route path='/vibrational-frequency' element={<VibrationTool />} />
+          <Route path="/longevity-blueprint" element={<LongevityTool />} />
+
+          <Route path='/report' element={<DailyReportsPage />} />
           <Route path="/card" element={<TarrotCard />} />
-          <Route path="/palm" element={<PalmReadingPage />}/>
-          <Route path="/facereading" element={<FaceReading />}/>
-          <Route path="/harmoneyi" element={<HarmonyIndex />}/>
-          <Route path="/relation" element={<RelationshipCompatibility />}/>
-          <Route path="/upload" element={<PalmUploadPage />}/>
-          <Route path="/palm-report" element={<PalmReadingReportPage/>}/>
-          <Route path="/face-upload" element={<FaceUploadPage />}/>
-          <Route path="/face-report" element={<FaceReadingReportPage />}/>
-          
+          <Route path="/palm" element={<PalmReadingPage />} />
+          <Route path="/facereading" element={<FaceReading />} />
+          <Route path="/harmoneyi" element={<HarmonyIndex />} />
+          <Route path="/relation" element={<RelationshipCompatibility />} />
+          <Route path="/upload" element={<PalmUploadPage />} />
+          <Route path="/palm-report" element={<PalmReadingReportPage />} />
+          <Route path="/face-upload" element={<FaceUploadPage />} />
+          <Route path="/face-report" element={<FaceReadingReportPage />} />
+
 
           <Route path="/harmony" element={<HarmonyIndexPage />} />
-          <Route path='/vibrational-frequency' element={<VibrationTool/>}/>
-          <Route path='/Healing' element={<HealingModal/>}/>
-          <Route path='/ai-chat' element={<AiChat/>}/>
-          <Route path="/age-tracker" element={<AgeTrack/>} />
+          <Route path='/vibrational-frequency' element={<VibrationTool />} />
+          <Route path='/Healing' element={<HealingModal />} />
+          <Route path='/ai-chat' element={<AiChat />} />
+          <Route path="/age-tracker" element={<AgeTrack />} />
 
           <Route path="/harmony" element={<HarmonyIndexPage />} />
 

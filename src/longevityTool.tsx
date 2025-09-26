@@ -21,7 +21,7 @@ const sidebarMenuItems = [
     { id: 'longevity-blueprint', label: 'Longevity Blueprint', icon: <Mic size={16} />, reportType: 'longevity_blueprint' },
 ];
 
-const VibrationTool: React.FC = () => {
+const LongevityTool: React.FC = () => {
     const [inputValue, setInputValue] = useState("");
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
@@ -1130,4 +1130,4 @@ const VibrationTool: React.FC = () => {
     );
 };
 
-export default VibrationTool;
+export default LongevityTool;
