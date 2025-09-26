@@ -336,10 +336,10 @@ const KoshaMap: React.FC = () => {
 
                     setMessages((prev) => [
                         ...prev,
-                        {
-                            sender: "ai",
-                            text: data.message || "Thank you for your response.",
-                        },
+                        // {
+                        //     sender: "ai",
+                        //     text: data.message || "Thank you for your response.",
+                        // },
                         {
                             sender: "ai",
                             text: data.data.current_question,
@@ -972,7 +972,7 @@ const KoshaMap: React.FC = () => {
                                     fontWeight: 'bold',
                                     cursor: 'pointer'
                                 }}
-                                onClick={() => navigate('/spiritual')}
+                                onClick={() => navigate('/result')}
                             >
                                 Back to Spiritual
                             </Button>

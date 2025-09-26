@@ -831,33 +831,43 @@ const VibrationTool: React.FC = () => {
                     </div>
                 )} */}
 
-                <div className="flex-1 flex flex-col h-full relative overflow-hidden">
+               <div className="flex-1 flex flex-col h-full relative overflow-hidden">
                     {/* Chat Messages Area - Scrollable */}
-                    <div
-                        ref={chatContainerRef}
-                        className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-4"
-                        style={{
-                            maxWidth: '65%',
-                            margin: '0 auto',
-                            width: '100%',
-                            scrollbarWidth: 'thin',
-                            scrollbarColor: '#4B5563 #1E2123'
-                        }}
-                    >
-                        <style>{`
-                        .custom-scrollbar::-webkit-scrollbar {
-                            width: 6px;
-                        }
-                        .custom-scrollbar::-webkit-scrollbar-track {
-                            background: #1E2123;
-                        }
-                        .custom-scrollbar::-webkit-scrollbar-thumb {
-                            background: #4B5563;
-                            border-radius: 3px;
-                        }
-                        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                            background: #6B7280;
-                        }
+                             <div
+            ref={chatContainerRef}
+            className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar"
+            style={{
+              maxWidth: "65%",
+              margin: "0 auto",
+              width: "100%",
+              // scrollbarWidth: 'thin',
+              // scrollbarColor: '#4B5563 #1E2123'
+            }}
+          >
+            <style>{`
+                        // .custom-scrollbar::-webkit-scrollbar {
+                        //     width: 6px;
+                        // }
+                        // .custom-scrollbar::-webkit-scrollbar-track {
+                        //     background: #1E2123;
+                        // }
+                        // .custom-scrollbar::-webkit-scrollbar-thumb {
+                        //     background: #4B5563;
+                        //     border-radius: 3px;
+                        // }
+                        // .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                        //     background: #6B7280;
+                        // }
+                         /* Hide scrollbar for Chrome, Safari and Opera */
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for Firefox */
+    .hide-scrollbar {
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
                         `}</style>
 
                         {messages.length === 0 && assessmentStatus === 'not_started' ? (
