@@ -491,7 +491,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             </StyledFormControl>
 
             {/* Place of Birth */}
-            <StyledFormControl variant="outlined">
+            {/* <StyledFormControl variant="outlined">
               <IconLeftWrapper>
                 <LocationOnIcon />
               </IconLeftWrapper>
@@ -511,10 +511,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </MenuItem>
                 ))}
               </Select>
-            </StyledFormControl>
+            </StyledFormControl> */}
 
             {/* Current Location */}
-            <StyledFormControl variant="outlined">
+            {/* <StyledFormControl variant="outlined">
               <IconLeftWrapper>
                 <LocationOnIcon />
               </IconLeftWrapper>
@@ -534,7 +534,51 @@ const handleSubmit = async (e: React.FormEvent) => {
                   </MenuItem>
                 ))}
               </Select>
-            </StyledFormControl>
+            </StyledFormControl> */}
+
+            <StyledFormControl variant="outlined">
+  {/* <IconLeftWrapper>
+    <LocationOnIcon />
+  </IconLeftWrapper> */}
+  <TextField
+    value={formData.placeOfBirth}
+    onChange={(e) => handleChange("placeOfBirth", e.target.value)}
+    placeholder="Enter Place of Birth"
+    variant="outlined"
+    fullWidth
+    required
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <LocationOnIcon />
+        </InputAdornment>
+      ),
+      // Optional: remove default outline if StyledFormControl handles styling
+    }}
+  />
+</StyledFormControl>
+
+
+<StyledFormControl variant="outlined">
+  {/* <IconLeftWrapper>
+    <LocationOnIcon />
+  </IconLeftWrapper> */}
+  <TextField
+    value={formData.currentLocation}
+    onChange={(e) => handleChange("currentLocation", e.target.value)}
+    placeholder="Enter Current Location"
+    variant="outlined"
+    fullWidth
+    required
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <LocationOnIcon />
+        </InputAdornment>
+      ),
+    }}
+  />
+</StyledFormControl>
 
             {/* Date of Birth */}
             <TextField

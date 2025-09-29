@@ -2,17 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Button, Container, Row, Col, Alert, Badge } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FaceReadingResponse } from './types'; // Import your type
 
 const FaceReadingReportPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [report, setReport] = useState<FaceReadingResponse | null>(null);
+  const [report, setReport] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (location.state && (location.state as FaceReadingResponse).success) {
-      setReport(location.state as FaceReadingResponse);
+    if (location.state && (location.state).success) {
+      setReport(location.state);
     } else {
       setError('No report data found. Please upload a face image first.');
     }
@@ -100,7 +99,7 @@ const FaceReadingReportPage: React.FC = () => {
                     lineHeight: '2'
                   }}
                 >
-                  {data.raw_analysis
+                  {data.spiritual_interpretation
                     ?.split('\n')
                     .filter(line => !/^[=-]+\s*$/.test(line)) // Remove lines with only = or -
                     .map(line => {

@@ -2,14 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-
+ 
 // Define proper types
 interface ChartImage {
   original: string;
   inline: string;
   attachment: string;
 }
-
+ 
 interface AstrologyResponse {
   success: boolean;
   message: string;
@@ -27,7 +27,7 @@ const RasiChartPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
+ 
   const fetchAstrologyData = async () => {
     try {
       const user_id = localStorage.getItem("user_id");
@@ -42,7 +42,6 @@ const RasiChartPage: React.FC = () => {
       // Normalize date to MM/DD/YYYY
       dateOfBirth = normalizeDateToMMDDYYYY(dateOfBirth);
  
-
       const payload = {
         user_id,
         location: placeOfBirth,
@@ -72,7 +71,7 @@ const RasiChartPage: React.FC = () => {
       setLoading(false);
     }
   };
-
+ 
   function normalizeDateToMMDDYYYY(input: string): string {
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(input)) {
       return input;
@@ -101,7 +100,6 @@ const RasiChartPage: React.FC = () => {
   const downloadImage = (url: string, filename: string) => {
     const cleanUrl = url.trim();
  
-
     // Handle data URLs (though not used here, kept for safety)
     if (cleanUrl.startsWith('')) {
       const link = document.createElement('a');
@@ -112,7 +110,7 @@ const RasiChartPage: React.FC = () => {
       document.body.removeChild(link);
       return;
     }
-
+ 
     // Fetch remote URL (SVG in this case)
     fetch(cleanUrl)
       .then((response) => {
@@ -140,13 +138,11 @@ const RasiChartPage: React.FC = () => {
       <div
         className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center"
         style={{
-
           backgroundColor: '#000',
           position: 'fixed',
           top: 0,
           left: 0,
           zIndex: 1050
-
         }}
       >
         <div className="text-center">
@@ -161,7 +157,6 @@ const RasiChartPage: React.FC = () => {
               }}
             />
             <div
-
               className="position-absolute top-50 start-50 translate-middle"
               style={{
                 width: '4.5rem',
@@ -178,7 +173,7 @@ const RasiChartPage: React.FC = () => {
       </div>
     );
   }
-
+ 
   // === Error State ===
   if (error) {
     return (
@@ -192,7 +187,7 @@ const RasiChartPage: React.FC = () => {
       </div>
     );
   }
-
+ 
   // === No Data State ===
   if (!data?.data?.chartImages) {
     return (
@@ -204,7 +199,7 @@ const RasiChartPage: React.FC = () => {
   }
  
   const { rasiChart, navamshaChart } = data.data.chartImages;
-
+ 
   return (
     <div className="vh-100 vw-100 p-4" style={{ backgroundColor: '#000', color: 'white' }}>
       {/* Header */}
@@ -262,7 +257,7 @@ const RasiChartPage: React.FC = () => {
               </Card.Body>
             </Card>
           </Col>
-
+ 
           {/* Navamsha Chart */}
           <Col md={6}>
             <Card className="bg-dark text-white border-secondary h-100">

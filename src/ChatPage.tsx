@@ -148,7 +148,7 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     const welcomeMessage = `👋 Hey ${localStorage.getItem(
       "username"
-    )}!, What do you want from External AI.`;
+    )}!, What do you want from Eternal AI.`;
     const questionMessages = questions.map((question) => ({
       sender: "ai",
       text: question?.message,
@@ -291,7 +291,7 @@ const ChatPage: React.FC = () => {
   // };
 
   const sendMessage = async () => {
-  
+
     const userId = localStorage.getItem("user_id");
     const BASE_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
 
@@ -323,7 +323,7 @@ const ChatPage: React.FC = () => {
       { sender: "ai", text: "Thinking...", isThinking: true },
     ]);
 
-     if (textAreaRef.current) {
+    if (textAreaRef.current) {
       textAreaRef.current.style.height = "40px";
     }
     try {
@@ -810,7 +810,7 @@ const ChatPage: React.FC = () => {
   };
 
   const showRemainingQuestions = () => {
-  
+
     const remaining = questions.filter(
       (q) => !completedReports.includes(reportTypes[q.message])
     );
@@ -950,8 +950,8 @@ const ChatPage: React.FC = () => {
       const fileExtension = audioBlob.type.includes("wav")
         ? ".wav"
         : audioBlob.type.includes("mp3")
-        ? ".mp3"
-        : ".webm";
+          ? ".mp3"
+          : ".webm";
       const fileName = `voice_recording${fileExtension}`;
 
       formData.append("file", audioBlob, fileName);
@@ -1334,9 +1334,8 @@ const ChatPage: React.FC = () => {
               return (
                 <div
                   key={i}
-                  className={`d-flex flex-column mb-4 ${
-                    isUser ? "align-items-end" : "align-items-start"
-                  }`}
+                  className={`d-flex flex-column mb-4 ${isUser ? "align-items-end" : "align-items-start"
+                    }`}
                 >
                   {/* Avatar on top */}
                   {(msg.aiAvatar || msg.userAvatar) && (
@@ -1386,8 +1385,8 @@ const ChatPage: React.FC = () => {
                       borderRadius: aiAvatar
                         ? "0px 10px 10px 10px"
                         : userAvatar
-                        ? "10px 0px 10px 10px"
-                        : "10px",
+                          ? "10px 0px 10px 10px"
+                          : "10px",
                     }}
                     onClick={() => {
                       if (isSuggestion) {
@@ -1518,24 +1517,24 @@ const ChatPage: React.FC = () => {
         {!reportGenerated && (
           <div className="position-relative z-10 p-3">
             <div className="d-flex justify-content-center w-100">
-                {completedReports.length > 0 && <Button
-                  variant="link"
-                  className="border-0 p-0 me-2 d-flex align-items-center justify-content-center"
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    backgroundImage:
-                      "linear-gradient(90deg, rgb(0, 198, 255), rgb(0, 114, 255))",
-                    color: "white",
-                    fontSize: "1.2rem",
-                    position: "relative",
-                    top: "5px",
-                  }}
-                  onClick={handleMagicButtonClick}
-                >
-                  <i className="bi bi-stars"></i>
-                </Button>}
+              {completedReports.length > 0 && <Button
+                variant="link"
+                className="border-0 p-0 me-2 d-flex align-items-center justify-content-center"
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  backgroundImage:
+                    "linear-gradient(90deg, rgb(0, 198, 255), rgb(0, 114, 255))",
+                  color: "white",
+                  fontSize: "1.2rem",
+                  position: "relative",
+                  top: "5px",
+                }}
+                onClick={handleMagicButtonClick}
+              >
+                <i className="bi bi-stars"></i>
+              </Button>}
               <div
                 className="bg-dark bg-opacity-75 rounded-4 p-2 shadow-sm"
                 style={{ width: "100%", maxWidth: "1000px" }}
@@ -1591,7 +1590,7 @@ const ChatPage: React.FC = () => {
                         as="textarea"
                         rows={1}
                         placeholder="Enter a prompt here"
-                        className="bg-transparent text-white border-0 shadow-none flex-grow-1"
+                        className="bg-transparent text-white border-0 shadow-none flex-grow-1 white-placeholder"
                         style={{
                           resize: "none",
                           overflow: "hidden",
@@ -1603,16 +1602,15 @@ const ChatPage: React.FC = () => {
                         onChange={(e) => {
                           setInputValue(e.target.value);
                           e.currentTarget.style.height = "40px"; // reset first
-                          e.currentTarget.style.height =
-                            e.currentTarget.scrollHeight + "px";
+                          e.currentTarget.style.height = e.currentTarget.scrollHeight + "px";
                         }}
-                        onKeyDown={
-                          (e) =>
-                            e.key === "Enter" &&
-                            !e.shiftKey &&
-                            (e.preventDefault(), sendMessage(inputValue)) // Call sendMessage with text
+                        onKeyDown={(e) =>
+                          e.key === "Enter" &&
+                          !e.shiftKey &&
+                          (e.preventDefault(), sendMessage(inputValue))
                         }
                       />
+
 
                       {/* Icons + Send */}
                       <div className="d-flex align-items-center ms-2">

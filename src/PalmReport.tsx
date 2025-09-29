@@ -2,17 +2,17 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Button, Container, Row, Col, Badge, Alert } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PalmReadingResponse } from './types'; // Import your type
+
 
 const PalmReadingReportPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [report, setReport] = useState<PalmReadingResponse | null>(null);
+  const [report, setReport] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (location.state && (location.state as PalmReadingResponse).success) {
-      setReport(location.state as PalmReadingResponse);
+    if (location.state && (location.state).success) {
+      setReport(location.state);
     } else {
       setError('No report data found. Please upload a palm image first.');
     }
