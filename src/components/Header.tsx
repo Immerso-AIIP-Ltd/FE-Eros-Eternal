@@ -12,7 +12,7 @@ export const Header: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const username = localStorage.getItem('username') || 'Guest';
+  // const username = localStorage.getItem('username') || 'Guest'; 
   const fetchAstrologyData = async () => {
     try {
       // Get data from localStorage
