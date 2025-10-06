@@ -19,7 +19,7 @@ const SplashScreen: React.FC = () => {
         className="rotate-image-bg position-absolute"
         style={{
           zIndex: 0,
-          opacity: 3.15,
+          opacity: 0.5,
           pointerEvents: "none",
           top: "50%",
           left: "50%",
@@ -60,7 +60,7 @@ const SplashScreen: React.FC = () => {
         <div className="mb-4">
           <div
             className="text-light opacity-70 fw-medium mb-1"
-            style={{ fontSize: "24px", letterSpacing: "1px",color:"rgba(255, 255, 255, 1)",fontFamily:"Manrope" }}
+            style={{ fontSize: "24px", letterSpacing: "1px",color:"rgba(255, 255, 255, 1)",fontFamily:"Manrope,sans-serif" }}
           >
             EROS Universe
           </div>
@@ -78,11 +78,22 @@ const SplashScreen: React.FC = () => {
   >
     Eternal AI
   </h1> */}
-              <h2 style={{ color: "rgba(0, 184, 248, 1)", fontSize: "64px",fontFamily:"Montserrat" ,}}> Eternal AI</h2>
+              <h2 style={{
+  background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  backgroundClip: 'text',
+  color: 'transparent',
+  fontSize: '64px',
+  fontFamily: 'Montserrat,sans-serif'
+}}>
+  Eternal AI
+</h2>
+
           {/* <h2 className="h4 fw-bold" style={{color: "#00A2FF",}}> Eternal AI</h2> */}
           <p
             className="text-light opacity-80 mb-4"
-            style={{ fontSize: "1.9rem",fontFamily:"Manrope"}}
+            style={{ fontSize: "1.9rem",fontFamily:"Manrope,sans-serif"}}
           >
             Eternal AI is your personal companion for inner growth and
             exploration.
@@ -93,7 +104,7 @@ const SplashScreen: React.FC = () => {
             {/* Outline Button with Rocket Icon */}
             <button
               className="btn btn-outline-light rounded-pill px-4 py-2 d-flex align-items-center"
-              style={{ borderColor: "#ffffff",fontFamily:"Poppins" }}
+              style={{ borderColor: "#ffffff",fontFamily:"Poppins,sans-serif" }}
             >
               {/* <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -114,7 +125,7 @@ const SplashScreen: React.FC = () => {
                 console.log("check its working");
                 navigate("/founder");
               }}
-              className="btn btn-info text-white rounded-pill px-4 py-2 fw-medium" style={{fontFamily:"Poppins"}}
+              className="btn btn-info text-white rounded-pill px-4 py-2 fw-medium" style={{fontFamily:"Poppins,sans-serif"}}
             >
               Begin your journey
             </button>

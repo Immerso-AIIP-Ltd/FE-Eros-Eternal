@@ -67,23 +67,19 @@ export const ExploreSection: React.FC = () => {
           fontSize: '1.25rem',
           fontWeight: 600,
           color: '#ffffff',
-          fontFamily:"Poppins"
+          fontFamily: "Poppins,sans-serif"
         }}
       >
         Explore More
       </h2>
 
-      {/* Horizontal Scroll Container */}
+      {/* Grid Container */}
       <div
-        className="horizontal-scroll"
+        className="cards-grid"
         style={{
-          display: 'flex',
-          overflowX: 'auto',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(450px, 1fr))',
           gap: '1rem',
-          padding: '0 0.5rem',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          whiteSpace: 'nowrap',
           marginTop: '1rem',
           paddingBottom: '1rem',
         }}
@@ -97,16 +93,15 @@ export const ExploreSection: React.FC = () => {
             tabIndex={item.onClick ? 0 : -1}
             aria-label={item.locked ? `${item.title} - Coming Soon` : item.title}
             style={{
-              minWidth: '300px',
-              flexShrink: 0,
+              width: '100%',
               borderRadius: '12px',
               backgroundColor: '#1e2123',
               overflow: 'hidden',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               cursor: item.onClick ? 'pointer' : 'not-allowed',
               position: 'relative',
-              fontFamily:"DM Sans",
-              fontSize:"16px",
+              fontFamily: "DM Sans,sans-serif",
+              fontSize: "16px",
             }}
             onMouseEnter={(e) => {
               if (item.onClick) {
@@ -202,10 +197,6 @@ export const ExploreSection: React.FC = () => {
 
       {/* Injected Styles */}
       <style jsx>{`
-        .horizontal-scroll::-webkit-scrollbar {
-          display: none;
-        }
-
         .card-item:hover {
           transform: scale(1.02);
           box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
@@ -214,7 +205,7 @@ export const ExploreSection: React.FC = () => {
         .card-item img {
           width: 100%;
           height: 200px;
-          object-fit: conatin;
+          object-fit: contain;
         }
 
         .card-item .text-content {

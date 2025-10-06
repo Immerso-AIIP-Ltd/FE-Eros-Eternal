@@ -14,8 +14,14 @@ interface ReportData {
         report_title: string;
         assessment: {
             vibrational_frequency?: number;
+            current_flame_score?: number;
+            current_energy_assessment: {
+                vibrational_frequency?: number;
+            }
             current_energy_state?: string;
-            current_flame_score?: string;
+            spiritual_evolution: {
+                current_flame_score?: string;
+            }
             flame_score?: string;
             aura_intensity?: string;
             kosha_alignment?: string;
@@ -113,13 +119,15 @@ const ViewReport = () => {
         const assessment = reportData?.report_data?.assessment;
         if (!assessment) return 'N/A    ';
 
-        return assessment.vibrational_frequency ||
-            assessment.current_flame_score ||
-            assessment.flame_score ||
-            assessment.aura_intensity ||
-            assessment.kosha_alignment ||
-            assessment.star_magnitude ||
-            assessment.longevity_score ||
+        return assessment?.current_energy_assessment?.vibrational_frequency ||
+        assessment?.vibrational_frequency ||
+            assessment?.spiritual_evolution?.current_flame_score ||
+            assessment?.current_flame_score ||
+            assessment?.flame_score ||
+            assessment?.aura_intensity ||
+            assessment?.kosha_alignment ||
+            assessment?.star_magnitude ||
+            assessment?.longevity_score ||
             'N/A';
     };
 

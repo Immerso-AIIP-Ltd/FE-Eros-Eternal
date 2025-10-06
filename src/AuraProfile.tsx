@@ -779,10 +779,17 @@ const AuraProfile: React.FC = () => {
           div::-webkit-scrollbar-thumb:hover {
             background: #6B7280;
           }
+            .sidebar-btn:hover{
+            background-color: #71717A;
+          }
         `}</style>
                 <div className="p-4 border-b border-gray-700">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold" style={{ color: '#00B8F8' }}>Eternal Reports</h2>
+                        <h2 className="text-lg font-bold" style={{ background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  backgroundClip: 'text',
+  color: 'transparent', }}>Eternal Reports</h2>
                         <button
                             className="md:hidden text-gray-400 hover:text-white bg-transparent"
                             onClick={() => setSidebarOpen(false)}
@@ -798,7 +805,7 @@ const AuraProfile: React.FC = () => {
                                 key={item.id}
                                 className={`btn d-flex align-items-center my-2 gap-2 w-100 text-start ${activeMenuItem === item.id
                                     ? 'btn-info text-white'
-                                    : 'btn-dark text-white hover-bg-dark'
+                                    : 'sidebar-btn text-white hover-bg-dark'
                                     }`}
                                 onClick={async () => {
                                     setActiveMenuItem(item.id);
@@ -847,7 +854,7 @@ const AuraProfile: React.FC = () => {
                             <LogOut size={18} />
                         </div>
                         <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center text-sm font-semibold ms-2">
-                            A
+                            <User size={18} />
                         </div>
                     </div>
                 </div>
@@ -960,7 +967,7 @@ const AuraProfile: React.FC = () => {
                                                 <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                                                     <span className="text-xs font-semibold text-white">AI</span>
                                                 </div>
-                                                <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg">
+                                                <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg" style={{border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D'}}>
                                                     <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
                                                         {message.isThinking ? (
                                                             <div className="flex items-center gap-2">
@@ -1018,8 +1025,8 @@ const AuraProfile: React.FC = () => {
 
                     {/* Fixed Input Area at Bottom */}
                     {assessmentStatus !== 'report_generated' && (
-                        <div className="sticky bottom-0 bg-black z-20 px-6 pb-4 pt-2 border-t border-gray-800">
-                            <div className="bg-gray-800 rounded-2xl p-4 shadow-lg" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
+                        <div className="sticky bottom-0 bg-black z-20 px-6 pb-4 pt-2 border-gray-800">
+                            <div className="bg-gray-800 rounded-2xl p-4 shadow-lg" style={{ maxWidth: '65%', margin: '0 auto', width: '100%', backgroundColor: '#1E2123' }}>
                                 {(attachedImages.length > 0 || attachedVoices.length > 0) && (
                                     <div className="flex flex-col gap-3 mb-3">
                                         {attachedImages.length > 0 && (
@@ -1141,16 +1148,16 @@ const AuraProfile: React.FC = () => {
                     )}
 
                     {/* Footer - Fixed at very bottom */}
-                    <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-t border-gray-800">
+                    <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-gray-800">
                         <div className="text-center text-xs text-gray-500" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
-                            <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center justify-center text-xs">
                                 <div>© 2025 EROS Universe. All Rights Reserved.</div>
-                                <div className="flex items-center gap-6">
+                                {/* <div className="flex items-center gap-6">
                                     <a href="#" className="hover:text-gray-300 transition-colors">FAQs</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Terms & Conditions</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Refund Policy</a>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>

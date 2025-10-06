@@ -10,6 +10,13 @@ import star from '../starmap.webm'
 import crystal from "../Magic Crystal Ball.webm";
 import galaxy from "../galaxy.webm"
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import soul from "../soul.webm"
+import chakra from "../chakra.webm";
+import vibrational from "./../assets/webm/vibrational.webm";
+import kosha from "./../assets/webm/kosha.webm";
+import aura from "./../assets/webm/aura.webm";
+import starmap from "./../assets/webm/star-map.webm";
+import longevity from "./../assets/webm/longevity.webm";
 
 const StatsCards = () => {
   const navigate = useNavigate();
@@ -23,7 +30,7 @@ const StatsCards = () => {
     {
       id: 1,
       title: "Vibrational Frequency",
-      iconVideo: vibe,
+      iconVideo: vibrational,
       route: "/vibrational-frequency",
       reportType: "vibrational_frequency"
 
@@ -46,14 +53,14 @@ const StatsCards = () => {
     {
       id: 4,
       title: "Aura Profile",
-      iconVideo: crystal,
+      iconVideo: aura,
       route: "/aura-profile",
       reportType: "aura_profile"
     },
     {
       id: 5,
       title: "Kosha Map",
-      iconVideo: star,
+      iconVideo: kosha,
       route: "/kosha-map",
       reportType: "kosha_map"
 
@@ -61,7 +68,7 @@ const StatsCards = () => {
     {
       id: 6,
       title: "Longevity Blueprint",
-      iconVideo: gym,
+      iconVideo: longevity,
       route: "/longevity-blueprint",
       reportType: "longevity_blueprint"
     },
@@ -162,10 +169,10 @@ const StatsCards = () => {
   return (
     <div className="container-fluid p-0 m-0">
       <div className="header mb-4">
-        <h1 className="text-white mb-1" style={{ fontFamily: "Poppins" }}>
+        <h1 className="text-white mb-1" style={{ fontFamily: "Poppins,sans-serif" }}>
           Your Soul Reports Hub
         </h1>
-        <p className="text-white mb-0" style={{ fontFamily: "Poppins" }}>
+        <p className="text-white mb-0" style={{ fontFamily: "Poppins,sans-serif" }}>
           Tap any card to generate your personalized report
         </p>
       </div>
@@ -234,7 +241,7 @@ const StatsCards = () => {
                   </h5>
                   <p
                     className="card-text mb-3 small"
-                    style={{ color: "#00B8F8", fontFamily: "Inter" }}
+                    style={{ color: "#00B8F8", fontFamily: "Inter,sans-serif" }}
                   >
                     {hasReport ? "View Report" : "Report"}
                   </p>
@@ -243,7 +250,7 @@ const StatsCards = () => {
                     className={`btn btn-outline-primary btn-sm text-white rounded-pill px-4 ${hasReport ? "border-blue-500" : ""
                       }`}
                     onClick={() => handleButtonClick(card)}
-                    style={{ fontFamily: "Poppins" }}
+                    style={{ fontFamily: "Poppins,sans-serif" }}
                   >
                     {hasReport ? "Recommendations" : "Generate Report"}
                   </button>

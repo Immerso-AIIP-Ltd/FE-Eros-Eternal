@@ -39,8 +39,9 @@ export default function Stars() {
         top: 0,
         left: 0,
         width: "100%",
-        height: `${pageHeight - 10}px`, // full dynamic height
+        height: "100vh",
         // zIndex: -1,
+        overflow: "hidden"
       }}
     >
       {stars.map((star) => (

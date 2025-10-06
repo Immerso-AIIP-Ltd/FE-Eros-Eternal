@@ -10,3 +10,8 @@
   margin: 2rem auto;
   width: fit-content;
 }
+
+.white-placeholder::placeholder {
+  color: rgb(202, 200, 200);
+  opacity: 1; /* Ensures full white, not semi-transparent */
+}

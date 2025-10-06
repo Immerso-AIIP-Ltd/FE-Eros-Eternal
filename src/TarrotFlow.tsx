@@ -8,6 +8,7 @@ import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "./components/Tarot/TarotCardSelector";
 import Stars from "./components/stars";
 import { Calendar } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 
 interface TarotReading {
   card_backcover: string;
@@ -17,6 +18,7 @@ interface TarotReading {
   reading: TarotCard[];
 }
 const TarotFlow: React.FC = () => {
+   const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1 = intro, 2 = form, 3 = tarot
   const [formData, setFormData] = useState({
     name: "",
@@ -164,7 +166,7 @@ const TarotFlow: React.FC = () => {
               width: "10%",
               border: "none",
             }}
-            onClick={() => setStep(1)}
+            onClick={() => navigate("/result")}
           >
             <i className="bi bi-arrow-left m-3"></i> Back
           </button>
@@ -222,9 +224,9 @@ const TarotFlow: React.FC = () => {
                     onChange={handleChange}
                     ref={dateInputRef}
                   />
-                  <span className="input-group-text" onClick={openDatePicker} style={{ cursor: 'pointer' }}>
+                  {/* <span className="input-group-text" onClick={openDatePicker} style={{ cursor: 'pointer' }}>
                     <Calendar size={20} />
-                  </span>
+                  </span> */}
                 </div>
               </div>
 
@@ -237,7 +239,7 @@ const TarotFlow: React.FC = () => {
               </button>
             </form>
 
-            <p className="small text-center mt-3">
+            {/* <p className="small text-center mt-3">
               By continuing, you agree to our{" "}
               <a href="#" className="text-info">
                 terms of service
@@ -251,7 +253,7 @@ const TarotFlow: React.FC = () => {
                 cookie policy
               </a>
               .
-            </p>
+            </p> */}
           </div>
         </div>
       )}
