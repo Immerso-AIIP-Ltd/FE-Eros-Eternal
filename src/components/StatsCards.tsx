@@ -177,7 +177,7 @@ const StatsCards = () => {
           return (
             <div key={card.id} className="col-md-6 mb-4">
               <div
-                className="card border-0 rounded-4 shadow-lg bg-dark hover-card top-outline-primary custom-top-border"
+                className="card border-0 rounded-4 shadow-lg hover-card top-outline-primary custom-top-border"
                 onClick={(e) => handleCardClick(card, e)}
                 style={{
                   borderImage:
@@ -216,7 +216,8 @@ const StatsCards = () => {
                     />
                     <ArrowForwardIosIcon
                       sx={{
-                        color: "rgba(102, 102, 102, 1)",
+                        // color: "rgba(102, 102, 102, 1)",
+                        color: "rgb(214 214 214)",
                         fontSize: "1.25rem",
                       }}
                     />

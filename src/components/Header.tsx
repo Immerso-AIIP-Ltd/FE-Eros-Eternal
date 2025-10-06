@@ -76,7 +76,7 @@ export const Header: React.FC = () => {
       style={{
         width: "100%",
         height: "40vh", // Full viewport height
-        backgroundImage: `url(${headerBg})`,
+        backgroundImage: `linear-gradient(rgba(245, 246, 252, 0.52), #111111),url(${headerBg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -221,6 +221,7 @@ export const Header: React.FC = () => {
           marginBottom: "2rem",
           zIndex: 2,
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+          backgroundImage:"linear-gradient(160deg, rgb(0, 162, 255) 60%, rgb(170, 225, 39) 120%)",
           position: "relative",
           overflow: "hidden",
         }}
@@ -233,8 +234,8 @@ export const Header: React.FC = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            background:
-              "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px)",
+            // background:
+            //   "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px)",
             pointerEvents: "none",
             opacity: 0.3,
           }}
