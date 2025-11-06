@@ -82,9 +82,11 @@ const PalmUploadPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
+
     try {
+      const userId = localStorage.getItem('user_id');
       const formData = new FormData();
-      formData.append("user_id", "1eb41064-025e-434d-aa1d-c9738a37ce1d");
+      formData.append("user_id", userId || "");
       formData.append("image_data", selectedFile); // 👈 Use selectedFile directly
 
       const response = await fetch(
