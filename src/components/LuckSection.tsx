@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import planetIcon from "../planet.png";
 import Month from "../Month.png";
 import number from "../number.png";
+import moment from "moment";
 
 interface LuckyNumbers {
   destiny_number: number;
@@ -28,6 +29,7 @@ interface PersonalMonthResponse {
 }
 
 const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+// const API_URL = "http://192.168.18.5:7001";
 
 export const LuckSection: React.FC = () => {
   const [flippedIndexes, setFlippedIndexes] = useState<Set<number>>(new Set());
@@ -84,7 +86,7 @@ export const LuckSection: React.FC = () => {
             "0"
           )}-${day.padStart(2, "0")}`;
 
-          formData.append("dob", formattedDob); // Now sends "1990-08-15"
+          formData.append("dob", moment(formattedDob).format("YYYY-MM-DD")); // Now sends "1990-08-15"
         }
         const response = await fetch(
           `${API_URL}/api/v1/numerology/planetary_horoscope`,
@@ -146,7 +148,7 @@ export const LuckSection: React.FC = () => {
               "0"
             )}-${day.padStart(2, "0")}`;
 
-            formData.append("dob", formattedDob); // Now sends "1990-08-15"
+            formData.append("dob", moment(formattedDob).format("YYYY-MM-DD")); // Now sends "1990-08-15"
           }
         const response = await fetch(
           `${API_URL}/api/v1/numerology/personal_month`,
@@ -236,7 +238,7 @@ useEffect(() => {
       if (dob) {
         const [day, month, year] = dob.split("-");
         const formattedDob = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-        formData.append("dob", formattedDob);
+        formData.append("dob", moment(formattedDob).format("YYYY-MM-DD"));
       }
 
       const response = await fetch(

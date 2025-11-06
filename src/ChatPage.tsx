@@ -151,6 +151,8 @@ const ChatPage: React.FC = () => {
     const userId = localStorage.getItem("user_id");
     const BASE_URL =
       "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+    // const BASE_URL =
+    //   "http://192.168.18.5:7001";
 
     const message = (inputValue ?? "").toString();
     const hasText = message.trim().length > 0;
@@ -187,7 +189,7 @@ const ChatPage: React.FC = () => {
       const form = new FormData();
 
       if (chatMode === "spiritual") {
-        url = `${BASE_URL}/api/v1/chat/spiritual`;
+        url = `${BASE_URL}/api/v1/chat/spiritual/${userId}`;
         form.append("user_id", userId || "0");
         form.append("message", message);
         if (spiritualSessionId) {

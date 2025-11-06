@@ -106,6 +106,7 @@ const FaceUploadPage: React.FC = () => {
 
       const response = await fetch(
         'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/face_reading/analyze',
+        // `http://192.168.18.5:7001/api/v1/face_reading/analyze`,
         {
           method: 'POST',
           body: formData,
@@ -161,7 +162,7 @@ const FaceUploadPage: React.FC = () => {
         <button
           className="btn text-white"
           onClick={() => window.history.back()}
-          style={{ fontSize: '1rem' }}
+          style={{ fontSize: '1rem', zIndex: 2 }}
         >
           ← Back
         </button>

@@ -27,6 +27,7 @@ const TarotFlow: React.FC = () => {
   });
   const [cardData, setCardData] = useState<TarotReading | null>(null);
   const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+  // const API_URL = "http://192.168.18.5:7001";
   const userId = localStorage.getItem("user_id");
 
   const dateInputRef = useRef(null);

@@ -6,6 +6,9 @@ import Stars from "./components/stars";
 // 💡 Replace this with your actual API URL
 const API_URL =
   "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+  
+// const API_URL =
+//   "http://192.168.18.5:7001";
 
 interface CompatibilityData {
   match_for: string;

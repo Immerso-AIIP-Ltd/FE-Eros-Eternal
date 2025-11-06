@@ -12,15 +12,18 @@ import {
   InputAdornment,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import backgroundImg from "./background.png";
 import Stars from "./components/stars";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
-const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+const API_URL =
+  "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+// const API_URL =
+//   "http://192.168.18.5:7001";
 
 interface FormData {
   firstName: string;
@@ -193,20 +196,22 @@ const SoulProfilePage: React.FC = () => {
 
   // ✅ FIXED: Validate & sanitize data from localStorage
   useEffect(() => {
-    const savedData = localStorage.getItem('soulProfile');
+    const savedData = localStorage.getItem("soulProfile");
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
 
         // Validate date format: YYYY-MM-DD
         const isValidDate = (str: string): boolean => {
-          if (!str || typeof str !== 'string') return false;
-          return /^\d{4}-\d{2}-\d{2}$/.test(str) && !isNaN(new Date(str).getTime());
+          if (!str || typeof str !== "string") return false;
+          return (
+            /^\d{4}-\d{2}-\d{2}$/.test(str) && !isNaN(new Date(str).getTime())
+          );
         };
 
         // Validate time format: HH:mm or HH:mm:ss
         const isValidTime = (str: string): boolean => {
-          if (!str || typeof str !== 'string') return false;
+          if (!str || typeof str !== "string") return false;
           return /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/.test(str);
         };
 
@@ -225,12 +230,16 @@ const SoulProfilePage: React.FC = () => {
           gender: parsed.gender || "",
           placeOfBirth: parsed.placeOfBirth || "",
           currentLocation: parsed.currentLocation || "",
-          dateOfBirth: isValidDate(parsed.dateOfBirth) ? parsed.dateOfBirth : "",
-          timeOfBirth: isValidTime(parsed.timeOfBirth) ? normalizeTime(parsed.timeOfBirth) : "",
+          dateOfBirth: isValidDate(parsed.dateOfBirth)
+            ? parsed.dateOfBirth
+            : "",
+          timeOfBirth: isValidTime(parsed.timeOfBirth)
+            ? normalizeTime(parsed.timeOfBirth)
+            : "",
         });
       } catch (e) {
         console.error("Failed to parse saved profile:", e);
-        localStorage.removeItem('soulProfile');
+        localStorage.removeItem("soulProfile");
       }
     }
   }, []);
@@ -238,7 +247,7 @@ const SoulProfilePage: React.FC = () => {
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => {
       const updated = { ...prev, [field]: value };
-      localStorage.setItem('soulProfile', JSON.stringify(updated));
+      localStorage.setItem("soulProfile", JSON.stringify(updated));
       return updated;
     });
   };
@@ -258,102 +267,117 @@ const SoulProfilePage: React.FC = () => {
     timeInputRef.current?.click();
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  // if (!formData.firstName.trim()) {
-  //   alert("Please enter your first name.");
-  //   return;
-  // }
-  if (!formData.name.trim()) {
-    alert("Please enter your name.");
-    return;
-  }
-  if (!formData.dateOfBirth) {
-    alert("Please select a valid date of birth.");
-    return;
-  }
-  if (!formData.timeOfBirth) {
-    alert("Please select a valid time of birth.");
-    return;
-  }
-
-  const [year, month, day] = formData.dateOfBirth.split("-");
-  const formattedDate = `${day}-${month}-${year}`;
-
-  // ✅ Create FormData instead of a plain object
-  const payload = new FormData();
-  payload.append("gender", formData.gender);
-  payload.append("username", formData.name);
-  payload.append("place_of_birth", formData.placeOfBirth);
-  payload.append("current_location", formData.currentLocation);
-  payload.append("date_of_birth", formattedDate);
-  payload.append("time_of_birth", formData.timeOfBirth);
-
-  setError(null);
-  setLoading(true);
-
-  try {
-    const response = await fetch(`${API_URL}/api/v1/users/profile/`, {
-      method: "POST",
-      // ⚠️ DO NOT set Content-Type — let the browser handle it
-      // headers: { "Content-Type": "application/json" }, ← REMOVE THIS
-      body: payload, // ← FormData goes here
-    });
-
-    if (!response.ok) {
-      // ⚠️ Important: When using FormData, the server might still return JSON errors
-      // So we try to parse as JSON, but be cautious
-      let errorResponse;
-      const text = await response.text();
-      try {
-        errorResponse = JSON.parse(text);
-      } catch {
-        errorResponse = text; // fallback to raw text
-      }
-
-      let errorMessage = "Server error occurred";
-
-      if (Array.isArray(errorResponse)) {
-        errorMessage = errorResponse
-          .map(err => err.msg || err.message || err.detail || "Unknown error")
-          .join("; ");
-      } else if (errorResponse && typeof errorResponse === "object") {
-        errorMessage = errorResponse.message || errorResponse.error || JSON.stringify(errorResponse);
-      } else if (typeof errorResponse === "string") {
-        errorMessage = errorResponse;
-      }
-
-      throw new Error(errorMessage);
+    // if (!formData.firstName.trim()) {
+    //   alert("Please enter your first name.");
+    //   return;
+    // }
+    if (!formData.name.trim()) {
+      alert("Please enter your name.");
+      return;
+    }
+    if (!formData.dateOfBirth) {
+      alert("Please select a valid date of birth.");
+      return;
+    }
+    if (!formData.timeOfBirth) {
+      alert("Please select a valid time of birth.");
+      return;
     }
 
-    const result = await response.json();
+    const [year, month, day] = formData.dateOfBirth.split("-");
+    const formattedDate = `${day}-${month}-${year}`;
 
-    if (result.success) {
-      localStorage.setItem("user_id", result.data.user_id);
-      localStorage.setItem("username", result.data.username);
-      localStorage.setItem("date_of_birth", result.data.date_of_birth);
-      localStorage.setItem("gender",result.data.gender);
-      localStorage.setItem("place_of_birth",result.data.place_of_birth);
-      localStorage.setItem("current_location",result.data.current_location);
-      localStorage.setItem("time_of_birth",result.data.time_of_birth)
-      alert(result.message);
-      navigate("/aipage");
-    } else {
-      throw new Error(result.message || "Profile creation failed");
+    // ✅ Create FormData instead of a plain object
+    const payload = new FormData();
+    payload.append("gender", formData.gender);
+    payload.append("username", formData.name);
+    payload.append("place_of_birth", formData.placeOfBirth);
+    payload.append("current_location", formData.currentLocation);
+    payload.append("date_of_birth", formattedDate);
+    payload.append("time_of_birth", formData.timeOfBirth);
+
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/api/v1/users/profile/`, {
+        method: "POST",
+        // ⚠️ DO NOT set Content-Type — let the browser handle it
+        // headers: { "Content-Type": "application/json" }, ← REMOVE THIS
+        body: payload, // ← FormData goes here
+      });
+
+      if (!response.ok) {
+        // ⚠️ Important: When using FormData, the server might still return JSON errors
+        // So we try to parse as JSON, but be cautious
+        let errorResponse;
+        const text = await response.text();
+        try {
+          errorResponse = JSON.parse(text);
+        } catch {
+          errorResponse = text; // fallback to raw text
+        }
+
+        let errorMessage = "Server error occurred";
+
+        if (Array.isArray(errorResponse)) {
+          errorMessage = errorResponse
+            .map(
+              (err) => err.msg || err.message || err.detail || "Unknown error"
+            )
+            .join("; ");
+        } else if (errorResponse && typeof errorResponse === "object") {
+          errorMessage =
+            errorResponse.message ||
+            errorResponse.error ||
+            JSON.stringify(errorResponse);
+        } else if (typeof errorResponse === "string") {
+          errorMessage = errorResponse;
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        localStorage.setItem("user_id", result.data.user_id);
+        localStorage.setItem("username", result.data.username);
+        localStorage.setItem("date_of_birth", result.data.date_of_birth);
+        localStorage.setItem("gender", result.data.gender);
+        localStorage.setItem("place_of_birth", result.data.place_of_birth);
+        localStorage.setItem("current_location", result.data.current_location);
+        localStorage.setItem("time_of_birth", result.data.time_of_birth);
+        alert(result.message);
+        navigate("/aipage");
+      } else {
+        throw new Error(result.message || "Profile creation failed");
+      }
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setError(errorMsg);
+      alert(`Error: ${errorMsg}`);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : "An unknown error occurred";
-    setError(errorMsg);
-    alert(`Error: ${errorMsg}`);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <div style={{ height: "100vh", width: "100vw", background: "#000", color: "#fff", position: "relative", overflow: "hidden" }}>
+      <div
+        style={{
+          height: "100vh",
+          width: "100vw",
+          background: "#000",
+          color: "#fff",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
         <Stars />
         <div
           style={{
@@ -369,7 +393,13 @@ const handleSubmit = async (e: React.FormEvent) => {
           }}
         >
           {/* Left Side - Background and Logo */}
-          <div style={{ flex: "1 1 50%", position: "relative", textAlign: "center" }}>
+          <div
+            style={{
+              flex: "1 1 50%",
+              position: "relative",
+              textAlign: "center",
+            }}
+          >
             <img
               src={backgroundImg}
               alt="Rotating Cosmic Background"
@@ -401,17 +431,20 @@ const handleSubmit = async (e: React.FormEvent) => {
             >
               EROS UNIVERSE
             </div>
-                       <h2 style={{
-  background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  backgroundClip: 'text',
-  color: 'transparent',
-  fontSize: '64px',
-  fontFamily: 'Montserrat,sans-serif'
-}}>
-  Eternal AI
-</h2>
+            <h2
+              style={{
+                background:
+                  "linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                color: "transparent",
+                fontSize: "64px",
+                fontFamily: "Montserrat,sans-serif",
+              }}
+            >
+              Eternal AI
+            </h2>
           </div>
 
           {/* Right Side - Form */}
@@ -427,10 +460,18 @@ const handleSubmit = async (e: React.FormEvent) => {
               display: "flex",
               flexDirection: "column",
               gap: "1rem",
-              fontFamily:"Inter,sans-serif"
+              fontFamily: "Inter,sans-serif",
             }}
           >
-            <h1 style={{ marginBottom: "1rem",fontFamily:"Montserrat,sans-serif",fontWeight:"700"}}>Create Your Soul Profile</h1>
+            <h1
+              style={{
+                marginBottom: "1rem",
+                fontFamily: "Montserrat,sans-serif",
+                fontWeight: "700",
+              }}
+            >
+              Create Your Soul Profile
+            </h1>
 
             {/* <TextField
               label="First Name"
@@ -487,11 +528,13 @@ const handleSubmit = async (e: React.FormEvent) => {
               </IconLeftWrapper>
               <Select
                 value={formData.gender}
-                onChange={(e: SelectChangeEvent) => handleChange("gender", e.target.value)}
+                onChange={(e: SelectChangeEvent) =>
+                  handleChange("gender", e.target.value)
+                }
                 displayEmpty
                 IconComponent={() => null}
               >
-                <MenuItem value="" disabled style={{opacity: '1'}}>
+                <MenuItem value="" disabled style={{ opacity: "1" }}>
                   Select Gender
                 </MenuItem>
                 <MenuItem value="Male">Male</MenuItem>
@@ -547,48 +590,49 @@ const handleSubmit = async (e: React.FormEvent) => {
             </StyledFormControl> */}
 
             <StyledFormControl variant="outlined">
-  {/* <IconLeftWrapper>
+              {/* <IconLeftWrapper>
     <LocationOnIcon />
   </IconLeftWrapper> */}
-  <TextField
-    value={formData.placeOfBirth}
-    onChange={(e) => handleChange("placeOfBirth", e.target.value)}
-    placeholder="Enter Place of Birth"
-    variant="outlined"
-    fullWidth
-    required
-    InputProps={{
-      startAdornment: (
-        <InputAdornment position="start">
-          <LocationOnIcon />
-        </InputAdornment>
-      ),
-      // Optional: remove default outline if StyledFormControl handles styling
-    }}
-  />
-</StyledFormControl>
+              <TextField
+                value={formData.placeOfBirth}
+                onChange={(e) => handleChange("placeOfBirth", e.target.value)}
+                placeholder="Enter Place of Birth"
+                variant="outlined"
+                fullWidth
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LocationOnIcon />
+                    </InputAdornment>
+                  ),
+                  // Optional: remove default outline if StyledFormControl handles styling
+                }}
+              />
+            </StyledFormControl>
 
-
-<StyledFormControl variant="outlined">
-  {/* <IconLeftWrapper>
+            <StyledFormControl variant="outlined">
+              {/* <IconLeftWrapper>
     <LocationOnIcon />
   </IconLeftWrapper> */}
-  <TextField
-    value={formData.currentLocation}
-    onChange={(e) => handleChange("currentLocation", e.target.value)}
-    placeholder="Enter Current Location"
-    variant="outlined"
-    fullWidth
-    required
-    InputProps={{
-      startAdornment: (
-        <InputAdornment position="start">
-          <LocationOnIcon />
-        </InputAdornment>
-      ),
-    }}
-  />
-</StyledFormControl>
+              <TextField
+                value={formData.currentLocation}
+                onChange={(e) =>
+                  handleChange("currentLocation", e.target.value)
+                }
+                placeholder="Enter Current Location"
+                variant="outlined"
+                fullWidth
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LocationOnIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </StyledFormControl>
 
             {/* Date of Birth */}
             <TextField
@@ -602,12 +646,12 @@ const handleSubmit = async (e: React.FormEvent) => {
               inputProps={{
                 style: { color: "#fff" },
                 sx: {
-                  '&::-webkit-calendar-picker-indicator': {
+                  "&::-webkit-calendar-picker-indicator": {
                     opacity: 0,
-                    pointerEvents: 'none',
+                    pointerEvents: "none",
                   },
-                  '&::-webkit-inner-spin-button': {
-                    display: 'none',
+                  "&::-webkit-inner-spin-button": {
+                    display: "none",
                   },
                 },
               }}
@@ -616,9 +660,9 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <InputAdornment
                     position="start"
                     onClick={handleIconClick}
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ cursor: "pointer" }}
                   >
-                    <CalendarTodayIcon sx={{ color: '#fff' }} />
+                    <CalendarTodayIcon sx={{ color: "#fff" }} />
                   </InputAdornment>
                 ),
               }}
@@ -655,12 +699,12 @@ const handleSubmit = async (e: React.FormEvent) => {
               inputProps={{
                 style: { color: "#fff" },
                 sx: {
-                  '&::-webkit-calendar-picker-indicator': {
+                  "&::-webkit-calendar-picker-indicator": {
                     opacity: 0,
-                    pointerEvents: 'none',
+                    pointerEvents: "none",
                   },
-                  '&::-webkit-inner-spin-button': {
-                    display: 'none',
+                  "&::-webkit-inner-spin-button": {
+                    display: "none",
                   },
                 },
               }}
@@ -669,9 +713,9 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <InputAdornment
                     position="start"
                     onClick={handleTimeIconClick}
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ cursor: "pointer" }}
                   >
-                    <AccessTimeIcon sx={{ color: '#fff' }} />
+                    <AccessTimeIcon sx={{ color: "#fff" }} />
                   </InputAdornment>
                 ),
               }}
@@ -707,7 +751,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 fontWeight: "600",
                 cursor: "pointer",
                 marginTop: "1rem",
-                fontFamily:"Inter,sans-serif"
+                fontFamily: "Inter,sans-serif",
               }}
               disabled={loading}
             >
