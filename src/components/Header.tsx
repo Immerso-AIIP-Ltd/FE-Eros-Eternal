@@ -145,7 +145,7 @@ export const Header: React.FC = () => {
             lineHeight: 1,
             letterSpacing: "-0.02em",
             textShadow: "0 0 20px rgba(170, 225, 39, 0.3)",
-            fontFamily: "Poppins",
+            fontFamily: "Poppins,sans-serif",
           }}
         >
           Eternal
@@ -165,7 +165,7 @@ export const Header: React.FC = () => {
             transition: "all 0.2s ease",
             boxShadow: "0 4px 12px rgba(0, 184, 248, 0.3)",
             outline: "none",
-            fontFamily: "Poppins",
+            fontFamily: "Poppins,sans-serif",
             width: "100%",
           }}
           onMouseEnter={(e) => {
@@ -197,7 +197,7 @@ export const Header: React.FC = () => {
             color: "rgba(255, 255, 255, 0.7)",
             fontWeight: "500",
             margin: 0,
-            fontFamily: "Poppins",
+            fontFamily: "Poppins,sans-serif",
           }}
         >
           Get started with
@@ -276,7 +276,7 @@ export const Header: React.FC = () => {
               fontWeight: "600",
               color: "white",
               margin: "0 0 8px 0",
-              fontFamily: "Poppins",
+              fontFamily: "Poppins,sans-serif",
             }}
           >
             Welcome, {username}
@@ -288,7 +288,7 @@ export const Header: React.FC = () => {
               color: "rgba(255, 255, 255, 0.9)",
               margin: "0 0 12px 0",
               lineHeight: 1.5,
-              fontFamily: "Poppins",
+              fontFamily: "Poppins,sans-serif",
             }}
           >
             "Your aura is a map, your spirit a compass — step into Eternal and
@@ -296,7 +296,7 @@ export const Header: React.FC = () => {
           </p>
           <button
             style={{
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              backgroundColor: "white",
               color: "#00b8f8",
               border: "1px solid rgba(255, 255, 255, 0.3)",
               borderRadius: "20px",
@@ -306,15 +306,15 @@ export const Header: React.FC = () => {
               cursor: "pointer",
               transition: "all 0.2s ease",
               outline: "none",
-              fontFamily: "Poppins",
+              fontFamily: "Poppins,sans-serif",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor =
-                "rgba(255, 255, 255, 0.3)";
+                "white";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor =
-                "rgba(255, 255, 255, 0.2)";
+                "white";
             }}
             // onClick={fetchAstrologyData}
             onClick={() => navigate('/rasi-chart')}

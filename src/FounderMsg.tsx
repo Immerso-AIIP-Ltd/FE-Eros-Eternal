@@ -1,21 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Stars from "./components/stars";
 
 const FounderMsg = () => {
   const navigate = useNavigate();
+  const [stars] = useState(() =>
+    Array.from({ length: 50 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      opacity: 0.3 + Math.random() * 0.7,
+      size: Math.random() * 2 + 1,
+    }))
+  );
   return (
     <div className='tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white' style={{ alignItems: 'start', justifyContent: 'start' }}>
+      <Stars />
+      <div className="absolute inset-0 overflow-hidden z-50">
+        {stars.map((star, i) => (
+          <div
+            key={i}
+            className="absolute bg-white rounded-full animate-pulse"
+            style={{
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              opacity: star.opacity,
+              top: `${star.y}%`,
+              left: `${star.x}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+      </div>
       {/* Back Button */}
-      <div className="p-6">
+      <div className="p-6 z-50" onClick={() => navigate('/')}>
         <button className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors bg-transparent">
           <ArrowLeft size={20} />
-          <span className="text-lg" onClick={() => navigate(-1)}>Back</span>
+          <span className="text-lg" >Back</span>
         </button>
       </div>
 
       {/* Main Content */}
-      <div className="d-flex justify-content-center align-items-center flex-grow-1 w-100"
+      <div className="d-flex justify-content-center align-items-center flex-grow-1 w-100 z-50"
       >
         <div className="max-w-4xl w-full">
           {/* Header */}
@@ -94,7 +121,7 @@ const FounderMsg = () => {
                 navigate("/profile");
               }}
               className="btn btn-info text-white px-4 py-2 fw-medium"
-              style={{ fontFamily: "Poppins" }}
+              style={{ fontFamily: "Poppins,sans-serif" }}
             >
               Continue
             </button>

@@ -2,18 +2,39 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Button, Container, Row, Col, Alert, Badge } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Stars from "./components/stars";
 
 const FaceReadingReportPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [report, setReport] = useState("");
+  const [report, setReport] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>('');
+  const [stars] = useState(() =>
+    Array.from({ length: 50 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      opacity: 0.3 + Math.random() * 0.7,
+      size: Math.random() * 2 + 1,
+    }))
+  );
 
   useEffect(() => {
-    if (location.state && (location.state).success) {
+    if (location.state && location.state.success) {
       setReport(location.state);
+      // Get uploaded image from location state
+      if (location.state.uploadedImage) {
+        setUploadedImage(location.state.uploadedImage);
+      }
     } else {
       setError('No report data found. Please upload a face image first.');
+    }
+
+    // Get username from localStorage
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
     }
   }, [location.state]);
 
@@ -47,31 +68,67 @@ const FaceReadingReportPage: React.FC = () => {
 
   return (
     <div className="vw-100 d-flex flex-column p-4">
+      <Stars />
+      <div className="absolute inset-0 overflow-hidden ">
+        {stars.map((star, i) => (
+          <div
+            key={i}
+            className="absolute bg-white rounded-full animate-pulse"
+            style={{
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              opacity: star.opacity,
+              top: `${star.y}%`,
+              left: `${star.x}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+      </div>
+
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button
-          className="btn btn-link text-white"
-          onClick={() => navigate(-1)}
-          style={{ fontSize: '1rem' }}
+          className="btn  text-white"
+          onClick={() => navigate("/result")}
+          style={{ fontSize: '1rem', zIndex: '10' }}
         >
           ← Back
         </button>
-        <button
-          className="btn btn-link text-white"
+        {/* <button
+          className="btn  text-white"
           onClick={() => window.location.reload()}
           style={{ fontSize: '1.2rem' }}
         >
           ↻
-        </button>
+        </button> */}
       </div>
 
       {/* Title */}
-      <div className="text-center mb-4">
-        <h2 className="fw-bold text-white">Face Reading Report</h2>
-        {/* <p className="text-white">
-          Generated for User ID: {data.user_id}
-        </p> */}
+      <div className="d-flex flex-column align-items-center justify-content-center mb-4">
+        {/* User Image and Name */}
+        {uploadedImage && (
+          <div className="text-center">
+            <img
+              src={uploadedImage}
+              alt="Uploaded face"
+              style={{
+                width: '150px',
+                height: '150px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '3px solid #333'
+              }}
+            />
+            {username && (
+              <h2 className="text-white mt-3">{username}</h2>
+            )}
+            <h6 className="text-white mt-4">Face Analysis</h6>
+          </div>
+        )}
       </div>
+
 
       {/* Face Analysis Text */}
       <Container>
@@ -85,12 +142,16 @@ const FaceReadingReportPage: React.FC = () => {
                 </pre>
               </Card.Body>
             </Card> */}
-
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333', color: "#ffffff" }}>
+            {/* <Card.Title className='mb-5'>Spiritual Interpretation & Wellness Guidance</Card.Title> */}
+            <Card className="mb-4" style={{
+              background:
+                "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
+                border: '1px solid grey'
+            }}>
               <Card.Body>
-                <Card.Title>Spiritual Interpretation & Wellness Guidance</Card.Title>
+
                 <pre
-                  className="bg-dark text-white p-3 rounded"
+                  className="text-white p-3 rounded"
                   style={{
                     whiteSpace: 'pre-wrap',
                     fontFamily: 'sans-serif',

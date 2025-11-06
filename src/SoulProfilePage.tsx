@@ -376,7 +376,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               className="rotate-image-bg position-absolute"
               style={{
                 zIndex: 0,
-                opacity: 3.15,
+                opacity: 0.5,
                 pointerEvents: "none",
                 top: "50%",
                 left: "50%",
@@ -401,7 +401,17 @@ const handleSubmit = async (e: React.FormEvent) => {
             >
               EROS UNIVERSE
             </div>
-            <h2 style={{ color: "rgba(0, 184, 248, 1)", fontSize: "64px",fontFamily:"Montserrat" ,}}> Eternal AI</h2>
+                       <h2 style={{
+  background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  backgroundClip: 'text',
+  color: 'transparent',
+  fontSize: '64px',
+  fontFamily: 'Montserrat,sans-serif'
+}}>
+  Eternal AI
+</h2>
           </div>
 
           {/* Right Side - Form */}
@@ -417,10 +427,10 @@ const handleSubmit = async (e: React.FormEvent) => {
               display: "flex",
               flexDirection: "column",
               gap: "1rem",
-              fontFamily:"Inter"
+              fontFamily:"Inter,sans-serif"
             }}
           >
-            <h1 style={{ marginBottom: "1rem",fontFamily:"Montserrat",fontWeight:"700"}}>Create Your Soul Profile</h1>
+            <h1 style={{ marginBottom: "1rem",fontFamily:"Montserrat,sans-serif",fontWeight:"700"}}>Create Your Soul Profile</h1>
 
             {/* <TextField
               label="First Name"
@@ -697,7 +707,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 fontWeight: "600",
                 cursor: "pointer",
                 marginTop: "1rem",
-                fontFamily:"Inter"
+                fontFamily:"Inter,sans-serif"
               }}
               disabled={loading}
             >

@@ -66,7 +66,7 @@ const EternalAIPage: React.FC = () => {
               className="rotate-image-bg position-absolute"
               style={{
                 zIndex: 0,
-                opacity: 3.15,
+                opacity: 0.5,
                 pointerEvents: "none",
                 top: "50%",
                 left: "50%",
@@ -101,24 +101,34 @@ const EternalAIPage: React.FC = () => {
           <div className="mb-4" style={{ textAlign: "center" }}>
             <p
               className=" mb-2"
-              style={{ opacity: 0.8, fontSize: "1.5rem" ,color:"rgba(255, 255, 255, 1)",fontFamily:"Manrope"}}
+              style={{ opacity: 0.8, fontSize: "1.5rem" ,color:"rgba(255, 255, 255, 1)",fontFamily:"Manrope,sans-serif"}}
             >
               Welcome to
             </p>
-            <h2  style={{color: "rgba(0, 184, 248, 1)",fontSize:"64px"}}> Eternal AI</h2>
+                         <h2 style={{
+  background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  backgroundClip: 'text',
+  color: 'transparent',
+  fontSize: '64px',
+  fontFamily: 'Montserrat,sans-serif'
+}}>
+  Eternal AI
+</h2>
           </div>
 
           {/* Subtitle */}
           <p
             className="text-white mb-3"
-            style={{ opacity: 0.9, fontSize: "20px", lineHeight: 1.6 ,fontFamily:"Inter"}}
+            style={{ opacity: 0.9, fontSize: "20px", lineHeight: 1.6 ,fontFamily:"Inter,sans-serif"}}
           >
             Decode your aura. Track your vibe. Align with your cosmic path.
           </p>
 
           {/* Features List */}
           <div className="mb-5 text-start">
-            <div className="d-flex align-items-center gap-2 mb-3  justify-content-center" style={{fontFamily:"Inter"}}>
+            <div className="d-flex align-items-center gap-2 mb-3  justify-content-center" style={{fontFamily:"Inter,sans-serif"}}>
               <span style={{ fontSize: "1.2rem" }}>✨</span>
               <span style={{ opacity: 0.9, fontSize: "0.9rem",color:"" }}>
                 You'll unlock:
@@ -162,7 +172,7 @@ const EternalAIPage: React.FC = () => {
               cursor: "pointer",
               position: "relative",
               zIndex: 10,
-              fontFamily:"Inter",
+              fontFamily:"Inter,sans-serif",
               width:"480px"
             }}
           >

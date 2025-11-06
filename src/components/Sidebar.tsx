@@ -47,7 +47,7 @@ export const Sidebar: React.FC = () => {
           outline: 'none',
           transition: 'all 0.2s ease',
           // boxShadow: '0 4px 12px rgba(0, 184, 248, 0.3)',
-          fontFamily:"Poppins"
+          fontFamily:"Poppins,sans-serif"
         }}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle Sidebar"

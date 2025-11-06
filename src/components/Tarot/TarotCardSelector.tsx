@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, } from "react";
 import { Button } from "react-bootstrap";
 import cardBg from "../../assets/cardbg.png";
 import card2 from "../../assets/image.png";
 import Stars from "../stars";
+import { useNavigate } from "react-router-dom";
 // import card2 from "../../assets/Tarot1.jpg";
 
 const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
@@ -19,6 +20,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
   // const userId = localStorage.getItem("user_id");
   // const username = localStorage.getItem("username");
   // const dob = localStorage.getItem("date_of_birth");
+  const navigate = useNavigate();
 
   // Custom styles for the component
   const styles = {
@@ -237,7 +239,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
         const randomRotation = Math.random() * 720;
         return {
           transform: `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg) scale(0.7)`,
-          opacity: 0.7,
+          opacity: 0.5,
           zIndex: 20,
           transition: "all 0.3s ease-out",
         };
@@ -399,7 +401,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
           border: "none",
           zIndex: 100,
         }}
-        onClick={() => onStepChange(2)}
+        onClick={() => navigate('/result')}
       >
         <i className="bi bi-arrow-left m-3"></i> Back
       </button>
@@ -593,7 +595,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
               </div>
               <div
                 className="text-white"
-                style={{ opacity: 0.7, fontSize: "0.875rem" }}
+                style={{ opacity: 0.5, fontSize: "0.875rem" }}
               >
                 The cards scatter and realign with cosmic forces...
               </div>

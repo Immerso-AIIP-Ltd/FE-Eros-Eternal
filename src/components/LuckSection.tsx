@@ -309,12 +309,15 @@ useEffect(() => {
         <p style={errorStyle}>{error[0]}</p>
       ) : (
         <>
-          <p style={backText}>
+          <p style={backText} >
             <strong>Zodiac:</strong> {horoscope?.zodiac_sign}
           </p>
-          <p style={backQuote}>
+          {/* <p style={backQuote}>
             "{horoscope?.horoscope?.substring(0, 160)}..."
-          </p>
+          </p> */}
+           <p style={backQuote}>
+  "{horoscope?.horoscope}"
+</p>
         </>
       )}
     </div>
@@ -392,20 +395,24 @@ useEffect(() => {
   const backTitleStyle: React.CSSProperties = {
     margin: "0 0 12px 0",
     color: "#fff",
-    fontSize: "16px",
+    fontSize: "18px",
+    fontWeight: '700'
   };
 
   const backText: React.CSSProperties = {
     margin: 0,
-    color: "#ccc",
-    fontSize: "14px",
+    // color: "#ccc",
+     color: "#fff",
+    fontSize: "16px",
   };
 
   const backQuote: React.CSSProperties = {
     margin: "6px 0 0 0",
-    fontStyle: "italic",
-    color: "#aaa",
-    fontSize: "13.5px",
+    // color: "#aaa",
+      color: "#fff",
+    fontSize: "14px",
+    textAlign: 'justify',
+    marginTop: '20px'
   };
 
   const smallText: React.CSSProperties = {
@@ -415,7 +422,7 @@ useEffect(() => {
   };
 
   const loadingStyle: React.CSSProperties = {
-    color: "#aaa",
+    color: "#fff",
     margin: 0,
   };
 
@@ -442,7 +449,7 @@ useEffect(() => {
             color: "#fff",
             margin: 0,
             letterSpacing: "-0.02em",
-            fontFamily: "Poppins",
+            fontFamily: "Poppins,sans-serif",
           }}
         >
           Discover your luck
@@ -483,7 +490,7 @@ useEffect(() => {
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              fontFamily: "Inter",
+              fontFamily: "Inter,sans-serif",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "#353a3e";
@@ -564,7 +571,7 @@ useEffect(() => {
                   height: "100%",
                   backfaceVisibility: "hidden",
                   transform: "rotateY(180deg)",
-                  backgroundColor: "#1a1a1a",
+                  background: "linear-gradient(160deg, rgb(0, 162, 255) 60%, rgb(170, 225, 39) 120%)",
                   borderRadius: "12px",
                   display: "flex",
                   alignItems: "center",

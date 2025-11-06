@@ -1,5 +1,6 @@
 // src/pages/PalmReadingPage.tsx
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 
 interface PalmReadingDetail {
   hand_shape: string;
@@ -25,6 +26,7 @@ interface PalmReadingResponse {
 const API_URL='http://192.168.29.154:8002';
 
 const PalmReadingPage: React.FC = () => {
+    const navigate = useNavigate();
   const userId = localStorage.getItem('user_id');
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -143,7 +145,7 @@ const PalmReadingPage: React.FC = () => {
       cursor: 'pointer',
       zIndex: 2
     }}
-    onClick={() => window.history.back()}
+    onClick={() => navigate("/result")}
   >
     ← Go Back
   </button>

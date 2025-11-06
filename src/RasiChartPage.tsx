@@ -2,14 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
- 
+import { Eye, Download } from "lucide-react";
+import Stars from "./components/stars";
+
 // Define proper types
 interface ChartImage {
   original: string;
   inline: string;
   attachment: string;
 }
- 
+
 interface AstrologyResponse {
   success: boolean;
   message: string;
@@ -21,27 +23,27 @@ interface AstrologyResponse {
     // Add other fields if needed later
   };
 }
- 
+
 const RasiChartPage: React.FC = () => {
   const [data, setData] = useState<AstrologyResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
- 
+
   const fetchAstrologyData = async () => {
     try {
       const user_id = localStorage.getItem("user_id");
       const placeOfBirth = localStorage.getItem("place_of_birth") || "Chennai, India";
       let dateOfBirth = localStorage.getItem("date_of_birth") || "07/04/2002";
       const timeOfBirth = localStorage.getItem("time_of_birth") || "01:55";
- 
+
       if (!placeOfBirth || !dateOfBirth || !timeOfBirth) {
         throw new Error("Missing birth details. Please complete your profile first.");
       }
- 
+
       // Normalize date to MM/DD/YYYY
       dateOfBirth = normalizeDateToMMDDYYYY(dateOfBirth);
- 
+
       const payload = {
         user_id,
         location: placeOfBirth,
@@ -49,7 +51,7 @@ const RasiChartPage: React.FC = () => {
         tob: timeOfBirth,
         timezone: "5:30",
       };
- 
+
       const response = await fetch(
         'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/vedastro/get_astrology_data',
         {
@@ -58,11 +60,11 @@ const RasiChartPage: React.FC = () => {
           body: JSON.stringify(payload),
         }
       );
- 
+
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const result: AstrologyResponse = await response.json();
       if (!result.success) throw new Error(result.message || 'Failed to fetch data');
- 
+
       setData(result);
     } catch (err) {
       console.error('Fetch error:', err);
@@ -71,7 +73,7 @@ const RasiChartPage: React.FC = () => {
       setLoading(false);
     }
   };
- 
+
   function normalizeDateToMMDDYYYY(input: string): string {
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(input)) {
       return input;
@@ -91,15 +93,15 @@ const RasiChartPage: React.FC = () => {
     console.warn("Unrecognized date format:", input);
     return input;
   }
- 
+
   useEffect(() => {
     fetchAstrologyData();
   }, []);
- 
+
   // ✅ Fixed download function
   const downloadImage = (url: string, filename: string) => {
     const cleanUrl = url.trim();
- 
+
     // Handle data URLs (though not used here, kept for safety)
     if (cleanUrl.startsWith('')) {
       const link = document.createElement('a');
@@ -110,7 +112,7 @@ const RasiChartPage: React.FC = () => {
       document.body.removeChild(link);
       return;
     }
- 
+
     // Fetch remote URL (SVG in this case)
     fetch(cleanUrl)
       .then((response) => {
@@ -131,12 +133,21 @@ const RasiChartPage: React.FC = () => {
         alert('Failed to download image. Try opening in new tab.');
       });
   };
- 
+
+  const [stars] = useState(() =>
+    Array.from({ length: 50 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      opacity: 0.3 + Math.random() * 0.7,
+      size: Math.random() * 2 + 1,
+    }))
+  );
+
   // === Loading State ===
   if (loading) {
     return (
       <div
-        className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center"
+        className='tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white'
         style={{
           backgroundColor: '#000',
           position: 'fixed',
@@ -145,6 +156,24 @@ const RasiChartPage: React.FC = () => {
           zIndex: 1050
         }}
       >
+        <Stars />
+        <div className="absolute inset-0 overflow-hidden z-50">
+          {stars.map((star, i) => (
+            <div
+              key={i}
+              className="absolute bg-white rounded-full animate-pulse"
+              style={{
+                width: `${star.size}px`,
+                height: `${star.size}px`,
+                opacity: star.opacity,
+                top: `${star.y}%`,
+                left: `${star.x}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
+        </div>
         <div className="text-center">
           <div className="mb-4">
             <Spinner
@@ -173,7 +202,7 @@ const RasiChartPage: React.FC = () => {
       </div>
     );
   }
- 
+
   // === Error State ===
   if (error) {
     return (
@@ -187,7 +216,7 @@ const RasiChartPage: React.FC = () => {
       </div>
     );
   }
- 
+
   // === No Data State ===
   if (!data?.data?.chartImages) {
     return (
@@ -197,9 +226,14 @@ const RasiChartPage: React.FC = () => {
       </div>
     );
   }
- 
+
+  const username = localStorage.getItem("username");
+  const dob = localStorage.getItem("date_of_birth");
+  const tob = localStorage.getItem("time_of_birth");
+  const birthPlace = localStorage.getItem("place_of_birth");
+
   const { rasiChart, navamshaChart } = data.data.chartImages;
- 
+
   return (
     <div className="vh-100 vw-100 p-4" style={{ backgroundColor: '#000', color: 'white' }}>
       {/* Header */}
@@ -207,90 +241,98 @@ const RasiChartPage: React.FC = () => {
         <button
           className="btn btn-link text-white"
           onClick={() => navigate(-1)}
-          style={{ fontSize: '1.2rem' }}
+          style={{ fontSize: '1.2rem', textDecoration: 'none' }}
         >
-          ← Back
+          ← Rasi Chart
         </button>
-        <h2 className="mb-0">Rasi & Navamsha Charts</h2>
+        {/* <h2 className="mb-5">Rasi & Navamsha Charts</h2> */}
         <div></div>
       </div>
- 
+
+      <div className='d-flex align-items-center justify-content-center mb-3'>
+        <h3>{username}</h3>
+      </div>
+
+      <div className='d-flex align-items-center justify-content-center mb-5'>
+        <p>{dob}, {tob}, {birthPlace}</p>
+      </div>
+
       <Container fluid>
         <Row className="g-4">
           {/* Rasi Chart */}
           <Col md={6}>
             <Card className="bg-dark text-white border-secondary h-100">
               <Card.Body className="d-flex flex-column">
-                <Card.Title className="text-white">Rasi Chart (D1)</Card.Title>
-                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
+                <Card.Title className="text-white text-center">Rasi Chart</Card.Title>
+                <p className="text-white text-center">Individual Chart</p>
+                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <iframe
                     src={rasiChart.inline.trim()}
                     title="Rasi Chart"
                     width="100%"
-                    height="400"
+                    height="600"
                     style={{
                       borderRadius: '8px',
-                      backgroundColor: '#fff',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                       overflow: 'hidden',
                       border: 'none'
                     }}
                   />
                 </div>
-                <div className="mt-3 d-flex justify-content-center">
+                <div className="mt-3 d-flex justify-content-end">
                   <Button
                     variant="outline-info"
                     size="sm"
                     className="me-2"
                     onClick={() => window.open(rasiChart.inline.trim(), '_blank')}
                   >
-                    View Full
+                    <Eye />
                   </Button>
                   <Button
                     variant="info"
                     size="sm"
                     onClick={() => downloadImage(rasiChart.attachment.trim(), 'rasi_chart.svg')}
                   >
-                    Download
+                    <Download />
                   </Button>
                 </div>
               </Card.Body>
             </Card>
           </Col>
- 
+
           {/* Navamsha Chart */}
           <Col md={6}>
             <Card className="bg-dark text-white border-secondary h-100">
               <Card.Body className="d-flex flex-column">
-                <Card.Title className="text-white">Navamsha Chart (D9)</Card.Title>
-                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
+                <Card.Title className="text-white text-center">Navamsha Chart</Card.Title>
+                <p className="text-white text-center">Life Partner Chart</p>
+                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <iframe
                     src={navamshaChart.inline.trim()}
                     title="Navamsha Chart"
                     width="100%"
-                    height="400"
-                    style={{ border: 'none', backgroundColor: '#fff' }}
+                    height="600"
+                    style={{ border: 'none' }}
                     sandbox="allow-scripts allow-same-origin"
                     onError={(e) => {
                       (e.target as HTMLIFrameElement).src = 'https://via.placeholder.com/400x400/333/999?text=Navamsha+Chart+Not+Loaded';
                     }}
                   />
                 </div>
-                <div className="mt-3 d-flex justify-content-center">
+                <div className="mt-3 d-flex justify-content-end">
                   <Button
                     variant="outline-info"
                     size="sm"
                     className="me-2"
                     onClick={() => window.open(navamshaChart.inline.trim(), '_blank')}
                   >
-                    View Full
+                    <Eye />
                   </Button>
                   <Button
                     variant="info"
                     size="sm"
                     onClick={() => downloadImage(navamshaChart.attachment.trim(), 'navamsha_chart.svg')}
                   >
-                    Download
+                    <Download />
                   </Button>
                 </div>
               </Card.Body>
@@ -301,5 +343,5 @@ const RasiChartPage: React.FC = () => {
     </div>
   );
 };
- 
+
 export default RasiChartPage;

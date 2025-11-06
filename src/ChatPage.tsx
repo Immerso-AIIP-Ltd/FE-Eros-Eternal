@@ -1,14 +1,7 @@
 // src/ErosChatUI.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Row,
-  Col,
-  Button,
-  Form,
-  OverlayTrigger,
-  Tooltip,
-} from "react-bootstrap";
+import { Row, Col, Button, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import starone from "./star1.png";
 import startwo from "./star2.png";
 import starthree from "./star3.png";
@@ -697,8 +690,8 @@ const ChatPage: React.FC = () => {
       const fileExtension = audioBlob.type.includes("wav")
         ? ".wav"
         : audioBlob.type.includes("mp3")
-        ? ".mp3"
-        : ".webm";
+          ? ".mp3"
+          : ".webm";
       const fileName = `voice_recording${fileExtension}`;
 
       formData.append("file", audioBlob, fileName);
@@ -833,6 +826,7 @@ const ChatPage: React.FC = () => {
                 background: "deepskyblue",
                 // color: "#0B1117",
                 color: "white",
+
               }}
             >
               {initials}
@@ -938,9 +932,8 @@ const ChatPage: React.FC = () => {
               return (
                 <div
                   key={i}
-                  className={`d-flex flex-column mb-4 ${
-                    isUser ? "align-items-end" : "align-items-start"
-                  }`}
+                  className={`d-flex flex-column mb-4 ${isUser ? "align-items-end" : "align-items-start"
+                    }`}
                 >
                   {(msg.aiAvatar || msg.userAvatar) && (
                     <div
@@ -988,8 +981,8 @@ const ChatPage: React.FC = () => {
                       borderRadius: msg.aiAvatar
                         ? "0px 10px 10px 10px"
                         : msg.userAvatar
-                        ? "10px 0px 10px 10px"
-                        : "10px",
+                          ? "10px 0px 10px 10px"
+                          : "10px",
                     }}
                     onClick={() => {
                       if (isSuggestion) {
@@ -1091,7 +1084,9 @@ const ChatPage: React.FC = () => {
                 key={"top"}
                 placement={"top"}
                 overlay={
-                  <Tooltip id={`tooltip-${"top"}`}>Quick Actions</Tooltip>
+                  <Tooltip id={`tooltip-${"top"}`}>
+                    Quick Actions
+                  </Tooltip>
                 }
               >
                 <Button
@@ -1234,25 +1229,6 @@ const ChatPage: React.FC = () => {
                             <i className="bi bi-mic"></i>
                           </Button>
                         )}
-
-                        {chatMode !== "spiritual" && (<Button
-                          as="label"
-                          variant="link"
-                          className="border-0 p-2"
-                          style={{
-                            color: "#ccc",
-                            fontSize: "1.2rem",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <i className="bi bi-music-note"></i>
-                          <input
-                            type="file"
-                            accept=".mp3,.wav"
-                            hidden
-                            onChange={handleAudioUpload}
-                          />
-                        </Button> )}
 
                         {chatMode !== "spiritual" && (
                           <Button
