@@ -183,7 +183,7 @@ const StatsCards = () => {
           const hasReport = reportStatuses[card.reportType];
 
           return (
-            <div key={card.id} className="col-md-6 mb-4">
+            <div key={card.id} className="col-md-6 col-lg-4 mb-4">
               <div
                 className="card border-0 rounded-4 shadow-lg bg-dark hover-card top-outline-primary custom-top-border"
                 onClick={(e) => handleCardClick(card, e)}
