@@ -635,7 +635,7 @@ const ChatPage: React.FC = () => {
       setReportGenerated(false);
       try {
         const res = await fetch(
-          "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual",
+          `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual/${userId}`,
           {
             method: "POST",
             body: form,
