@@ -25,6 +25,7 @@ const StatsCards = () => {
 
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
   const baseApiUrl = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/reports/individual_report/";
+  // const baseApiUrl = "http://192.168.18.5:7001/api/v1/reports/individual_report/";
 
   const reportCards = [
     {
@@ -37,7 +38,7 @@ const StatsCards = () => {
     },
     {
       id: 2,
-      title: "Star Map",
+      title: "Birth Chart",
       iconVideo: galaxy,
       route: "/star-map",
       reportType: "star_map"
@@ -182,7 +183,7 @@ const StatsCards = () => {
           const hasReport = reportStatuses[card.reportType];
 
           return (
-            <div key={card.id} className="col-md-6 mb-4">
+            <div key={card.id} className="col-md-6 col-lg-4 mb-4">
               <div
                 className="card border-0 rounded-4 shadow-lg bg-dark hover-card top-outline-primary custom-top-border"
                 onClick={(e) => handleCardClick(card, e)}

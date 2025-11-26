@@ -74,45 +74,52 @@ const PalmUploadPage: React.FC = () => {
   };
 
   const handleContinue = async () => {
-    if (!selectedFile) {
-      setError('Please select a file first.');
-      return;
-    }
+  if (!selectedFile) {
+    setError('Please select a file first.');
+    return;
+  }
 
-    setIsLoading(true);
-    setError(null);
+  setIsLoading(true);
+  setError(null);
 
+  try {
+    const userId = localStorage.getItem('user_id');
+    const formData = new FormData();
+    formData.append("user_id", userId || "");
+    formData.append("image_data", selectedFile);
 
-    try {
-      const userId = localStorage.getItem('user_id');
-      const formData = new FormData();
-      formData.append("user_id", userId || "");
-      formData.append("image_data", selectedFile); // 👈 Use selectedFile directly
-
-      const response = await fetch(
-        'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/analysis/palm',
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const result = await response.json();
-
-      if (result.success) {
-        navigate('/palm-report', { state: result });
-      } else {
-        setError(result.message || 'Failed to generate palm reading.');
+    const response = await fetch(
+      'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/analysis/palm',
+      {
+        method: 'POST',
+        body: formData,
       }
-    } catch (err) {
-      console.error('Upload error:', err);
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
+    );
+
+    // Try to read JSON response even if status != 200
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      // Use backend message if available
+      const errMsg = data.message || `HTTP ${response.status}`;
+      throw new Error(errMsg);
     }
-  };
+
+    if (data.success) {
+      navigate('/palm-report', { state: data });
+    } else {
+      setError(data.message || 'Failed to generate palm reading.');
+    }
+
+  } catch (err) {
+    console.error('Upload error:', err.message);
+    // Show server-provided message
+    setError(err.message || 'Failed to generate palm reading.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="vh-100 vw-100 d-flex flex-column p-4" style={{ backgroundColor: '#000' }}>

@@ -18,7 +18,8 @@ import { useNavigate } from "react-router-dom";
 const sidebarMenuItems = [
   { id: 'vibrational-frequency', label: 'Vibrational Frequency', icon: <ImagePlus size={16} /> },
   { id: 'aura-profile', label: 'Aura Profile', icon: <User size={16} /> },
-  { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} /> },
+  // { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} /> },
+   { id: 'star-map', label: 'Birth Chart', icon: <SquarePlus size={16} />, reportType: 'star_map' },
   { id: 'kosha-map', label: 'Kosha Map', icon: <Camera size={16} /> },
   { id: 'flame-score', label: 'Flame Score', icon: <Upload size={16} /> },
   { id: 'longevity-blueprint', label: 'Longevity Blueprint', icon: <Mic size={16} /> },

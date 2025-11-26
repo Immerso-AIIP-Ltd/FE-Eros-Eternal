@@ -75,65 +75,69 @@ const FaceUploadPage: React.FC = () => {
   };
 
   const handleContinue = async () => {
-    if (!selectedFile) {
-      setError('Please select a file first.');
+  if (!selectedFile) {
+    setError('Please select a file first.');
+    return;
+  }
+
+  setIsLoading(true);
+  setError(null);
+
+  try {
+    // Convert image to base64 for storage (to show later)
+    const imageBase64 = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(selectedFile);
+    });
+
+    const userId = localStorage.getItem('user_id');
+
+    if (!userId) {
+      setError('User ID not found. Please log in again.');
+      setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    const formData = new FormData();
+    formData.append('user_id', userId);
+    formData.append('image', selectedFile);
 
-    try {
-      // Convert image to base64 for storage
-      const imageBase64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(selectedFile);
-      });
-
-      const userId = localStorage.getItem('user_id');
-
-      // Handle null case
-      if (!userId) {
-        setError('User ID not found. Please log in again.');
-        setIsLoading(false);
-        return;
+    const response = await fetch(
+      'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/face_reading/analyze',
+      {
+        method: 'POST',
+        body: formData,
       }
+    );
 
-      const formData = new FormData();
-      formData.append("user_id", userId);
-      formData.append("image", selectedFile);
+    // Try to parse backend error message even when response is not OK
+    const data = await response.json().catch(() => ({}));
 
-      const response = await fetch(
-        'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/face_reading/analyze',
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const result = await response.json();
-
-      if (result.success) {
-        // Pass the uploaded image along with the result
-        navigate('/face-report', {
-          state: {
-            ...result,
-            uploadedImage: imageBase64
-          }
-        });
-      } else {
-        setError(result.message || 'Failed to generate face reading.');
-      }
-    } catch (err) {
-      console.error('Upload error:', err);
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const errMsg = data.message || `HTTP ${response.status}`;
+      throw new Error(errMsg);
     }
-  };
+
+    if (data.success) {
+      navigate('/face-report', {
+        state: {
+          ...data,
+          uploadedImage: imageBase64,
+        },
+      });
+    } else {
+      setError(data.message || 'Failed to generate face reading.');
+    }
+  } catch (err: any) {
+    console.error('Upload error:', err);
+    // ✅ Show backend message if available
+    setError(err.message || 'Something went wrong. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="vw-100 vh-100 d-flex flex-column">

@@ -32,6 +32,7 @@ interface Message {
   userAvatar?: boolean;
   icon?: any;
   audioBlob?: any;
+  fileList?: { name: string; size: number; type: string }[];
 }
 
 const ChatPage: React.FC = () => {
@@ -53,6 +54,7 @@ const ChatPage: React.FC = () => {
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const attachmentInputRef = useRef<HTMLInputElement | null>(null);
   const [completedReports, setCompletedReports] = useState<string[]>([]);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const [spiritualSessionId, setSpiritualSessionId] = useState<string | null>(
@@ -147,10 +149,24 @@ const ChatPage: React.FC = () => {
     setAttachedFiles((prev) => [...prev, ...filesArr]);
   };
 
+  const handleFileAttachment = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const filesArr = Array.from(files);
+    setAttachedFiles((prev) => [...prev, ...filesArr]);
+  };
+
+  const removeAttachedFile = (index: number) => {
+    setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const sendMessage = async () => {
     const userId = localStorage.getItem("user_id");
     const BASE_URL =
       "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+    // const BASE_URL =
+    //   "http://192.168.18.5:7001";
 
     const message = (inputValue ?? "").toString();
     const hasText = message.trim().length > 0;
@@ -164,6 +180,9 @@ const ChatPage: React.FC = () => {
         sender: "user",
         text: message || undefined,
         imageList: attachedImages.length ? [...attachedImages] : undefined,
+        fileList: attachedFiles.length 
+          ? attachedFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
+          : undefined,
         userAvatar: true,
       },
     ]);
@@ -172,6 +191,7 @@ const ChatPage: React.FC = () => {
     setAttachedImages([]);
     setAttachedFiles([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (attachmentInputRef.current) attachmentInputRef.current.value = "";
 
     setIsLoadingResponse(true);
     setMessages((prev) => [
@@ -187,7 +207,7 @@ const ChatPage: React.FC = () => {
       const form = new FormData();
 
       if (chatMode === "spiritual") {
-        url = `${BASE_URL}/api/v1/chat/spiritual`;
+        url = `${BASE_URL}/api/v1/chat/spiritual/${userId}`;
         form.append("user_id", userId || "0");
         form.append("message", message);
         if (spiritualSessionId) {
@@ -633,7 +653,7 @@ const ChatPage: React.FC = () => {
       setReportGenerated(false);
       try {
         const res = await fetch(
-          "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual",
+          `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual/${userId}`,
           {
             method: "POST",
             body: form,
@@ -821,10 +841,7 @@ const ChatPage: React.FC = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 fontWeight: 700,
-                // background:
-                //   "linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))",
                 background: "deepskyblue",
-                // color: "#0B1117",
                 color: "white",
 
               }}
@@ -913,8 +930,8 @@ const ChatPage: React.FC = () => {
               paddingTop: "20px",
               overflowY: "auto",
               maxHeight: "calc(100vh - 180px)",
-              scrollbarWidth: "none", // Firefox
-              msOverflowStyle: "none", // IE/Edge
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
             }}
             ref={messagesContainerRef}
           >
@@ -1013,6 +1030,28 @@ const ChatPage: React.FC = () => {
 
                     <div>{msg.text}</div>
 
+                    {msg.fileList && msg.fileList.length > 0 && (
+                      <div className="d-flex flex-column gap-2 mt-2" style={{ maxWidth: "100%" }}>
+                        {msg.fileList.map((file, j) => (
+                          <div
+                            key={j}
+                            className="d-flex align-items-center gap-2 bg-dark bg-opacity-50 rounded px-3 py-2"
+                            style={{ minWidth: "200px" }}
+                          >
+                            <i className="bi bi-file-earmark-pdf fs-4 text-danger"></i>
+                            <div className="flex-grow-1">
+                              <div className="text-white" style={{ fontSize: "0.9rem" }}>
+                                {file.name}
+                              </div>
+                              <div className="text-muted" style={{ fontSize: "0.75rem" }}>
+                                {(file.size / 1024).toFixed(1)} KB
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     {msg.imageList && msg.imageList.length > 0 && (
                       <div
                         className="d-flex flex-wrap gap-2 mt-2"
@@ -1079,7 +1118,6 @@ const ChatPage: React.FC = () => {
         {!reportGenerated && (
           <div className="position-fixed bottom-0 start-0 end-0 z-10 p-3">
             <div className="d-flex justify-content-center w-100">
-              {/* {completedReports.length > 0 && ( */}
               <OverlayTrigger
                 key={"top"}
                 placement={"top"}
@@ -1109,11 +1147,41 @@ const ChatPage: React.FC = () => {
                   <i className="bi bi-stars"></i>
                 </Button>
               </OverlayTrigger>
-              {/* )} */}
+              
               <div
                 className="bg-dark bg-opacity-75 rounded-4 p-2 shadow-sm"
                 style={{ width: "100%", maxWidth: "1000px" }}
               >
+                {/* File attachments preview */}
+                {attachedFiles.length > 0 && (
+                  <div className="d-flex flex-wrap gap-2 mb-2 p-2 bg-dark bg-opacity-50 rounded">
+                    {attachedFiles.map((file, idx) => (
+                      <div
+                        key={idx}
+                        className="d-flex align-items-center gap-2 bg-secondary bg-opacity-25 rounded px-2 py-1"
+                        style={{ fontSize: "0.85rem" }}
+                      >
+                        <i className="bi bi-file-earmark"></i>
+                        <span className="text-truncate" style={{ maxWidth: "150px" }}>
+                          {file.name}
+                        </span>
+                        <span className="text-muted">
+                          ({(file.size / 1024).toFixed(1)} KB)
+                        </span>
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="p-0 text-danger border-0"
+                          style={{ fontSize: "1rem" }}
+                          onClick={() => removeAttachedFile(idx)}
+                        >
+                          <i className="bi bi-x-circle"></i>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {attachedImages.length > 0 && (
                   <div className="d-flex flex-wrap gap-2 mb-2">
                     {attachedImages.map((img, idx) => (
@@ -1240,14 +1308,26 @@ const ChatPage: React.FC = () => {
                               fontSize: "1.2rem",
                               cursor: "pointer",
                             }}
-                          ></Button>
+                          >
+                            <i className="bi bi-paperclip"></i>
+                            <input
+                              ref={attachmentInputRef}
+                              type="file"
+                              accept="*/*"
+                              hidden
+                              multiple
+                              onChange={handleFileAttachment}
+                            />
+                          </Button>
                         )}
 
                         <Button
                           variant="info"
                           className="rounded-pill px-3 py-2 ms-2"
                           disabled={
-                            !inputValue.trim() && attachedImages.length === 0
+                            !inputValue.trim() && 
+                            attachedImages.length === 0 && 
+                            attachedFiles.length === 0
                           }
                           style={{
                             backgroundColor: "#00b8f8",

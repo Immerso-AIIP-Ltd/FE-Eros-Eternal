@@ -56,6 +56,7 @@ export default function Stars() {
             opacity: star.opacity,
             animationDelay: star.animationDelay,
             animationDuration: star.animationDuration,
+            backgroundRepeat: "repeat"
           }}
         >
           ✦
