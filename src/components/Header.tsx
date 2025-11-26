@@ -1,96 +1,33 @@
 // src/components/Header.tsx
-import React, { useState, } from "react";
+import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import headerBg from "../header-bg.png"; // Ensure this path is correct
+import HeaderBg from "../assets/background.png";
+import ProfileBg from "../assets/profileBg.png";
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
-  const [chartUrls, setChartUrls] = useState({
-    rasi: "",
-    navamsha: "",
-  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const fetchAstrologyData = async () => {
-    try {
-      // Get data from localStorage
-      const placeOfBirth =
-        localStorage.getItem("place_of_birth") || "Chennai, India";
-      const dateOfBirth = localStorage.getItem("date_of_birth") || "07/04/2002"; // Format: MM/DD/YYYY
-      const timeOfBirth = localStorage.getItem("time_of_birth") || "01:55";
-
-      const timezone = "5:30";
-
-      // Validate required fields
-      if (!placeOfBirth || !dateOfBirth || !timeOfBirth) {
-        alert("Missing birth details. Please complete your profile first.");
-        return;
-      }
-
-      const payload = {
-        location: placeOfBirth,
-        dob: dateOfBirth,
-        tob: timeOfBirth,
-        timezone: timezone,
-      };
-
-      const response = await fetch(
-        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/vedastro/get_astrology_data`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.message || "Failed to fetch astrology data");
-      }
-
-      // Extract chart URLs
-      const { rasiChart, navamshaChart } = result.data.chartImages;
-
-      // Navigate to chart page or show modal — here we'll open in new tab for demo
-      window.open(rasiChart, "_blank");
-      window.open(navamshaChart, "_blank");
-
-      // Optional: Show success message
-      alert("Charts loaded successfully!");
-    } catch (err) {
-      console.error("Error fetching astrology data:", err);
-      alert(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
-    }
-  };
 
   const username = localStorage.getItem('username') || 'Guest';
+
   return (
     <div
       style={{
         width: "100%",
-        height: "40vh", // Full viewport height
-        backgroundImage: `linear-gradient(rgba(245, 246, 252, 0.52), #111111),url(${headerBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
+        minHeight: "40vh",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
+        justifyContent: "center",
         alignItems: "center",
         position: "relative",
         overflow: "hidden",
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        padding: "0",
+        margin: "0",
       }}
     >
-      {/* Background Overlay */}
+      {/* Background Image Layer */}
       <div
         style={{
           position: "absolute",
@@ -98,12 +35,16 @@ export const Header: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: "rgba(0, 0, 0, 0.4)",
-          zIndex: 1,
+          backgroundImage: `url('${HeaderBg}')`,
+          transform: "scaleY(-1)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          zIndex: 0,
         }}
       />
 
-      {/* Additional Atmospheric Gradient Overlay */}
+      {/* Dark Overlay */}
       <div
         style={{
           position: "absolute",
@@ -111,443 +52,268 @@ export const Header: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background:
-            "linear-gradient(180deg, rgba(0, 26, 60, 0.3) 0%, rgba(5, 5, 5, 0.6) 100%)",
+          background: "rgba(0, 0, 0, 0.7)",
           zIndex: 1,
-          pointerEvents: "none",
         }}
       />
 
-      {/* Main Content */}
+      {/* Bottom Fade Overlay */}
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "16px",
-          zIndex: 2,
-          textAlign: "center",
-          padding: "0 2rem",
-          flex: 1,
-          justifyContent: "center",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "linear-gradient(180deg, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.8) 90%, rgba(0, 0, 0, 1) 100%)",
+          zIndex: 1,
         }}
-      >
-        {/* Title */}
-        <h1
-          style={{
-            fontSize: "4rem",
-            fontWeight: "700",
-            background: "linear-gradient(90deg, #AAE127 0%, #00A2FF 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            margin: 0,
-            lineHeight: 1,
-            letterSpacing: "-0.02em",
-            textShadow: "0 0 20px rgba(170, 225, 39, 0.3)",
-            fontFamily: "Poppins,sans-serif",
-          }}
-        >
-          Eternal
-        </h1>
+      />
 
-        {/* How it works Button */}
-        <button
-          style={{
-            backgroundColor: "#00b8f8",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "24px",
-            padding: "10px 20px",
-            fontSize: "14px",
-            fontWeight: "600",
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-            boxShadow: "0 4px 12px rgba(0, 184, 248, 0.3)",
-            outline: "none",
-            fontFamily: "Poppins,sans-serif",
-            width: "100%",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#0099d9";
-            e.currentTarget.style.transform = "translateY(-1px)";
-            e.currentTarget.style.boxShadow =
-              "0 6px 16px rgba(0, 184, 248, 0.4)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#00b8f8";
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow =
-              "0 4px 12px rgba(0, 184, 248, 0.3)";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.transform = "translateY(-1px)";
-          }}
-        >
-          How it works
-        </button>
-
-        {/* Subtitle */}
-        <div
-          style={{
-            fontSize: "14px",
-            color: "rgba(255, 255, 255, 0.7)",
-            fontWeight: "500",
-            margin: 0,
-            fontFamily: "Poppins,sans-serif",
-          }}
-        >
-          Get started with
-        </div>
-      </div>
-
-      {/* Welcome Card */}
+      {/* Main Content Container */}
       <div
         style={{
           width: "100%",
-          // maxWidth: '1200px',
-          padding: "2rem",
-          backgroundColor: "rgba(25, 70, 160, 0.8)",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          borderRadius: "24px",
+          // maxWidth: "1400px",
           display: "flex",
-          alignItems: "flex-start",
-          gap: "16px",
-          marginTop: "auto",
-          marginBottom: "2rem",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "50px",
           zIndex: 2,
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-          backgroundImage:"linear-gradient(160deg, rgb(0, 162, 255) 60%, rgb(170, 225, 39) 120%)",
-          position: "relative",
-          overflow: "hidden",
+          padding: "0 1rem",
         }}
       >
-        {/* Grid Pattern Background */}
+        {/* Top Section - Title and Button */}
         <div
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            // background:
-            //   "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px)",
-            pointerEvents: "none",
-            opacity: 0.3,
-          }}
-        />
-
-        {/* Avatar */}
-        <div
-          style={{
-            width: "48px",
-            height: "48px",
-            borderRadius: "50%",
-            backgroundColor: "#00b8f8",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
-            color: "white",
-            fontSize: "1.2rem",
-            fontWeight: "bold",
-            boxShadow: "0 4px 12px rgba(0, 184, 248, 0.3)",
+            gap: "18px",
+            textAlign: "center",
           }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            width="20"
-            height="20"
-          >
-            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-          </svg>
-        </div>
-
-        {/* Text Content */}
-        <div style={{ flex: 1 }}>
-          <h2
+          {/* Title */}
+          <h1
             style={{
-              fontSize: "1.5rem",
-              fontWeight: "600",
-              color: "white",
-              margin: "0 0 8px 0",
-              fontFamily: "Poppins,sans-serif",
+              fontSize: "clamp(2.5rem, 8vw, 5rem)",
+              fontWeight: "700",
+              background: "linear-gradient(90deg, #AAE127 0%, #00A2FF 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              margin: 0,
+              lineHeight: 1,
+              letterSpacing: "-0.02em",
+              fontFamily: "Poppins, sans-serif",
             }}
           >
-            Welcome, {username}
-          </h2>
+            Eternal
+          </h1>
 
-          <p
-            style={{
-              fontSize: "1rem",
-              color: "rgba(255, 255, 255, 0.9)",
-              margin: "0 0 12px 0",
-              lineHeight: 1.5,
-              fontFamily: "Poppins,sans-serif",
-            }}
-          >
-            "Your aura is a map, your spirit a compass — step into Eternal and
-            unlock the blueprint of your infinite journey."
-          </p>
+          {/* How it works Button */}
           <button
             style={{
-              backgroundColor: "white",
-              color: "#00b8f8",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              borderRadius: "20px",
-              padding: "8px 16px",
-              fontSize: "0.875rem",
-              fontWeight: "500",
+              backgroundColor: "#00b8f8",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "30px",
+              padding: "11px 30px",
+              fontSize: "14px",
+              fontWeight: "600",
               cursor: "pointer",
               transition: "all 0.2s ease",
+              boxShadow: "0 4px 20px rgba(0, 184, 248, 0.4)",
               outline: "none",
-              fontFamily: "Poppins,sans-serif",
+              fontFamily: "Poppins, sans-serif",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "white";
+              e.currentTarget.style.backgroundColor = "#0099d9";
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 6px 24px rgba(0, 184, 248, 0.5)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "white";
+              e.currentTarget.style.backgroundColor = "#00b8f8";
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 4px 20px rgba(0, 184, 248, 0.4)";
             }}
-            // onClick={fetchAstrologyData}
-            onClick={() => navigate('/rasi-chart')}
           >
-            View Your Rasi Chart
+            How it works
           </button>
 
-          {loading && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "20px",
-                color: "#00b8f8",
-                fontSize: "1rem",
-                fontWeight: "500",
-              }}
-            >
-              🌀 Fetching your Rasi & Navamsha charts...
-            </div>
-          )}
+          {/* Subtitle */}
+          <div
+            style={{
+              fontSize: "14px",
+              color: "rgba(255, 255, 255, 0.75)",
+              fontWeight: "400",
+              margin: 0,
+              fontFamily: "Poppins, sans-serif",
+            }}
+          >
+            Get started with
+          </div>
+        </div>
 
-          {error && (
-            <div
-              style={{
-                backgroundColor: "#ffcccc",
-                color: "#cc0000",
-                padding: "12px",
-                borderRadius: "8px",
-                margin: "10px 0",
-                textAlign: "center",
-                fontSize: "0.9rem",
-              }}
-            >
-              ❌ {error}
-            </div>
-          )}
+        {/* Welcome Card */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "100%",
+            padding: "0",
+            backgroundColor: "transparent",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0",
+            zIndex: 2,
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+            position: "relative",
+            overflow: "hidden",
+            minHeight: "clamp(200px, 30vh, 200px)",
+            marginBottom: "clamp(60px, 10vh, 80px)",
+          }}
+        >
+          {/* Background Image for Card - Responsive */}
+          <div
+            style={{
+              position: "absolute",
+              top: "-150%",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundImage: `url('${ProfileBg}')`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              zIndex: 0,
+            }}
+          />
 
-          {chartUrls.rasi && (
-            <div
+          {/* Dark gradient overlay for card */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "linear-gradient(90deg, rgba(0, 0, 0, 0.4) 0%, transparent 100%)",
+              zIndex: 1,
+            }}
+          />
+
+          {/* Text Content - Left Side */}
+          <div
+            style={{
+              zIndex: 2,
+              position: "relative",
+              padding: "clamp(20px, 4vw, 40px) clamp(25px, 5vw, 50px)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              flex: "0 0 auto",
+              maxWidth: "100%",
+            }}
+          >
+            <h2
               style={{
-                display: "flex",
-                gap: "20px",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                marginTop: "20px",
-                padding: "20px",
-                backgroundColor: "#0a0a0a", // Dark background like your screenshot
-                borderRadius: "12px",
+                fontSize: "clamp(1.5rem, 4vw, 2.3rem)",
+                fontWeight: "600",
+                color: "white",
+                margin: 0,
+                fontFamily: "Poppins, sans-serif",
+                lineHeight: 1.2,
+                wordBreak: "break-word",
               }}
             >
-              {/* Rasi Chart */}
+              Welcome, {username}
+            </h2>
+
+            <p
+              style={{
+                fontSize: "clamp(1.2rem, 2vw, 0.95rem)",
+                color: "rgba(255, 255, 255, 0.9)",
+                margin: 0,
+                lineHeight: 1.5,
+                fontFamily: "Poppins, sans-serif",
+              }}
+            >
+              "Reset starts with one mindful minute"
+            </p>
+
+            {loading && (
               <div
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "400px",
-                  backgroundColor: "#121212",
-                  border: "2px solid #00b8f8",
-                  borderRadius: "12px",
-                  padding: "16px",
-                  boxShadow: "0 4px 12px rgba(0, 184, 248, 0.1)",
-                  position: "relative",
+                  color: "#00b8f8",
+                  fontSize: "0.9rem",
+                  fontWeight: "500",
+                  marginTop: "8px",
                 }}
               >
-                <h3
-                  style={{
-                    color: "#ffffff",
-                    fontSize: "1.2rem",
-                    marginBottom: "4px",
-                    fontWeight: "600",
-                  }}
-                >
-                  Rasi Chart
-                </h3>
-                <p
-                  style={{
-                    color: "#aaaaaa",
-                    fontSize: "0.85rem",
-                    marginBottom: "16px",
-                  }}
-                >
-                  Individual Chart
-                </p>
-                <img
-                  src={chartUrls.rasi}
-                  alt="Rasi D1 Chart"
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "500px",
-                    objectFit: "contain",
-                    borderRadius: "8px",
-                    border: "1px solid #333",
-                    backgroundColor: "#0d0d0d",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "10px",
-                    right: "10px",
-                    display: "flex",
-                    gap: "6px",
-                  }}
-                >
-                  <button
-                    style={{
-                      backgroundColor: "#222",
-                      color: "#fff",
-                      border: "1px solid #444",
-                      borderRadius: "4px",
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                    onClick={() => window.open(chartUrls.rasi, "_blank")}
-                  >
-                    ↗️
-                  </button>
-                  <button
-                    style={{
-                      backgroundColor: "#222",
-                      color: "#fff",
-                      border: "1px solid #444",
-                      borderRadius: "4px",
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                    onClick={() => {
-                      const link = document.createElement("a");
-                      link.href = chartUrls.rasi;
-                      link.download = "rasi_chart.png";
-                      link.click();
-                    }}
-                  >
-                    ⬇️
-                  </button>
-                </div>
+                🌀 Loading...
               </div>
+            )}
 
-              {/* Navamsha Chart */}
+            {error && (
               <div
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "400px",
-                  backgroundColor: "#121212",
-                  border: "2px solid #00b8f8",
-                  borderRadius: "12px",
-                  padding: "16px",
-                  boxShadow: "0 4px 12px rgba(0, 184, 248, 0.1)",
-                  position: "relative",
+                  backgroundColor: "#ffcccc",
+                  color: "#cc0000",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  fontSize: "0.9rem",
+                  marginTop: "8px",
                 }}
               >
-                <h3
-                  style={{
-                    color: "#ffffff",
-                    fontSize: "1.2rem",
-                    marginBottom: "4px",
-                    fontWeight: "600",
-                  }}
-                >
-                  Navamsha Chart
-                </h3>
-                <p
-                  style={{
-                    color: "#aaaaaa",
-                    fontSize: "0.85rem",
-                    marginBottom: "16px",
-                  }}
-                >
-                  Life Partner Chart
-                </p>
-                <img
-                  src={chartUrls.navamsha}
-                  alt="Navamsha D9 Chart"
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "500px",
-                    objectFit: "contain",
-                    borderRadius: "8px",
-                    border: "1px solid #333",
-                    backgroundColor: "#0d0d0d",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "10px",
-                    right: "10px",
-                    display: "flex",
-                    gap: "6px",
-                  }}
-                >
-                  <button
-                    style={{
-                      backgroundColor: "#222",
-                      color: "#fff",
-                      border: "1px solid #444",
-                      borderRadius: "4px",
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                    onClick={() => window.open(chartUrls.navamsha, "_blank")}
-                  >
-                    ↗️
-                  </button>
-                  <button
-                    style={{
-                      backgroundColor: "#222",
-                      color: "#fff",
-                      border: "1px solid #444",
-                      borderRadius: "4px",
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                    onClick={() => {
-                      const link = document.createElement("a");
-                      link.href = chartUrls.navamsha;
-                      link.download = "navamsha_chart.png";
-                      link.click();
-                    }}
-                  >
-                    ⬇️
-                  </button>
-                </div>
+                ❌ {error}
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
+
+        {/* Button - Below the Card, Right Aligned */}
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "flex-end",
+            position: "relative",
+            marginTop: "clamp(-150px, -15vh, -160px)",
+            zIndex: 3,
+            paddingRight: "clamp(20px, 4vw, 40px)",
+          }}
+        >
+          <button
+            style={{
+              background: "linear-gradient(135deg, #AAE127 0%, #00A2FF 100%)",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              padding: "clamp(12px, 2vh, 16px) clamp(24px, 4vw, 40px)",
+              fontSize: "clamp(0.875rem, 2vw, 1rem)",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              outline: "none",
+              fontFamily: "Poppins, sans-serif",
+              boxShadow: "0 4px 20px rgba(170, 225, 39, 0.3)",
+              whiteSpace: "nowrap",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 6px 24px rgba(170, 225, 39, 0.5)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 4px 20px rgba(170, 225, 39, 0.3)";
+            }}
+            onClick={() => navigate('/rasi-chart')}
+          >
+            View Rasi Charts
+          </button>
         </div>
       </div>
     </div>

@@ -1,12 +1,12 @@
 // src/components/ExploreSection.tsx
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Import images
-import tarot from '../tarrotfull.png';
-import harmonyindex from '../harmonyindex.png';
-import palm from '../palm.png';
-import facescan from '../facescan.png';
+import tarot from '../assets/explore/tarrot.png';
+import harmonyindex from '../assets/explore/harmony.png';
+import palm from '../assets/explore/palmistry.jpg';
+import facescan from '../assets/explore/face.png';
 import angel from '../vintage.png';
 
 interface ExploreItem {
@@ -19,6 +19,42 @@ interface ExploreItem {
 
 export const ExploreSection: React.FC = () => {
   const navigate = useNavigate();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [hasMoved, setHasMoved] = useState(false);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setHasMoved(false);
+    setStartX(e.pageX - (scrollContainerRef.current?.offsetLeft || 0));
+    setScrollLeft(scrollContainerRef.current?.scrollLeft || 0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - (scrollContainerRef.current?.offsetLeft || 0);
+    const walk = (x - startX) * 2;
+    
+    // If moved more than 5 pixels, consider it a drag
+    if (Math.abs(walk) > 5) {
+      setHasMoved(true);
+    }
+    
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
 
   const items: ExploreItem[] = [
     {
@@ -49,105 +85,145 @@ export const ExploreSection: React.FC = () => {
       onClick: () => navigate('/facereading'),
       locked: false,
     },
-    // {
-    //   title: "Angel Cards",
-    //   subtitle: "Angel guidance for your spiritual journey",
-    //   image: angel,
-    //   onClick: undefined,
-    //   locked: true,
-    // },
   ];
 
   return (
-    <div>
+    <div style={{ paddingBottom: '2rem', width: '100%' }}>
       {/* Header */}
-      <h2
-        className="mb-0"
-        style={{
-          fontSize: '1.25rem',
+      <div className="header" style={{ marginBottom: '1.5rem' }}>
+        <h1 style={{
+          fontSize: '1.5rem',
           fontWeight: 600,
           color: '#ffffff',
-          fontFamily: "Poppins,sans-serif"
-        }}
-      >
-        Explore More
-      </h2>
+          fontFamily: "Poppins, sans-serif",
+          margin: 0
+        }}>
+          Explore More
+        </h1>
+      </div>
 
-      {/* Grid Container */}
+      {/* Scrollable Container */}
       <div
-        className="cards-grid"
+        ref={scrollContainerRef}
+        className="cards-container"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(450px, 1fr))',
-          gap: '1rem',
-          marginTop: '1rem',
+          display: 'flex',
+          gap: '1.25rem',
+          overflowX: 'auto',
+          scrollBehavior: isDragging ? 'auto' : 'smooth',
+          cursor: isDragging ? 'grabbing' : 'grab',
           paddingBottom: '1rem',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          width: '100%',
         }}
       >
         {items.map((item, index) => (
           <div
             key={index}
             className="card-item"
-            onClick={item.onClick}
+            onClick={(e) => {
+              // Only navigate if we haven't moved (not a drag)
+              if (!hasMoved && item.onClick) {
+                item.onClick();
+              }
+            }}
             role="button"
             tabIndex={item.onClick ? 0 : -1}
             aria-label={item.locked ? `${item.title} - Coming Soon` : item.title}
             style={{
-              width: '100%',
-              borderRadius: '12px',
-              backgroundColor: '#1e2123',
-              overflow: 'hidden',
+              flex: '0 0 calc((100% - 1.05rem) / 3.2)',
+              minWidth: '280px',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              cursor: item.onClick ? 'pointer' : 'not-allowed',
+              cursor: item.onClick && !isDragging ? 'pointer' : isDragging ? 'grabbing' : 'grab',
               position: 'relative',
-              fontFamily: "DM Sans,sans-serif",
+              fontFamily: "DM Sans, sans-serif",
               fontSize: "16px",
+              borderRadius: "20px",
+              backgroundColor: "#1a1d1f",
+              overflow: "hidden",
+              height: '380px',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
             }}
             onMouseEnter={(e) => {
-              if (item.onClick) {
-                e.currentTarget.style.backgroundColor = '#2a2e30';
+              if (item.onClick && !isDragging) {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 0, 0, 0.5)';
               }
             }}
             onMouseLeave={(e) => {
-              if (item.onClick) {
-                e.currentTarget.style.backgroundColor = '#1e2123';
-              }
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             {/* Image */}
             <img
               src={item.image}
               alt={item.title}
+              draggable={false}
               style={{
                 width: '100%',
-                height: '200px',
+                height: '100%',
                 objectFit: 'cover',
-                // marginTop:"20px"
+                userSelect: 'none',
+                pointerEvents: 'none',
               }}
             />
 
-            {/* Text Content */}
+            {/* Gradient Overlay - Subtle */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.7) 85%, rgba(0,0,0,0.9) 100%)",
+                zIndex: 1,
+                pointerEvents: 'none',
+              }}
+            />
+
+            {/* Text Content with Strong Blur */}
             <div
               className="text-content"
               style={{
-                padding: '1rem',
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                padding: "1.25rem 1.5rem",
+                background: "rgba(15, 18, 20, 0.6)",
+                backdropFilter: "blur(30px) saturate(180%)",
+                WebkitBackdropFilter: "blur(30px) saturate(180%)",
+                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                zIndex: 5,
+                pointerEvents: 'none',
               }}
             >
               <h3
                 style={{
-                  fontSize: '0.9rem',
+                  fontSize: '1.25rem',
                   fontWeight: 600,
-                  color: 'white',
-                  marginBottom: '0.5rem',
+                  color: '#ffffff',
+                  marginBottom: '0.4rem',
+                  fontFamily: "Poppins, sans-serif",
+                  lineHeight: 1.3,
                 }}
               >
                 {item.title}
               </h3>
               <p
                 style={{
-                  fontSize: '0.75rem',
-                  color: '#9ca3af',
+                  fontSize: '0.875rem',
+                  color: 'rgba(255, 255, 255, 0.7)',
                   margin: 0,
+                  lineHeight: 1.5,
+                  fontFamily: "DM Sans, sans-serif",
                 }}
               >
                 {item.subtitle}
@@ -164,12 +240,13 @@ export const ExploreSection: React.FC = () => {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 70%)',
+                  background: 'rgba(0, 0, 0, 0.75)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'flex-end',
+                  justifyContent: 'center',
                   alignItems: 'center',
-                  padding: '16px',
                   textAlign: 'center',
                   color: 'white',
                   zIndex: 10,
@@ -177,11 +254,11 @@ export const ExploreSection: React.FC = () => {
               >
                 <i
                   className="bi bi-lock-fill"
-                  style={{ fontSize: '2rem', color: '#ccc', marginBottom: '8px' }}
+                  style={{ fontSize: '2.5rem', color: '#ccc', marginBottom: '12px' }}
                 ></i>
                 <p
                   style={{
-                    fontSize: '0.95rem',
+                    fontSize: '1rem',
                     fontWeight: 500,
                     margin: 0,
                     lineHeight: 1.4,
@@ -196,63 +273,26 @@ export const ExploreSection: React.FC = () => {
       </div>
 
       {/* Injected Styles */}
-      <style jsx>{`
-        .card-item:hover {
-          transform: scale(1.02);
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      <style>{`
+        .cards-container::-webkit-scrollbar {
+          display: none;
         }
 
-        .card-item img {
-          width: 100%;
-          height: 200px;
-          object-fit: contain;
+        .card-item {
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                      box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .card-item .text-content {
-          padding: 1rem;
+        @media (max-width: 1024px) {
+          .card-item {
+            flex: 0 0 calc((100% - 2.5rem) / 2.2) !important;
+          }
         }
 
-        .card-item h3 {
-          font-size: 0.9rem;
-          font-weight: 600;
-          color: white;
-          margin-bottom: 0.5rem;
-        }
-
-        .card-item p {
-          font-size: 0.75rem;
-          color: #9ca3af;
-          margin: 0;
-        }
-
-        .lock-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 70%);
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
-          align-items: center;
-          padding: 16px;
-          text-align: center;
-          color: white;
-          z-index: 10;
-        }
-
-        .lock-overlay i {
-          font-size: 2rem;
-          color: #ccc;
-          margin-bottom: 8px;
-        }
-
-        .lock-overlay p {
-          font-size: 0.95rem;
-          font-weight: 500;
-          margin: 0;
-          line-height: 1.4;
+        @media (max-width: 768px) {
+          .card-item {
+            flex: 0 0 calc(100% - 2rem) !important;
+          }
         }
       `}</style>
     </div>

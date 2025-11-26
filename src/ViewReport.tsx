@@ -15,6 +15,7 @@ interface ReportData {
       current_energy_assessment: {
         vibrational_frequency?: number;
       };
+      current_vibrational_frequency: number;
       current_energy_state?: string;
       spiritual_evolution: {
         current_flame_score?: string;
@@ -169,7 +170,7 @@ const ViewReport = () => {
 
     return (
       assessment?.current_energy_assessment?.vibrational_frequency ||
-      assessment?.vibrational_frequency ||
+      assessment?.vibrational_frequency || assessment?.current_vibrational_frequency ||
       assessment?.spiritual_evolution?.current_flame_score ||
       assessment?.current_flame_score ||
       assessment?.flame_score ||
