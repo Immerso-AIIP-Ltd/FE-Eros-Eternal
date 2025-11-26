@@ -8,7 +8,7 @@ interface CompatibilityData {
   sign_partner: string;
 }
 
-const API_URL='http://192.168.29.154:8002';
+const API_URL = 'http://192.168.29.154:8002';
 
 const HarmonyIndexPage: React.FC = () => {
   // Read from localStorage
@@ -81,7 +81,7 @@ const HarmonyIndexPage: React.FC = () => {
       }}
     >
 
-            <div className="position-absolute w-100 h-100 pointer-events-none">
+      <div className="position-absolute w-100 h-100 pointer-events-none">
         {Array.from({ length: 50 }).map((_, i) => (
           <div
             key={i}
@@ -100,35 +100,35 @@ const HarmonyIndexPage: React.FC = () => {
         ))}
       </div>
       {/* Header */}
-<div className="position-relative w-100 mb-5" style={{ height: '100px' }}>
-  {/* Go Back Button - pinned to left */}
-  <button 
-    className="btn position-absolute start-0 top-50 translate-middle-y ms-3"
-    style={{ 
-      backgroundColor: 'skyblue', 
-      color: 'white', 
-      fontWeight: 'bold',
-      border: 'none',
-      padding: '8px 20px',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      zIndex: 2
-    }}
-    onClick={() => window.history.back()}
-  >
-    ← Go Back
-  </button>
+      <div className="position-relative w-100 mb-5" style={{ height: '100px' }}>
+        {/* Go Back Button - pinned to left */}
+        <button
+          className="btn position-absolute start-0 top-50 translate-middle-y ms-3"
+          style={{
+            backgroundColor: 'skyblue',
+            color: 'white',
+            fontWeight: 'bold',
+            border: 'none',
+            padding: '8px 20px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            zIndex: 2
+          }}
+          onClick={() => window.history.back()}
+        >
+          ← Go Back
+        </button>
 
-  {/* Centered Content (Title + Subtitle) */}
-  <div className="text-center" style={{ zIndex: 1 }}>
-    <h1 className="display-5 fw-bold text-light" style={{ textShadow: '2px 2px 6px rgba(0,0,0,0.7)' }}>
-      Harmony Index
-    </h1>
-    <p className="text-light opacity-75">
-      Discover your career compatibility with your partner
-    </p>
-  </div>
-</div>
+        {/* Centered Content (Title + Subtitle) */}
+        <div className="text-center" style={{ zIndex: 1 }}>
+          <h1 className="display-5 fw-bold text-light" style={{ textShadow: '2px 2px 6px rgba(0,0,0,0.7)' }}>
+            Harmony Index
+          </h1>
+          <p className="text-light opacity-75">
+            Discover your career compatibility with your partner
+          </p>
+        </div>
+      </div>
 
       {/* Form */}
       <div

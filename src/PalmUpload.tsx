@@ -140,7 +140,7 @@ const PalmUploadPage: React.FC = () => {
         <button
           className="btn text-white"
           onClick={() => window.history.back()}
-          style={{ fontSize: '1rem' }}
+          style={{ fontSize: '1rem', zIndex: 2 }}
         >
           ← Back
         </button>
