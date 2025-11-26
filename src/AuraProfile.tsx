@@ -15,7 +15,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 const sidebarMenuItems = [
     { id: 'vibrational-frequency', label: 'Vibrational Frequency', icon: <ImagePlus size={16} />, reportType: 'vibrational_frequency' },
     { id: 'aura-profile', label: 'Aura Profile', icon: <User size={16} />, reportType: 'aura_profile' },
-    { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} />, reportType: 'star_map' },
+    // { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} />, reportType: 'star_map' },
+    { id: 'star-map', label: 'Birth Chart', icon: <SquarePlus size={16} />, reportType: 'star_map' },
     { id: 'kosha-map', label: 'Kosha Map', icon: <Camera size={16} />, reportType: 'kosha_map' },
     { id: 'flame-score', label: 'Flame Score', icon: <Upload size={16} />, reportType: 'flame_score' },
     { id: 'longevity-blueprint', label: 'Longevity Blueprint', icon: <Mic size={16} />, reportType: 'longevity_blueprint' },

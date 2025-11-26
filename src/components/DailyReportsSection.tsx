@@ -8,7 +8,8 @@ export const DailyReportsSection: React.FC = () => {
 const reports = [
   { title: "Frequency Alignment Report", icon: fileIcon, reportType: "vibrational_frequency" },
   { title: "Aura Profile", icon: fileIcon, reportType: "aura_profile" },
-  { title: "Star Map", icon: fileIcon, reportType: "star_map" },
+  // { title: "Star Map", icon: fileIcon, reportType: "star_map" },
+   { title: "Birth Chart", icon: fileIcon, reportType: "star_map" },
   { title: "Kosha Map", icon: fileIcon, reportType: "kosha_map" },
   { title: "Flame Score", icon: fileIcon, reportType: "flame_score" },
   { title: "Longevity Blueprint", icon: fileIcon, reportType: "longevity_blueprint" },

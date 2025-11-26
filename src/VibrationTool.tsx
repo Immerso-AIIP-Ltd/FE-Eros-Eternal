@@ -41,7 +41,8 @@ const sidebarMenuItems = [
   },
   {
     id: "star-map",
-    label: "Star Map",
+    // label: "Star Map",
+    label:"Birth Chart",
     icon: <SquarePlus size={16} />,
     reportType: "star_map",
   },

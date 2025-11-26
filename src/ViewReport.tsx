@@ -46,7 +46,8 @@ const reportCards = [
   },
   {
     id: 2,
-    title: "Star Map",
+    // title: "Star Map",
+    label:"Birth Chart",
     // iconVideo: galaxy,
     route: "/star-map",
     reportType: "star_map",

@@ -69,7 +69,8 @@ const RecordVoice: React.FC = () => {
           {[
             { name: 'Vibrational Frequency', icon: vibrational },
             { name: 'Aura Profile', icon: aura },
-            { name: 'Star Map', icon: star },
+            // { name: 'Star Map', icon: star },
+             { name: 'Birth Chart', icon: star },
             { name: 'Kosha Map', icon: kosha },
             { name: 'Flame Score', icon: flame },
             { name: 'Longevity Blueprint', icon: longevity },
