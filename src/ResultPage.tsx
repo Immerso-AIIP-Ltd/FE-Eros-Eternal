@@ -69,7 +69,7 @@ const ResultPage: React.FC = () => {
 
         {/* Content Container */}
         <div
-          className="flex-grow-1 py-3 px-3 px-lg-4"
+          className="flex-grow-1 py-3"
           style={{
             maxWidth: '100%',
             paddingBottom: '2rem',
@@ -79,6 +79,7 @@ const ResultPage: React.FC = () => {
         >
           <Header />
           {/* <DateSelector /> */}
+          <div className="flex-grow-1 py-3 px-3 px-lg-4">
           <StatsCards />
           {/* <PanchangComponent /> */}
           {/* <ReadingsSection /> */}
@@ -86,6 +87,7 @@ const ResultPage: React.FC = () => {
           <ExploreSection />
           {/* <DailyReportsSection /> */}
           {/* <PopularSection /> */}
+          </div>
         </div>
       </main>
     </div>
