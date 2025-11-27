@@ -7,20 +7,20 @@ import Stars from "./components/stars";
 
 // Define proper types
 interface ChartImage {
-  original: string;
-  inline: string;
-  attachment: string;
+  original?: string;
+  inline?: string;
+  attachment?: string;
 }
 
 interface AstrologyResponse {
   success: boolean;
   message: string;
   data: {
-    chartImages: {
+    astrologyData?: string; // The API returns this as a string
+    chartImages?: {
       rasiChart: ChartImage;
       navamshaChart: ChartImage;
     };
-    // Add other fields if needed later
   };
 }
 
@@ -62,10 +62,57 @@ const RasiChartPage: React.FC = () => {
       );
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const result: AstrologyResponse = await response.json();
+      const result = await response.json();
+      
+      // ✅ COMPREHENSIVE DEBUGGING - Check what we actually received
+      console.log('=== FULL API RESPONSE ===');
+      console.log(JSON.stringify(result, null, 2));
+      
       if (!result.success) throw new Error(result.message || 'Failed to fetch data');
 
-      setData(result);
+      // ✅ Parse the astrologyData string to extract chart URLs
+      if (result.data?.astrologyData) {
+        const astrologyText = result.data.astrologyData;
+        console.log('=== ASTROLOGY DATA ===');
+        console.log(astrologyText);
+        
+        // Extract Rasi Chart URL
+        const rasiMatch = astrologyText.match(/Rasi D1 Chart URL:\s*(https?:\/\/[^\s\n]+)/);
+        const rasiUrl = rasiMatch ? rasiMatch[1] : null;
+        
+        // Extract Navamsha Chart URL
+        const navamshaMatch = astrologyText.match(/Navamsha D9 Chart URL:\s*(https?:\/\/[^\s\n]+)/);
+        const navamshaUrl = navamshaMatch ? navamshaMatch[1] : null;
+        
+        console.log('=== EXTRACTED URLS ===');
+        console.log('Rasi URL:', rasiUrl);
+        console.log('Navamsha URL:', navamshaUrl);
+        
+        // Transform the data to match our expected structure
+        const transformedResult: AstrologyResponse = {
+          ...result,
+          data: {
+            ...result.data,
+            chartImages: {
+              rasiChart: {
+                inline: rasiUrl || '',
+                original: rasiUrl || '',
+                attachment: rasiUrl || ''
+              },
+              navamshaChart: {
+                inline: navamshaUrl || '',
+                original: navamshaUrl || '',
+                attachment: navamshaUrl || ''
+              }
+            }
+          }
+        };
+        
+        setData(transformedResult);
+      } else {
+        // Store the data as-is if it already has chartImages
+        setData(result);
+      }
     } catch (err) {
       console.error('Fetch error:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -98,12 +145,17 @@ const RasiChartPage: React.FC = () => {
     fetchAstrologyData();
   }, []);
 
-  // ✅ Fixed download function
-  const downloadImage = (url: string, filename: string) => {
+  // ✅ Fixed download function with null checks
+  const downloadImage = (url: string | undefined, filename: string) => {
+    if (!url) {
+      alert('Chart URL not available');
+      return;
+    }
+
     const cleanUrl = url.trim();
 
-    // Handle data URLs (though not used here, kept for safety)
-    if (cleanUrl.startsWith('')) {
+    // Handle data URLs
+    if (cleanUrl.startsWith('data:')) {
       const link = document.createElement('a');
       link.href = cleanUrl;
       link.download = filename;
@@ -221,7 +273,14 @@ const RasiChartPage: React.FC = () => {
   if (!data?.data?.chartImages) {
     return (
       <div className="vh-100 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#000' }}>
-        <Alert variant="warning">No chart data available.</Alert>
+        <Alert variant="warning">
+          <div>No chart data available.</div>
+          <div className="mt-2 small">
+            <pre style={{ textAlign: 'left', maxHeight: '200px', overflow: 'auto' }}>
+              {JSON.stringify(data, null, 2)}
+            </pre>
+          </div>
+        </Alert>
         <Button variant="outline-light" onClick={() => navigate(-1)}>← Go Back</Button>
       </div>
     );
@@ -234,6 +293,29 @@ const RasiChartPage: React.FC = () => {
 
   const { rasiChart, navamshaChart } = data.data.chartImages;
 
+  // ✅ DEBUG: Log the chart objects
+  console.log('=== RENDERING CHARTS ===');
+  console.log('rasiChart object:', rasiChart);
+  console.log('rasiChart.inline:', rasiChart?.inline);
+  console.log('navamshaChart object:', navamshaChart);
+  console.log('navamshaChart.inline:', navamshaChart?.inline);
+
+  // ✅ Additional safety check before rendering
+  if (!rasiChart || !navamshaChart) {
+    return (
+      <div className="vh-100 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#000' }}>
+        <Alert variant="warning">
+          <div>Chart data is incomplete.</div>
+          <div className="mt-2 small">
+            rasiChart exists: {rasiChart ? 'Yes' : 'No'}<br/>
+            navamshaChart exists: {navamshaChart ? 'Yes' : 'No'}
+          </div>
+        </Alert>
+        <Button variant="outline-light" onClick={() => navigate(-1)}>← Go Back</Button>
+      </div>
+    );
+  }
+
   return (
     <div className="vh-100 vw-100 p-4" style={{ backgroundColor: '#000', color: 'white' }}>
       {/* Header */}
@@ -245,7 +327,6 @@ const RasiChartPage: React.FC = () => {
         >
           ← Rasi Chart
         </button>
-        {/* <h2 className="mb-5">Rasi & Navamsha Charts</h2> */}
         <div></div>
       </div>
 
@@ -265,32 +346,49 @@ const RasiChartPage: React.FC = () => {
               <Card.Body className="d-flex flex-column">
                 <Card.Title className="text-white text-center">Rasi Chart</Card.Title>
                 <p className="text-white text-center">Individual Chart</p>
-                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <iframe
-                    src={rasiChart.inline.trim()}
-                    title="Rasi Chart"
-                    width="100%"
-                    height="600"
-                    style={{
-                      borderRadius: '8px',
-                      overflow: 'hidden',
-                      border: 'none'
-                    }}
-                  />
+                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
+                  {rasiChart?.inline ? (
+                    <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                      {/* Render as iframe for URLs */}
+                      <iframe
+                        src={rasiChart.inline.trim()}
+                        title="Rasi Chart"
+                        width="100%"
+                        height="600"
+                        style={{
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          border: 'none',
+                          backgroundColor: 'white'
+                        }}
+                        onLoad={() => console.log('✅ Rasi iframe loaded successfully')}
+                        onError={(e) => console.error('❌ Rasi iframe error:', e)}
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <div className="text-muted mb-3">Chart not available</div>
+                      <div className="small text-info">
+                        No Rasi chart URL found in response
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="mt-3 d-flex justify-content-end">
                   <Button
                     variant="outline-info"
                     size="sm"
                     className="me-2"
-                    onClick={() => window.open(rasiChart.inline.trim(), '_blank')}
+                    onClick={() => rasiChart?.inline && window.open(rasiChart.inline.trim(), '_blank')}
+                    disabled={!rasiChart?.inline}
                   >
                     <Eye />
                   </Button>
                   <Button
                     variant="info"
                     size="sm"
-                    onClick={() => downloadImage(rasiChart.attachment.trim(), 'rasi_chart.svg')}
+                    onClick={() => downloadImage(rasiChart?.attachment, 'rasi_chart.svg')}
+                    disabled={!rasiChart?.attachment}
                   >
                     <Download />
                   </Button>
@@ -305,32 +403,48 @@ const RasiChartPage: React.FC = () => {
               <Card.Body className="d-flex flex-column">
                 <Card.Title className="text-white text-center">Navamsha Chart</Card.Title>
                 <p className="text-white text-center">Life Partner Chart</p>
-                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <iframe
-                    src={navamshaChart.inline.trim()}
-                    title="Navamsha Chart"
-                    width="100%"
-                    height="600"
-                    style={{ border: 'none' }}
-                    sandbox="allow-scripts allow-same-origin"
-                    onError={(e) => {
-                      (e.target as HTMLIFrameElement).src = 'https://via.placeholder.com/400x400/333/999?text=Navamsha+Chart+Not+Loaded';
-                    }}
-                  />
+                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
+                  {navamshaChart?.inline ? (
+                    <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                      {/* Render as iframe for URLs */}
+                      <iframe
+                        src={navamshaChart.inline.trim()}
+                        title="Navamsha Chart"
+                        width="100%"
+                        height="600"
+                        style={{ 
+                          border: 'none',
+                          backgroundColor: 'white'
+                        }}
+                        sandbox="allow-scripts allow-same-origin"
+                        onLoad={() => console.log('✅ Navamsha iframe loaded successfully')}
+                        onError={(e) => console.error('❌ Navamsha iframe error:', e)}
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <div className="text-muted mb-3">Chart not available</div>
+                      <div className="small text-info">
+                        No Navamsha chart URL found in response
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="mt-3 d-flex justify-content-end">
                   <Button
                     variant="outline-info"
                     size="sm"
                     className="me-2"
-                    onClick={() => window.open(navamshaChart.inline.trim(), '_blank')}
+                    onClick={() => navamshaChart?.inline && window.open(navamshaChart.inline.trim(), '_blank')}
+                    disabled={!navamshaChart?.inline}
                   >
                     <Eye />
                   </Button>
                   <Button
                     variant="info"
                     size="sm"
-                    onClick={() => downloadImage(navamshaChart.attachment.trim(), 'navamsha_chart.svg')}
+                    onClick={() => downloadImage(navamshaChart?.attachment, 'navamsha_chart.svg')}
+                    disabled={!navamshaChart?.attachment}
                   >
                     <Download />
                   </Button>
