@@ -210,9 +210,9 @@ const ChatPage: React.FC = () => {
         url = `${BASE_URL}/api/v1/chat/spiritual/${userId}`;
         form.append("user_id", userId || "0");
         form.append("message", message);
-        if (spiritualSessionId) {
-          form.append("session_id", spiritualSessionId);
-        }
+        // if (spiritualSessionId) {
+        //   form.append("session_id", spiritualSessionId);
+        // }
       } else {
         url = `${BASE_URL}/api/v1/chat/answer_question/${userId}`;
         form.append("report_type", reportType || "vibrational_frequency");
