@@ -199,7 +199,7 @@ const ErosChatUI: React.FC = () => {
         sender: "ai",
         text: (
           <div className="text-center">
-            <div className="text-xl font-semibold text-white">Hi, I'm Eternal AI</div>
+            <div className="text-xl font-semibold text-white">Hi, I'm EROS Wellness</div>
             <div className="text-sm text-gray-400 mt-1">How can I help you today?</div>
           </div>
         ),
@@ -592,7 +592,7 @@ const ErosChatUI: React.FC = () => {
         `}</style>
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold" style={{ color: '#00B8F8' }}>Eternal Reports</h2>
+            <h2 className="text-lg font-bold" style={{ color: '#00B8F8' }}>EROS Wellness</h2>
             <button
 
               className="md:hidden text-gray-400 hover:text-white bg-transparent"
@@ -633,7 +633,7 @@ const ErosChatUI: React.FC = () => {
               <Menu size={20} />
             </button>
 
-            <h3 className="text-xl font-semibold">Eternal AI</h3>
+            <h3 className="text-xl font-semibold" style={{color:"#00B8F8"}}>Wellness Chat Bot</h3>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold">
@@ -889,7 +889,7 @@ const ErosChatUI: React.FC = () => {
           <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-t border-gray-800">
             <div className="text-center text-xs text-gray-500" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
               <div className="flex items-center justify-between text-xs">
-                <div>© 2025 EROS Universe. All Rights Reserved.</div>
+                {/* <div>© 2025 EROS Universe. All Rights Reserved.</div> */}
                 <div className="flex items-center gap-6">
                   <a href="#" className="hover:text-gray-300 transition-colors">FAQs</a>
                   <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>

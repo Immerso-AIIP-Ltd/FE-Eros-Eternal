@@ -351,8 +351,8 @@ const SoulProfilePage: React.FC = () => {
         localStorage.setItem("place_of_birth", result.data.place_of_birth);
         localStorage.setItem("current_location", result.data.current_location);
         localStorage.setItem("time_of_birth", result.data.time_of_birth);
-        alert(result.message);
-        navigate("/aipage");
+        // alert(result.message);
+        navigate("/ques");
       } else {
         throw new Error(result.message || "Profile creation failed");
       }
@@ -433,17 +433,14 @@ const SoulProfilePage: React.FC = () => {
             </div>
             <h2
               style={{
-                background:
-                  "linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                color: "transparent",
+                color:"#00B8F8",
                 fontSize: "64px",
                 fontFamily: "Montserrat,sans-serif",
+                fontWeight:"bold"
               }}
             >
-              Eternal AI
+          
+              EROS Wellness
             </h2>
           </div>
 

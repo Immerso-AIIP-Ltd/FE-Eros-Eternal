@@ -961,17 +961,19 @@ const VibrationTool: React.FC = () => {
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center justify-between">
             <h2
-              className="text-lg font-bold"
+              className="text-sm font-bold"
               style={{
-                background:
-                  "linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                color: "transparent",
+                // background:
+                //   "linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))",
+                // WebkitBackgroundClip: "text",
+                // WebkitTextFillColor: "transparent",
+                // backgroundClip: "text",
+                // color: "transparent",
+                color:"#00B8F8"
               }}
             >
-              Eternal Reports
+              EROS Wellness
+              {/* Eternal Reports */}
             </h2>
             <button
               className="md:hidden text-gray-400 hover:text-white bg-transparent"
@@ -1027,7 +1029,7 @@ const VibrationTool: React.FC = () => {
               <Menu size={20} />
             </button>
             <h3 className="text-xl font-semibold">
-              Eternal AI -{" "}
+              EROS Wellness -{" "}
               {sidebarMenuItems.find((item) => item.id === activeMenuItem)
                 ?.label || "Assessment"}
             </h3>
@@ -1393,7 +1395,7 @@ const VibrationTool: React.FC = () => {
               style={{ maxWidth: "65%", margin: "0 auto", width: "100%" }}
             >
               <div className="flex items-center justify-center text-xs">
-                <div>© 2025 EROS Universe. All Rights Reserved.</div>
+                {/* <div>© 2025 EROS Universe. All Rights Reserved.</div> */}
                 {/* <div className="flex items-center gap-6">
                                     <a href="#" className="hover:text-gray-300 transition-colors">FAQs</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>

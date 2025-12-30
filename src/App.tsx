@@ -37,18 +37,21 @@ import FlameScore from "./FlameScore";
 
 import LongevityTool from "./longevityTool";
 import FounderMsg from "./FounderMsg";
+import WellnessScreen from "./WelnessScreen";
 
 const App: React.FC = () => {
   return (
     <Router>
       <div className="app overflow-fix">
         <Routes>
-          <Route path="/" element={<SplashScreen />} />
+          {/* <Route path="/" element={<SplashScreen />} /> */}
+           <Route path="/" element={<WellnessScreen />}/>
           <Route path="/chat" element={<ErosChatUI />} />
           <Route path="/profile" element={<SoulProfilePage />} />
           <Route path="/aipage" element={<EternalAIPage />} />
           <Route path="/result" element={<ResultPage />} />
           <Route path="/record" element={<RecordVoice />} />
+          {/* <Route path="/" element={<WellnessScreen />}/> */}
 
           <Route path="/ques" element={<ChatPage />} />
           <Route path="/home" element={<HomePage />} />

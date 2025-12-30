@@ -8,6 +8,7 @@ import { BsArrowLeft } from "react-icons/bs";
 import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "./components/Tarot/TarotCardSelector";
 import Stars from "./components/stars";
+import Harmony from "../src/images/final-harmony.png"
 
 interface TarotReading {
   card_backcover: string;
@@ -84,7 +85,7 @@ const HarmonyIndex: React.FC = () => {
   };
 
   return (
-    <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white">
+    <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white overflow-hidden">
       {/* <button
         type="button"
         className="absolute btn"
@@ -99,9 +100,18 @@ const HarmonyIndex: React.FC = () => {
         <i className="bi bi-star-fill"></i> Tarot Reading
       </button> */}
 
-      {step === 1 && (
-        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 tarot-intro">
-          {/* Tarot Cards */}
+      {/* {step === 1 && (
+        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 ">
+         
+
+           <img 
+      src={Harmony}
+      alt="Tarot" 
+      style={{ 
+        width:"100%",
+        
+      }} 
+    />
           <a
             href="/result"
             type="button"
@@ -117,13 +127,12 @@ const HarmonyIndex: React.FC = () => {
           >
             <i className="bi bi-arrow-left m-3"></i> Harmony Index
           </a>
-          {/* Title */}
+        
           <div className="d-flex h-50 flex-column align-items-center justify-content-center">
-            <h1 className="fw-bold">Harmony Index</h1>
-            <p className="text-white fw-bold">Get Your Relationship Status</p>
+          
           </div>
 
-          {/* Bottom */}
+        
           <div className="text-center p-4">
             <h3 className="fw-bold">Unlock the Secrets of Relationship</h3>
             <p className="text-white mt-4">
@@ -135,6 +144,38 @@ const HarmonyIndex: React.FC = () => {
            onClick={() => navigate('/relation')}
             >
               Start Harmoney Index Reading
+            </button>
+          </div>
+        </div>
+      )} */}
+                  {step === 1 && (
+        <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden">
+         
+          <img
+            src={Harmony}
+            alt="Face Reading Background"
+            className="position-absolute top-0 start-0 w-100  h-75 object-fit-cover"
+          />
+
+        
+          <a
+            href="/result"
+            className="position-absolute top-0 start-0 btn btn-link text-white p-3"
+            style={{ fontSize: '1.5rem', zIndex: 10 }}
+          >
+            <i className="bi bi-arrow-left"></i> Harmony Index
+          </a>
+
+        
+          <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-end text-center text-white position-relative pb-5" style={{ zIndex: 5 }}>
+            <h3 className="fw-bold display-5 mb-3">Unlock the Secrets of Relationship</h3>
+           
+            <button
+              className="btn btn-primary rounded-pill px-5 py-3 fs-5"
+              style={{ backgroundColor: '#00B8F8', border: 'none' }}
+              onClick={() => navigate('/relation')}
+            >
+              Start Face Reading
             </button>
           </div>
         </div>

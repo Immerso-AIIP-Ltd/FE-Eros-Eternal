@@ -8,6 +8,7 @@ import { BsArrowLeft } from "react-icons/bs";
 import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "./components/Tarot/TarotCardSelector";
 import Stars from "./components/stars";
+import Palm from "../src/images/final-palm.jpg"
 
 interface TarotReading {
   card_backcover: string;
@@ -99,9 +100,9 @@ const PalmFlow: React.FC = () => {
         <i className="bi bi-star-fill"></i> Tarot Reading
       </button> */}
 
-      {step === 1 && (
+      {/* {step === 1 && (
         <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 tarot-introp">
-          {/* Tarot Cards */}
+         
           <a
             href="/result"
             type="button"
@@ -117,13 +118,11 @@ const PalmFlow: React.FC = () => {
           >
             <i className="bi bi-arrow-left m-3"></i> Palmistry
           </a>
-          {/* Title */}
+    
           <div className="d-flex h-50 flex-column align-items-center justify-content-center">
-            <h1 className="fw-bold">Palmistry</h1>
-            <p className="text-white fw-bold">Unlock the secrets of your palm</p>
+           
           </div>
 
-          {/* Bottom */}
           <div className="text-center p-4">
             <h3 className="fw-bold">Unlock the Secrets of Your Plam</h3>
             <p className="text-white mt-4">
@@ -135,6 +134,39 @@ const PalmFlow: React.FC = () => {
                 onClick={() => navigate('/upload')}
             >
               Start Plam Reading
+            </button>
+          </div>
+        </div>
+      )} */}
+
+                        {step === 1 && (
+        <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden">
+         
+          <img
+            src={Palm}
+            alt="Face Reading Background"
+            className="position-absolute top-0 start-0 w-100 h-75"
+          />
+
+        
+          <a
+            href="/result"
+            className="position-absolute top-0 start-0 btn btn-link text-white p-3"
+            style={{ fontSize: '1.5rem', zIndex: 10 }}
+          >
+            <i className="bi bi-arrow-left"></i>Palmistry
+          </a>
+
+        
+          <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-end text-center text-white position-relative pb-5" style={{ zIndex: 5 }}>
+            <h3 className="fw-bold display-5 mb-3">Unlock the Secrets of Your Plam</h3>
+           
+            <button
+              className="btn btn-primary rounded-pill px-5 py-3 fs-5"
+              style={{ backgroundColor: '#00B8F8', border: 'none' }}
+              onClick={() => navigate('/relation')}
+            >
+              Start Face Reading
             </button>
           </div>
         </div>

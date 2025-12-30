@@ -108,7 +108,7 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     const welcomeMessage = `👋 Hey ${localStorage.getItem(
       "username"
-    )}!, What do you want from Eternal AI.`;
+    )}!, What do you want from EROS Wellness.`;
     const questionMessages = questions.map((question) => ({
       sender: "ai" as const,
       text: question?.message,
@@ -811,7 +811,7 @@ const ChatPage: React.FC = () => {
     <div className="d-flex w-100 h-100 min-vh-100 min-vw-100 bg-black text-white overflow-hidden">
       <Stars />
 
-      <div className="flex-grow-1 d-flex flex-column position-relative">
+      <div className="flex-grow-1 w-100 d-flex flex-column position-relative">
         <div className="container z-10 d-flex justify-content-between align-items-center p-4">
           <h2
             className="h4 fw-bold"
@@ -820,7 +820,8 @@ const ChatPage: React.FC = () => {
                 "linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))",
             }}
           >
-            Eternal AI
+   
+            EROS Wellness
           </h2>
 
           <button
@@ -1385,13 +1386,13 @@ const ChatPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="position-relative z-10 px-3 pb-3">
+            {/* <div className="position-relative z-10 px-3 pb-3">
               <div className="d-flex flex-wrap justify-content-center align-items-center text-secondary small">
                 <span className="mb-2 mb-md-0">
                   © 2025 EROS Universe. All Rights Reserved.
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
         )}
 

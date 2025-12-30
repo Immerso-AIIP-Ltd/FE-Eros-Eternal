@@ -96,7 +96,7 @@ export const Header: React.FC = () => {
           {/* Title */}
           <h1
             style={{
-              fontSize: "clamp(2.5rem, 8vw, 5rem)",
+              fontSize: "clamp(2.5rem, 8vw, 3rem)",
               fontWeight: "700",
               background: "linear-gradient(90deg, #AAE127 0%, #00A2FF 100%)",
               WebkitBackgroundClip: "text",
@@ -108,11 +108,12 @@ export const Header: React.FC = () => {
               fontFamily: "Poppins, sans-serif",
             }}
           >
-            Eternal
+            {/* Eternal */}
+            EROS Wellness
           </h1>
 
           {/* How it works Button */}
-          <button
+          {/* <button
             style={{
               backgroundColor: "#00b8f8",
               color: "#ffffff",
@@ -139,10 +140,10 @@ export const Header: React.FC = () => {
             }}
           >
             How it works
-          </button>
+          </button> */}
 
           {/* Subtitle */}
-          <div
+          {/* <div
             style={{
               fontSize: "14px",
               color: "rgba(255, 255, 255, 0.75)",
@@ -152,7 +153,7 @@ export const Header: React.FC = () => {
             }}
           >
             Get started with
-          </div>
+          </div> */}
         </div>
 
         {/* Welcome Card */}

@@ -23,11 +23,13 @@
 }
 
 .tarot-introp {
-  background-image: url("./assets/PalmBG.jpg");
+  background-image: url("./images//final-palm.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  /* height: 100vh; */
+  /* height:"50vh" */
+  height: 100vh;
+ 
 }
 
 /* Tarot.css */

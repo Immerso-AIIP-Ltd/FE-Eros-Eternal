@@ -648,12 +648,13 @@ const AiChat: React.FC = () => {
                 <div className="p-4 border-b border-gray-700">
                     <div className="flex items-center justify-between">
                         <h2 className="text-lg font-bold" style={{
-                            background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                            color: 'transparent',
-                        }}>Eternal AI</h2>
+                            // background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
+                            // WebkitBackgroundClip: 'text',
+                            // WebkitTextFillColor: 'transparent',
+                            // backgroundClip: 'text',
+                            // color: 'transparent',
+                            color:"#00B8F8"
+                        }}>EROS Wellness</h2>
                         <button
                             className="md:hidden text-gray-400 hover:text-white bg-transparent"
                             onClick={() => setSidebarOpen(false)}
@@ -705,7 +706,7 @@ const AiChat: React.FC = () => {
                         >
                             <Menu size={20} />
                         </button>
-                        <h3 className="text-xl font-semibold">Eternal AI</h3>
+                        <h3 className="text-xl font-semibold" style={{color:"#00B8F8"}}>Wellness Chat Bot</h3>
                     </div>
                     <div className="flex items-center gap-2">
                         <div
@@ -983,7 +984,7 @@ const AiChat: React.FC = () => {
                     <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-gray-800">
                         <div className="text-center text-xs text-gray-500" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
                             <div className="flex items-center justify-center text-xs">
-                                <div>© 2025 EROS Universe. All Rights Reserved.</div>
+                                {/* <div>© 2025 EROS Universe. All Rights Reserved.</div> */}
                                 {/* <div className="flex items-center gap-6">
                                     <a href="#" className="hover:text-gray-300 transition-colors">FAQs</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>

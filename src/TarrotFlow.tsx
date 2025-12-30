@@ -9,6 +9,7 @@ import TarotCardSelector from "./components/Tarot/TarotCardSelector";
 import Stars from "./components/stars";
 import { Calendar } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import Tarrot from "../src/images/final-tarrot.png"
 
 interface TarotReading {
   card_backcover: string;
@@ -94,24 +95,24 @@ const TarotFlow: React.FC = () => {
   };
 
   return (
-    <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white">
-      {/* <button
-        type="button"
-        className="absolute btn"
-        style={{
-          top: "2%",
-          left: "2%",
-          fontSize: "large",
-          background: "none",
-          width: "10%",
-        }}
-      >
-        <i className="bi bi-star-fill"></i> Tarot Reading
-      </button> */}
+    
+    <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white" style={{backgroundColor:"rgb(0, 0, 0);"}}>
+      
 
-      {step === 1 && (
-        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 tarot-introt">
-          {/* Tarot Cards */}
+     
+    
+
+      {/* {step === 1 && (
+        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 ">
+        
+            <img 
+      src={Tarrot}
+      alt="Tarot" 
+      style={{ 
+        maxWidth: "100%", 
+     
+      }} 
+    />
           <a
             href="/result"
             type="button"
@@ -127,13 +128,12 @@ const TarotFlow: React.FC = () => {
           >
             <i className="bi bi-arrow-left m-3"></i> Tarot Reading
           </a>
-          {/* Title */}
+        
           <div className="d-flex h-50 flex-column align-items-center justify-content-center">
-            <h1 className="fw-bold">Tarot Reading</h1>
-            <p className="text-white fw-bold">Unlock the secrets of Life</p>
+          
           </div>
 
-          {/* Bottom */}
+        
           <div className="text-center p-4">
             <h3 className="fw-bold">Unlock the Secrets of Your Life</h3>
             <p className="text-white mt-4">
@@ -146,6 +146,39 @@ const TarotFlow: React.FC = () => {
               onClick={() => setStep(2)}
             >
               Start Tarot Reading
+            </button>
+          </div>
+        </div>
+      )} */}
+
+            {step === 1 && (
+        <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden">
+         
+          <img
+            src={Tarrot}
+            alt="Face Reading Background"
+            className="position-absolute top-0 start-0 w-100  object-fit-cover"
+          />
+
+        
+          <a
+            href="/result"
+            className="position-absolute top-0 start-0 btn btn-link text-white p-3"
+            style={{ fontSize: '1.5rem', zIndex: 10 }}
+          >
+            <i className="bi bi-arrow-left"></i> Tarot Reading
+          </a>
+
+        
+          <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-end text-center text-white position-relative pb-5" style={{ zIndex: 5 }}>
+            <h3 className="fw-bold display-5 mb-3">Unlock the Secrets of Your Face</h3>
+           
+            <button
+              className="btn btn-primary rounded-pill px-5 py-3 fs-5"
+              style={{ backgroundColor: '#00B8F8', border: 'none' }}
+              onClick={() => setStep(2)}
+            >
+              Start Face Reading
             </button>
           </div>
         </div>
