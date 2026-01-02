@@ -131,32 +131,35 @@ const FaceReading: React.FC = () => {
       )} */}
       {step === 1 && (
         <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden">
-         
+
           <img
             src={Face}
             alt="Face Reading Background"
             className="position-absolute top-0 start-0 w-100  h-75 object-fit-cover"
           />
 
-        
+
           <a
             href="/result"
             className="position-absolute top-0 start-0 btn btn-link text-white p-3"
-            style={{ fontSize: '1.5rem', zIndex: 10 }}
+            style={{ fontSize: '1.5rem', zIndex: 10, textDecoration: 'none' }}
           >
-            <i className="bi bi-arrow-left"></i> Face Reading
+            <i className="bi bi-arrow-left mr-3"></i> Face Reading
           </a>
 
-        
+
           <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-end text-center text-white position-relative pb-5" style={{ zIndex: 5 }}>
-            <h3 className="fw-bold display-5 mb-3">Unlock the Secrets of Your Face</h3>
-           
+            <h3 className="fw-semibold display-5 mb-3">Unlock the Secrets of Your Face</h3>
+            <p className="text-white-50 mb-4 text-xl">
+              Discover insights into your personality, relationship, and future with our AI-powered
+              face reading technology
+            </p>
             <button
-              className="btn btn-primary rounded-pill px-5 py-3 fs-5"
+              className="btn btn-primary rounded-pill px-5 py-3 fs-5 w-25"
               style={{ backgroundColor: '#00B8F8', border: 'none' }}
               onClick={() => navigate('/face-upload')}
             >
-              Start Face Reading
+              Continue
             </button>
           </div>
         </div>
@@ -200,9 +203,8 @@ const FaceReading: React.FC = () => {
                 <label className="form-label">Enter Your Name</label>
                 <input
                   type="text"
-                  className={`form-control tarot-input ${
-                    formData.name ? "has-value" : ""
-                  }`}
+                  className={`form-control tarot-input ${formData.name ? "has-value" : ""
+                    }`}
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
@@ -213,9 +215,8 @@ const FaceReading: React.FC = () => {
               <div className="mb-3">
                 <label className="form-label">Gender</label>
                 <select
-                  className={`form-select tarot-input ${
-                    formData.gender ? "has-value" : ""
-                  }`}
+                  className={`form-select tarot-input ${formData.gender ? "has-value" : ""
+                    }`}
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
@@ -231,9 +232,8 @@ const FaceReading: React.FC = () => {
                 <label className="form-label">Date of Birth</label>
                 <input
                   type="date"
-                  className={`form-control tarot-input ${
-                    formData.dob ? "has-value" : ""
-                  }`}
+                  className={`form-control tarot-input ${formData.dob ? "has-value" : ""
+                    }`}
                   name="dob"
                   value={formData.dob}
                   onChange={handleChange}

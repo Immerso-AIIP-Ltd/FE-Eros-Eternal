@@ -19,7 +19,7 @@ interface TarotReading {
   reading: TarotCard[];
 }
 const TarotFlow: React.FC = () => {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1); // 1 = intro, 2 = form, 3 = tarot
   const [formData, setFormData] = useState({
     name: "",
@@ -95,12 +95,12 @@ const TarotFlow: React.FC = () => {
   };
 
   return (
-    
-    <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white" style={{backgroundColor:"rgb(0, 0, 0);"}}>
-      
 
-     
-    
+    <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white" style={{ backgroundColor: "rgb(0, 0, 0);" }}>
+
+
+
+
 
       {/* {step === 1 && (
         <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 ">
@@ -151,34 +151,37 @@ const TarotFlow: React.FC = () => {
         </div>
       )} */}
 
-            {step === 1 && (
+      {step === 1 && (
         <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden">
-         
+
           <img
             src={Tarrot}
             alt="Face Reading Background"
             className="position-absolute top-0 start-0 w-100  object-fit-cover"
           />
 
-        
+
           <a
             href="/result"
             className="position-absolute top-0 start-0 btn btn-link text-white p-3"
-            style={{ fontSize: '1.5rem', zIndex: 10 }}
+            style={{ fontSize: '1.5rem', zIndex: 10, textDecoration: 'none' }}
           >
-            <i className="bi bi-arrow-left"></i> Tarot Reading
+            <i className="bi bi-arrow-left mr-3"></i> Tarot Reading
           </a>
 
-        
+
           <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-end text-center text-white position-relative pb-5" style={{ zIndex: 5 }}>
-            <h3 className="fw-bold display-5 mb-3">Unlock the Secrets of Your Face</h3>
-           
+            <h3 className="fw-semibold display-5 mb-3">Unlock the Secrets of Your Life</h3>
+            <p className="text-xl text-white-50 mb-4">
+              Discover insights into your personality, relationship, and future with
+              our tarot cards
+            </p>
             <button
-              className="btn btn-primary rounded-pill px-5 py-3 fs-5"
+              className="btn btn-primary rounded-pill px-5 py-3 fs-5 w-25"
               style={{ backgroundColor: '#00B8F8', border: 'none' }}
               onClick={() => setStep(2)}
             >
-              Start Face Reading
+              Continue
             </button>
           </div>
         </div>

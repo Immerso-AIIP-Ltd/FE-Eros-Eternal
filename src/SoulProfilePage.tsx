@@ -35,6 +35,7 @@ interface FormData {
   timeOfBirth: string; // HH:mm or HH:mm:ss
 }
 
+
 const indianStates = [
   "Mumbai",
   "Delhi",
@@ -182,6 +183,7 @@ const darkTheme = createTheme({
 });
 
 const SoulProfilePage: React.FC = () => {
+
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
@@ -368,6 +370,35 @@ const SoulProfilePage: React.FC = () => {
 
   return (
     <ThemeProvider theme={darkTheme}>
+      <style>
+        {`
+  @media (max-width: 768px) {
+    .responsive-container {
+      flex-direction: column !important;
+      padding: 1rem !important;
+    }
+    
+    .left-side {
+      display: none !important;
+    }
+    
+    .right-side {
+      flex: 1 1 100% !important;
+    }
+    
+    .soul-profile-form {
+      width: 100% !important;
+      padding: 1.5rem !important;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .soul-profile-form {
+      width: 70% !important;
+    }
+  }
+`}
+      </style>
       <div
         style={{
           height: "100vh",
@@ -391,6 +422,7 @@ const SoulProfilePage: React.FC = () => {
             position: "relative",
             zIndex: 1,
           }}
+          className="responsive-container"
         >
           {/* Left Side - Background and Logo */}
           <div
@@ -399,6 +431,7 @@ const SoulProfilePage: React.FC = () => {
               position: "relative",
               textAlign: "center",
             }}
+            className="left-side"
           >
             <img
               src={backgroundImg}
@@ -433,44 +466,53 @@ const SoulProfilePage: React.FC = () => {
             </div>
             <h2
               style={{
-                color:"#00B8F8",
+                color: "#00B8F8",
                 fontSize: "64px",
                 fontFamily: "Montserrat,sans-serif",
-                fontWeight:"bold"
+                fontWeight: "bold"
               }}
             >
-          
+
               EROS Wellness
             </h2>
           </div>
 
           {/* Right Side - Form */}
-          <form
-            onSubmit={handleSubmit}
+          <div
             style={{
-              flex: "1 1 40%",
-              backgroundColor: "#000",
-              padding: "2rem",
-              borderRadius: "16px",
-              border: "1px solid #2a2a2a",
-              boxShadow: "0 0 15px #00B8F8",
+              flex: "1 1 50%",
               display: "flex",
-              flexDirection: "column",
-              gap: "1rem",
-              fontFamily: "Inter,sans-serif",
+              alignItems: "center",
+              justifyContent: "center",
             }}
+            className="right-side"
           >
-            <h1
+            <form
+              onSubmit={handleSubmit}
               style={{
-                marginBottom: "1rem",
-                fontFamily: "Montserrat,sans-serif",
-                fontWeight: "700",
+                width: "60%",
+                backgroundColor: "#000",
+                padding: "2rem",
+                borderRadius: "16px",
+                border: "1px solid #2a2a2a",
+                display: "flex",
+                flexDirection: "column",
+                gap: "1rem",
+                fontFamily: "Inter,sans-serif",
               }}
+              className="soul-profile-form"
             >
-              Create Your Soul Profile
-            </h1>
+              <h1
+                style={{
+                  marginBottom: "1rem",
+                  fontFamily: "Montserrat,sans-serif",
+                  fontWeight: "700",
+                }}
+              >
+                Create Your Soul Profile
+              </h1>
 
-            {/* <TextField
+              {/* <TextField
               label="First Name"
               variant="outlined"
               value={formData.firstName}
@@ -494,54 +536,54 @@ const SoulProfilePage: React.FC = () => {
               }}
             /> */}
 
-            <TextField
-              label="Name"
-              variant="outlined"
-              value={formData.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-              required
-              InputLabelProps={{ style: { color: "#fff" } }}
-              inputProps={{ style: { color: "#fff" } }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#6c757d",
+              <TextField
+                label="Name"
+                variant="outlined"
+                value={formData.name}
+                onChange={(e) => handleChange("name", e.target.value)}
+                required
+                InputLabelProps={{ style: { color: "#fff" } }}
+                inputProps={{ style: { color: "#fff" } }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#6c757d",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#6c757d",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#00B8F8",
+                      boxShadow: "0 0 8px #00B8F8",
+                    },
                   },
-                  "&:hover fieldset": {
-                    borderColor: "#6c757d",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00B8F8",
-                    boxShadow: "0 0 8px #00B8F8",
-                  },
-                },
-              }}
-            />
+                }}
+              />
 
-            {/* Gender */}
-            <StyledFormControl variant="outlined">
-              <IconLeftWrapper>
-                <ArrowDropDownIcon />
-              </IconLeftWrapper>
-              <Select
-                value={formData.gender}
-                onChange={(e: SelectChangeEvent) =>
-                  handleChange("gender", e.target.value)
-                }
-                displayEmpty
-                IconComponent={() => null}
-              >
-                <MenuItem value="" disabled style={{ opacity: "1" }}>
-                  Select Gender
-                </MenuItem>
-                <MenuItem value="Male">Male</MenuItem>
-                <MenuItem value="Female">Female</MenuItem>
-                <MenuItem value="Other">Other</MenuItem>
-              </Select>
-            </StyledFormControl>
+              {/* Gender */}
+              <StyledFormControl variant="outlined">
+                <IconLeftWrapper>
+                  <ArrowDropDownIcon />
+                </IconLeftWrapper>
+                <Select
+                  value={formData.gender}
+                  onChange={(e: SelectChangeEvent) =>
+                    handleChange("gender", e.target.value)
+                  }
+                  displayEmpty
+                  IconComponent={() => null}
+                >
+                  <MenuItem value="" disabled style={{ opacity: "1" }}>
+                    Select Gender
+                  </MenuItem>
+                  <MenuItem value="Male">Male</MenuItem>
+                  <MenuItem value="Female">Female</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
+                </Select>
+              </StyledFormControl>
 
-            {/* Place of Birth */}
-            {/* <StyledFormControl variant="outlined">
+              {/* Place of Birth */}
+              {/* <StyledFormControl variant="outlined">
               <IconLeftWrapper>
                 <LocationOnIcon />
               </IconLeftWrapper>
@@ -563,8 +605,8 @@ const SoulProfilePage: React.FC = () => {
               </Select>
             </StyledFormControl> */}
 
-            {/* Current Location */}
-            {/* <StyledFormControl variant="outlined">
+              {/* Current Location */}
+              {/* <StyledFormControl variant="outlined">
               <IconLeftWrapper>
                 <LocationOnIcon />
               </IconLeftWrapper>
@@ -586,178 +628,179 @@ const SoulProfilePage: React.FC = () => {
               </Select>
             </StyledFormControl> */}
 
-            <StyledFormControl variant="outlined">
-              {/* <IconLeftWrapper>
+              <StyledFormControl variant="outlined">
+                {/* <IconLeftWrapper>
     <LocationOnIcon />
   </IconLeftWrapper> */}
-              <TextField
-                value={formData.placeOfBirth}
-                onChange={(e) => handleChange("placeOfBirth", e.target.value)}
-                placeholder="Enter Place of Birth"
-                variant="outlined"
-                fullWidth
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LocationOnIcon />
-                    </InputAdornment>
-                  ),
-                  // Optional: remove default outline if StyledFormControl handles styling
-                }}
-              />
-            </StyledFormControl>
+                <TextField
+                  value={formData.placeOfBirth}
+                  onChange={(e) => handleChange("placeOfBirth", e.target.value)}
+                  placeholder="Enter Place of Birth"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LocationOnIcon />
+                      </InputAdornment>
+                    ),
+                    // Optional: remove default outline if StyledFormControl handles styling
+                  }}
+                />
+              </StyledFormControl>
 
-            <StyledFormControl variant="outlined">
-              {/* <IconLeftWrapper>
+              <StyledFormControl variant="outlined">
+                {/* <IconLeftWrapper>
     <LocationOnIcon />
   </IconLeftWrapper> */}
+                <TextField
+                  value={formData.currentLocation}
+                  onChange={(e) =>
+                    handleChange("currentLocation", e.target.value)
+                  }
+                  placeholder="Enter Current Location"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LocationOnIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </StyledFormControl>
+
+              {/* Date of Birth */}
               <TextField
-                value={formData.currentLocation}
-                onChange={(e) =>
-                  handleChange("currentLocation", e.target.value)
-                }
-                placeholder="Enter Current Location"
-                variant="outlined"
-                fullWidth
+                label="Date of Birth"
+                type="date"
+                value={formData.dateOfBirth}
+                onChange={(e) => handleChange("dateOfBirth", e.target.value)}
                 required
+                inputRef={dobInputRef}
+                InputLabelProps={{ shrink: true, style: { color: "#fff" } }}
+                inputProps={{
+                  style: { color: "#fff" },
+                  sx: {
+                    "&::-webkit-calendar-picker-indicator": {
+                      opacity: 0,
+                      pointerEvents: "none",
+                    },
+                    "&::-webkit-inner-spin-button": {
+                      display: "none",
+                    },
+                  },
+                }}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
-                      <LocationOnIcon />
+                    <InputAdornment
+                      position="start"
+                      onClick={handleIconClick}
+                      sx={{ cursor: "pointer" }}
+                    >
+                      <CalendarTodayIcon sx={{ color: "#fff" }} />
                     </InputAdornment>
                   ),
                 }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    cursor: "pointer",
+                    "& fieldset": {
+                      borderColor: "#6c757d",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#6c757d",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#00B8F8",
+                      boxShadow: "0 0 8px #00B8F8",
+                    },
+                  },
+                  "& .MuiInputBase-input": {
+                    cursor: "pointer",
+                    paddingLeft: "8px",
+                  },
+                }}
               />
-            </StyledFormControl>
 
-            {/* Date of Birth */}
-            <TextField
-              label="Date of Birth"
-              type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) => handleChange("dateOfBirth", e.target.value)}
-              required
-              inputRef={dobInputRef}
-              InputLabelProps={{ shrink: true, style: { color: "#fff" } }}
-              inputProps={{
-                style: { color: "#fff" },
-                sx: {
-                  "&::-webkit-calendar-picker-indicator": {
-                    opacity: 0,
-                    pointerEvents: "none",
+              {/* Time of Birth */}
+              <TextField
+                label="Time of Birth"
+                type="time"
+                value={formData.timeOfBirth}
+                onChange={(e) => handleChange("timeOfBirth", e.target.value)}
+                required
+                inputRef={timeInputRef}
+                InputLabelProps={{ shrink: true, style: { color: "#fff" } }}
+                inputProps={{
+                  style: { color: "#fff" },
+                  sx: {
+                    "&::-webkit-calendar-picker-indicator": {
+                      opacity: 0,
+                      pointerEvents: "none",
+                    },
+                    "&::-webkit-inner-spin-button": {
+                      display: "none",
+                    },
                   },
-                  "&::-webkit-inner-spin-button": {
-                    display: "none",
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment
+                      position="start"
+                      onClick={handleTimeIconClick}
+                      sx={{ cursor: "pointer" }}
+                    >
+                      <AccessTimeIcon sx={{ color: "#fff" }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    cursor: "pointer",
+                    "& fieldset": {
+                      borderColor: "#6c757d",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#6c757d",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#00B8F8",
+                      boxShadow: "0 0 8px #00B8F8",
+                    },
                   },
-                },
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment
-                    position="start"
-                    onClick={handleIconClick}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <CalendarTodayIcon sx={{ color: "#fff" }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  cursor: "pointer",
-                  "& fieldset": {
-                    borderColor: "#6c757d",
+                  "& .MuiInputBase-input": {
+                    cursor: "pointer",
+                    paddingLeft: "8px",
                   },
-                  "&:hover fieldset": {
-                    borderColor: "#6c757d",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00B8F8",
-                    boxShadow: "0 0 8px #00B8F8",
-                  },
-                },
-                "& .MuiInputBase-input": {
-                  cursor: "pointer",
-                  paddingLeft: "8px",
-                },
-              }}
-            />
+                }}
+              />
 
-            {/* Time of Birth */}
-            <TextField
-              label="Time of Birth"
-              type="time"
-              value={formData.timeOfBirth}
-              onChange={(e) => handleChange("timeOfBirth", e.target.value)}
-              required
-              inputRef={timeInputRef}
-              InputLabelProps={{ shrink: true, style: { color: "#fff" } }}
-              inputProps={{
-                style: { color: "#fff" },
-                sx: {
-                  "&::-webkit-calendar-picker-indicator": {
-                    opacity: 0,
-                    pointerEvents: "none",
-                  },
-                  "&::-webkit-inner-spin-button": {
-                    display: "none",
-                  },
-                },
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment
-                    position="start"
-                    onClick={handleTimeIconClick}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <AccessTimeIcon sx={{ color: "#fff" }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
+              <button
+                type="submit"
+                style={{
+                  backgroundColor: "#00B8F8",
+                  color: "#fff",
+                  border: "none",
+                  padding: "1rem",
+                  fontSize: "1.2rem",
+                  fontWeight: "600",
                   cursor: "pointer",
-                  "& fieldset": {
-                    borderColor: "#6c757d",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#6c757d",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00B8F8",
-                    boxShadow: "0 0 8px #00B8F8",
-                  },
-                },
-                "& .MuiInputBase-input": {
-                  cursor: "pointer",
-                  paddingLeft: "8px",
-                },
-              }}
-            />
-
-            <button
-              type="submit"
-              style={{
-                backgroundColor: "#00B8F8",
-                color: "#fff",
-                border: "none",
-                padding: "1rem",
-                fontSize: "1.2rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                marginTop: "1rem",
-                fontFamily: "Inter,sans-serif",
-              }}
-              disabled={loading}
-            >
-              {loading ? "Creating..." : "Create your soul profile"}
-            </button>
-          </form>
+                  marginTop: "1rem",
+                  fontFamily: "Inter,sans-serif",
+                }}
+                disabled={loading}
+              >
+                {loading ? "Creating..." : "Create your soul profile"}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
-    </ThemeProvider>
+    </ThemeProvider >
   );
 };
 

@@ -161,21 +161,23 @@ const HarmonyIndex: React.FC = () => {
           <a
             href="/result"
             className="position-absolute top-0 start-0 btn btn-link text-white p-3"
-            style={{ fontSize: '1.5rem', zIndex: 10 }}
+            style={{ fontSize: '1.5rem', zIndex: 10, textDecoration: 'none' }}
           >
-            <i className="bi bi-arrow-left"></i> Harmony Index
+            <i className="bi bi-arrow-left mr-3"></i> Harmony Index
           </a>
 
         
           <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-end text-center text-white position-relative pb-5" style={{ zIndex: 5 }}>
-            <h3 className="fw-bold display-5 mb-3">Unlock the Secrets of Relationship</h3>
-           
+            <h3 className="fw-semibold display-5 mb-3">Unlock the Secrets of Your Relationship</h3>
+           <p className="text-white-50 mb-4 text-xl">
+              Discover insights into your personality, relationship, and future with our AI-powered
+            </p>
             <button
-              className="btn btn-primary rounded-pill px-5 py-3 fs-5"
+              className="btn btn-primary rounded-pill px-5 py-3 fs-5 w-25"
               style={{ backgroundColor: '#00B8F8', border: 'none' }}
               onClick={() => navigate('/relation')}
             >
-              Start Face Reading
+              Continue
             </button>
           </div>
         </div>
