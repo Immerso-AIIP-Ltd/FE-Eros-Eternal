@@ -16,4 +16,9 @@ export default defineConfig({
   resolve: {
     dedupe: ['@mui/material', '@mui/icons-material'],
   },
+   preview: {
+    allowedHosts: [
+      ".shakticloud.ai"
+    ]
+  }
 })
