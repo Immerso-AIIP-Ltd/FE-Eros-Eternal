@@ -21,7 +21,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
 const API_URL =
-  "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+  "https://http.ukksg3jorv.shaktistudio.shakticloud.ai";
 // const API_URL =
 //   "http://192.168.18.5:7001";
 

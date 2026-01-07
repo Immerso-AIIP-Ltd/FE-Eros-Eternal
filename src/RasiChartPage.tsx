@@ -53,7 +53,7 @@ const RasiChartPage: React.FC = () => {
       };
 
       const response = await fetch(
-        'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/vedastro/get_astrology_data',
+        'https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/vedastro/get_astrology_data',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

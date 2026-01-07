@@ -18,7 +18,7 @@ interface TarotReading {
   reading: TarotCard[];
 }
 
-const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+const API_URL = "https://http.ukksg3jorv.shaktistudio.shakticloud.ai";
 
 const TarotCard: React.FC = () => {
   const [data, setData] = useState<TarotReading | null>(null);
