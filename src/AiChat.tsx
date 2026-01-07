@@ -234,7 +234,7 @@ const AiChat: React.FC = () => {
         if (!userId) return;
 
         try {
-            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/sessions/?user_id=${userId}`);
+            const response = await fetch(`https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/sessions/?user_id=${userId}`);
             // const response = await fetch(`http://192.168.18.5:7001/api/v1/chat/sessions/?user_id=${userId}`);
             const data = await response.json();
             if (data.success && data.data && data.data.sessions && Array.isArray(data.data.sessions)) {
@@ -253,7 +253,7 @@ const AiChat: React.FC = () => {
         if (!userId) return;
 
         try {
-            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/conversation/${sessionId}`);
+            const response = await fetch(`https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/conversation/${sessionId}`);
             // const response = await fetch(`http://192.168.18.5:7001/api/v1/chat/conversation/${sessionId}`);
             const data = await response.json();
             if (data.success && data.data && data.data.conversation_history && Array.isArray(data.data.conversation_history)) {
@@ -453,7 +453,7 @@ const AiChat: React.FC = () => {
 
             // If no session ID exists, initialize a new session
             if (!currentSessionId) {
-                const initResponse = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual/${userId}`, {
+                const initResponse = await fetch(`https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/spiritual/${userId}`, {
                 // const initResponse = await fetch(`http://192.168.18.5:7001/api/v1/chat/spiritual/${userId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -477,7 +477,7 @@ const AiChat: React.FC = () => {
             }
 
             // Send the user's message
-            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual/${userId}`, {
+            const response = await fetch(`https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/spiritual/${userId}`, {
             // const response = await fetch(`http://192.168.18.5:7001/api/v1/chat/spiritual/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded',  },
