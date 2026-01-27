@@ -1,4 +1,4 @@
-import React, { useState, useEffect, } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import cardBg from "../../assets/cardbg.png";
 import card2 from "../../assets/image.png";
@@ -180,6 +180,11 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
 
   const totalCards = 25;
   const cards = Array.from({ length: totalCards }, (_, i) => i);
+
+  // function handleMagicButtonClick () {
+  //   navigate("ai-chat")
+
+  // }
 
   const handleCardClick = (cardIndex) => {
     if (tornadoPhase) return;
@@ -401,7 +406,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
           border: "none",
           zIndex: 100,
         }}
-        onClick={() => navigate('/result')}
+        onClick={() => navigate("/result")}
       >
         <i className="bi bi-arrow-left m-3"></i> Back
       </button>
@@ -626,7 +631,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
             <div className="mt-4">
               <Button
                 variant="outline-warning"
-                onClick={()=>{
+                onClick={() => {
                   resetWithCardScatter();
                   // onShuffle();
                 }}
@@ -912,6 +917,28 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
           </div>
         )}
 
+      {selectedCards.length === 3 && <Button
+        variant="link"
+        className="border-0 p-0 me-2 d-flex align-items-center justify-content-center"
+        style={{
+          width: "50px",
+          height: "50px",
+          borderRadius: "50%",
+          backgroundImage:
+            "linear-gradient(90deg, rgb(0, 198, 255), rgb(0, 114, 255))",
+          color: "white",
+          fontSize: "1.2rem",
+          position: "relative",
+          top: "90%",
+          left: "90%",
+          zIndex: 100,
+        }}
+        // onClick={handleMagicButtonClick}
+        onClick={() => navigate("/ai-chat")}
+        data-tooltip="true"
+      >
+        <i className="bi bi-stars"></i>
+      </Button>}
       {/* Cards container */}
       <div
         style={{
