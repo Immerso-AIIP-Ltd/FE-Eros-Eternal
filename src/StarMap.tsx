@@ -302,7 +302,7 @@ const StarMap: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/select_soul_report/${userId}`,
+        `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -404,7 +404,7 @@ const StarMap: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/answer_question/${userId}`,
+        `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -474,7 +474,7 @@ const StarMap: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/generate_soul_report/${userId}`,
+        `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -784,7 +784,7 @@ const StarMap: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
+        `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
       );
       return response.ok && response.status === 200;
     } catch (error) {

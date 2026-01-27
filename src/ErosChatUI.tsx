@@ -387,7 +387,7 @@ const ErosChatUI: React.FC = () => {
       let currentSessionId = sessionId;
 
       if (!currentSessionId) {
-        const initResponse = await fetch('http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual', {
+        const initResponse = await fetch('https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/spiritual', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
@@ -406,7 +406,7 @@ const ErosChatUI: React.FC = () => {
         }
       }
 
-      const response = await fetch('http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual', {
+      const response = await fetch('https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/spiritual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({

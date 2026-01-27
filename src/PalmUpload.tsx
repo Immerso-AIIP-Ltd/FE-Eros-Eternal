@@ -89,7 +89,7 @@ const PalmUploadPage: React.FC = () => {
     formData.append("image_data", selectedFile);
 
     const response = await fetch(
-      'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/analysis/palm',
+      'https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/analysis/palm',
       {
         method: 'POST',
         body: formData,

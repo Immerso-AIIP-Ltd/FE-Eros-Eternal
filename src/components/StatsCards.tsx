@@ -32,7 +32,7 @@ const StatsCards = () => {
   const [loading, setLoading] = useState(true);
 
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
-  const baseApiUrl = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/reports/individual_report/";
+  const baseApiUrl = "https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/reports/individual_report/";
   // const baseApiUrl = "http://192.168.18.5:7001/api/v1/reports/individual_report/";
 
   const reportCards = [
