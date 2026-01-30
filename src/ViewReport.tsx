@@ -93,7 +93,7 @@ const ViewReport = () => {
   const recommendationsRef = useRef(null);
 
   const baseApiUrl =
-    "https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/reports/individual_report/";
+    "http://164.52.205.108:8500/api/v1/reports/individual_report/";
   // const baseApiUrl =
   //   "http://192.168.18.5:7001/api/v1/reports/individual_report/";
 

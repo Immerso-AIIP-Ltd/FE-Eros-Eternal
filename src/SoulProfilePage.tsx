@@ -21,7 +21,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
 const API_URL =
-  "https://http.ukksg3jorv.shaktistudio.shakticloud.ai";
+  "http://164.52.205.108:8500";
 // const API_URL =
 //   "http://192.168.18.5:7001";
 

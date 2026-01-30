@@ -164,7 +164,7 @@ const ChatPage: React.FC = () => {
   const sendMessage = async () => {
     const userId = localStorage.getItem("user_id");
     const BASE_URL =
-      "https://http.ukksg3jorv.shaktistudio.shakticloud.ai";
+      "http://164.52.205.108:8500";
     // const BASE_URL =
     //   "http://192.168.18.5:7001";
 
@@ -507,7 +507,7 @@ const ChatPage: React.FC = () => {
 
     try {
       const res = await fetch(
-        `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/select_soul_report/${userId}`,
+        `http://164.52.205.108:8500/api/v1/chat/select_soul_report/${userId}`,
         { method: "POST", body: form }
       );
       const data = await res.json();
@@ -532,7 +532,7 @@ const ChatPage: React.FC = () => {
 
     try {
       const res = await fetch(
-        `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/generate_soul_report/${userId}`,
+        `http://164.52.205.108:8500/api/v1/chat/generate_soul_report/${userId}`,
         { method: "POST", body: form }
       );
       const data = await res.json();
@@ -653,7 +653,7 @@ const ChatPage: React.FC = () => {
       setReportGenerated(false);
       try {
         const res = await fetch(
-          `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/spiritual/${userId}`,
+          `http://164.52.205.108:8500/api/v1/chat/spiritual/${userId}`,
           {
             method: "POST",
             body: form,
@@ -722,7 +722,7 @@ const ChatPage: React.FC = () => {
       console.log("Sending converted audio file:", fileName);
       console.log("File size:", audioBlob.size, "bytes");
 
-      const voiceUrl = `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/answer_question/${userId}`;
+      const voiceUrl = `http://164.52.205.108:8500/api/v1/chat/answer_question/${userId}`;
       const response = await fetch(voiceUrl, {
         method: "POST",
         body: formData,

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": " vite build",
+    "build": "vite build",
     "build:skip-types": "tsc --noEmit false && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -33,7 +33,7 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.8.2",
     "wavesurfer-react": "^3.0.4",
-    "wavesurfer.js": "^6.6.4"
+    "wavesurfer.js": "^7.12.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
