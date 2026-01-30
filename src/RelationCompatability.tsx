@@ -4,17 +4,34 @@ import { UsersRound } from "lucide-react";
 import Stars from "./components/stars";
 
 // 💡 Replace this with your actual API URL
-const API_URL =
-  "http://164.52.205.108:8500";
-  
+const API_URL = "http://164.52.205.108:8500";
+
 // const API_URL =
 //   "http://192.168.18.5:7001";
 
 interface CompatibilityData {
   match_for: string;
   match_summary: string;
+  dynamic_summary: string;
+  compatibility_score: number;
+
   sign_main: string;
   sign_partner: string;
+
+  strengths: string[];
+  challenges: string[];
+  shared_values: string[];
+  ideal_roles: string[];
+  warning_signs: string[];
+
+  communication_style: string;
+  growth_opportunities: string;
+
+  advice_for_main: string;
+  advice_for_partner: string;
+
+  element_interaction: string;
+  modality_interaction: string;
 }
 
 interface ApiResponse {
@@ -32,7 +49,7 @@ const RelationshipCompatibility: React.FC = () => {
       y: Math.random() * 100,
       opacity: 0.3 + Math.random() * 0.7,
       size: Math.random() * 2 + 1,
-    }))
+    })),
   );
   const [yourName, setYourName] = useState("");
   const [yourDob, setYourDob] = useState("");
@@ -52,6 +69,7 @@ const RelationshipCompatibility: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const userId = localStorage.getItem("user_id") || "0";
 
     if (!yourName || !yourDob || !partnerName || !partnerDob) {
       alert("Please fill all fields");
@@ -63,7 +81,7 @@ const RelationshipCompatibility: React.FC = () => {
 
     // 📦 Create FormData
     const formData = new FormData();
-    formData.append("user_id", "7b274190-1893-44df-80aa-20708e94f693");
+    formData.append("user_id", userId || "123");
     formData.append("user_name", yourName);
     formData.append("dob", yourDob);
     formData.append("dob_partner", partnerDob);
@@ -74,7 +92,7 @@ const RelationshipCompatibility: React.FC = () => {
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -122,8 +140,12 @@ const RelationshipCompatibility: React.FC = () => {
           </h2>
 
           <p className="text-gray-300 text-lg">
-            <span className="text-cyan-400 fs-4 font-semibold">{yourName}</span> &{" "}
-            <span className="text-cyan-400 fs-4 font-semibold">{partnerName}</span> {" "}<br/>
+            <span className="text-cyan-400 fs-4 font-semibold">{yourName}</span>{" "}
+            &{" "}
+            <span className="text-cyan-400 fs-4 font-semibold">
+              {partnerName}
+            </span>{" "}
+            <br />
             <span className="fs-6">{data.match_for}</span>
           </p>
         </div>
@@ -133,27 +155,175 @@ const RelationshipCompatibility: React.FC = () => {
           {/* <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div> */}
           Relationship Strengths
         </h5>
-        <div className="mb-8 p-6 rounded-2xl border border-gray-600 shadow-xl"
+        <div
+          className="mb-8 p-6 rounded-2xl border border-gray-600 shadow-xl"
           style={{
             background:
               "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-          }}>
+          }}
+        >
+          <div className="space-y-6">
+            {/* Match Summary */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Match Summary
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                {data.match_summary}
+              </p>
+            </div>
 
-          <div className="text-gray-300 leading-relaxed">
-            <p className="text-base" style={{lineHeight: '2.5'}}>{data.match_summary}</p>
+            {/* Dynamic Summary */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Overview
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                {data.dynamic_summary}
+              </p>
+            </div>
+
+            {/* Compatibility Score */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Compatibility Score
+              </h3>
+              <p className="text-gray-300 text-2xl font-bold">
+                {data.compatibility_score}%
+              </p>
+            </div>
+
+            {/* Strengths */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Strengths
+              </h3>
+              <ul className="list-disc list-inside text-gray-300 space-y-2">
+                {data.strengths?.length ? (
+                  <ul className="list-disc list-inside text-gray-300 space-y-2">
+                    {data.strengths.map((strength, index) => (
+                      <li key={index}>{strength}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-400">No strengths available</p>
+                )}
+              </ul>
+            </div>
+
+            {/* Challenges */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Challenges
+              </h3>
+              <ul className="list-disc list-inside text-gray-300 space-y-2">
+                {data.challenges.map((challenge, index) => (
+                  <li key={index}>{challenge}</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Shared Values */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Shared Values
+              </h3>
+              <ul className="list-disc list-inside text-gray-300 space-y-2">
+                {data.shared_values.map((value, index) => (
+                  <li key={index}>{value}</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Ideal Roles */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Ideal Roles
+              </h3>
+              <ul className="list-disc list-inside text-gray-300 space-y-2">
+                {data.ideal_roles.map((role, index) => (
+                  <li key={index}>{role}</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Communication Style */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Communication Style
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                {data.communication_style}
+              </p>
+            </div>
+
+            {/* Growth Opportunities */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Growth Opportunities
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                {data.growth_opportunities}
+              </p>
+            </div>
+
+            {/* Warning Signs */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Warning Signs
+              </h3>
+              <ul className="list-disc list-inside text-gray-300 space-y-2">
+                {data.warning_signs.map((warning, index) => (
+                  <li key={index}>{warning}</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Advice for Main */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Advice for {data.sign_main}
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                {data.advice_for_main}
+              </p>
+            </div>
+
+            {/* Advice for Partner */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Advice for {data.sign_partner}
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                {data.advice_for_partner}
+              </p>
+            </div>
+
+            {/* Element Interaction */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Element Interaction
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                {data.element_interaction}
+              </p>
+            </div>
+
+            {/* Modality Interaction */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Modality Interaction
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                {data.modality_interaction}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Back Button */}
         <div className="text-center">
-          <button
-            className="px-8 py-3 btn btn-info text-white rounded-pill px-4 py-2 mt-4 w-full"
-            onClick={() => {
-              setCompatibilityResult(null);
-            }}
-          >
-            ← Try Another Pair
-          </button>
+          
         </div>
       </div>
     );
@@ -165,7 +335,10 @@ const RelationshipCompatibility: React.FC = () => {
       style={{ position: "relative", minHeight: "100vh" }}
     >
       <Stars />
-      <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 0, pointerEvents: "none" }}>
+      <div
+        className="absolute inset-0 overflow-hidden"
+        style={{ zIndex: 0, pointerEvents: "none" }}
+      >
         {stars.map((star, i) => (
           <div
             key={i}
@@ -183,12 +356,12 @@ const RelationshipCompatibility: React.FC = () => {
         ))}
       </div>
 
-       {/* Header */}
+      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button
           className="btn text-white"
           onClick={() => navigate("/result")}
-          style={{ fontSize: '1rem', position: 'relative', zIndex: 1000 }}
+          style={{ fontSize: "1rem", position: "relative", zIndex: 1000 }}
         >
           ← Back
         </button>
@@ -241,7 +414,10 @@ const RelationshipCompatibility: React.FC = () => {
         </button>
       </div> */}
 
-      <div className="flex-grow flex my-4 p-4" style={{ position: "relative", zIndex: 10 }}>
+      <div
+        className="flex-grow flex my-4 p-4"
+        style={{ position: "relative", zIndex: 10 }}
+      >
         {/* Show Form OR Results */}
         {!compatibilityResult ? (
           <div
@@ -249,7 +425,10 @@ const RelationshipCompatibility: React.FC = () => {
             style={{ position: "relative", zIndex: 10 }}
           >
             <div className="d-flex justify-content-center mb-4">
-              <div className="bg-info rounded-circle d-flex align-items-center justify-content-center" style={{ width: "48px", height: "48px" }}>
+              <div
+                className="bg-info rounded-circle d-flex align-items-center justify-content-center"
+                style={{ width: "48px", height: "48px" }}
+              >
                 <UsersRound size={18} />
               </div>
             </div>
