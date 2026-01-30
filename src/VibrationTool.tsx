@@ -350,7 +350,7 @@ const VibrationTool: React.FC = () => {
       }
 
       const response = await fetch(
-        `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/select_soul_report/${userId}`,
+        `http://164.52.205.108:8500/api/v1/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -452,7 +452,7 @@ const VibrationTool: React.FC = () => {
       }
 
       const response = await fetch(
-        `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/answer_question/${userId}`,
+        `http://164.52.205.108:8500/api/v1/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -525,7 +525,7 @@ const VibrationTool: React.FC = () => {
 
     try {
       const response = await fetch(
-        `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/generate_soul_report/${userId}`,
+        `http://164.52.205.108:8500/api/v1/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -835,7 +835,7 @@ const VibrationTool: React.FC = () => {
 
     try {
       const response = await fetch(
-          `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
+          `http://164.52.205.108:8500/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
       );
  
       return response.ok && response.status === 200;

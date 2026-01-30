@@ -235,7 +235,7 @@ const AuraProfile: React.FC = () => {
                 return;
             }
 
-            const response = await fetch(`https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/select_soul_report/${userId}`, {
+            const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/select_soul_report/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
@@ -318,7 +318,7 @@ const AuraProfile: React.FC = () => {
             }
 
             const response = await fetch(
-                `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/answer_question/${userId}`,
+                `http://164.52.205.108:8500/api/v1/chat/answer_question/${userId}`,
                 {
                     method: "POST",
                     body: formData,
@@ -386,7 +386,7 @@ const AuraProfile: React.FC = () => {
         setIsGeneratingReport(true);
 
         try {
-            const response = await fetch(`https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/chat/generate_soul_report/${userId}`, {
+            const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/generate_soul_report/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
@@ -668,7 +668,7 @@ const AuraProfile: React.FC = () => {
 
         try {
             const response = await fetch(
-                `https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
+                `http://164.52.205.108:8500/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
             );
             return response.ok && response.status === 200;
         } catch (error) {

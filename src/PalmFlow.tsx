@@ -26,7 +26,7 @@ const PalmFlow: React.FC = () => {
     dob: "",
   });
   const [cardData, setCardData] = useState<TarotReading | null>(null);
-  const API_URL = "https://http.ukksg3jorv.shaktistudio.shakticloud.ai";
+  const API_URL = "http://164.52.205.108:8500";
   const userId = localStorage.getItem("user_id");
 
   // Handle input changes

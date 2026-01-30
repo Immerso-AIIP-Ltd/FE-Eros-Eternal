@@ -27,7 +27,7 @@ const FaceReading: React.FC = () => {
   });
   const [cardData, setCardData] = useState<TarotReading | null>(null);
   const API_URL =
-    "https://http.ukksg3jorv.shaktistudio.shakticloud.ai";
+    "http://164.52.205.108:8500";
   const userId = localStorage.getItem("user_id");
 
   // Handle input changes

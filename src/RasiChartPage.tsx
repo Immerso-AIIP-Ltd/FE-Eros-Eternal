@@ -53,7 +53,7 @@ const RasiChartPage: React.FC = () => {
       };
 
       const response = await fetch(
-        'https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/vedastro/get_astrology_data',
+        'http://164.52.205.108:8500/api/v1/vedastro/get_astrology_data',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

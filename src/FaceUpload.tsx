@@ -104,7 +104,7 @@ const FaceUploadPage: React.FC = () => {
     formData.append('image', selectedFile);
 
     const response = await fetch(
-      'https://http.ukksg3jorv.shaktistudio.shakticloud.ai/api/v1/face_reading/analyze',
+      'http://164.52.205.108:8500/api/v1/face_reading/analyze',
       {
         method: 'POST',
         body: formData,
