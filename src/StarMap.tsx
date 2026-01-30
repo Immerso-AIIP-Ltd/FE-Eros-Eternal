@@ -1323,7 +1323,7 @@ const StarMap: React.FC = () => {
             <div
               className="text-center text-xs text-gray-500"
               style={{ maxWidth: "65%", margin: "0 auto", width: "100%" }}
-            >
+            > 
               <div className="flex items-center justify-center text-xs">
                 {/* <div>© 2025 EROS Universe. All Rights Reserved.</div> */}
                 {/* <div className="flex items-center gap-6">
