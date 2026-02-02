@@ -354,7 +354,7 @@ const SoulProfilePage: React.FC = () => {
         localStorage.setItem("current_location", result.data.current_location);
         localStorage.setItem("time_of_birth", result.data.time_of_birth);
         // alert(result.message);
-        navigate("/ques");
+        navigate("/eros-home");
       } else {
         throw new Error(result.message || "Profile creation failed");
       }
@@ -478,64 +478,46 @@ const SoulProfilePage: React.FC = () => {
           </div>
 
           {/* Right Side - Form */}
-          <div
+<div
             style={{
               flex: "1 1 50%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              padding: "2rem", // Added padding to the container
             }}
             className="right-side"
           >
             <form
               onSubmit={handleSubmit}
               style={{
-                width: "60%",
+                width: "100%",
+                maxWidth: "700px", // Better than percentage for readability
                 backgroundColor: "#000",
-                padding: "2rem",
+                padding: "2.5rem", // Increased padding
                 borderRadius: "16px",
                 border: "1px solid #2a2a2a",
                 display: "flex",
                 flexDirection: "column",
-                gap: "1rem",
+                gap: "1.5rem", // Increased gap between fields
                 fontFamily: "Inter,sans-serif",
+                boxSizing: "border-box",
               }}
               className="soul-profile-form"
             >
               <h1
                 style={{
-                  marginBottom: "1rem",
+                  margin: "0 0 0.5rem 0", // Reset top margin, add bottom margin
                   fontFamily: "Montserrat,sans-serif",
                   fontWeight: "700",
+                  fontSize: "1.75rem",
+                  lineHeight: "1.2",
                 }}
               >
                 Create Your Soul Profile
               </h1>
 
-              {/* <TextField
-              label="First Name"
-              variant="outlined"
-              value={formData.firstName}
-              onChange={(e) => handleChange("firstName", e.target.value)}
-              required
-              InputLabelProps={{ style: { color: "#fff" } }}
-              inputProps={{ style: { color: "#fff" } }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#6c757d",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#6c757d",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00B8F8",
-                    boxShadow: "0 0 8px #00B8F8",
-                  },
-                },
-              }}
-            /> */}
-
+              {/* Name Field */}
               <TextField
                 label="Name"
                 variant="outlined"
@@ -583,55 +565,7 @@ const SoulProfilePage: React.FC = () => {
               </StyledFormControl>
 
               {/* Place of Birth */}
-              {/* <StyledFormControl variant="outlined">
-              <IconLeftWrapper>
-                <LocationOnIcon />
-              </IconLeftWrapper>
-              <Select
-                value={formData.placeOfBirth}
-                onChange={(e: SelectChangeEvent) => handleChange("placeOfBirth", e.target.value)}
-                displayEmpty
-                IconComponent={() => null}
-                required
-              >
-                <MenuItem value="" disabled>
-                  Select Place of Birth
-                </MenuItem>
-                {indianStates.map((state) => (
-                  <MenuItem key={state} value={state}>
-                    {state}
-                  </MenuItem>
-                ))}
-              </Select>
-            </StyledFormControl> */}
-
-              {/* Current Location */}
-              {/* <StyledFormControl variant="outlined">
-              <IconLeftWrapper>
-                <LocationOnIcon />
-              </IconLeftWrapper>
-              <Select
-                value={formData.currentLocation}
-                onChange={(e: SelectChangeEvent) => handleChange("currentLocation", e.target.value)}
-                displayEmpty
-                IconComponent={() => null}
-                required
-              >
-                <MenuItem value="" disabled>
-                  Select Current Location
-                </MenuItem>
-                {indianStates.map((state) => (
-                  <MenuItem key={state} value={state}>
-                    {state}
-                  </MenuItem>
-                ))}
-              </Select>
-            </StyledFormControl> */}
-
               <StyledFormControl variant="outlined">
-                {/* <IconLeftWrapper>
-    <LocationOnIcon />
-  </IconLeftWrapper> */}
                 <TextField
                   value={formData.placeOfBirth}
                   onChange={(e) => handleChange("placeOfBirth", e.target.value)}
@@ -642,18 +576,31 @@ const SoulProfilePage: React.FC = () => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <LocationOnIcon />
+                        <LocationOnIcon sx={{ color: "#fff" }} />
                       </InputAdornment>
                     ),
-                    // Optional: remove default outline if StyledFormControl handles styling
+                  }}
+                  InputLabelProps={{ style: { color: "#fff" } }}
+                  inputProps={{ style: { color: "#fff" } }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: "#6c757d",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#6c757d",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#00B8F8",
+                        boxShadow: "0 0 8px #00B8F8",
+                      },
+                    },
                   }}
                 />
               </StyledFormControl>
 
+              {/* Current Location */}
               <StyledFormControl variant="outlined">
-                {/* <IconLeftWrapper>
-    <LocationOnIcon />
-  </IconLeftWrapper> */}
                 <TextField
                   value={formData.currentLocation}
                   onChange={(e) =>
@@ -666,9 +613,25 @@ const SoulProfilePage: React.FC = () => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <LocationOnIcon />
+                        <LocationOnIcon sx={{ color: "#fff" }} />
                       </InputAdornment>
                     ),
+                  }}
+                  InputLabelProps={{ style: { color: "#fff" } }}
+                  inputProps={{ style: { color: "#fff" } }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: "#6c757d",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#6c757d",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#00B8F8",
+                        boxShadow: "0 0 8px #00B8F8",
+                      },
+                    },
                   }}
                 />
               </StyledFormControl>
@@ -779,20 +742,29 @@ const SoulProfilePage: React.FC = () => {
                 }}
               />
 
+              {/* Submit Button */}
               <button
                 type="submit"
                 style={{
                   backgroundColor: "#00B8F8",
                   color: "#fff",
                   border: "none",
-                  padding: "1rem",
-                  fontSize: "1.2rem",
+                  padding: "1rem 1.5rem",
+                  fontSize: "1.1rem",
                   fontWeight: "600",
                   cursor: "pointer",
-                  marginTop: "1rem",
+                  marginTop: "0.5rem", // Reduced from 1rem since gap already provides spacing
                   fontFamily: "Inter,sans-serif",
+                  borderRadius: "8px",
+                  transition: "background-color 0.2s ease",
                 }}
                 disabled={loading}
+                onMouseEnter={(e) => {
+                  if (!loading) e.currentTarget.style.backgroundColor = "#0099d6";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#00B8F8";
+                }}
               >
                 {loading ? "Creating..." : "Create your soul profile"}
               </button>

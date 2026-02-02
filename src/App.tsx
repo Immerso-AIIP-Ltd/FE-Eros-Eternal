@@ -38,6 +38,7 @@ import FlameScore from "./FlameScore";
 import LongevityTool from "./longevityTool";
 import FounderMsg from "./FounderMsg";
 import WellnessScreen from "./WelnessScreen";
+import ErosHome from "./ErosHome";
 
 const App: React.FC = () => {
   return (
@@ -51,6 +52,7 @@ const App: React.FC = () => {
           <Route path="/aipage" element={<EternalAIPage />} />
           <Route path="/result" element={<ResultPage />} />
           <Route path="/record" element={<RecordVoice />} />
+          <Route path="/eros-home" element={<ErosHome />} />
           {/* <Route path="/" element={<WellnessScreen />}/> */}
 
           <Route path="/ques" element={<ChatPage />} />

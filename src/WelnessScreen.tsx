@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import background from "../src/images/welcome-screen.jpg";
 
+
 const WellnessScreen = () => {
       const navigate = useNavigate();
 
