@@ -10,7 +10,7 @@ import facescan from '../assets/explore/face.png';
 import angel from '../vintage.png';
 
 interface ExploreItem {
-  title: string;
+ title: string;
   subtitle: string;
   image: string;
   onClick?: () => void;
@@ -65,7 +65,7 @@ export const ExploreSection: React.FC = () => {
       locked: false,
     },
     {
-      title: "Palmistry",
+      title: "Palm Reading",
       subtitle: "Unlock insights and energy balance through the wisdom of your palms",
       image: palm,
       onClick: () => navigate('/palmcard'),
@@ -88,15 +88,25 @@ export const ExploreSection: React.FC = () => {
   ];
 
   return (
-    <div style={{ paddingBottom: '2rem', width: '100%' }}>
+    <div style={{ 
+      paddingBottom: '2rem', 
+      width: '100vw',
+      // paddingTop: '1rem',
+      paddingLeft: '1rem',
+      paddingRight: '1rem'
+    }}>
       {/* Header */}
-      <div className="header" style={{ marginBottom: '1.5rem' }}>
+      <div className="header" style={{ 
+        marginBottom: '1.5rem',
+        paddingLeft: '1.5rem'
+      }}>
         <h1 style={{
-          fontSize: '1.5rem',
+          fontSize: '1.75rem',
           fontWeight: 600,
           color: '#ffffff',
           fontFamily: "Poppins, sans-serif",
-          margin: 0
+          margin: 0,
+          letterSpacing: '-0.02em',
         }}>
           Explore More
         </h1>
@@ -112,14 +122,16 @@ export const ExploreSection: React.FC = () => {
         onMouseLeave={handleMouseLeave}
         style={{
           display: 'flex',
-          gap: '1.25rem',
+          gap: '24px',
           overflowX: 'auto',
           scrollBehavior: isDragging ? 'auto' : 'smooth',
           cursor: isDragging ? 'grabbing' : 'grab',
-          paddingBottom: '1rem',
+          paddingBottom: '2rem',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
           width: '100%',
+          paddingLeft: '1.5rem',
+          paddingRight: '1.5rem',
         }}
       >
         {items.map((item, index) => (
@@ -136,18 +148,20 @@ export const ExploreSection: React.FC = () => {
             tabIndex={item.onClick ? 0 : -1}
             aria-label={item.locked ? `${item.title} - Coming Soon` : item.title}
             style={{
-              flex: '0 0 calc((100% - 1.05rem) / 3.2)',
-              minWidth: '280px',
+              flex: '0 0 800px',
+              width:"100vw",
+              // minWidth: '320px',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               cursor: item.onClick && !isDragging ? 'pointer' : isDragging ? 'grabbing' : 'grab',
               position: 'relative',
               fontFamily: "DM Sans, sans-serif",
               fontSize: "16px",
-              borderRadius: "20px",
+              borderRadius: "16px",
               backgroundColor: "#1a1d1f",
               overflow: "hidden",
-              height: '380px',
+              height: '450px',
               border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
             }}
             onMouseEnter={(e) => {
               if (item.onClick && !isDragging) {
@@ -157,7 +171,7 @@ export const ExploreSection: React.FC = () => {
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.3)';
             }}
           >
             {/* Image */}
@@ -196,10 +210,10 @@ export const ExploreSection: React.FC = () => {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                padding: "1.25rem 1.5rem",
+                padding: "1.5rem 1.5rem 1.75rem",
                 background: "rgba(15, 18, 20, 0.6)",
-                backdropFilter: "blur(30px) saturate(180%)",
-                WebkitBackdropFilter: "blur(30px) saturate(180%)",
+                backdropFilter: "blur(12px) saturate(180%)",
+                WebkitBackdropFilter: "blur(12px) saturate(180%)",
                 borderTop: "1px solid rgba(255, 255, 255, 0.1)",
                 zIndex: 5,
                 pointerEvents: 'none',
@@ -210,20 +224,22 @@ export const ExploreSection: React.FC = () => {
                   fontSize: '1.25rem',
                   fontWeight: 600,
                   color: '#ffffff',
-                  marginBottom: '0.4rem',
+                  marginBottom: '0.5rem',
                   fontFamily: "Poppins, sans-serif",
                   lineHeight: 1.3,
+                  textShadow: '0 1px 2px rgba(0,0,0,0.5)'
                 }}
               >
                 {item.title}
               </h3>
               <p
                 style={{
-                  fontSize: '0.875rem',
-                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '0.9rem',
+                  color: 'rgba(255, 255, 255, 0.85)',
                   margin: 0,
                   lineHeight: 1.5,
                   fontFamily: "DM Sans, sans-serif",
+                  textShadow: '0 1px 2px rgba(0,0,0,0.5)'
                 }}
               >
                 {item.subtitle}
@@ -284,14 +300,66 @@ export const ExploreSection: React.FC = () => {
         }
 
         @media (max-width: 1024px) {
+          .cards-container {
+            gap: 16px;
+            padding: 0 1rem;
+          }
+          
           .card-item {
-            flex: 0 0 calc((100% - 2.5rem) / 2.2) !important;
+            flex: 0 0 280px;
+            height: 340px;
+          }
+          
+          .text-content {
+            padding: 1.25rem;
+          }
+          
+          h3 {
+            font-size: 1.125rem;
+          }
+          
+          p {
+            font-size: 0.85rem;
           }
         }
 
         @media (max-width: 768px) {
+          .cards-container {
+            gap: 12px;
+            padding: 0 0.75rem;
+          }
+          
           .card-item {
-            flex: 0 0 calc(100% - 2rem) !important;
+            flex: 0 0 260px;
+            height: 320px;
+          }
+          
+          .text-content {
+            padding: 1.1rem;
+          }
+          
+          h3 {
+            font-size: 1.05rem;
+          }
+          
+          p {
+            font-size: 0.8rem;
+          }
+        }
+        
+        @media (max-width: 600px) {
+          .cards-container {
+            gap: 10px;
+            padding: 0 0.5rem;
+          }
+          
+          .card-item {
+            flex: 0 0 240px;
+            height: 300px;
+          }
+          
+          h3 {
+            font-size: 0.95rem;
           }
         }
       `}</style>

@@ -36,12 +36,9 @@ const API_URL = "http://164.52.205.108:8500";
 
 export const LuckSection: React.FC = () => {
   const [flippedIndexes, setFlippedIndexes] = useState<Set<number>>(new Set());
-  const [luckyNumbers, setLuckyNumbers] = useState<LuckyNumbersResponse | null>(
-    null
-  );
+  const [luckyNumbers, setLuckyNumbers] = useState<LuckyNumbers | null>(null);
   const [horoscope, setHoroscope] = useState<HoroscopeResponse | null>(null);
-  const [personalMonth, setPersonalMonth] =
-    useState<PersonalMonthResponse | null>(null);
+  const [personalMonth, setPersonalMonth] = useState<PersonalMonthResponse | null>(null);
   const [loading, setLoading] = useState<Record<number, boolean>>({});
   const [error, setError] = useState<Record<number, string>>({});
 
@@ -96,12 +93,8 @@ export const LuckSection: React.FC = () => {
           {
             method: "POST",
             body: formData,
-            // headers: { "Content-Type": "application/json" },
-            // body: JSON.stringify({ user_id: userId, user_name: username, dob }),
           }
         );
-
-
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -135,7 +128,6 @@ export const LuckSection: React.FC = () => {
       setErrorState(index, "");
 
       try {
-
         const formData = new FormData();
         formData.append("user_id", userId);
         formData.append("user_name", username);
@@ -158,12 +150,8 @@ export const LuckSection: React.FC = () => {
           {
             method: "POST",
             body: formData
-            // headers: { "Content-Type": "application/json" },
-            // body: JSON.stringify({ user_id: userId, user_name: username, dob }),
           }
         );
-
-
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -185,43 +173,6 @@ export const LuckSection: React.FC = () => {
   }, [hasUserData, userId, username, dob]);
 
   // 🔁 Fetch Lucky Numbers (index 2)
-  // useEffect(() => {
-  //   const fetchLuckyNumbers = async () => {
-  //     const index = 2;
-  //     if (!hasUserData) {
-  //       setErrorState(index, "User data missing.");
-  //       return;
-  //     }
-
-  //     setLoadingState(index, true);
-  //     setErrorState(index, "");
-
-  //     try {
-  //       const response = await fetch(`${API_URL}/api/v1/numerology/lucky_numbers`, {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({ user_id: userId, user_name: username, dob }),
-  //       });
-
-  //       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-  //       const data = await response.json();
-  //       if (data.success && data.data?.lucky_numbers) {
-  //         setLuckyNumbers(data.data.lucky_numbers);
-  //       } else {
-  //         setErrorState(index, "No lucky numbers found.");
-  //       }
-  //     } catch (err) {
-  //       console.error("Lucky Numbers Error:", err);
-  //       setErrorState(index, "Failed to load lucky numbers.");
-  //     } finally {
-  //       setLoadingState(index, false);
-  //     }
-  //   };
-
-  //   fetchLuckyNumbers();
-  // }, [hasUserData, userId, username, dob]);
-
   useEffect(() => {
     const fetchLuckyNumbers = async () => {
       const index = 2;
@@ -254,11 +205,11 @@ export const LuckSection: React.FC = () => {
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-        const result = await response.json(); // renamed to `result` to avoid confusion
+        const result = await response.json();
 
         // ✅ FIX: result.data is the LuckyNumbers object
         if (result.success && result.data) {
-          setLuckyNumbers(result.data); // ← directly assign result.data
+          setLuckyNumbers(result.data);
         } else {
           setErrorState(index, "No lucky numbers found.");
         }
@@ -314,12 +265,9 @@ export const LuckSection: React.FC = () => {
         <p style={errorStyle}>{error[0]}</p>
       ) : (
         <>
-          <p style={backText} >
+          <p style={backText}>
             <strong>Zodiac:</strong> {horoscope?.zodiac_sign}
           </p>
-          {/* <p style={backQuote}>
-            "{horoscope?.horoscope?.substring(0, 160)}..."
-          </p> */}
           <p style={backQuote}>
             "{horoscope?.horoscope}"
           </p>
@@ -344,9 +292,6 @@ export const LuckSection: React.FC = () => {
             <strong>Theme:</strong> {personalMonth.meaning}
           </p>
           <p style={backQuote}>"{personalMonth.detailed_meaning}"</p>
-          {/* <p style={smallText}>
-            <strong>Target:</strong> {personalMonth.target_date}
-          </p> */}
         </>
       ) : null}
     </div>
@@ -376,7 +321,6 @@ export const LuckSection: React.FC = () => {
           <p style={backText}>
             <strong>Soul:</strong> {luckyNumbers.soul_number}
           </p>
-          {/* <p style={backText}><strong>Inner Dream:</strong> {luckyNumbers.inner_dream_number}</p> */}
         </>
       ) : (
         <p style={errorStyle}>Unable to load data.</p>
@@ -406,14 +350,12 @@ export const LuckSection: React.FC = () => {
 
   const backText: React.CSSProperties = {
     margin: 0,
-    // color: "#ccc",
     color: "#fff",
     fontSize: "16px",
   };
 
   const backQuote: React.CSSProperties = {
     margin: "6px 0 0 0",
-    // color: "#aaa",
     color: "#fff",
     fontSize: "14px",
     textAlign: 'justify',
@@ -440,34 +382,30 @@ export const LuckSection: React.FC = () => {
   return (
     <div
       style={{
-        padding: "20px 0",
-        backgroundColor: "#000", paddingRight: "100px"
-        // fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        padding: "40px 0",
+        backgroundColor: "#000",
+        // paddingRight: "100px",
+        // paddingLeft: "100px"
       }}
     >
       {/* Header */}
-      {/* <div style={{ marginBottom: "20px" }}>
-        <h2
+      <div style={{ 
+        marginBottom: "32px",
+        paddingLeft: "40px",
+        paddingRight: "40px"
+      }}>
+        <h1
           style={{
-            fontSize: "18px",
-            fontWeight: "600",
+            fontSize: "28px",
+            fontWeight: "700",
             color: "#fff",
             margin: 0,
             letterSpacing: "-0.02em",
-            fontFamily: "Poppins,sans-serif",
+            fontFamily: "Poppins, sans-serif",
           }}
         >
           Discover your luck
-        </h2>
-      </div> */}
-
-      <div className="header mb-4">
-        <h1 className="text-white mb-1">
-          Discover Your Luck
         </h1>
-        <p className="text-white mb-0" style={{ fontFamily: "Poppins,sans-serif" }}>
-          Daily numeralogy insights and guidance
-        </p>
       </div>
 
       {/* Cards Container */}
@@ -475,10 +413,12 @@ export const LuckSection: React.FC = () => {
         className="luck-cards-container"
         style={{
           display: "flex",
-          gap: "16px",
+          gap: "24px",
           overflowX: "auto",
-          padding: "0 16px 24px",
+          padding: "0 40px 40px",
           scrollbarWidth: "none",
+          // maxWidth: "1400px",
+          margin: "0 auto"
         }}
         css={`
     &::-webkit-scrollbar { display: none; }
@@ -493,8 +433,8 @@ export const LuckSection: React.FC = () => {
             style={{
               minWidth: "320px",
               width: "320px",
-              height: "460px",
-              borderRadius: "24px",
+              height: "420px",
+              borderRadius: "16px",
               border: "1px solid rgba(255, 255, 255, 0.1)",
               backgroundColor: "rgba(20, 20, 30, 0.6)",
               backdropFilter: "blur(10px)",
@@ -541,7 +481,6 @@ export const LuckSection: React.FC = () => {
                       index === 1 ? `url('${SpiritualBg}')` :
                         `url('${LuckyBg}')`,
                   backgroundSize: "cover",
-                  objectFit: "fill",
                   backgroundPosition: "center",
                   padding: "24px",
                   display: "flex",
@@ -549,47 +488,36 @@ export const LuckSection: React.FC = () => {
                   justifyContent: "space-between",
                 }}
               >
-                {/* Title */}
-                <div>
+                {/* Card Content */}
+                <div style={{ 
+                  position: "absolute", 
+                  bottom: "24px", 
+                  left: "24px", 
+                  right: "24px",
+                  // background: "rgba(0, 0, 0, 0.4)",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  backdropFilter: "blur(4px)"
+                }}>
                   <h3 style={{
-                    fontSize: "28px",
-                    fontWeight: "700",
+                    fontSize: "22px",
+                    fontWeight: "600",
                     color: "#FFFFFF",
                     margin: 0,
                     fontFamily: "'Poppins', sans-serif",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.5)"
                   }}>
                     {item.title}
                   </h3>
                   <p style={{
-                    fontSize: "18px",
-                    margin: "20px 0 0",
-                    fontWeight: "500",
+                    fontSize: "16px",
+                    margin: "8px 0 0",
+                    fontWeight: "400",
+                    color: "rgba(255,255,255,0.85)",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.5)"
                   }}>
                     {item.subtitle}
                   </p>
-                </div>
-
-                {/* Center Icon */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {/* <img
-                    src={item.icon}
-                    alt={item.title}
-                    style={{
-                      width: "223px",
-                      height: "223px",
-                      objectFit: "contain",
-                    }}
-                  /> */}
                 </div>
               </div>
 
@@ -646,33 +574,39 @@ export const LuckSection: React.FC = () => {
 
         @media (min-width: 768px) and (max-width: 1023px) {
           .flip-card {
-            width: 270px;
-            height: 175px;
+            width: 280px;
+            height: 320px;
+          }
+          .flip-card h3 {
+            font-size: 18px;
           }
         }
 
-       @media (min-width: 1024px) {
-    .luck-cards-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      padding: 0;
-      overflow: visible;
-    }
-    .flip-card {
-      min-width: unset !important;
-      width: 100% !important;
-    }
-  }
+        @media (min-width: 1024px) {
+          .luck-cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            padding: 0;
+            overflow: visible;
+          }
+          .flip-card {
+            min-width: unset !important;
+            width: 100% !important;
+          }
+        }
 
         @media (max-width: 767.98px) {
           .flip-card {
-      min-width: 300px;
-      width: 300px;
-      height: 440px;
-    }
+            min-width: 300px;
+            width: 300px;
+            height: 360px;
+          }
           .flip-card h3 {
-            font-size: 15px;
+            font-size: 18px;
+          }
+          .flip-card p {
+            font-size: 14px;
           }
         }
       `}</style>

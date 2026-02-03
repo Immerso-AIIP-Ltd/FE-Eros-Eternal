@@ -1,33 +1,215 @@
-// src/components/Header.tsx
-import React, { useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import HeaderBg from "../assets/background.png";
-import ProfileBg from "../assets/profileBg.png";
+import StarmapIcon from "../assets/result-images/brightness_5.png";
+import VibrationalIcon from "../assets/result-images/add_reaction.png";
+import VitaScanIcon from "../assets/result-images/clinical_notes.png";
+import FlameScoreIcon from "../assets/result-images/mode_heat.png";
+import AuraProfileIcon from "../assets/result-images/background_replace.png";
+import KoshaMapIcon from "../assets/result-images/map_search.png";
+import LongevityIcon from "../assets/result-images/ecg_heart.png";
+import { Paperclip, ArrowRight, Bell, ChevronDown } from 'lucide-react';
+import notification from "../assets/notification.png";
+import credits from "../assets/credits.png";
+import overlay from "../assets/result-images/overlay.png";
+
+// Report background images
+import vibrationalBg from "../assets/reports/vibrational.jpg";
+import birthChartBg from "../assets/reports/birthMap.png";
+import flameScoreBg from "../assets/reports/flame.png";
+import auraBg from "../assets/reports/aura.png";
+import koshaBg from "../assets/reports/kosha.png";
+import longevityBg from "../assets/reports/longevity.png";
+
+interface CardData {
+  id: number;
+  icon: string;
+  title: string;
+  buttonText: string;
+  reportType?: string;
+  route?: string;
+  backgroundImage?: string;
+}
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [activeCard, setActiveCard] = useState<number | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>({});
+  const [loadingStatuses, setLoadingStatuses] = useState(true);
 
-  const username = localStorage.getItem('username') || 'Guest';
+  // Get user ID from localStorage
+  const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
+  const baseApiUrl = "http://164.52.205.108:8500/api/v1/reports/individual_report/";
+
+  // Enhanced cards data with report mappings
+  const cardsData: CardData[] = [
+    { 
+      id: 1, 
+      icon: VitaScanIcon, 
+      title: "Vita Scan", 
+      buttonText: "View Report",
+      reportType: "vita_scan",
+      route: "/vita-scan",
+    },
+    { 
+      id: 2, 
+      icon: VibrationalIcon, 
+      title: "Vibrational Frequency", 
+      buttonText: "Generate",
+      reportType: "vibrational_frequency",
+      route: "/vibrational-frequency",
+      backgroundImage: vibrationalBg
+    },
+    { 
+      id: 3, 
+      icon: StarmapIcon, 
+      title: "Star Map", 
+      buttonText: "Generate",
+      reportType: "star_map",
+      route: "/star-map",
+      backgroundImage: birthChartBg
+    },
+    { 
+      id: 4, 
+      icon: FlameScoreIcon, 
+      title: "Flame Score", 
+      buttonText: "Generate",
+      reportType: "flame_score",
+      route: "/flame-score",
+      backgroundImage: flameScoreBg
+    },
+    { 
+      id: 5, 
+      icon: AuraProfileIcon, 
+      title: "Aura Profile", 
+      buttonText: "Generate",
+      reportType: "aura_profile",
+      route: "/aura-profile",
+      backgroundImage: auraBg
+    },
+    { 
+      id: 6, 
+      icon: KoshaMapIcon, 
+      title: "Kosha Map", 
+      buttonText: "Generate",
+      reportType: "kosha_map",
+      route: "/kosha-map",
+      backgroundImage: koshaBg
+    },
+    { 
+      id: 7, 
+      icon: LongevityIcon, 
+      title: "Longevity Blueprint", 
+      buttonText: "Generate",
+      reportType: "longevity_blueprint",
+      route: "/longevity-blueprint",
+      backgroundImage: longevityBg
+    },
+  ];
+
+  // Fetch report statuses on mount and when userId changes
+  useEffect(() => {
+    const fetchReportStatuses = async () => {
+      if (!userId) {
+        setLoadingStatuses(false);
+        return;
+      }
+
+      setLoadingStatuses(true);
+      const statuses: Record<string, boolean> = {};
+      
+      try {
+        // Fetch all report statuses concurrently
+        const reportChecks = cardsData
+          .filter(card => card.reportType) // Only check cards with reportType
+          .map(async (card) => {
+            try {
+              const response = await fetch(
+                `${baseApiUrl}?user_id=${userId}&report_type=${card.reportType}`
+              );
+              const data = await response.json();
+              
+              // Check if report exists and has data
+              const hasReport = data.success && data.data && data.data.report_data;
+              statuses[card.reportType!] = hasReport;
+              return { reportType: card.reportType!, hasReport };
+            } catch (error) {
+              console.error(`Error checking ${card.reportType}:`, error);
+              statuses[card.reportType!] = false;
+              return { reportType: card.reportType!, hasReport: false };
+            }
+          });
+
+        await Promise.all(reportChecks);
+        setReportStatuses(statuses);
+      } catch (error) {
+        console.error("Error checking report statuses:", error);
+      } finally {
+        setLoadingStatuses(false);
+      }
+    };
+
+    fetchReportStatuses();
+  }, [userId]);
+
+  // Get dynamic button text based on report status
+  const getButtonText = (card: CardData): string => {
+    if (!card.reportType || loadingStatuses) return card.buttonText;
+    
+    const hasReport = reportStatuses[card.reportType];
+    if (hasReport === undefined) return card.buttonText;
+    
+    return hasReport ? "View Report" : "Generate";
+  };
+
+  // Handle card click with report status awareness
+  const handleCardClick = (card: CardData) => {
+    console.log(`Clicked on ${card.title}`);
+    setActiveCard(card.id);
+
+    // For cards with report functionality
+    if (card.reportType && userId) {
+      const hasReport = reportStatuses[card.reportType];
+      
+      if (hasReport) {
+        // Navigate to view report page
+        navigate('/view-report', {
+          state: {
+            reportType: card.reportType,
+            userId,
+            title: card.title
+          }
+        });
+      } else if (card.route) {
+        // Navigate to generation page
+        navigate(card.route);
+      }
+    } else {
+      // Fallback navigation if no status available
+      if (card.route) navigate(card.route);
+    }
+  };
+
+  const handleRasiClick = () => {
+    navigate("/rasi-chart");
+  };
 
   return (
     <div
       style={{
         width: "100%",
-        minHeight: "40vh",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
         alignItems: "center",
-        position: "relative",
-        overflow: "hidden",
+        justifyContent: "flex-start",
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        padding: "0",
-        margin: "0",
+        position: "relative",
+        backgroundColor: "#000",
+        overflowX: "hidden",
       }}
     >
-      {/* Background Image Layer */}
+      {/* Background Image */}
       <div
         style={{
           position: "absolute",
@@ -36,7 +218,85 @@ export const Header: React.FC = () => {
           right: 0,
           bottom: 0,
           backgroundImage: `url('${HeaderBg}')`,
-          transform: "scaleY(-1)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",  
+          zIndex: 0,
+          height: "100%",
+//           // mask-image: background: linear-gradient(180deg, rgba(0, 26, 60, 0.6) 0%, #050505 100%);
+// ,
+//           //  -webkit-mask-image: "linear-gradient(to bottom, black 0%, transparent 100%)",
+        }}
+      />
+
+      {/* Top Navbar */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          width: "100%",
+          height: "52px",
+          backgroundColor: "#000",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.07)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          padding: "0 36px",
+          gap: "18px",
+          boxSizing: "border-box",
+          flexShrink: 0,
+        }}
+      >
+        <button
+          style={{
+            background: "linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)",
+            border: "none",
+            borderRadius: "20px",
+            padding: "8px 22px",
+            fontSize: "13.5px",
+            cursor: "pointer",
+            color: "white",
+            fontWeight: 600,
+            transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            boxShadow: "0 3px 8px rgba(0, 0, 0, 0.3)",
+            whiteSpace: "nowrap",
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          onClick={handleRasiClick}
+        >
+          View Rasi chart
+        </button>
+
+        <img
+          src={notification}
+          alt="Notifications"
+          style={{ width: "24px", height: "24px", cursor: "pointer", objectFit: "contain" }}
+        />
+
+        <div style={{ display: "flex", alignItems: "center", gap: "0px" }}>
+          <img
+            src={credits}
+            alt="Credits"
+            style={{
+              height: "34px",
+              width: "auto",
+              marginLeft: "-6px",
+              objectFit: "contain",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Overlay */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url('${overlay}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -44,277 +304,264 @@ export const Header: React.FC = () => {
         }}
       />
 
-      {/* Dark Overlay */}
+      {/* Main Content */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "rgba(0, 0, 0, 0.7)",
-          zIndex: 1,
-        }}
-      />
-
-      {/* Bottom Fade Overlay */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "linear-gradient(180deg, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.8) 90%, rgba(0, 0, 0, 1) 100%)",
-          zIndex: 1,
-        }}
-      />
-
-      {/* Main Content Container */}
-      <div
-        style={{
+          position: "relative",
+          zIndex: 5,
           width: "100%",
-          // maxWidth: "1400px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "50px",
-          zIndex: 2,
-          padding: "0 1rem",
+          marginTop: "44px",
+          padding: "0 40px",
+          boxSizing: "border-box",
         }}
       >
-        {/* Top Section - Title and Button */}
+        <h1
+          style={{
+            fontSize: "56px",
+            fontWeight: 700,
+            marginBottom: "48px",
+            textAlign: "center",
+            letterSpacing: "-0.02em",
+            fontFamily: "Poppins, sans-serif",
+            lineHeight: 1.1,
+            background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(100, 200, 255) 50%, rgb(0, 162, 255) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          <span>EROS</span>{" "}
+          <span>Wellness</span>
+        </h1>
+
+        {/* Cards Row */}
         <div
           style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "24px",
+            flexWrap: "wrap",
+            width: "100%",
+            marginBottom: "48px",
+          }}
+        >
+          {cardsData.map((card) => {
+            const isActive = activeCard === card.id;
+            const isHov = hoveredCard === card.id;
+            const buttonText = getButtonText(card);
+            const hasReport = card.reportType ? reportStatuses[card.reportType] : false;
+            
+            return (
+              <div 
+                key={card.id}
+                style={{
+                  width: "220px",
+                  position: "relative"
+                }}
+              >
+                <div
+                  onClick={() => handleCardClick(card)}
+                  onMouseEnter={() => setHoveredCard(card.id)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                  style={{
+                    width: "100%",
+                    height: "220px",
+                    borderRadius: "16px",
+                    background: hasReport && card.backgroundImage 
+                      ? `background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',, url(${card.backgroundImage})`
+                      : "background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
+                    boxShadow: hasReport
+                      ? "0 0 20px rgba(170, 225, 39, 0.4)"
+                      : "0 0 25px rgba(0, 0, 0, 0.25)",
+                    transition: "all 0.28s ease",
+                    transform: isHov ? "scale(1.05)" : "scale(1)",
+                    boxSizing: "border-box",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* Card Content */}
+                  <div style={{ 
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    padding: "16px",
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor:"#00B8F833"
+                  }}>
+                    <div
+                      style={{
+                        width: "60px",
+                        height: "60px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <img
+                        src={card.icon}
+                        alt={card.title}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                          filter: "brightness(1.2) saturate(1.3)",
+                          transition: "filter 0.3s ease"
+                        }}
+                      />
+                    </div>
+
+                    {/* <div
+                      style={{
+                        color: "#fff",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        marginBottom: "12px",
+                        textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",
+                      }}
+                    >
+                      {card.title}
+                    </div> */}
+
+                    <div
+                      style={{
+                        // background: "rgba(0, 0, 0, 0.5)",
+                        background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
+                        borderRadius: "8px",
+                        padding: "6px 12px",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        color: "white",
+                        letterSpacing: "0.02em", 
+                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                        textShadow: "0 1px 1px rgba(0, 0, 0, 0.5)",
+                      }}
+                    >
+                      {loadingStatuses ? "Loading..." : buttonText}
+                    </div>
+                  </div>
+                </div>
+
+                 <div
+                      style={{
+                        color: "#fff",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        marginBottom: "12px",
+                        textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",
+                        textAlign: "center",
+                        padding: "12px",
+                      }}
+                    >
+                      {card.title}
+                    </div>
+              </div>
+            );
+          })}
+
+          
+        </div>
+
+        {/* Search Bar */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "880px",
+            height: "140px",
+            background: "rgba(0, 0, 0, 0.35)",
+            border: "3px solid rgba(21, 167, 216, 0.3)",
+            borderRadius: "26px",
+            padding: "20px 28px",
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            gap: "18px",
-            textAlign: "center",
-          }}
-        >
-          {/* Title */}
-          <h1
-            style={{
-              fontSize: "clamp(2.5rem, 8vw, 3rem)",
-              fontWeight: "700",
-              background: "linear-gradient(90deg, #AAE127 0%, #00A2FF 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              margin: 0,
-              lineHeight: 1,
-              letterSpacing: "-0.02em",
-              fontFamily: "Poppins, sans-serif",
-            }}
-          >
-            {/* Eternal */}
-            EROS Wellness
-          </h1>
-
-          {/* How it works Button */}
-          {/* <button
-            style={{
-              backgroundColor: "#00b8f8",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "30px",
-              padding: "11px 30px",
-              fontSize: "14px",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              boxShadow: "0 4px 20px rgba(0, 184, 248, 0.4)",
-              outline: "none",
-              fontFamily: "Poppins, sans-serif",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#0099d9";
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 6px 24px rgba(0, 184, 248, 0.5)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#00b8f8";
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 4px 20px rgba(0, 184, 248, 0.4)";
-            }}
-          >
-            How it works
-          </button> */}
-
-          {/* Subtitle */}
-          {/* <div
-            style={{
-              fontSize: "14px",
-              color: "rgba(255, 255, 255, 0.75)",
-              fontWeight: "400",
-              margin: 0,
-              fontFamily: "Poppins, sans-serif",
-            }}
-          >
-            Get started with
-          </div> */}
-        </div>
-
-        {/* Welcome Card */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "100%",
-            padding: "0",
-            backgroundColor: "transparent",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            borderRadius: "20px",
-            display: "flex",
-            alignItems: "center",
             justifyContent: "space-between",
-            gap: "0",
-            zIndex: 2,
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+            boxShadow: "0 0 22px rgba(21, 167, 216, 0.08), inset 0 0 20px rgba(0,0,0,0.45)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
             position: "relative",
-            overflow: "hidden",
-            minHeight: "clamp(200px, 30vh, 200px)",
-            marginBottom: "clamp(60px, 10vh, 80px)",
+            boxSizing: "border-box",
           }}
         >
-          {/* Background Image for Card - Responsive */}
-          <div
+          <textarea
+            placeholder="Ask me anything..."
             style={{
-              position: "absolute",
-              top: "-150%",
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundImage: `url('${ProfileBg}')`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              zIndex: 0,
-            }}
-          />
-
-          {/* Dark gradient overlay for card */}
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: "linear-gradient(90deg, rgba(0, 0, 0, 0.4) 0%, transparent 100%)",
-              zIndex: 1,
-            }}
-          />
-
-          {/* Text Content - Left Side */}
-          <div
-            style={{
-              zIndex: 2,
-              position: "relative",
-              padding: "clamp(20px, 4vw, 40px) clamp(25px, 5vw, 50px)",
-              display: "flex",
-              flexDirection: "column",
-              gap: "10px",
-              flex: "0 0 auto",
-              maxWidth: "100%",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "clamp(1.5rem, 4vw, 2.3rem)",
-                fontWeight: "600",
-                color: "white",
-                margin: 0,
-                fontFamily: "Poppins, sans-serif",
-                lineHeight: 1.2,
-                wordBreak: "break-word",
-              }}
-            >
-              Welcome, {username}
-            </h2>
-
-            <p
-              style={{
-                fontSize: "clamp(1.2rem, 2vw, 0.95rem)",
-                color: "rgba(255, 255, 255, 0.9)",
-                margin: 0,
-                lineHeight: 1.5,
-                fontFamily: "Poppins, sans-serif",
-              }}
-            >
-              "Reset starts with one mindful minute"
-            </p>
-
-            {loading && (
-              <div
-                style={{
-                  color: "#00b8f8",
-                  fontSize: "0.9rem",
-                  fontWeight: "500",
-                  marginTop: "8px",
-                }}
-              >
-                🌀 Loading...
-              </div>
-            )}
-
-            {error && (
-              <div
-                style={{
-                  backgroundColor: "#ffcccc",
-                  color: "#cc0000",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  fontSize: "0.9rem",
-                  marginTop: "8px",
-                }}
-              >
-                ❌ {error}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Button - Below the Card, Right Aligned */}
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "flex-end",
-            position: "relative",
-            marginTop: "clamp(-150px, -15vh, -160px)",
-            zIndex: 3,
-            paddingRight: "clamp(20px, 4vw, 40px)",
-          }}
-        >
-          <button
-            style={{
-              background: "linear-gradient(135deg, #AAE127 0%, #00A2FF 100%)",
-              color: "white",
+              width: "100%",
+              flex: 1,
+              background: "transparent",
               border: "none",
-              borderRadius: "12px",
-              padding: "clamp(12px, 2vh, 16px) clamp(24px, 4vw, 40px)",
-              fontSize: "clamp(0.875rem, 2vw, 1rem)",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
               outline: "none",
+              color: "rgba(255,255,255,0.55)",
+              fontSize: "17px",
+              resize: "none",
               fontFamily: "Poppins, sans-serif",
-              boxShadow: "0 4px 20px rgba(170, 225, 39, 0.3)",
-              whiteSpace: "nowrap",
+              lineHeight: 1.5,
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 6px 24px rgba(170, 225, 39, 0.5)";
+          />
+
+          <div
+            style={{
+              position: "absolute",
+              bottom: "18px",
+              right: "24px",
+              display: "flex",
+              gap: "10px",
+              alignItems: "center",
             }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 4px 20px rgba(170, 225, 39, 0.3)";
-            }}
-            onClick={() => navigate('/rasi-chart')}
           >
-            View Rasi Charts
-          </button>
+            <button
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                background: "transparent",
+                border: "2px solid rgba(21, 167, 216, 0.5)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "border-color 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#15A7D8")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(21, 167, 216, 0.5)")}
+            >
+              <Paperclip color="#15A7D8" size={25} />
+            </button>
+
+            <button
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                background: "#0F3D55",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "background 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#15A7D8")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#0F3D55")}
+            >
+              <ArrowRight color="white" size={25} />
+            </button>
+          </div>
         </div>
       </div>
     </div>
