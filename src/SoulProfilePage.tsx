@@ -8,9 +8,10 @@ import {
   ThemeProvider,
   createTheme,
   styled,
-  SelectChangeEvent,
   InputAdornment,
 } from "@mui/material";
+
+import type { SelectChangeEvent } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import backgroundImg from "./background.png";
