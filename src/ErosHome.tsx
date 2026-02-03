@@ -9,7 +9,7 @@ const ErosHome = () => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/result");
+    navigate("/facescan");
   };
     const handleRasiClick = () => {
     navigate("/rasi-chart");

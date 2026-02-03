@@ -44,63 +44,63 @@ export const Header: React.FC = () => {
 
   // Enhanced cards data with report mappings
   const cardsData: CardData[] = [
-    { 
-      id: 1, 
-      icon: VitaScanIcon, 
-      title: "Vita Scan", 
+    {
+      id: 1,
+      icon: VitaScanIcon,
+      title: "Vita Scan",
       buttonText: "View Report",
       reportType: "vita_scan",
       route: "/vita-scan",
     },
-    { 
-      id: 2, 
-      icon: VibrationalIcon, 
-      title: "Vibrational Frequency", 
+    {
+      id: 2,
+      icon: VibrationalIcon,
+      title: "Vibrational Frequency",
       buttonText: "Generate",
       reportType: "vibrational_frequency",
       route: "/vibrational-frequency",
       backgroundImage: vibrationalBg
     },
-    { 
-      id: 3, 
-      icon: StarmapIcon, 
-      title: "Star Map", 
+    {
+      id: 3,
+      icon: StarmapIcon,
+      title: "Star Map",
       buttonText: "Generate",
       reportType: "star_map",
       route: "/star-map",
       backgroundImage: birthChartBg
     },
-    { 
-      id: 4, 
-      icon: FlameScoreIcon, 
-      title: "Flame Score", 
+    {
+      id: 4,
+      icon: FlameScoreIcon,
+      title: "Flame Score",
       buttonText: "Generate",
       reportType: "flame_score",
       route: "/flame-score",
       backgroundImage: flameScoreBg
     },
-    { 
-      id: 5, 
-      icon: AuraProfileIcon, 
-      title: "Aura Profile", 
+    {
+      id: 5,
+      icon: AuraProfileIcon,
+      title: "Aura Profile",
       buttonText: "Generate",
       reportType: "aura_profile",
       route: "/aura-profile",
       backgroundImage: auraBg
     },
-    { 
-      id: 6, 
-      icon: KoshaMapIcon, 
-      title: "Kosha Map", 
+    {
+      id: 6,
+      icon: KoshaMapIcon,
+      title: "Kosha Map",
       buttonText: "Generate",
       reportType: "kosha_map",
       route: "/kosha-map",
       backgroundImage: koshaBg
     },
-    { 
-      id: 7, 
-      icon: LongevityIcon, 
-      title: "Longevity Blueprint", 
+    {
+      id: 7,
+      icon: LongevityIcon,
+      title: "Longevity Blueprint",
       buttonText: "Generate",
       reportType: "longevity_blueprint",
       route: "/longevity-blueprint",
@@ -118,7 +118,7 @@ export const Header: React.FC = () => {
 
       setLoadingStatuses(true);
       const statuses: Record<string, boolean> = {};
-      
+
       try {
         // Fetch all report statuses concurrently
         const reportChecks = cardsData
@@ -129,7 +129,7 @@ export const Header: React.FC = () => {
                 `${baseApiUrl}?user_id=${userId}&report_type=${card.reportType}`
               );
               const data = await response.json();
-              
+
               // Check if report exists and has data
               const hasReport = data.success && data.data && data.data.report_data;
               statuses[card.reportType!] = hasReport;
@@ -156,10 +156,10 @@ export const Header: React.FC = () => {
   // Get dynamic button text based on report status
   const getButtonText = (card: CardData): string => {
     if (!card.reportType || loadingStatuses) return card.buttonText;
-    
+
     const hasReport = reportStatuses[card.reportType];
     if (hasReport === undefined) return card.buttonText;
-    
+
     return hasReport ? "View Report" : "Generate";
   };
 
@@ -171,7 +171,7 @@ export const Header: React.FC = () => {
     // For cards with report functionality
     if (card.reportType && userId) {
       const hasReport = reportStatuses[card.reportType];
-      
+
       if (hasReport) {
         // Navigate to view report page
         navigate('/view-report', {
@@ -217,15 +217,21 @@ export const Header: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: `url('${HeaderBg}')`,
+          height: "100%",
+          zIndex: 0,
+
+          backgroundImage: `
+      linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.5),
+        rgba(0, 0, 0, 1)
+      ),
+      url(${HeaderBg})
+    `,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",  
-          zIndex: 0,
-          height: "100%",
-//           // mask-image: background: linear-gradient(180deg, rgba(0, 26, 60, 0.6) 0%, #050505 100%);
-// ,
-//           //  -webkit-mask-image: "linear-gradient(to bottom, black 0%, transparent 100%)",
+          backgroundRepeat: "no-repeat",
+          // transform: "rotate(180deg)",
         }}
       />
 
@@ -289,7 +295,7 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Overlay */}
-      <div
+      {/* <div
         style={{
           position: "absolute",
           top: 0,
@@ -302,7 +308,7 @@ export const Header: React.FC = () => {
           backgroundRepeat: "no-repeat",
           zIndex: 0,
         }}
-      />
+      /> */}
 
       {/* Main Content */}
       <div
@@ -353,9 +359,9 @@ export const Header: React.FC = () => {
             const isHov = hoveredCard === card.id;
             const buttonText = getButtonText(card);
             const hasReport = card.reportType ? reportStatuses[card.reportType] : false;
-            
+
             return (
-              <div 
+              <div
                 key={card.id}
                 style={{
                   width: "220px",
@@ -370,7 +376,7 @@ export const Header: React.FC = () => {
                     width: "100%",
                     height: "220px",
                     borderRadius: "16px",
-                    background: hasReport && card.backgroundImage 
+                    background: hasReport && card.backgroundImage
                       ? `background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',, url(${card.backgroundImage})`
                       : "background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',",
                     backgroundSize: "cover",
@@ -393,7 +399,7 @@ export const Header: React.FC = () => {
                   }}
                 >
                   {/* Card Content */}
-                  <div style={{ 
+                  <div style={{
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
@@ -402,7 +408,7 @@ export const Header: React.FC = () => {
                     padding: "16px",
                     width: "100%",
                     height: "100%",
-                    backgroundColor:"#00B8F833"
+                    backgroundColor: "#00B8F833"
                   }}>
                     <div
                       style={{
@@ -448,7 +454,7 @@ export const Header: React.FC = () => {
                         fontSize: "12px",
                         fontWeight: 600,
                         color: "white",
-                        letterSpacing: "0.02em", 
+                        letterSpacing: "0.02em",
                         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                         textShadow: "0 1px 1px rgba(0, 0, 0, 0.5)",
                       }}
@@ -458,24 +464,24 @@ export const Header: React.FC = () => {
                   </div>
                 </div>
 
-                 <div
-                      style={{
-                        color: "#fff",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        marginBottom: "12px",
-                        textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",
-                        textAlign: "center",
-                        padding: "12px",
-                      }}
-                    >
-                      {card.title}
-                    </div>
+                <div
+                  style={{
+                    color: "#fff",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    marginBottom: "12px",
+                    textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",
+                    textAlign: "center",
+                    padding: "12px",
+                  }}
+                >
+                  {card.title}
+                </div>
               </div>
             );
           })}
 
-          
+
         </div>
 
         {/* Search Bar */}
@@ -506,7 +512,8 @@ export const Header: React.FC = () => {
               background: "transparent",
               border: "none",
               outline: "none",
-              color: "rgba(255,255,255,0.55)",
+              // color: "rgba(255,255,255,0.55)",
+              color: "#fff",
               fontSize: "17px",
               resize: "none",
               fontFamily: "Poppins, sans-serif",
@@ -538,7 +545,7 @@ export const Header: React.FC = () => {
                 transition: "border-color 0.2s",
               }}
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#15A7D8")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(21, 167, 216, 0.5)")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#15A7D8")}
             >
               <Paperclip color="#15A7D8" size={25} />
             </button>
@@ -548,7 +555,7 @@ export const Header: React.FC = () => {
                 width: "56px",
                 height: "56px",
                 borderRadius: "50%",
-                background: "#0F3D55",
+                background: "#15A7D8",
                 border: "none",
                 display: "flex",
                 alignItems: "center",
@@ -557,7 +564,7 @@ export const Header: React.FC = () => {
                 transition: "background 0.2s",
               }}
               onMouseEnter={(e) => (e.currentTarget.style.background = "#15A7D8")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#0F3D55")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#15A7D8")}
             >
               <ArrowRight color="white" size={25} />
             </button>
