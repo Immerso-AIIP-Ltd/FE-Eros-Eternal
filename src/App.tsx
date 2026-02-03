@@ -37,6 +37,7 @@ import FlameScore from "./FlameScore";
 
 import LongevityTool from "./longevityTool";
 import FounderMsg from "./FounderMsg";
+import FaceScanner from "./components/FaceScanner/FaceScanner";
 
 const App: React.FC = () => {
   return (
@@ -52,6 +53,7 @@ const App: React.FC = () => {
 
           <Route path="/ques" element={<ChatPage />} />
           <Route path="/home" element={<HomePage />} />
+          <Route path="/facescan" element={<FaceScanner />} />
           {/* <Route path="/card" element={<TarrotCard />} /> */}
           <Route path="/card" element={<TarotFlow />} />
           <Route path="/palmcard" element={<PalmFlow />} />
