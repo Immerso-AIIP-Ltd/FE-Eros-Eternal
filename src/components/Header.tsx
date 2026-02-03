@@ -398,7 +398,7 @@ export const Header: React.FC = () => {
                     overflow: "hidden",
                   }}
                 >
-                  {/* Card Content */}
+                
                   <div style={{
                     display: "flex",
                     flexDirection: "column",
@@ -433,24 +433,14 @@ export const Header: React.FC = () => {
                       />
                     </div>
 
-                    {/* <div
-                      style={{
-                        color: "#fff",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        marginBottom: "12px",
-                        textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",
-                      }}
-                    >
-                      {card.title}
-                    </div> */}
+                   
 
                     <div
                       style={{
                         // background: "rgba(0, 0, 0, 0.5)",
                         background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
                         borderRadius: "8px",
-                        padding: "6px 12px",
+                        padding: "13px 40px",
                         fontSize: "12px",
                         fontWeight: 600,
                         color: "white",
@@ -467,7 +457,7 @@ export const Header: React.FC = () => {
                 <div
                   style={{
                     color: "#fff",
-                    fontSize: "14px",
+                    fontSize: "18px",
                     fontWeight: 600,
                     marginBottom: "12px",
                     textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",

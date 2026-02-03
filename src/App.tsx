@@ -40,6 +40,7 @@ import FounderMsg from "./FounderMsg";
 import WellnessScreen from "./WelnessScreen";
 import ErosHome from "./ErosHome";
 import FaceScanner from "./components/FaceScanner/FaceScanner";
+import VitaScanReport from "./VitaScanReport";
 
 const App: React.FC = () => {
   return (
@@ -47,7 +48,7 @@ const App: React.FC = () => {
       <div className="app overflow-fix">
         <Routes>
           {/* <Route path="/" element={<SplashScreen />} /> */}
-           <Route path="/" element={<WellnessScreen />}/>
+          <Route path="/" element={<WellnessScreen />} />
           <Route path="/chat" element={<ErosChatUI />} />
           <Route path="/profile" element={<SoulProfilePage />} />
           <Route path="/aipage" element={<EternalAIPage />} />
@@ -81,20 +82,20 @@ const App: React.FC = () => {
           <Route path="/face-upload" element={<FaceUploadPage />} />
           <Route path="/face-report" element={<FaceReadingReportPage />} />
           <Route path="/rasi-chart" element={<RasiChartPage />} />
-          <Route path="/star-map" element={<StarMap />}/>
-          <Route path="/kosha-map" element={<KoshaMap />}/>
-          <Route path="/aura-profile" element={<AuraProfile />}/>
-          <Route path="/flame-score" element={<FlameScore />}/>
-          <Route path="/founder" element={<FounderMsg />}/>
-        
+          <Route path="/star-map" element={<StarMap />} />
+          <Route path="/kosha-map" element={<KoshaMap />} />
+          <Route path="/aura-profile" element={<AuraProfile />} />
+          <Route path="/flame-score" element={<FlameScore />} />
+          <Route path="/founder" element={<FounderMsg />} />
+          <Route path="/vita-scan" element={<VitaScanReport />} />
 
           <Route path="/harmony" element={<HarmonyIndexPage />} />
 
 
-          <Route path='/vibrational-frequency' element={<VibrationTool/>}/>
-          <Route path='/Healing' element={<HealingModal/>}/>
-          <Route path='/ai-chat' element={<AiChat/>}/>
-          <Route path="/age-tracker" element={<AgeTrack/>} />
+          <Route path='/vibrational-frequency' element={<VibrationTool />} />
+          <Route path='/Healing' element={<HealingModal />} />
+          <Route path='/ai-chat' element={<AiChat />} />
+          <Route path="/age-tracker" element={<AgeTrack />} />
 
 
           <Route path="/harmony" element={<HarmonyIndexPage />} />
