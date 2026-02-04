@@ -16,6 +16,7 @@ export default defineConfig({
   resolve: {
     dedupe: ['@mui/material', '@mui/icons-material'],
   },
+
   assetsInclude: ['**/*.tflite', '**/*.gz'],
   server: {
     host: true,

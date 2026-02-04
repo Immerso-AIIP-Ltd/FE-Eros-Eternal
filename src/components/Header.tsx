@@ -37,6 +37,8 @@ export const Header: React.FC = () => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>({});
   const [loadingStatuses, setLoadingStatuses] = useState(true);
+  const [chatInput, setChatInput] = useState("");
+
 
   // Get user ID from localStorage
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
@@ -167,6 +169,7 @@ export const Header: React.FC = () => {
   const handleCardClick = (card: CardData) => {
     console.log(`Clicked on ${card.title}`);
     setActiveCard(card.id);
+
 
     // For cards with report functionality
     if (card.reportType && userId) {
@@ -307,17 +310,18 @@ export const Header: React.FC = () => {
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           zIndex: 0,
+
         }}
       /> */}
 
-      {/* Main Content */}
+      {/* Top Navbar */}
       <div
         style={{
           position: "relative",
           zIndex: 5,
           width: "100%",
+
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           marginTop: "44px",
           padding: "0 40px",
@@ -352,7 +356,11 @@ export const Header: React.FC = () => {
             flexWrap: "wrap",
             width: "100%",
             marginBottom: "48px",
+
           }}
+          onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          onClick={handleRasiClick}
         >
           {cardsData.map((card) => {
             const isActive = activeCard === card.id;
@@ -384,7 +392,8 @@ export const Header: React.FC = () => {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center",
+                    // justifyContent: "center",
+                    justifyContent: "space-between",
                     cursor: "pointer",
                     backdropFilter: "blur(10px)",
                     WebkitBackdropFilter: "blur(10px)",
@@ -398,7 +407,7 @@ export const Header: React.FC = () => {
                     overflow: "hidden",
                   }}
                 >
-                
+
                   <div style={{
                     display: "flex",
                     flexDirection: "column",
@@ -417,7 +426,8 @@ export const Header: React.FC = () => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        marginBottom: "16px",
+                        marginBottom: "24px",
+                        
                       }}
                     >
                       <img
@@ -433,21 +443,22 @@ export const Header: React.FC = () => {
                       />
                     </div>
 
-                   
+
 
                     <div
-                      style={{
-                        // background: "rgba(0, 0, 0, 0.5)",
-                        background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
-                        borderRadius: "8px",
-                        padding: "13px 40px",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        color: "white",
-                        letterSpacing: "0.02em",
-                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                        textShadow: "0 1px 1px rgba(0, 0, 0, 0.5)",
-                      }}
+                     style={{
+          background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
+          borderRadius: "12px",
+          padding: "14px 48px",
+          fontSize: "14px",
+          fontWeight: 700,
+          color: "white",
+          letterSpacing: "0.5px",
+          cursor: "pointer",
+          transition: 'all 0.3s ease',
+        
+          textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+        }}
                     >
                       {loadingStatuses ? "Loading..." : buttonText}
                     </div>
@@ -496,6 +507,16 @@ export const Header: React.FC = () => {
         >
           <textarea
             placeholder="Ask me anything..."
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                navigate('/ai-chat', { state: { initialMessage: chatInput } });
+                setChatInput("");
+              }
+            }}
+
             style={{
               width: "100%",
               flex: 1,
@@ -521,7 +542,8 @@ export const Header: React.FC = () => {
               alignItems: "center",
             }}
           >
-            <button
+            {/* <button
+
               style={{
                 width: "56px",
                 height: "56px",
@@ -538,7 +560,8 @@ export const Header: React.FC = () => {
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#15A7D8")}
             >
               <Paperclip color="#15A7D8" size={25} />
-            </button>
+            </button> */}
+
 
             <button
               style={{
@@ -553,6 +576,11 @@ export const Header: React.FC = () => {
                 cursor: "pointer",
                 transition: "background 0.2s",
               }}
+              onClick={() => {
+                navigate('/ai-chat', { state: { initialMessage: chatInput } });
+                setChatInput("");
+              }}
+
               onMouseEnter={(e) => (e.currentTarget.style.background = "#15A7D8")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "#15A7D8")}
             >

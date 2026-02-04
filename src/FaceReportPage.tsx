@@ -1,6 +1,7 @@
 // FaceReportPage.tsx
 import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
 import {
   AreaChart,
   Area,
@@ -154,6 +155,7 @@ const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
 const FaceReportPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [report, setReport] = useState<CombinedReportData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -169,6 +171,12 @@ const FaceReportPage: React.FC = () => {
       setError('No report data found. Please complete a face scan first.');
     }
 
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+
+    // Get username from localStorage
     const storedUsername = localStorage.getItem('username');
     if (storedUsername) {
       setUsername(storedUsername);
@@ -340,6 +348,7 @@ const FaceReportPage: React.FC = () => {
   }
 
   return (
+
     <div
       style={{
         minHeight: '100vh',
@@ -731,6 +740,7 @@ const FaceReportPage: React.FC = () => {
                     textTransform: 'capitalize',
                   }}
                 >
+
                   {rppg.hrv.recordingClass.replace(/-/g, ' ')}
                 </span>
               </div>

@@ -11,12 +11,14 @@ import Stars from "./components/stars";
 import VoiceMessage from "./VoiceMessage";
 import MicVisualizer from "./MicVisualizer";
 import { useNavigate, useLocation } from "react-router-dom";
+import eroslogo from "../src/assets/eros-logo.png"
 
 const sidebarMenuItems = [
     { id: 'vibrational-frequency', label: 'Vibrational Frequency', icon: <ImagePlus size={16} />, reportType: 'vibrational_frequency' },
     { id: 'aura-profile', label: 'Aura Profile', icon: <User size={16} />, reportType: 'aura_profile' },
     // { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} />, reportType: 'star_map' },
-     { id: 'star-map', label: 'Birth Chart', icon: <SquarePlus size={16} />, reportType: 'star_map' },
+    { id: 'star-map', label: 'Birth Chart', icon: <SquarePlus size={16} />, reportType: 'star_map' },
+
     { id: 'kosha-map', label: 'Kosha Map', icon: <Camera size={16} />, reportType: 'kosha_map' },
     { id: 'flame-score', label: 'Flame Score', icon: <Upload size={16} />, reportType: 'flame_score' },
     { id: 'longevity-blueprint', label: 'Longevity Blueprint', icon: <Mic size={16} />, reportType: 'longevity_blueprint' },
@@ -786,18 +788,31 @@ const KoshaMap: React.FC = () => {
         `}</style>
                 <div className="p-4 border-b border-gray-700">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold" style={{
-//                             background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
-//   WebkitBackgroundClip: 'text',
-//   WebkitTextFillColor: 'transparent',
-//   backgroundClip: 'text',
-//   color: 'transparent',
-color:"#00B8F8"
- }}
-  >
-    {/* Eternal Reports */}
-    EROS Wellness
-  </h2>
+                        {/* <h2 className="text-lg font-bold" style={{
+                                                  
+                            color: "#00B8F8"
+                        }}
+                        >
+
+                            EROS Wellness
+                        </h2> */}
+
+                           <img
+            src={eroslogo}
+            alt="EROS Wellness Logo"
+            style={{
+              width: 'clamp(200px, 40vw, 500px)',
+              height: 'auto',
+              // maxWidth: '500px',
+              margin: 0,
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
+              transition: 'transform 0.3s ease',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          />
+
                         <button
                             className="md:hidden text-gray-400 hover:text-white bg-transparent"
                             onClick={() => setSidebarOpen(false)}
@@ -851,7 +866,8 @@ color:"#00B8F8"
                             <Menu size={20} />
                         </button>
                         <h3 className="text-xl font-semibold">
-                           EROS Wellness- {sidebarMenuItems.find(item => item.id === activeMenuItem)?.label || 'Assessment'}
+                            EROS Wellness- {sidebarMenuItems.find(item => item.id === activeMenuItem)?.label || 'Assessment'}
+
                         </h3>
                     </div>
                     <div className="flex items-center gap-2">
@@ -975,7 +991,8 @@ color:"#00B8F8"
                                                 <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                                                     <span className="text-xs font-semibold text-white">AI</span>
                                                 </div>
-                                                <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg" style={{border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D'}}>
+                                                <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg" style={{ border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D' }}>
+
                                                     <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
                                                         {message.isThinking ? (
                                                             <div className="flex items-center gap-2">

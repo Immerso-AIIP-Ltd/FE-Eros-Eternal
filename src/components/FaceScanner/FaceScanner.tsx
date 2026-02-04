@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Stars from '../stars';
@@ -50,6 +51,7 @@ const FaceScanner: React.FC = () => {
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const navigate = useNavigate();
 
+
   // rPPG State
   const [rppgInitialized, setRppgInitialized] = useState<boolean>(false);
   const [heartRate, setHeartRate] = useState<number>(0);
@@ -98,9 +100,11 @@ const FaceScanner: React.FC = () => {
       hostname === '127.0.0.1' ||
       hostname === '[::1]';
 
+
     const isLocalNetwork = /^192\.168\.\d+\.\d+$/.test(hostname) ||
       /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
       /^172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+$/.test(hostname);
+
 
     if (!isSecureContext && !isLocalhost && !isLocalNetwork) {
       setError('Camera access requires HTTPS. Please run this app on HTTPS or localhost.');
@@ -114,6 +118,7 @@ const FaceScanner: React.FC = () => {
 
     return true;
   };
+
 
   // Get ordered buffer for PSD processing
   const getOrderedBuffer = useCallback((): Float32Array => {
@@ -655,6 +660,7 @@ const FaceScanner: React.FC = () => {
   const openCamera = async () => {
     setError(null);
     setIsCameraReady(false);
+
     setRppgError(null);
 
     if (!checkCameraSupport()) {
@@ -662,6 +668,7 @@ const FaceScanner: React.FC = () => {
     }
 
     try {
+
       const constraints: MediaStreamConstraints = {
         video: {
           width: { ideal: 1280 },
@@ -673,10 +680,12 @@ const FaceScanner: React.FC = () => {
       };
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
       streamRef.current = stream;
 
       // Set state to camera first to render the video element
       setScanState('camera');
+
 
       // Initialize rPPG after camera is ready
       setTimeout(async () => {
@@ -695,6 +704,7 @@ const FaceScanner: React.FC = () => {
               console.error('Error playing video:', err);
               setError('Error starting camera preview. Please try again.');
             });
+
         }
       }, 50);
 
@@ -729,6 +739,7 @@ const FaceScanner: React.FC = () => {
     }
 
     chunksRef.current = [];
+
     hrLogRef.current = [];
     bvpLogRef.current = [];
     bufferPtrRef.current = 0;
@@ -806,6 +817,7 @@ const FaceScanner: React.FC = () => {
         const blob = new Blob(chunksRef.current, { type: chunksRef.current[0]?.type || 'video/webm' });
         setRecordedVideo(blob);
 
+
         const url = URL.createObjectURL(blob);
         setPreviewUrl(url);
 
@@ -832,6 +844,7 @@ const FaceScanner: React.FC = () => {
     mediaRecorderRef.current = mediaRecorder;
 
     try {
+
       mediaRecorder.start(100);
       setScanState('recording');
       setRecordingTime(0);
@@ -852,6 +865,7 @@ const FaceScanner: React.FC = () => {
       interval = setInterval(() => {
         setRecordingTime(prev => {
           const newTime = prev + 1;
+
 
           if (newTime >= RECORDING_DURATION) {
             stopRecording();
@@ -886,6 +900,7 @@ const FaceScanner: React.FC = () => {
   }, [scanState]);
 
   const resetScan = () => {
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -896,6 +911,7 @@ const FaceScanner: React.FC = () => {
     if (previewUrl && previewUrl.startsWith('blob:')) {
       URL.revokeObjectURL(previewUrl);
     }
+
 
     // Clean up workers
     inferenceWorkerRef.current?.terminate();
@@ -912,6 +928,7 @@ const FaceScanner: React.FC = () => {
     setRecordingTime(0);
     setError(null);
     setIsCameraReady(false);
+
     setRppgInitialized(false);
     setHeartRate(0);
     setSqi(0);
@@ -929,10 +946,12 @@ const FaceScanner: React.FC = () => {
 
   // Handle skip to results
   const handleSkip = () => {
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+
 
     navigate('/result');
   };
@@ -1012,6 +1031,7 @@ const FaceScanner: React.FC = () => {
       return;
     }
 
+
     setScanState('processing');
     setProgress(0);
 
@@ -1089,6 +1109,7 @@ const FaceScanner: React.FC = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
     }
+
   };
 
   // Clean up on unmount
@@ -1100,6 +1121,7 @@ const FaceScanner: React.FC = () => {
       if (previewUrl && previewUrl.startsWith('blob:')) {
         URL.revokeObjectURL(previewUrl);
       }
+
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -1137,6 +1159,7 @@ const FaceScanner: React.FC = () => {
       <line x1="19" y1="5" x2="19" y2="19"></line>
     </svg>
   );
+
 
   const HeartIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -1430,6 +1453,7 @@ const FaceScanner: React.FC = () => {
           font-size: 0.875rem;
         }
 
+
         .heart-rate-card {
           position: absolute;
           top: 1rem;
@@ -1502,6 +1526,7 @@ const FaceScanner: React.FC = () => {
             aspect-ratio: 4/3;
           }
 
+
           .heart-rate-card {
             top: 0.5rem;
             left: 0.5rem;
@@ -1569,6 +1594,7 @@ const FaceScanner: React.FC = () => {
                       {error}
                     </div>
                   )}
+
 
                   {/* rPPG Warning */}
                   {rppgError && (scanState === 'camera' || scanState === 'recording') && (
@@ -1685,6 +1711,7 @@ const FaceScanner: React.FC = () => {
                           </>
                         )}
 
+
                         {/* Live Heart Rate Display */}
                         {scanState === 'recording' && heartRate > 0 && (
                           <div className="heart-rate-card">
@@ -1744,6 +1771,7 @@ const FaceScanner: React.FC = () => {
                             <p style={{ color: '#00B8D4', marginTop: '1rem' }}>Starting camera...</p>
                           </div>
                         )}
+
 
                         {/* Face detection overlay canvas */}
                         <canvas
@@ -2089,5 +2117,6 @@ const FaceScanner: React.FC = () => {
     </>
   );
 };
+
 
 export default FaceScanner;
