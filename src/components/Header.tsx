@@ -37,6 +37,8 @@ export const Header: React.FC = () => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>({});
   const [loadingStatuses, setLoadingStatuses] = useState(true);
+  const [chatInput, setChatInput] = useState("");
+
 
   // Get user ID from localStorage
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
@@ -398,7 +400,7 @@ export const Header: React.FC = () => {
                     overflow: "hidden",
                   }}
                 >
-                
+
                   <div style={{
                     display: "flex",
                     flexDirection: "column",
@@ -433,7 +435,7 @@ export const Header: React.FC = () => {
                       />
                     </div>
 
-                   
+
 
                     <div
                       style={{
@@ -496,6 +498,15 @@ export const Header: React.FC = () => {
         >
           <textarea
             placeholder="Ask me anything..."
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                navigate('/ai-chat', { state: { initialMessage: chatInput } });
+                setChatInput("");
+              }
+            }}
             style={{
               width: "100%",
               flex: 1,
@@ -552,6 +563,10 @@ export const Header: React.FC = () => {
                 justifyContent: "center",
                 cursor: "pointer",
                 transition: "background 0.2s",
+              }}
+              onClick={() => {
+                navigate('/ai-chat', { state: { initialMessage: chatInput } });
+                setChatInput("");
               }}
               onMouseEnter={(e) => (e.currentTarget.style.background = "#15A7D8")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "#15A7D8")}
