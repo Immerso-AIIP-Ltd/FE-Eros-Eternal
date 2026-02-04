@@ -10,6 +10,21 @@ import star from '../starmap.webm'
 import crystal from "../Magic Crystal Ball.webm";
 import galaxy from "../galaxy.webm"
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import soul from "../soul.webm"
+import chakra from "../chakra.webm";
+import vibrational from "./../assets/webm/vibrational.webm";
+import kosha from "./../assets/webm/kosha.webm";
+import aura from "./../assets/webm/aura.webm";
+import starmap from "./../assets/webm/star-map.webm";
+import longevity from "./../assets/webm/longevity.webm";
+
+// Import background images
+import vibrationalBg from "../assets/reports/vibrational.jpg";
+import birthChartBg from "../assets/reports/birthMap.png";
+import flameScoreBg from "../assets/reports/flame.png";
+import auraBg from "../assets/reports/aura.png";
+import koshaBg from "../assets/reports/kosha.png";
+import longevityBg from "../assets/reports/longevity.png";
 
 const StatsCards = () => {
   const navigate = useNavigate();
@@ -17,53 +32,57 @@ const StatsCards = () => {
   const [loading, setLoading] = useState(true);
 
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
-  const baseApiUrl = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/reports/individual_report/";
+  const baseApiUrl = "http://164.52.205.108:8500/api/v1/reports/individual_report/";
+  // const baseApiUrl = "http://192.168.18.5:7001/api/v1/reports/individual_report/";
 
   const reportCards = [
     {
       id: 1,
       title: "Vibrational Frequency",
-      iconVideo: vibe,
+      iconVideo: vibrational,
       route: "/vibrational-frequency",
-      reportType: "vibrational_frequency"
-
+      reportType: "vibrational_frequency",
+      backgroundImage: vibrationalBg
     },
     {
       id: 2,
-      title: "Star Map",
+      title: "Birth Chart",
       iconVideo: galaxy,
       route: "/star-map",
-      reportType: "star_map"
-
+      reportType: "star_map",
+      backgroundImage: birthChartBg
     },
     {
       id: 3,
       title: "Flame Score",
       iconVideo: fire,
       route: "/flame-score",
-      reportType: "flame_score"
+      reportType: "flame_score",
+      backgroundImage: flameScoreBg
     },
     {
       id: 4,
       title: "Aura Profile",
-      iconVideo: crystal,
+      iconVideo: aura,
       route: "/aura-profile",
-      reportType: "aura_profile"
+      reportType: "aura_profile",
+      backgroundImage: auraBg
     },
     {
       id: 5,
       title: "Kosha Map",
-      iconVideo: star,
+      iconVideo: kosha,
       route: "/kosha-map",
-      reportType: "kosha_map"
-
+      reportType: "kosha_map",
+      backgroundImage: koshaBg
     },
     {
       id: 6,
       title: "Longevity Blueprint",
-      iconVideo: gym,
+      iconVideo: longevity,
       route: "/longevity-blueprint",
-      reportType: "longevity_blueprint"
+      reportType: "longevity_blueprint",
+      backgroundImage: longevityBg
     },
   ];
 
@@ -160,12 +179,13 @@ const StatsCards = () => {
   }
 
   return (
-    <div className="container-fluid p-0 m-0">
+    <div className="container-fluid m-0" style={{ paddingRight: "100px" }}>
+
       <div className="header mb-4">
-        <h1 className="text-white mb-1" style={{ fontFamily: "Poppins" }}>
+        <h1 className="text-white mb-1">
           Your Soul Reports Hub
         </h1>
-        <p className="text-white mb-0" style={{ fontFamily: "Poppins" }}>
+        <p className="text-white mb-0">
           Tap any card to generate your personalized report
         </p>
       </div>
@@ -175,28 +195,57 @@ const StatsCards = () => {
           const hasReport = reportStatuses[card.reportType];
 
           return (
-            <div key={card.id} className="col-md-6 mb-4">
+            <div key={card.id} className="col-md-6 col-lg-4 mb-4">
               <div
-                className="card border-0 rounded-4 shadow-lg bg-dark hover-card top-outline-primary custom-top-border"
+                className="card border-0 shadow-lg hover-card"
                 onClick={(e) => handleCardClick(card, e)}
                 style={{
-                  borderImage:
-                    "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",
-                  borderTop: "3px solid transparent",
-                  borderRadius: "18px",
+                  borderRadius: "36px",
                   cursor: "pointer",
+                  position: "relative",
+                  overflow: "hidden",
+                  minHeight: '260px',
                 }}
               >
+                {/* Background Image */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundImage: `url(${card.backgroundImage})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                    zIndex: 0,
+                  }}
+                />
+
+                {/* Optional dark overlay for better text readability */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: "rgba(0, 0, 0, 0.2)",
+                    zIndex: 1,
+                  }}
+                />
+
                 <div
                   className="card-body p-4"
                   style={{
-                    borderImage:
-                      "linear-gradient(113.64deg, #0061FF 7.83%, #60EFFF 100.26%) 1",
-                    borderTop: "3px solid transparent",
-                    borderRadius: "18px",
+                    border: "1px solid rgba(255, 255, 255, 0.5)",
+                    borderRadius: "36px",
+                    position: "relative",
+                    zIndex: 2,
                   }}
                 >
-                  <div className="d-flex justify-content-between align-items-start mb-3">
+                  {/* <div className="d-flex justify-content-between align-items-start mb-3">
                     <video
                       src={card.iconVideo}
                       autoPlay
@@ -220,10 +269,10 @@ const StatsCards = () => {
                         fontSize: "1.25rem",
                       }}
                     />
-                  </div>
+                  </div> */}
 
                   <h5
-                    className="card-title text-white mb-2"
+                    className="card-title text-white mb-4"
                     style={{
                       fontFamily: "Inter",
                       fontWeight: "600",
@@ -234,16 +283,16 @@ const StatsCards = () => {
                   </h5>
                   <p
                     className="card-text mb-3 small"
-                    style={{ color: "#00B8F8", fontFamily: "Inter" }}
+                    style={{ color: "#00B8F8", fontFamily: "Inter,sans-serif", fontSize: "20px" }}
                   >
-                    {hasReport ? "View Report" : "Report"}
+                    {hasReport ? "View Report" : "Generate Report"}
                   </p>
 
                   <button
-                    className={`btn btn-outline-primary btn-sm text-white rounded-pill px-4 ${hasReport ? "border-blue-500" : ""
+                    className={`btn btn-lg text-white rounded-pill mb-4 mx-2 px-4 ${hasReport ? "btn-recommendations" : "btn-generate"
                       }`}
                     onClick={() => handleButtonClick(card)}
-                    style={{ fontFamily: "Poppins" }}
+                    style={{ fontFamily: "Poppins,sans-serif", position: "absolute", bottom: "16px", left: "16px" }}
                   >
                     {hasReport ? "Recommendations" : "Generate Report"}
                   </button>
@@ -255,19 +304,28 @@ const StatsCards = () => {
       </div>
 
       <style>{`
-        .top-outline-primary {
-          box-shadow: 0 -2px 0 0 #0d6efd;
-          border-top-left-radius: 0.5rem;
-          border-top-right-radius: 0.5rem;
+        .hover-card {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .hover-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+          transform: translateY(-5px);
+          box-shadow: 0 8px 30px rgba(0, 184, 248, 0.4);
         }
 
-        .custom-top-border {
-          border: #0d6efd;
+        .btn-recommendations,
+        .btn-generate {
+          background: linear-gradient(90deg, #AAE127 0%, #00A2FF 100%);
+          border: none;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+
+        .btn-recommendations:hover,
+        .btn-generate:hover {
+          background: linear-gradient(90deg, #AAE127 0%, #00A2FF 100%);
+          transform: scale(1.05);
+          box-shadow: 0 4px 15px rgba(95, 232, 127, 0.3);
         }
       `}</style>
     </div>

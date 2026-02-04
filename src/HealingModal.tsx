@@ -1357,7 +1357,7 @@ console.log("baseApiUrl", baseApiUrl);
         <div className="position-relative z-10 px-3 pb-3">
           <div className="d-flex flex-wrap justify-content-center align-items-center text-secondary small">
             <span className="mb-2 mb-md-0">
-              © 2025 EROS Universe. All Rights Reserved.
+              {/* © 2025 EROS Universe. All Rights Reserved. */}
             </span>
           </div>
         </div>

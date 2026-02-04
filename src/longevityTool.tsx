@@ -15,7 +15,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 const sidebarMenuItems = [
     { id: 'vibrational-frequency', label: 'Vibrational Frequency', icon: <ImagePlus size={16} />, reportType: 'vibrational_frequency' },
     { id: 'aura-profile', label: 'Aura Profile', icon: <User size={16} />, reportType: 'aura_profile' },
-    { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} />, reportType: 'star_map' },
+    // { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} />, reportType: 'star_map' },
+     { id: 'star-map', label: 'Birth Chart', icon: <SquarePlus size={16} />, reportType: 'star_map' },
     { id: 'kosha-map', label: 'Kosha Map', icon: <Camera size={16} />, reportType: 'kosha_map' },
     { id: 'flame-score', label: 'Flame Score', icon: <Upload size={16} />, reportType: 'flame_score' },
     { id: 'longevity-blueprint', label: 'Longevity Blueprint', icon: <Mic size={16} />, reportType: 'longevity_blueprint' },
@@ -234,7 +235,7 @@ const LongevityTool: React.FC = () => {
                 return;
             }
 
-            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/select_soul_report/${userId}`, {
+            const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/select_soul_report/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
@@ -317,7 +318,7 @@ const LongevityTool: React.FC = () => {
             }
 
             const response = await fetch(
-                `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/answer_question/${userId}`,
+                `http://164.52.205.108:8500/api/v1/chat/answer_question/${userId}`,
                 {
                     method: "POST",
                     body: formData,
@@ -385,7 +386,7 @@ const LongevityTool: React.FC = () => {
         setIsGeneratingReport(true);
 
         try {
-            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/generate_soul_report/${userId}`, {
+            const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/generate_soul_report/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
@@ -667,7 +668,7 @@ const LongevityTool: React.FC = () => {
 
         try {
             const response = await fetch(
-                `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
+                `http://164.52.205.108:8500/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
             );
             return response.ok && response.status === 200;
         } catch (error) {
@@ -779,10 +780,24 @@ const LongevityTool: React.FC = () => {
           div::-webkit-scrollbar-thumb:hover {
             background: #6B7280;
           }
+             .sidebar-btn:hover{
+      background-color: #71717A;
+      }
         `}</style>
                 <div className="p-4 border-b border-gray-700">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold" style={{ color: '#00B8F8' }}>Eternal Reports</h2>
+                        <h2 className="text-lg font-bold" style={{
+//                             background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
+//   WebkitBackgroundClip: 'text',
+//   WebkitTextFillColor: 'transparent',
+//   backgroundClip: 'text',
+//   color: 'transparent', 
+color:"#00B8F8"
+}}
+  >
+    {/* Eternal Reports */}
+    EROS Wellness
+    </h2>
                         <button
                             className="md:hidden text-gray-400 hover:text-white bg-transparent"
                             onClick={() => setSidebarOpen(false)}
@@ -798,7 +813,7 @@ const LongevityTool: React.FC = () => {
                                 key={item.id}
                                 className={`btn d-flex align-items-center my-2 gap-2 w-100 text-start ${activeMenuItem === item.id
                                     ? 'btn-info text-white'
-                                    : 'btn-dark text-white hover-bg-dark'
+                                    : 'sidebar-btn text-white hover-bg-dark'
                                     }`}
                                 onClick={async () => {
                                     setActiveMenuItem(item.id);
@@ -836,7 +851,7 @@ const LongevityTool: React.FC = () => {
                             <Menu size={20} />
                         </button>
                         <h3 className="text-xl font-semibold">
-                            Eternal AI - {sidebarMenuItems.find(item => item.id === activeMenuItem)?.label || 'Assessment'}
+                            EROS Wellness - {sidebarMenuItems.find(item => item.id === activeMenuItem)?.label || 'Assessment'}
                         </h3>
                     </div>
                     <div className="flex items-center gap-2">
@@ -847,7 +862,7 @@ const LongevityTool: React.FC = () => {
                             <LogOut size={18} />
                         </div>
                         <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center text-sm font-semibold ms-2">
-                            A
+                            <User size={18} />
                         </div>
                     </div>
                 </div>
@@ -960,7 +975,7 @@ const LongevityTool: React.FC = () => {
                                                 <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                                                     <span className="text-xs font-semibold text-white">AI</span>
                                                 </div>
-                                                <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg">
+                                                <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg" style={{border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D'}}>
                                                     <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
                                                         {message.isThinking ? (
                                                             <div className="flex items-center gap-2">
@@ -1017,8 +1032,8 @@ const LongevityTool: React.FC = () => {
 
                     {/* Fixed Input Area at Bottom */}
                     {assessmentStatus !== 'report_generated' && (
-                        <div className="sticky bottom-0 bg-black z-20 px-6 pb-4 pt-2 border-t border-gray-800">
-                            <div className="bg-gray-800 rounded-2xl p-4 shadow-lg" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
+                        <div className="sticky bottom-0 bg-black z-20 px-6 pb-4 pt-2 border-gray-800">
+                            <div className="bg-gray-800 rounded-2xl p-4 shadow-lg" style={{ maxWidth: '65%', margin: '0 auto', width: '100%', backgroundColor: '#1E2123' }}>
                                 {(attachedImages.length > 0 || attachedVoices.length > 0) && (
                                     <div className="flex flex-col gap-3 mb-3">
                                         {attachedImages.length > 0 && (
@@ -1140,16 +1155,16 @@ const LongevityTool: React.FC = () => {
                     )}
 
                     {/* Footer - Fixed at very bottom */}
-                    <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-t border-gray-800">
+                    <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-gray-800">
                         <div className="text-center text-xs text-gray-500" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
-                            <div className="flex items-center justify-between text-xs">
-                                <div>© 2025 EROS Universe. All Rights Reserved.</div>
-                                <div className="flex items-center gap-6">
+                            <div className="flex items-center justify-center text-xs">
+                                {/* <div>© 2025 EROS Universe. All Rights Reserved.</div> */}
+                                {/* <div className="flex items-center gap-6">
                                     <a href="#" className="hover:text-gray-300 transition-colors">FAQs</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Terms & Conditions</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Refund Policy</a>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>

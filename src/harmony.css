@@ -23,7 +23,7 @@
 }
 
 .tarot-intro {
-  background-image: url("./assets/IndexBG.jpg");
+  background-image: url("./images/final-harmony.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -34,7 +34,7 @@
 .tarot-input {
   background-color: #000 !important;
   color: #fff !important;
-  border: 1px solid #fff !important;
+  border: 1px solid #666666 !important;
   padding: 2%;
 }
 

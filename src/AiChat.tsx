@@ -207,16 +207,7 @@ const AiChat: React.FC = () => {
         setMessages([
             {
                 sender: "ai",
-                text: (
-                    <div className="text-center">
-                        <div className="text-2xl font-600 text-white">
-                            Hi, I'm Eternal AI
-                        </div>
-                        <div className="text-sm text-white mt-3">
-                            How can I help you today?
-                        </div>
-                    </div>
-                ),
+                text: "🌟  WELCOME TO YOUR SPIRITUAL GUIDE  🌟\n\nI'm here to offer wisdom, guidance, and spiritual reflection.\nAsk me anything about your spiritual journey, meditation, life purpose,\ninner peace, or any other spiritual topic that's on your heart.\n\nType 'help' for commands, or just start chatting!\n\n🧘 Spiritual Guide: Welcome, dear soul. I invite you to share the whispers of your heart. What stirs within you today?",
                 centered: true
             }
         ]);
@@ -243,7 +234,8 @@ const AiChat: React.FC = () => {
         if (!userId) return;
 
         try {
-            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/sessions/?user_id=${userId}`);
+            const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/sessions/?user_id=${userId}`);
+            // const response = await fetch(`http://192.168.18.5:7001/api/v1/chat/sessions/?user_id=${userId}`);
             const data = await response.json();
             if (data.success && data.data && data.data.sessions && Array.isArray(data.data.sessions)) {
                 setSessions(data.data.sessions);
@@ -261,7 +253,8 @@ const AiChat: React.FC = () => {
         if (!userId) return;
 
         try {
-            const response = await fetch(`http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/conversation/${sessionId}`);
+            const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/conversation/${sessionId}`);
+            // const response = await fetch(`http://192.168.18.5:7001/api/v1/chat/conversation/${sessionId}`);
             const data = await response.json();
             if (data.success && data.data && data.data.conversation_history && Array.isArray(data.data.conversation_history)) {
                 const formattedMessages = data.data.conversation_history.map((msg: any) => ({
@@ -460,7 +453,8 @@ const AiChat: React.FC = () => {
 
             // If no session ID exists, initialize a new session
             if (!currentSessionId) {
-                const initResponse = await fetch('http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual', {
+                const initResponse = await fetch(`http://164.52.205.108:8500/api/v1/chat/spiritual/${userId}`, {
+                // const initResponse = await fetch(`http://192.168.18.5:7001/api/v1/chat/spiritual/${userId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({
@@ -483,9 +477,10 @@ const AiChat: React.FC = () => {
             }
 
             // Send the user's message
-            const response = await fetch('http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/chat/spiritual', {
+            const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/spiritual/${userId}`, {
+            // const response = await fetch(`http://192.168.18.5:7001/api/v1/chat/spiritual/${userId}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded',  },
                 body: new URLSearchParams({
                     user_id: userId,
                     message: currentInput,
@@ -634,25 +629,32 @@ const AiChat: React.FC = () => {
             >
                 {/* Add custom scrollbar styles for WebKit browsers */}
                 <style>{`
-    div::-webkit-scrollbar {
-      width: 6px;
-    }
-    div::-webkit-scrollbar-track {
-      background: #1E2123;
-    }
-    div::-webkit-scrollbar-thumb {
-      background: #4B5563;
-      border-radius: 3px;
-    }
-    div::-webkit-scrollbar-thumb:hover {
-      background: #6B7280;
-    }
-  `}</style>
+                    div::-webkit-scrollbar {
+                    width: 6px;
+                    }
+                    div::-webkit-scrollbar-track {
+                    background: #1E2123;
+                    }
+                    div::-webkit-scrollbar-thumb {
+                    background: #4B5563;
+                    border-radius: 3px;
+                    }
+                    div::-webkit-scrollbar-thumb:hover {
+                    background: #6B7280;
+                    }
+                `}</style>
 
 
                 <div className="p-4 border-b border-gray-700">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold" style={{ color: '#00B8F8' }}>Eternal AI</h2>
+                        <h2 className="text-lg font-bold" style={{
+                            // background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
+                            // WebkitBackgroundClip: 'text',
+                            // WebkitTextFillColor: 'transparent',
+                            // backgroundClip: 'text',
+                            // color: 'transparent',
+                            color:"#00B8F8"
+                        }}>EROS Wellness</h2>
                         <button
                             className="md:hidden text-gray-400 hover:text-white bg-transparent"
                             onClick={() => setSidebarOpen(false)}
@@ -704,7 +706,7 @@ const AiChat: React.FC = () => {
                         >
                             <Menu size={20} />
                         </button>
-                        <h3 className="text-xl font-semibold">Eternal AI</h3>
+                        <h3 className="text-xl font-semibold" style={{color:"#00B8F8"}}>Wellness Chat Bot</h3>
                     </div>
                     <div className="flex items-center gap-2">
                         <div
@@ -714,7 +716,7 @@ const AiChat: React.FC = () => {
                             <LogOut size={18} />
                         </div>
                         <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center text-sm font-semibold ms-2">
-                            <User size={18}/>
+                            <User size={18} />
                         </div>
                     </div>
                 </div>
@@ -758,7 +760,7 @@ const AiChat: React.FC = () => {
                             }
                         `}</style>
 
-                        {messages.length === 1 && messages[0].centered ? (
+                        {messages.filter(m => m.sender === 'user').length === 0 && messages.length === 1 && messages[0].centered ? (
                             <div className="flex-1 flex items-center justify-center h-full min-h-[60vh]">
                                 <div className="text-center">
                                     <div className="mb-4">
@@ -810,7 +812,7 @@ const AiChat: React.FC = () => {
                                                 <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                                                     <span className="text-xs font-semibold text-white">AI</span>
                                                 </div>
-                                                <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg">
+                                                <div className="text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg" style={{ border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D' }}>
                                                     <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
                                                         {message.isThinking ? (
                                                             <div className="flex items-center gap-2">
@@ -831,7 +833,7 @@ const AiChat: React.FC = () => {
                                         <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                                             <span className="text-xs font-semibold text-white">AI</span>
                                         </div>
-                                        <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 shadow-lg">
+                                        <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 shadow-lg" style={{ border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D' }}>
                                             <div className="flex items-center gap-2">
                                                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-cyan-500 border-t-transparent"></div>
                                                 <span className="text-sm">Thinking...</span>
@@ -844,8 +846,8 @@ const AiChat: React.FC = () => {
                     </div>
 
                     {/* Fixed Input Area at Bottom */}
-                    <div className="sticky bottom-0 bg-black z-20 px-6 pb-4 pt-2 border-t border-gray-800">
-                        <div className="bg-gray-800 rounded-2xl p-4 shadow-lg" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
+                    <div className="sticky bottom-0 bg-black z-20 px-6 pb-4 pt-2 border-gray-800">
+                        <div className="bg-gray-800 rounded-2xl p-4 shadow-lg" style={{ maxWidth: '65%', margin: '0 auto', width: '100%', backgroundColor: '#1E2123' }}>
                             {(attachedImages.length > 0 || attachedVoices.length > 0) && (
                                 <div className="flex flex-col gap-3 mb-3">
                                     {attachedImages.length > 0 && (
@@ -890,14 +892,20 @@ const AiChat: React.FC = () => {
                                 {!isRecording ? (
                                     <>
                                         <div className="flex-1">
-                                            <input
-                                                type="text"
+                                            <textarea
                                                 placeholder="Enter a prompt here"
                                                 value={inputValue}
                                                 onChange={(e) => setInputValue(e.target.value)}
-                                                onKeyPress={(e) => e.key === 'Enter' && !isLoading && sendMessage()}
-                                                className="w-full bg-transparent text-white placeholder-gray-400 outline-none text-sm py-2 resize-none"
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
+                                                        e.preventDefault();
+                                                        sendMessage();
+                                                    }
+                                                }}
+                                                className="w-full bg-transparent text-white placeholder-gray-400 outline-none text-sm py-2 resize-none max-h-32 overflow-y-auto"
                                                 disabled={isLoading}
+                                                rows={1}
+                                                style={{ minHeight: '40px' }}
                                             />
                                         </div>
 
@@ -973,16 +981,16 @@ const AiChat: React.FC = () => {
                     </div>
 
                     {/* Footer - Fixed at very bottom */}
-                    <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-t border-gray-800">
+                    <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-gray-800">
                         <div className="text-center text-xs text-gray-500" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
-                            <div className="flex items-center justify-between text-xs">
-                                <div>© 2025 EROS Universe. All Rights Reserved.</div>
-                                <div className="flex items-center gap-6">
+                            <div className="flex items-center justify-center text-xs">
+                                {/* <div>© 2025 EROS Universe. All Rights Reserved.</div> */}
+                                {/* <div className="flex items-center gap-6">
                                     <a href="#" className="hover:text-gray-300 transition-colors">FAQs</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Terms & Conditions</a>
                                     <a href="#" className="hover:text-gray-300 transition-colors">Refund Policy</a>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>

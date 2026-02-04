@@ -1,16 +1,16 @@
 // src/components/ExploreSection.tsx
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Import images
-import tarot from '../tarrotfull.png';
-import harmonyindex from '../harmonyindex.png';
-import palm from '../palm.png';
-import facescan from '../facescan.png';
+import tarot from '../assets/explore/tarrot.png';
+import harmonyindex from '../assets/explore/harmony.png';
+import palm from '../assets/explore/palmistry.jpg';
+import facescan from '../assets/explore/face.png';
 import angel from '../vintage.png';
 
 interface ExploreItem {
-  title: string;
+ title: string;
   subtitle: string;
   image: string;
   onClick?: () => void;
@@ -19,6 +19,42 @@ interface ExploreItem {
 
 export const ExploreSection: React.FC = () => {
   const navigate = useNavigate();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [hasMoved, setHasMoved] = useState(false);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setHasMoved(false);
+    setStartX(e.pageX - (scrollContainerRef.current?.offsetLeft || 0));
+    setScrollLeft(scrollContainerRef.current?.scrollLeft || 0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - (scrollContainerRef.current?.offsetLeft || 0);
+    const walk = (x - startX) * 2;
+    
+    // If moved more than 5 pixels, consider it a drag
+    if (Math.abs(walk) > 5) {
+      setHasMoved(true);
+    }
+    
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
 
   const items: ExploreItem[] = [
     {
@@ -29,7 +65,7 @@ export const ExploreSection: React.FC = () => {
       locked: false,
     },
     {
-      title: "Palmistry",
+      title: "Palm Reading",
       subtitle: "Unlock insights and energy balance through the wisdom of your palms",
       image: palm,
       onClick: () => navigate('/palmcard'),
@@ -49,110 +85,161 @@ export const ExploreSection: React.FC = () => {
       onClick: () => navigate('/facereading'),
       locked: false,
     },
-    // {
-    //   title: "Angel Cards",
-    //   subtitle: "Angel guidance for your spiritual journey",
-    //   image: angel,
-    //   onClick: undefined,
-    //   locked: true,
-    // },
   ];
 
   return (
-    <div>
+    <div style={{ 
+      paddingBottom: '2rem', 
+      width: '100vw',
+      // paddingTop: '1rem',
+      paddingLeft: '1rem',
+      paddingRight: '1rem'
+    }}>
       {/* Header */}
-      <h2
-        className="mb-0"
-        style={{
-          fontSize: '1.25rem',
+      <div className="header" style={{ 
+        marginBottom: '1.5rem',
+        paddingLeft: '1.5rem'
+      }}>
+        <h1 style={{
+          fontSize: '1.75rem',
           fontWeight: 600,
           color: '#ffffff',
-          fontFamily:"Poppins"
-        }}
-      >
-        Explore More
-      </h2>
+          fontFamily: "Poppins, sans-serif",
+          margin: 0,
+          letterSpacing: '-0.02em',
+        }}>
+          Explore More
+        </h1>
+      </div>
 
-      {/* Horizontal Scroll Container */}
+      {/* Scrollable Container */}
       <div
-        className="horizontal-scroll"
+        ref={scrollContainerRef}
+        className="cards-container"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         style={{
           display: 'flex',
+          gap: '24px',
           overflowX: 'auto',
-          gap: '1rem',
-          padding: '0 0.5rem',
+          scrollBehavior: isDragging ? 'auto' : 'smooth',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          paddingBottom: '2rem',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
-          whiteSpace: 'nowrap',
-          marginTop: '1rem',
-          paddingBottom: '1rem',
+          width: '100%',
+          paddingLeft: '1.5rem',
+          paddingRight: '1.5rem',
         }}
       >
         {items.map((item, index) => (
           <div
             key={index}
             className="card-item"
-            onClick={item.onClick}
+            onClick={(e) => {
+              // Only navigate if we haven't moved (not a drag)
+              if (!hasMoved && item.onClick) {
+                item.onClick();
+              }
+            }}
             role="button"
             tabIndex={item.onClick ? 0 : -1}
             aria-label={item.locked ? `${item.title} - Coming Soon` : item.title}
             style={{
-              minWidth: '300px',
-              flexShrink: 0,
-              borderRadius: '12px',
-              backgroundColor: '#1e2123',
-              overflow: 'hidden',
+              flex: '0 0 800px',
+              width:"100vw",
+              // minWidth: '320px',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              cursor: item.onClick ? 'pointer' : 'not-allowed',
+              cursor: item.onClick && !isDragging ? 'pointer' : isDragging ? 'grabbing' : 'grab',
               position: 'relative',
-              fontFamily:"DM Sans",
-              fontSize:"16px",
+              fontFamily: "DM Sans, sans-serif",
+              fontSize: "16px",
+              borderRadius: "16px",
+              backgroundColor: "#1a1d1f",
+              overflow: "hidden",
+              height: '450px',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
             }}
             onMouseEnter={(e) => {
-              if (item.onClick) {
-                e.currentTarget.style.backgroundColor = '#2a2e30';
+              if (item.onClick && !isDragging) {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 0, 0, 0.5)';
               }
             }}
             onMouseLeave={(e) => {
-              if (item.onClick) {
-                e.currentTarget.style.backgroundColor = '#1e2123';
-              }
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.3)';
             }}
           >
             {/* Image */}
             <img
               src={item.image}
               alt={item.title}
+              draggable={false}
               style={{
                 width: '100%',
-                height: '200px',
+                height: '100%',
                 objectFit: 'cover',
-                // marginTop:"20px"
+                userSelect: 'none',
+                pointerEvents: 'none',
               }}
             />
 
-            {/* Text Content */}
+            {/* Gradient Overlay - Subtle */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.7) 85%, rgba(0,0,0,0.9) 100%)",
+                zIndex: 1,
+                pointerEvents: 'none',
+              }}
+            />
+
+            {/* Text Content with Strong Blur */}
             <div
               className="text-content"
               style={{
-                padding: '1rem',
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                padding: "1.5rem 1.5rem 1.75rem",
+                background: "rgba(15, 18, 20, 0.6)",
+                backdropFilter: "blur(12px) saturate(180%)",
+                WebkitBackdropFilter: "blur(12px) saturate(180%)",
+                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                zIndex: 5,
+                pointerEvents: 'none',
               }}
             >
               <h3
                 style={{
-                  fontSize: '0.9rem',
+                  fontSize: '1.25rem',
                   fontWeight: 600,
-                  color: 'white',
+                  color: '#ffffff',
                   marginBottom: '0.5rem',
+                  fontFamily: "Poppins, sans-serif",
+                  lineHeight: 1.3,
+                  textShadow: '0 1px 2px rgba(0,0,0,0.5)'
                 }}
               >
                 {item.title}
               </h3>
               <p
                 style={{
-                  fontSize: '0.75rem',
-                  color: '#9ca3af',
+                  fontSize: '0.9rem',
+                  color: 'rgba(255, 255, 255, 0.85)',
                   margin: 0,
+                  lineHeight: 1.5,
+                  fontFamily: "DM Sans, sans-serif",
+                  textShadow: '0 1px 2px rgba(0,0,0,0.5)'
                 }}
               >
                 {item.subtitle}
@@ -169,12 +256,13 @@ export const ExploreSection: React.FC = () => {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 70%)',
+                  background: 'rgba(0, 0, 0, 0.75)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'flex-end',
+                  justifyContent: 'center',
                   alignItems: 'center',
-                  padding: '16px',
                   textAlign: 'center',
                   color: 'white',
                   zIndex: 10,
@@ -182,11 +270,11 @@ export const ExploreSection: React.FC = () => {
               >
                 <i
                   className="bi bi-lock-fill"
-                  style={{ fontSize: '2rem', color: '#ccc', marginBottom: '8px' }}
+                  style={{ fontSize: '2.5rem', color: '#ccc', marginBottom: '12px' }}
                 ></i>
                 <p
                   style={{
-                    fontSize: '0.95rem',
+                    fontSize: '1rem',
                     fontWeight: 500,
                     margin: 0,
                     lineHeight: 1.4,
@@ -201,67 +289,78 @@ export const ExploreSection: React.FC = () => {
       </div>
 
       {/* Injected Styles */}
-      <style jsx>{`
-        .horizontal-scroll::-webkit-scrollbar {
+      <style>{`
+        .cards-container::-webkit-scrollbar {
           display: none;
         }
 
-        .card-item:hover {
-          transform: scale(1.02);
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        .card-item {
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                      box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .card-item img {
-          width: 100%;
-          height: 200px;
-          object-fit: conatin;
+        @media (max-width: 1024px) {
+          .cards-container {
+            gap: 16px;
+            padding: 0 1rem;
+          }
+          
+          .card-item {
+            flex: 0 0 280px;
+            height: 340px;
+          }
+          
+          .text-content {
+            padding: 1.25rem;
+          }
+          
+          h3 {
+            font-size: 1.125rem;
+          }
+          
+          p {
+            font-size: 0.85rem;
+          }
         }
 
-        .card-item .text-content {
-          padding: 1rem;
+        @media (max-width: 768px) {
+          .cards-container {
+            gap: 12px;
+            padding: 0 0.75rem;
+          }
+          
+          .card-item {
+            flex: 0 0 260px;
+            height: 320px;
+          }
+          
+          .text-content {
+            padding: 1.1rem;
+          }
+          
+          h3 {
+            font-size: 1.05rem;
+          }
+          
+          p {
+            font-size: 0.8rem;
+          }
         }
-
-        .card-item h3 {
-          font-size: 0.9rem;
-          font-weight: 600;
-          color: white;
-          margin-bottom: 0.5rem;
-        }
-
-        .card-item p {
-          font-size: 0.75rem;
-          color: #9ca3af;
-          margin: 0;
-        }
-
-        .lock-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 70%);
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-end;
-          align-items: center;
-          padding: 16px;
-          text-align: center;
-          color: white;
-          z-index: 10;
-        }
-
-        .lock-overlay i {
-          font-size: 2rem;
-          color: #ccc;
-          margin-bottom: 8px;
-        }
-
-        .lock-overlay p {
-          font-size: 0.95rem;
-          font-weight: 500;
-          margin: 0;
-          line-height: 1.4;
+        
+        @media (max-width: 600px) {
+          .cards-container {
+            gap: 10px;
+            padding: 0 0.5rem;
+          }
+          
+          .card-item {
+            flex: 0 0 240px;
+            height: 300px;
+          }
+          
+          h3 {
+            font-size: 0.95rem;
+          }
         }
       `}</style>
     </div>

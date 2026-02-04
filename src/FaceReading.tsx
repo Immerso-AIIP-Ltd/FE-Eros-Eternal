@@ -1,13 +1,14 @@
 // src/pages/TarotFlow.tsx
 import React, { useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import TarotCard from "./TarrotCard"; 
-import "./face.css"
+import TarotCard from "./TarrotCard";
+import "./face.css";
 import { BsArrowLeft } from "react-icons/bs";
 import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "./components/Tarot/TarotCardSelector";
 import Stars from "./components/stars";
+import Face from "../src/images/final-face.png";
 
 interface TarotReading {
   card_backcover: string;
@@ -25,7 +26,8 @@ const FaceReading: React.FC = () => {
     dob: "",
   });
   const [cardData, setCardData] = useState<TarotReading | null>(null);
-  const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+  const API_URL =
+    "http://164.52.205.108:8500";
   const userId = localStorage.getItem("user_id");
 
   // Handle input changes
@@ -53,7 +55,6 @@ const FaceReading: React.FC = () => {
   };
 
   const fetchTarot = async () => {
-  
     try {
       const formDataSet = new FormData();
       formDataSet.append("user_id", userId);
@@ -78,30 +79,19 @@ const FaceReading: React.FC = () => {
   };
 
   const stepChange = (step: number) => {
-  
     setStep(step);
     setFormData({ name: "", gender: "", dob: "" });
   };
 
   return (
     <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white">
-      {/* <button
-        type="button"
-        className="absolute btn"
-        style={{
-          top: "2%",
-          left: "2%",
-          fontSize: "large",
-          background: "none",
-          width: "10%",
-        }}
-      >
-        <i className="bi bi-star-fill"></i> Tarot Reading
-      </button> */}
-
-      {step === 1 && (
-        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 tarot-introf">
-          {/* Tarot Cards */}
+      {/* {step === 1 && (
+        <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden">
+          <img
+            src={Face}
+            alt="Face Reading Background"
+            className="position-absolute top-0 start-0 w-100 h-100 object-fit-cover"
+          />
           <a
             href="/result"
             type="button"
@@ -117,24 +107,59 @@ const FaceReading: React.FC = () => {
           >
             <i className="bi bi-arrow-left m-3"></i> Face Reading
           </a>
-          {/* Title */}
+        
           <div className="d-flex h-50 flex-column align-items-center justify-content-center">
-            <h1 className="fw-bold">Face Reading</h1>
-            <p className="text-white fw-bold">Unlock the secrets of your Face</p>
+           
           </div>
 
-          {/* Bottom */}
+   
           <div className="text-center p-4">
             <h3 className="fw-bold">Unlock the Secrets of Your Face</h3>
             <p className="text-white mt-4">
-              Discover insights into your personality, relationship, and future with our AI-powered Face reading technology
+              Discover insights into your personality, relationship, and future
+              with our AI-powered Face reading technology
             </p>
             <button
               className="btn btn-primary rounded-pill px-4 py-2 mt-4 w-full"
               style={{ backgroundColor: "#00B8F8" }}
-              onClick={() => navigate('/face-upload')}
+              onClick={() => navigate("/face-upload")}
             >
               Start Face Reading
+            </button>
+          </div>
+        </div>
+      )} */}
+      {step === 1 && (
+        <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden">
+
+          <img
+            src={Face}
+            alt="Face Reading Background"
+            className="position-absolute top-0 start-0 w-100  h-75 object-fit-cover"
+          />
+
+
+          <a
+            href="/result"
+            className="position-absolute top-0 start-0 btn btn-link text-white p-3"
+            style={{ fontSize: '1.5rem', zIndex: 10, textDecoration: 'none' }}
+          >
+            <i className="bi bi-arrow-left mr-3"></i> Face Reading
+          </a>
+
+
+          <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-end text-center text-white position-relative pb-5" style={{ zIndex: 5 }}>
+            <h3 className="fw-semibold display-5 mb-3">Unlock the Secrets of Your Face</h3>
+            <p className="text-white-50 mb-4 text-xl">
+              Discover insights into your personality, relationship, and future with our AI-powered
+              face reading technology
+            </p>
+            <button
+              className="btn btn-primary rounded-pill px-5 py-3 fs-5 w-25"
+              style={{ backgroundColor: '#00B8F8', border: 'none' }}
+              onClick={() => navigate('/face-upload')}
+            >
+              Continue
             </button>
           </div>
         </div>
@@ -178,9 +203,8 @@ const FaceReading: React.FC = () => {
                 <label className="form-label">Enter Your Name</label>
                 <input
                   type="text"
-                  className={`form-control tarot-input ${
-                    formData.name ? "has-value" : ""
-                  }`}
+                  className={`form-control tarot-input ${formData.name ? "has-value" : ""
+                    }`}
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
@@ -191,9 +215,8 @@ const FaceReading: React.FC = () => {
               <div className="mb-3">
                 <label className="form-label">Gender</label>
                 <select
-                  className={`form-select tarot-input ${
-                    formData.gender ? "has-value" : ""
-                  }`}
+                  className={`form-select tarot-input ${formData.gender ? "has-value" : ""
+                    }`}
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
@@ -209,9 +232,8 @@ const FaceReading: React.FC = () => {
                 <label className="form-label">Date of Birth</label>
                 <input
                   type="date"
-                  className={`form-control tarot-input ${
-                    formData.dob ? "has-value" : ""
-                  }`}
+                  className={`form-control tarot-input ${formData.dob ? "has-value" : ""
+                    }`}
                   name="dob"
                   value={formData.dob}
                   onChange={handleChange}

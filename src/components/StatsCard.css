@@ -18,11 +18,11 @@ body {
   overflow: hidden;
 }
 
-.card:hover {
+/* .card:hover {
   transform: translateY(-5px);
   box-shadow: 0 12px 30px rgba(0, 123, 255, 0.3);
   border-top: 3px solid #007bff;
-}
+} */
 
 .hover-card .card-body {
   padding: 1.5rem;

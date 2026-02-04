@@ -1,98 +1,215 @@
-// src/components/Header.tsx
-import React, { useState, } from "react";
-import { useNavigate } from 'react-router-dom';
-import headerBg from "../header-bg.png"; // Ensure this path is correct
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
+import HeaderBg from "../assets/background.png";
+import StarmapIcon from "../assets/result-images/brightness_5.png";
+import VibrationalIcon from "../assets/result-images/add_reaction.png";
+import VitaScanIcon from "../assets/result-images/clinical_notes.png";
+import FlameScoreIcon from "../assets/result-images/mode_heat.png";
+import AuraProfileIcon from "../assets/result-images/background_replace.png";
+import KoshaMapIcon from "../assets/result-images/map_search.png";
+import LongevityIcon from "../assets/result-images/ecg_heart.png";
+import { Paperclip, ArrowRight, Bell, ChevronDown } from 'lucide-react';
+import notification from "../assets/notification.png";
+import credits from "../assets/credits.png";
+import overlay from "../assets/result-images/overlay.png";
+
+// Report background images
+import vibrationalBg from "../assets/reports/vibrational.jpg";
+import birthChartBg from "../assets/reports/birthMap.png";
+import flameScoreBg from "../assets/reports/flame.png";
+import auraBg from "../assets/reports/aura.png";
+import koshaBg from "../assets/reports/kosha.png";
+import longevityBg from "../assets/reports/longevity.png";
+
+interface CardData {
+  id: number;
+  icon: string;
+  title: string;
+  buttonText: string;
+  reportType?: string;
+  route?: string;
+  backgroundImage?: string;
+}
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
-  const [chartUrls, setChartUrls] = useState({
-    rasi: "",
-    navamsha: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [activeCard, setActiveCard] = useState<number | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>({});
+  const [loadingStatuses, setLoadingStatuses] = useState(true);
 
-  const username = localStorage.getItem('username') || 'Guest';
-  const fetchAstrologyData = async () => {
-    try {
-      // Get data from localStorage
-      const placeOfBirth =
-        localStorage.getItem("place_of_birth") || "Chennai, India";
-      const dateOfBirth = localStorage.getItem("date_of_birth") || "07/04/2002"; // Format: MM/DD/YYYY
-      const timeOfBirth = localStorage.getItem("time_of_birth") || "01:55";
+  // Get user ID from localStorage
+  const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
+  const baseApiUrl = "http://164.52.205.108:8500/api/v1/reports/individual_report/";
 
-      const timezone = "5:30";
+  // Enhanced cards data with report mappings
+  const cardsData: CardData[] = [
+    {
+      id: 1,
+      icon: VitaScanIcon,
+      title: "Vita Scan",
+      buttonText: "View Report",
+      reportType: "vita_scan",
+      route: "/vita-scan",
+    },
+    {
+      id: 2,
+      icon: VibrationalIcon,
+      title: "Vibrational Frequency",
+      buttonText: "Generate",
+      reportType: "vibrational_frequency",
+      route: "/vibrational-frequency",
+      backgroundImage: vibrationalBg
+    },
+    {
+      id: 3,
+      icon: StarmapIcon,
+      title: "Star Map",
+      buttonText: "Generate",
+      reportType: "star_map",
+      route: "/star-map",
+      backgroundImage: birthChartBg
+    },
+    {
+      id: 4,
+      icon: FlameScoreIcon,
+      title: "Flame Score",
+      buttonText: "Generate",
+      reportType: "flame_score",
+      route: "/flame-score",
+      backgroundImage: flameScoreBg
+    },
+    {
+      id: 5,
+      icon: AuraProfileIcon,
+      title: "Aura Profile",
+      buttonText: "Generate",
+      reportType: "aura_profile",
+      route: "/aura-profile",
+      backgroundImage: auraBg
+    },
+    {
+      id: 6,
+      icon: KoshaMapIcon,
+      title: "Kosha Map",
+      buttonText: "Generate",
+      reportType: "kosha_map",
+      route: "/kosha-map",
+      backgroundImage: koshaBg
+    },
+    {
+      id: 7,
+      icon: LongevityIcon,
+      title: "Longevity Blueprint",
+      buttonText: "Generate",
+      reportType: "longevity_blueprint",
+      route: "/longevity-blueprint",
+      backgroundImage: longevityBg
+    },
+  ];
 
-      // Validate required fields
-      if (!placeOfBirth || !dateOfBirth || !timeOfBirth) {
-        alert("Missing birth details. Please complete your profile first.");
+  // Fetch report statuses on mount and when userId changes
+  useEffect(() => {
+    const fetchReportStatuses = async () => {
+      if (!userId) {
+        setLoadingStatuses(false);
         return;
       }
 
-      const payload = {
-        location: placeOfBirth,
-        dob: dateOfBirth,
-        tob: timeOfBirth,
-        timezone: timezone,
-      };
+      setLoadingStatuses(true);
+      const statuses: Record<string, boolean> = {};
 
-      const response = await fetch(
-        `http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/vedastro/get_astrology_data`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      try {
+        // Fetch all report statuses concurrently
+        const reportChecks = cardsData
+          .filter(card => card.reportType) // Only check cards with reportType
+          .map(async (card) => {
+            try {
+              const response = await fetch(
+                `${baseApiUrl}?user_id=${userId}&report_type=${card.reportType}`
+              );
+              const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+              // Check if report exists and has data
+              const hasReport = data.success && data.data && data.data.report_data;
+              statuses[card.reportType!] = hasReport;
+              return { reportType: card.reportType!, hasReport };
+            } catch (error) {
+              console.error(`Error checking ${card.reportType}:`, error);
+              statuses[card.reportType!] = false;
+              return { reportType: card.reportType!, hasReport: false };
+            }
+          });
+
+        await Promise.all(reportChecks);
+        setReportStatuses(statuses);
+      } catch (error) {
+        console.error("Error checking report statuses:", error);
+      } finally {
+        setLoadingStatuses(false);
       }
+    };
 
-      const result = await response.json();
+    fetchReportStatuses();
+  }, [userId]);
 
-      if (!result.success) {
-        throw new Error(result.message || "Failed to fetch astrology data");
+  // Get dynamic button text based on report status
+  const getButtonText = (card: CardData): string => {
+    if (!card.reportType || loadingStatuses) return card.buttonText;
+
+    const hasReport = reportStatuses[card.reportType];
+    if (hasReport === undefined) return card.buttonText;
+
+    return hasReport ? "View Report" : "Generate";
+  };
+
+  // Handle card click with report status awareness
+  const handleCardClick = (card: CardData) => {
+    console.log(`Clicked on ${card.title}`);
+    setActiveCard(card.id);
+
+    // For cards with report functionality
+    if (card.reportType && userId) {
+      const hasReport = reportStatuses[card.reportType];
+
+      if (hasReport) {
+        // Navigate to view report page
+        navigate('/view-report', {
+          state: {
+            reportType: card.reportType,
+            userId,
+            title: card.title
+          }
+        });
+      } else if (card.route) {
+        // Navigate to generation page
+        navigate(card.route);
       }
-
-      // Extract chart URLs
-      const { rasiChart, navamshaChart } = result.data.chartImages;
-
-      // Navigate to chart page or show modal — here we'll open in new tab for demo
-      window.open(rasiChart, "_blank");
-      window.open(navamshaChart, "_blank");
-
-      // Optional: Show success message
-      alert("Charts loaded successfully!");
-    } catch (err) {
-      console.error("Error fetching astrology data:", err);
-      alert(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
+    } else {
+      // Fallback navigation if no status available
+      if (card.route) navigate(card.route);
     }
   };
 
-  const username = localStorage.getItem('username') || 'Guest';
+  const handleRasiClick = () => {
+    navigate("/rasi-chart");
+  };
+
   return (
     <div
       style={{
         width: "100%",
-        height: "40vh", // Full viewport height
-        backgroundImage: `url(${headerBg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
         alignItems: "center",
+        justifyContent: "flex-start",
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         position: "relative",
-        overflow: "hidden",
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        backgroundColor: "#000",
+        overflowX: "hidden",
       }}
     >
-      {/* Background Overlay */}
+      {/* Background Image */}
       <div
         style={{
           position: "absolute",
@@ -100,456 +217,348 @@ export const Header: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: "rgba(0, 0, 0, 0.4)",
-          zIndex: 1,
+          height: "100%",
+          zIndex: 0,
+
+          backgroundImage: `
+      linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.5),
+        rgba(0, 0, 0, 1)
+      ),
+      url(${HeaderBg})
+    `,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          // transform: "rotate(180deg)",
         }}
       />
 
-      {/* Additional Atmospheric Gradient Overlay */}
+      {/* Top Navbar */}
       <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          width: "100%",
+          height: "52px",
+          backgroundColor: "#000",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.07)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          padding: "0 36px",
+          gap: "18px",
+          boxSizing: "border-box",
+          flexShrink: 0,
+        }}
+      >
+        <button
+          style={{
+            background: "linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)",
+            border: "none",
+            borderRadius: "20px",
+            padding: "8px 22px",
+            fontSize: "13.5px",
+            cursor: "pointer",
+            color: "white",
+            fontWeight: 600,
+            transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            boxShadow: "0 3px 8px rgba(0, 0, 0, 0.3)",
+            whiteSpace: "nowrap",
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          onClick={handleRasiClick}
+        >
+          View Rasi chart
+        </button>
+
+        <img
+          src={notification}
+          alt="Notifications"
+          style={{ width: "24px", height: "24px", cursor: "pointer", objectFit: "contain" }}
+        />
+
+        <div style={{ display: "flex", alignItems: "center", gap: "0px" }}>
+          <img
+            src={credits}
+            alt="Credits"
+            style={{
+              height: "34px",
+              width: "auto",
+              marginLeft: "-6px",
+              objectFit: "contain",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Overlay */}
+      {/* <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          background:
-            "linear-gradient(180deg, rgba(0, 26, 60, 0.3) 0%, rgba(5, 5, 5, 0.6) 100%)",
-          zIndex: 1,
-          pointerEvents: "none",
+          backgroundImage: `url('${overlay}')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          zIndex: 0,
         }}
-      />
+      /> */}
 
       {/* Main Content */}
       <div
         style={{
+          position: "relative",
+          zIndex: 5,
+          width: "100%",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "16px",
-          zIndex: 2,
-          textAlign: "center",
-          padding: "0 2rem",
-          flex: 1,
-          justifyContent: "center",
+          marginTop: "44px",
+          padding: "0 40px",
+          boxSizing: "border-box",
         }}
       >
-        {/* Title */}
         <h1
           style={{
-            fontSize: "4rem",
-            fontWeight: "700",
-            background: "linear-gradient(90deg, #AAE127 0%, #00A2FF 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-            margin: 0,
-            lineHeight: 1,
+            fontSize: "56px",
+            fontWeight: 700,
+            marginBottom: "48px",
+            textAlign: "center",
             letterSpacing: "-0.02em",
-            textShadow: "0 0 20px rgba(170, 225, 39, 0.3)",
-            fontFamily: "Poppins",
+            fontFamily: "Poppins, sans-serif",
+            lineHeight: 1.1,
+            background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(100, 200, 255) 50%, rgb(0, 162, 255) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
           }}
         >
-          Eternal
+          <span>EROS</span>{" "}
+          <span>Wellness</span>
         </h1>
 
-        {/* How it works Button */}
-        <button
-          style={{
-            backgroundColor: "#00b8f8",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "24px",
-            padding: "10px 20px",
-            fontSize: "14px",
-            fontWeight: "600",
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-            boxShadow: "0 4px 12px rgba(0, 184, 248, 0.3)",
-            outline: "none",
-            fontFamily: "Poppins",
-            width: "100%",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#0099d9";
-            e.currentTarget.style.transform = "translateY(-1px)";
-            e.currentTarget.style.boxShadow =
-              "0 6px 16px rgba(0, 184, 248, 0.4)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#00b8f8";
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow =
-              "0 4px 12px rgba(0, 184, 248, 0.3)";
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.transform = "translateY(-1px)";
-          }}
-        >
-          How it works
-        </button>
-
-        {/* Subtitle */}
+        {/* Cards Row */}
         <div
           style={{
-            fontSize: "14px",
-            color: "rgba(255, 255, 255, 0.7)",
-            fontWeight: "500",
-            margin: 0,
-            fontFamily: "Poppins",
-          }}
-        >
-          Get started with
-        </div>
-      </div>
-
-      {/* Welcome Card */}
-      <div
-        style={{
-          width: "100%",
-          // maxWidth: '1200px',
-          padding: "2rem",
-          backgroundColor: "rgba(25, 70, 160, 0.8)",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          borderRadius: "24px",
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "16px",
-          marginTop: "auto",
-          marginBottom: "2rem",
-          zIndex: 2,
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Grid Pattern Background */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background:
-              "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px)",
-            pointerEvents: "none",
-            opacity: 0.3,
-          }}
-        />
-
-        {/* Avatar */}
-        <div
-          style={{
-            width: "48px",
-            height: "48px",
-            borderRadius: "50%",
-            backgroundColor: "#00b8f8",
             display: "flex",
-            alignItems: "center",
             justifyContent: "center",
-            color: "white",
-            fontSize: "1.2rem",
-            fontWeight: "bold",
-            boxShadow: "0 4px 12px rgba(0, 184, 248, 0.3)",
+            gap: "24px",
+            flexWrap: "wrap",
+            width: "100%",
+            marginBottom: "48px",
           }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            width="20"
-            height="20"
-          >
-            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-          </svg>
+          {cardsData.map((card) => {
+            const isActive = activeCard === card.id;
+            const isHov = hoveredCard === card.id;
+            const buttonText = getButtonText(card);
+            const hasReport = card.reportType ? reportStatuses[card.reportType] : false;
+
+            return (
+              <div
+                key={card.id}
+                style={{
+                  width: "220px",
+                  position: "relative"
+                }}
+              >
+                <div
+                  onClick={() => handleCardClick(card)}
+                  onMouseEnter={() => setHoveredCard(card.id)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                  style={{
+                    width: "100%",
+                    height: "220px",
+                    borderRadius: "16px",
+                    background: hasReport && card.backgroundImage
+                      ? `background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',, url(${card.backgroundImage})`
+                      : "background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
+                    boxShadow: hasReport
+                      ? "0 0 20px rgba(170, 225, 39, 0.4)"
+                      : "0 0 25px rgba(0, 0, 0, 0.25)",
+                    transition: "all 0.28s ease",
+                    transform: isHov ? "scale(1.05)" : "scale(1)",
+                    boxSizing: "border-box",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                
+                  <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    padding: "16px",
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "#00B8F833"
+                  }}>
+                    <div
+                      style={{
+                        width: "60px",
+                        height: "60px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <img
+                        src={card.icon}
+                        alt={card.title}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                          filter: "brightness(1.2) saturate(1.3)",
+                          transition: "filter 0.3s ease"
+                        }}
+                      />
+                    </div>
+
+                   
+
+                    <div
+                      style={{
+                        // background: "rgba(0, 0, 0, 0.5)",
+                        background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
+                        borderRadius: "8px",
+                        padding: "13px 40px",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        color: "white",
+                        letterSpacing: "0.02em",
+                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                        textShadow: "0 1px 1px rgba(0, 0, 0, 0.5)",
+                      }}
+                    >
+                      {loadingStatuses ? "Loading..." : buttonText}
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    color: "#fff",
+                    fontSize: "18px",
+                    fontWeight: 600,
+                    marginBottom: "12px",
+                    textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",
+                    textAlign: "center",
+                    padding: "12px",
+                  }}
+                >
+                  {card.title}
+                </div>
+              </div>
+            );
+          })}
+
+
         </div>
 
-        {/* Text Content */}
-        <div style={{ flex: 1 }}>
-          <h2
+        {/* Search Bar */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "880px",
+            height: "140px",
+            background: "rgba(0, 0, 0, 0.35)",
+            border: "3px solid rgba(21, 167, 216, 0.3)",
+            borderRadius: "26px",
+            padding: "20px 28px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            boxShadow: "0 0 22px rgba(21, 167, 216, 0.08), inset 0 0 20px rgba(0,0,0,0.45)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
+            position: "relative",
+            boxSizing: "border-box",
+          }}
+        >
+          <textarea
+            placeholder="Ask me anything..."
             style={{
-              fontSize: "1.5rem",
-              fontWeight: "600",
-              color: "white",
-              margin: "0 0 8px 0",
-              fontFamily: "Poppins",
-            }}
-          >
-            Welcome, {username}
-          </h2>
-
-
-          <p
-            style={{
-              fontSize: "1rem",
-              color: "rgba(255, 255, 255, 0.9)",
-              margin: "0 0 12px 0",
-              lineHeight: 1.5,
-              fontFamily: "Poppins",
-            }}
-          >
-            "Your aura is a map, your spirit a compass — step into Eternal and
-            unlock the blueprint of your infinite journey."
-          </p>
-          <button
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
-              color: "#00b8f8",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              borderRadius: "20px",
-              padding: "8px 16px",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
+              width: "100%",
+              flex: 1,
+              background: "transparent",
+              border: "none",
               outline: "none",
-              fontFamily: "Poppins",
+              // color: "rgba(255,255,255,0.55)",
+              color: "#fff",
+              fontSize: "17px",
+              resize: "none",
+              fontFamily: "Poppins, sans-serif",
+              lineHeight: 1.5,
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "rgba(255, 255, 255, 0.3)";
+          />
+
+          <div
+            style={{
+              position: "absolute",
+              bottom: "18px",
+              right: "24px",
+              display: "flex",
+              gap: "10px",
+              alignItems: "center",
             }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "rgba(255, 255, 255, 0.2)";
-            }}
-            // onClick={fetchAstrologyData}
-            onClick={() => navigate('/rasi-chart')}
           >
-            View Your Rasi Chart
-          </button>
-
-          {loading && (
-            <div
+            <button
               style={{
-                textAlign: "center",
-                padding: "20px",
-                color: "#00b8f8",
-                fontSize: "1rem",
-                fontWeight: "500",
-              }}
-            >
-              🌀 Fetching your Rasi & Navamsha charts...
-            </div>
-          )}
-
-          {error && (
-            <div
-              style={{
-                backgroundColor: "#ffcccc",
-                color: "#cc0000",
-                padding: "12px",
-                borderRadius: "8px",
-                margin: "10px 0",
-                textAlign: "center",
-                fontSize: "0.9rem",
-              }}
-            >
-              ❌ {error}
-            </div>
-          )}
-
-          {chartUrls.rasi && (
-            <div
-              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                background: "transparent",
+                border: "2px solid rgba(21, 167, 216, 0.5)",
                 display: "flex",
-                gap: "20px",
-                flexWrap: "wrap",
+                alignItems: "center",
                 justifyContent: "center",
-                marginTop: "20px",
-                padding: "20px",
-                backgroundColor: "#0a0a0a", // Dark background like your screenshot
-                borderRadius: "12px",
+                cursor: "pointer",
+                transition: "border-color 0.2s",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#15A7D8")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#15A7D8")}
             >
-              {/* Rasi Chart */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "400px",
-                  backgroundColor: "#121212",
-                  border: "2px solid #00b8f8",
-                  borderRadius: "12px",
-                  padding: "16px",
-                  boxShadow: "0 4px 12px rgba(0, 184, 248, 0.1)",
-                  position: "relative",
-                }}
-              >
-                <h3
-                  style={{
-                    color: "#ffffff",
-                    fontSize: "1.2rem",
-                    marginBottom: "4px",
-                    fontWeight: "600",
-                  }}
-                >
-                  Rasi Chart
-                </h3>
-                <p
-                  style={{
-                    color: "#aaaaaa",
-                    fontSize: "0.85rem",
-                    marginBottom: "16px",
-                  }}
-                >
-                  Individual Chart
-                </p>
-                <img
-                  src={chartUrls.rasi}
-                  alt="Rasi D1 Chart"
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "500px",
-                    objectFit: "contain",
-                    borderRadius: "8px",
-                    border: "1px solid #333",
-                    backgroundColor: "#0d0d0d",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "10px",
-                    right: "10px",
-                    display: "flex",
-                    gap: "6px",
-                  }}
-                >
-                  <button
-                    style={{
-                      backgroundColor: "#222",
-                      color: "#fff",
-                      border: "1px solid #444",
-                      borderRadius: "4px",
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                    onClick={() => window.open(chartUrls.rasi, "_blank")}
-                  >
-                    ↗️
-                  </button>
-                  <button
-                    style={{
-                      backgroundColor: "#222",
-                      color: "#fff",
-                      border: "1px solid #444",
-                      borderRadius: "4px",
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                    onClick={() => {
-                      const link = document.createElement("a");
-                      link.href = chartUrls.rasi;
-                      link.download = "rasi_chart.png";
-                      link.click();
-                    }}
-                  >
-                    ⬇️
-                  </button>
-                </div>
-              </div>
+              <Paperclip color="#15A7D8" size={25} />
+            </button>
 
-              {/* Navamsha Chart */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "400px",
-                  backgroundColor: "#121212",
-                  border: "2px solid #00b8f8",
-                  borderRadius: "12px",
-                  padding: "16px",
-                  boxShadow: "0 4px 12px rgba(0, 184, 248, 0.1)",
-                  position: "relative",
-                }}
-              >
-                <h3
-                  style={{
-                    color: "#ffffff",
-                    fontSize: "1.2rem",
-                    marginBottom: "4px",
-                    fontWeight: "600",
-                  }}
-                >
-                  Navamsha Chart
-                </h3>
-                <p
-                  style={{
-                    color: "#aaaaaa",
-                    fontSize: "0.85rem",
-                    marginBottom: "16px",
-                  }}
-                >
-                  Life Partner Chart
-                </p>
-                <img
-                  src={chartUrls.navamsha}
-                  alt="Navamsha D9 Chart"
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "500px",
-                    objectFit: "contain",
-                    borderRadius: "8px",
-                    border: "1px solid #333",
-                    backgroundColor: "#0d0d0d",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "10px",
-                    right: "10px",
-                    display: "flex",
-                    gap: "6px",
-                  }}
-                >
-                  <button
-                    style={{
-                      backgroundColor: "#222",
-                      color: "#fff",
-                      border: "1px solid #444",
-                      borderRadius: "4px",
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                    onClick={() => window.open(chartUrls.navamsha, "_blank")}
-                  >
-                    ↗️
-                  </button>
-                  <button
-                    style={{
-                      backgroundColor: "#222",
-                      color: "#fff",
-                      border: "1px solid #444",
-                      borderRadius: "4px",
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                      fontSize: "0.75rem",
-                    }}
-                    onClick={() => {
-                      const link = document.createElement("a");
-                      link.href = chartUrls.navamsha;
-                      link.download = "navamsha_chart.png";
-                      link.click();
-                    }}
-                  >
-                    ⬇️
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+            <button
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                background: "#15A7D8",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "background 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#15A7D8")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "#15A7D8")}
+            >
+              <ArrowRight color="white" size={25} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

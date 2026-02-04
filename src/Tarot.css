@@ -4,6 +4,8 @@
   overflow: hidden;
   background: #222;
   box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5);
+   /* background: #050505; */
+;
 }
 
 .tarot-card img {
@@ -23,10 +25,11 @@
 }
 
 .tarot-introt {
-  background-image: url("./assets/TarotBG.jpg");
+  background-image: url("./images/final-tarrot.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  height: 50vh;
   /* height: 100vh; */
 }
 
@@ -34,7 +37,7 @@
 .tarot-input {
   background-color: #000 !important;
   color: #fff !important;
-  border: 1px solid #fff !important;
+  border: 1px solid #666666 !important;
   padding: 2%;
 }
 

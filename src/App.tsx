@@ -37,21 +37,29 @@ import FlameScore from "./FlameScore";
 
 import LongevityTool from "./longevityTool";
 import FounderMsg from "./FounderMsg";
+import WellnessScreen from "./WelnessScreen";
+import ErosHome from "./ErosHome";
+import FaceScanner from "./components/FaceScanner/FaceScanner";
+import VitaScanReport from "./VitaScanReport";
 
 const App: React.FC = () => {
   return (
     <Router>
       <div className="app overflow-fix">
         <Routes>
-          <Route path="/" element={<SplashScreen />} />
+          {/* <Route path="/" element={<SplashScreen />} /> */}
+          <Route path="/" element={<WellnessScreen />} />
           <Route path="/chat" element={<ErosChatUI />} />
           <Route path="/profile" element={<SoulProfilePage />} />
           <Route path="/aipage" element={<EternalAIPage />} />
           <Route path="/result" element={<ResultPage />} />
           <Route path="/record" element={<RecordVoice />} />
+          <Route path="/eros-home" element={<ErosHome />} />
+          {/* <Route path="/" element={<WellnessScreen />}/> */}
 
           <Route path="/ques" element={<ChatPage />} />
           <Route path="/home" element={<HomePage />} />
+          <Route path="/facescan" element={<FaceScanner />} />
           {/* <Route path="/card" element={<TarrotCard />} /> */}
           <Route path="/card" element={<TarotFlow />} />
           <Route path="/palmcard" element={<PalmFlow />} />
@@ -74,20 +82,20 @@ const App: React.FC = () => {
           <Route path="/face-upload" element={<FaceUploadPage />} />
           <Route path="/face-report" element={<FaceReadingReportPage />} />
           <Route path="/rasi-chart" element={<RasiChartPage />} />
-          <Route path="/star-map" element={<StarMap />}/>
-          <Route path="/kosha-map" element={<KoshaMap />}/>
-          <Route path="/aura-profile" element={<AuraProfile />}/>
-          <Route path="/flame-score" element={<FlameScore />}/>
-          <Route path="/founder" element={<FounderMsg />}/>
-        
+          <Route path="/star-map" element={<StarMap />} />
+          <Route path="/kosha-map" element={<KoshaMap />} />
+          <Route path="/aura-profile" element={<AuraProfile />} />
+          <Route path="/flame-score" element={<FlameScore />} />
+          <Route path="/founder" element={<FounderMsg />} />
+          <Route path="/vita-scan" element={<VitaScanReport />} />
 
           <Route path="/harmony" element={<HarmonyIndexPage />} />
 
 
-          <Route path='/vibrational-frequency' element={<VibrationTool/>}/>
-          <Route path='/Healing' element={<HealingModal/>}/>
-          <Route path='/ai-chat' element={<AiChat/>}/>
-          <Route path="/age-tracker" element={<AgeTrack/>} />
+          <Route path='/vibrational-frequency' element={<VibrationTool />} />
+          <Route path='/Healing' element={<HealingModal />} />
+          <Route path='/ai-chat' element={<AiChat />} />
+          <Route path="/age-tracker" element={<AgeTrack />} />
 
 
           <Route path="/harmony" element={<HarmonyIndexPage />} />

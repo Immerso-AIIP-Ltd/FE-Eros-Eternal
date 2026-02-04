@@ -16,4 +16,16 @@ export default defineConfig({
   resolve: {
     dedupe: ['@mui/material', '@mui/icons-material'],
   },
+  assetsInclude: ['**/*.tflite', '**/*.gz'],
+  server: {
+    host: true,
+  },
+  worker: {
+    format: 'es',
+  },
+  preview: {
+    allowedHosts: [
+      ".shakticloud.ai"
+    ]
+  }
 })

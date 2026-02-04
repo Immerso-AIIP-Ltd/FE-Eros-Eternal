@@ -3,6 +3,7 @@ import { Button } from "react-bootstrap";
 import cardBg from "../../assets/cardbg.png";
 import card2 from "../../assets/image.png";
 import Stars from "../stars";
+import { useNavigate } from "react-router-dom";
 // import card2 from "../../assets/Tarot1.jpg";
 
 const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
@@ -14,11 +15,12 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
   const [readingPhase, setReadingPhase] = useState("selecting");
   const [tornadoPhase, setTornadoPhase] = useState(false);
   const [showDescriptions, setShowDescriptions] = useState(false);
-  // const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+  // const API_URL = "http://164.52.205.108:8500";
   // Read from localStorage
   // const userId = localStorage.getItem("user_id");
   // const username = localStorage.getItem("username");
   // const dob = localStorage.getItem("date_of_birth");
+  const navigate = useNavigate();
 
   // Custom styles for the component
   const styles = {
@@ -179,6 +181,11 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
   const totalCards = 25;
   const cards = Array.from({ length: totalCards }, (_, i) => i);
 
+  // function handleMagicButtonClick () {
+  //   navigate("ai-chat")
+
+  // }
+
   const handleCardClick = (cardIndex) => {
     if (tornadoPhase) return;
 
@@ -237,7 +244,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
         const randomRotation = Math.random() * 720;
         return {
           transform: `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg) scale(0.7)`,
-          opacity: 0.7,
+          opacity: 0.5,
           zIndex: 20,
           transition: "all 0.3s ease-out",
         };
@@ -399,7 +406,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
           border: "none",
           zIndex: 100,
         }}
-        onClick={() => onStepChange(2)}
+        onClick={() => navigate("/result")}
       >
         <i className="bi bi-arrow-left m-3"></i> Back
       </button>
@@ -593,7 +600,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
               </div>
               <div
                 className="text-white"
-                style={{ opacity: 0.7, fontSize: "0.875rem" }}
+                style={{ opacity: 0.5, fontSize: "0.875rem" }}
               >
                 The cards scatter and realign with cosmic forces...
               </div>
@@ -624,7 +631,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
             <div className="mt-4">
               <Button
                 variant="outline-warning"
-                onClick={()=>{
+                onClick={() => {
                   resetWithCardScatter();
                   // onShuffle();
                 }}
@@ -910,6 +917,28 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
           </div>
         )}
 
+      {selectedCards.length === 3 && <Button
+        variant="link"
+        className="border-0 p-0 me-2 d-flex align-items-center justify-content-center"
+        style={{
+          width: "50px",
+          height: "50px",
+          borderRadius: "50%",
+          backgroundImage:
+            "linear-gradient(90deg, rgb(0, 198, 255), rgb(0, 114, 255))",
+          color: "white",
+          fontSize: "1.2rem",
+          position: "relative",
+          top: "90%",
+          left: "90%",
+          zIndex: 100,
+        }}
+        // onClick={handleMagicButtonClick}
+        onClick={() => navigate("/ai-chat")}
+        data-tooltip="true"
+      >
+        <i className="bi bi-stars"></i>
+      </Button>}
       {/* Cards container */}
       <div
         style={{

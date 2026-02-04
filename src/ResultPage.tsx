@@ -17,7 +17,7 @@ const ResultPage: React.FC = () => {
   return (
     <div className="d-flex flex-column flex-lg-row vh-100 vw-100 mainParent" style={{ backgroundColor: '#050505', color: 'white' }}>
       {/* Sidebar - Always visible on desktop/tablet, mobile toggles */}
-      <div
+      {/* <div
         className="flex-shrink-0 d-none d-lg-block"
         style={{
           width: '256px',
@@ -27,7 +27,7 @@ const ResultPage: React.FC = () => {
         }}
       >
         <Sidebar />
-      </div>
+      </div> */}
 
       {/* Main Content Area */}
       <main
@@ -69,7 +69,7 @@ const ResultPage: React.FC = () => {
 
         {/* Content Container */}
         <div
-          className="flex-grow-1 py-3 px-3 px-lg-4"
+          className="flex-grow-1 py-3"
           style={{
             maxWidth: '100%',
             paddingBottom: '2rem',
@@ -79,13 +79,15 @@ const ResultPage: React.FC = () => {
         >
           <Header />
           {/* <DateSelector /> */}
-          <StatsCards />
+          {/* <div className="flex-grow-1 py-3 px-3 px-lg-4"> */}
+          {/* <StatsCards /> */}
           {/* <PanchangComponent /> */}
           {/* <ReadingsSection /> */}
           <LuckSection />
           <ExploreSection />
           {/* <DailyReportsSection /> */}
           {/* <PopularSection /> */}
+          {/* </div> */}
         </div>
       </main>
     </div>

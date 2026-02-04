@@ -2,9 +2,18 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Card, Button, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import Stars from "./components/stars";
 
 const PalmUploadPage: React.FC = () => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // 👈 Store File, not just metadata
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [stars] = useState(() =>
+    Array.from({ length: 50 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      opacity: 0.3 + Math.random() * 0.7,
+      size: Math.random() * 2 + 1,
+    }))
+  );
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -65,62 +74,90 @@ const PalmUploadPage: React.FC = () => {
   };
 
   const handleContinue = async () => {
-    if (!selectedFile) {
-      setError('Please select a file first.');
-      return;
-    }
+  if (!selectedFile) {
+    setError('Please select a file first.');
+    return;
+  }
 
-    setIsLoading(true);
-    setError(null);
+  setIsLoading(true);
+  setError(null);
 
-    try {
-      const formData = new FormData();
-      formData.append("user_id", "1eb41064-025e-434d-aa1d-c9738a37ce1d");
-      formData.append("image_data", selectedFile); // 👈 Use selectedFile directly
+  try {
+    const userId = localStorage.getItem('user_id');
+    const formData = new FormData();
+    formData.append("user_id", userId || "");
+    formData.append("image_data", selectedFile);
 
-      const response = await fetch(
-        'http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai/api/v1/analysis/palm',
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const result = await response.json();
-
-      if (result.success) {
-        navigate('/palm-report', { state: result });
-      } else {
-        setError(result.message || 'Failed to generate palm reading.');
+    const response = await fetch(
+      'http://164.52.205.108:8500/api/v1/analysis/palm',
+      {
+        method: 'POST',
+        body: formData,
       }
-    } catch (err) {
-      console.error('Upload error:', err);
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
+    );
+
+    // Try to read JSON response even if status != 200
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      // Use backend message if available
+      const errMsg = data.message || `HTTP ${response.status}`;
+      throw new Error(errMsg);
     }
-  };
+
+    if (data.success) {
+      navigate('/palm-report', { state: data });
+    } else {
+      setError(data.message || 'Failed to generate palm reading.');
+    }
+
+  } catch (err) {
+    console.error('Upload error:', err.message);
+    // Show server-provided message
+    setError(err.message || 'Failed to generate palm reading.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="vh-100 vw-100 d-flex flex-column p-4" style={{ backgroundColor: '#000' }}>
+
+      <Stars />
+      <div className="absolute inset-0 overflow-hidden ">
+        {stars.map((star, i) => (
+          <div
+            key={i}
+            className="absolute bg-white rounded-full animate-pulse"
+            style={{
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              opacity: star.opacity,
+              top: `${star.y}%`,
+              left: `${star.x}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+      </div>
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button
-          className="btn btn-link text-white"
+          className="btn text-white"
           onClick={() => window.history.back()}
-          style={{ fontSize: '1rem' }}
+          style={{ fontSize: '1rem', zIndex: 2 }}
         >
           ← Back
         </button>
-        <button
-          className="btn btn-link text-white"
+        {/* <button
+          className="btn  text-white"
           onClick={() => window.location.reload()}
           style={{ fontSize: '1.2rem' }}
         >
           ↻
-        </button>
+        </button> */}
       </div>
 
       {/* Title */}
@@ -132,7 +169,7 @@ const PalmUploadPage: React.FC = () => {
       </div>
 
       {/* Upload Card */}
-      <div className="d-flex justify-content-center w-100">
+      <div className="d-flex align-items-center justify-content-center w-100">
         <Card
           className="p-4"
           style={{
@@ -148,11 +185,11 @@ const PalmUploadPage: React.FC = () => {
 
             {/* Drag & Drop Area */}
             <div
-              className="border rounded p-4 text-center"
+              className="rounded p-4 text-center"
               style={{
-                borderStyle: 'dashed',
                 borderColor: '#00B8F8',
                 cursor: 'pointer',
+                border: '1px dashed #00B8F8'
               }}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
@@ -165,7 +202,7 @@ const PalmUploadPage: React.FC = () => {
               <p className="mb-1 text-white">or</p>
               <span
                 className="text-info fw-bold"
-                style={{ textDecoration: 'underline', cursor: 'pointer' }}
+                style={{ textDecoration: 'none', cursor: 'pointer' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleBrowseClick();

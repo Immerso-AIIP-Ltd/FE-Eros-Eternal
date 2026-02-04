@@ -3,6 +3,10 @@ import React, { useState, useEffect } from "react";
 import planetIcon from "../planet.png";
 import Month from "../Month.png";
 import number from "../number.png";
+import moment from "moment";
+import StartlightBg from "../assets/discover/planetary.png";
+import SpiritualBg from "../assets/discover/personalMonth.jpg";
+import LuckyBg from "../assets/discover/luckyNumber.jpg";
 
 interface LuckyNumbers {
   destiny_number: number;
@@ -27,16 +31,14 @@ interface PersonalMonthResponse {
   status: number;
 }
 
-const API_URL = "http://eros-eternal.runai-project-immerso-innnovation-venture-pvt.inferencing.shakticloud.ai";
+const API_URL = "http://164.52.205.108:8500";
+// const API_URL = "http://192.168.18.5:7001";
 
 export const LuckSection: React.FC = () => {
   const [flippedIndexes, setFlippedIndexes] = useState<Set<number>>(new Set());
-  const [luckyNumbers, setLuckyNumbers] = useState<LuckyNumbersResponse | null>(
-    null
-  );
+  const [luckyNumbers, setLuckyNumbers] = useState<LuckyNumbers | null>(null);
   const [horoscope, setHoroscope] = useState<HoroscopeResponse | null>(null);
-  const [personalMonth, setPersonalMonth] =
-    useState<PersonalMonthResponse | null>(null);
+  const [personalMonth, setPersonalMonth] = useState<PersonalMonthResponse | null>(null);
   const [loading, setLoading] = useState<Record<number, boolean>>({});
   const [error, setError] = useState<Record<number, string>>({});
 
@@ -74,7 +76,7 @@ export const LuckSection: React.FC = () => {
         formData.append("user_id", userId);
         formData.append("user_name", username);
         formData.append("dob", dob);
-            if (dob) {
+        if (dob) {
           // Split dd-mm-yyyy into parts
           const [day, month, year] = dob.split("-");
 
@@ -84,19 +86,15 @@ export const LuckSection: React.FC = () => {
             "0"
           )}-${day.padStart(2, "0")}`;
 
-          formData.append("dob", formattedDob); // Now sends "1990-08-15"
+          formData.append("dob", moment(formattedDob).format("YYYY-MM-DD")); // Now sends "1990-08-15"
         }
         const response = await fetch(
           `${API_URL}/api/v1/numerology/planetary_horoscope`,
           {
             method: "POST",
-             body: formData,
-            // headers: { "Content-Type": "application/json" },
-            // body: JSON.stringify({ user_id: userId, user_name: username, dob }),
+            body: formData,
           }
         );
-
-    
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -130,35 +128,30 @@ export const LuckSection: React.FC = () => {
       setErrorState(index, "");
 
       try {
+        const formData = new FormData();
+        formData.append("user_id", userId);
+        formData.append("user_name", username);
+        formData.append("dob", dob);
 
-         const formData = new FormData();
-          formData.append("user_id", userId);
-          formData.append("user_name", username);
-          formData.append("dob", dob);
+        if (dob) {
+          // Split dd-mm-yyyy into parts
+          const [day, month, year] = dob.split("-");
 
-              if (dob) {
-            // Split dd-mm-yyyy into parts
-            const [day, month, year] = dob.split("-");
+          // Reformat to yyyy-mm-dd (with zero-padding for safety)
+          const formattedDob = `${year}-${month.padStart(
+            2,
+            "0"
+          )}-${day.padStart(2, "0")}`;
 
-            // Reformat to yyyy-mm-dd (with zero-padding for safety)
-            const formattedDob = `${year}-${month.padStart(
-              2,
-              "0"
-            )}-${day.padStart(2, "0")}`;
-
-            formData.append("dob", formattedDob); // Now sends "1990-08-15"
-          }
+          formData.append("dob", moment(formattedDob).format("YYYY-MM-DD")); // Now sends "1990-08-15"
+        }
         const response = await fetch(
           `${API_URL}/api/v1/numerology/personal_month`,
           {
             method: "POST",
-            body:formData
-            // headers: { "Content-Type": "application/json" },
-            // body: JSON.stringify({ user_id: userId, user_name: username, dob }),
+            body: formData
           }
         );
-
-      
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -180,93 +173,56 @@ export const LuckSection: React.FC = () => {
   }, [hasUserData, userId, username, dob]);
 
   // 🔁 Fetch Lucky Numbers (index 2)
-  // useEffect(() => {
-  //   const fetchLuckyNumbers = async () => {
-  //     const index = 2;
-  //     if (!hasUserData) {
-  //       setErrorState(index, "User data missing.");
-  //       return;
-  //     }
-
-  //     setLoadingState(index, true);
-  //     setErrorState(index, "");
-
-  //     try {
-  //       const response = await fetch(`${API_URL}/api/v1/numerology/lucky_numbers`, {
-  //         method: 'POST',
-  //         headers: { 'Content-Type': 'application/json' },
-  //         body: JSON.stringify({ user_id: userId, user_name: username, dob }),
-  //       });
-
-  //       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-  //       const data = await response.json();
-  //       if (data.success && data.data?.lucky_numbers) {
-  //         setLuckyNumbers(data.data.lucky_numbers);
-  //       } else {
-  //         setErrorState(index, "No lucky numbers found.");
-  //       }
-  //     } catch (err) {
-  //       console.error("Lucky Numbers Error:", err);
-  //       setErrorState(index, "Failed to load lucky numbers.");
-  //     } finally {
-  //       setLoadingState(index, false);
-  //     }
-  //   };
-
-  //   fetchLuckyNumbers();
-  // }, [hasUserData, userId, username, dob]);
-
-useEffect(() => {
-  const fetchLuckyNumbers = async () => {
-    const index = 2;
-    if (!hasUserData) {
-      setErrorState(index, "User data missing.");
-      return;
-    }
-
-    setLoadingState(index, true);
-    setErrorState(index, "");
-
-    try {
-      const formData = new FormData();
-      formData.append("user_id", userId);
-      formData.append("user_name", username);
-      
-      if (dob) {
-        const [day, month, year] = dob.split("-");
-        const formattedDob = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-        formData.append("dob", formattedDob);
+  useEffect(() => {
+    const fetchLuckyNumbers = async () => {
+      const index = 2;
+      if (!hasUserData) {
+        setErrorState(index, "User data missing.");
+        return;
       }
 
-      const response = await fetch(
-        `${API_URL}/api/v1/numerology/lucky_numbers`,
-        {
-          method: "POST",
-          body: formData,
+      setLoadingState(index, true);
+      setErrorState(index, "");
+
+      try {
+        const formData = new FormData();
+        formData.append("user_id", userId);
+        formData.append("user_name", username);
+
+        if (dob) {
+          const [day, month, year] = dob.split("-");
+          const formattedDob = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+          formData.append("dob", moment(formattedDob).format("YYYY-MM-DD"));
         }
-      );
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const response = await fetch(
+          `${API_URL}/api/v1/numerology/lucky_numbers`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
 
-      const result = await response.json(); // renamed to `result` to avoid confusion
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-      // ✅ FIX: result.data is the LuckyNumbers object
-      if (result.success && result.data) {
-        setLuckyNumbers(result.data); // ← directly assign result.data
-      } else {
-        setErrorState(index, "No lucky numbers found.");
+        const result = await response.json();
+
+        // ✅ FIX: result.data is the LuckyNumbers object
+        if (result.success && result.data) {
+          setLuckyNumbers(result.data);
+        } else {
+          setErrorState(index, "No lucky numbers found.");
+        }
+      } catch (err) {
+        console.error("Lucky Numbers Error:", err);
+        setErrorState(index, "Failed to load lucky numbers.");
+      } finally {
+        setLoadingState(index, false);
       }
-    } catch (err) {
-      console.error("Lucky Numbers Error:", err);
-      setErrorState(index, "Failed to load lucky numbers.");
-    } finally {
-      setLoadingState(index, false);
-    }
-  };
+    };
 
-  fetchLuckyNumbers();
-}, [hasUserData, userId, username, dob]);
+    fetchLuckyNumbers();
+  }, [hasUserData, userId, username, dob]);
 
   // 🔁 Toggle flip on card click
   const toggleFlip = (index: number) => {
@@ -313,7 +269,7 @@ useEffect(() => {
             <strong>Zodiac:</strong> {horoscope?.zodiac_sign}
           </p>
           <p style={backQuote}>
-            "{horoscope?.horoscope?.substring(0, 160)}..."
+            "{horoscope?.horoscope}"
           </p>
         </>
       )}
@@ -336,9 +292,6 @@ useEffect(() => {
             <strong>Theme:</strong> {personalMonth.meaning}
           </p>
           <p style={backQuote}>"{personalMonth.detailed_meaning}"</p>
-          {/* <p style={smallText}>
-            <strong>Target:</strong> {personalMonth.target_date}
-          </p> */}
         </>
       ) : null}
     </div>
@@ -368,7 +321,6 @@ useEffect(() => {
           <p style={backText}>
             <strong>Soul:</strong> {luckyNumbers.soul_number}
           </p>
-          {/* <p style={backText}><strong>Inner Dream:</strong> {luckyNumbers.inner_dream_number}</p> */}
         </>
       ) : (
         <p style={errorStyle}>Unable to load data.</p>
@@ -392,20 +344,22 @@ useEffect(() => {
   const backTitleStyle: React.CSSProperties = {
     margin: "0 0 12px 0",
     color: "#fff",
-    fontSize: "16px",
+    fontSize: "18px",
+    fontWeight: '700'
   };
 
   const backText: React.CSSProperties = {
     margin: 0,
-    color: "#ccc",
-    fontSize: "14px",
+    color: "#fff",
+    fontSize: "16px",
   };
 
   const backQuote: React.CSSProperties = {
     margin: "6px 0 0 0",
-    fontStyle: "italic",
-    color: "#aaa",
-    fontSize: "13.5px",
+    color: "#fff",
+    fontSize: "14px",
+    textAlign: 'justify',
+    marginTop: '20px'
   };
 
   const smallText: React.CSSProperties = {
@@ -415,7 +369,7 @@ useEffect(() => {
   };
 
   const loadingStyle: React.CSSProperties = {
-    color: "#aaa",
+    color: "#fff",
     margin: 0,
   };
 
@@ -428,25 +382,30 @@ useEffect(() => {
   return (
     <div
       style={{
-        padding: "20px 0",
+        padding: "40px 0",
         backgroundColor: "#000",
-        // fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        // paddingRight: "100px",
+        // paddingLeft: "100px"
       }}
     >
       {/* Header */}
-      <div style={{ marginBottom: "20px" }}>
-        <h2
+      <div style={{ 
+        marginBottom: "32px",
+        paddingLeft: "40px",
+        paddingRight: "40px"
+      }}>
+        <h1
           style={{
-            fontSize: "18px",
-            fontWeight: "600",
+            fontSize: "28px",
+            fontWeight: "700",
             color: "#fff",
             margin: 0,
             letterSpacing: "-0.02em",
-            fontFamily: "Poppins",
+            fontFamily: "Poppins, sans-serif",
           }}
         >
           Discover your luck
-        </h2>
+        </h1>
       </div>
 
       {/* Cards Container */}
@@ -454,36 +413,35 @@ useEffect(() => {
         className="luck-cards-container"
         style={{
           display: "flex",
-          gap: "12px",
+          gap: "24px",
           overflowX: "auto",
-          paddingBottom: "8px",
-          paddingLeft: "2px",
-          paddingRight: "2px",
-          scrollbarWidth: "thin",
-          msOverflowStyle: "none",
+          padding: "0 40px 40px",
+          scrollbarWidth: "none",
+          // maxWidth: "1400px",
+          margin: "0 auto"
         }}
+        css={`
+    &::-webkit-scrollbar { display: none; }
+    -ms-overflow-style: none;
+  `}
       >
         {luckItems.map((item, index) => (
           <div
             key={index}
-            className={`flip-card ${
-              flippedIndexes.has(index) ? "flipped" : ""
-            }`}
+            className={`flip-card ${flippedIndexes.has(index) ? "flipped" : ""}`}
             onClick={() => toggleFlip(index)}
             style={{
-              width: "412px",
-              height: "480px",
-              borderRadius: "12px",
-              border: "1px solid #3a3d40",
-              backgroundColor: "#2a2d30",
+              minWidth: "320px",
+              width: "320px",
+              height: "420px",
+              borderRadius: "16px",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              backgroundColor: "rgba(20, 20, 30, 0.6)",
+              backdropFilter: "blur(10px)",
               position: "relative",
               cursor: "pointer",
-              transition: "all 0.2s ease",
               overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              fontFamily: "Inter",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = "#353a3e";
@@ -518,40 +476,48 @@ useEffect(() => {
                   width: "100%",
                   height: "100%",
                   backfaceVisibility: "hidden",
+                  backgroundImage:
+                    index === 0 ? `url('${StartlightBg}')` :
+                      index === 1 ? `url('${SpiritualBg}')` :
+                        `url('${LuckyBg}')`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  padding: "24px",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
-                  padding: "16px",
-                  boxSizing: "border-box",
                 }}
               >
-                {/* Title */}
-                <div>
-                  <h3 style={cardTitleStyle}>{item.title}</h3>
-                  <p style={cardSubtitleStyle}>{item.subtitle}</p>
-                </div>
-
-                {/* Center Icon */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <img
-                    src={item.icon}
-                    alt={item.title}
-                    style={{
-                      width: "223px",
-                      height: "223px",
-                      objectFit: "contain",
-                    }}
-                  />
+                {/* Card Content */}
+                <div style={{ 
+                  position: "absolute", 
+                  bottom: "24px", 
+                  left: "24px", 
+                  right: "24px",
+                  // background: "rgba(0, 0, 0, 0.4)",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  backdropFilter: "blur(4px)"
+                }}>
+                  <h3 style={{
+                    fontSize: "22px",
+                    fontWeight: "600",
+                    color: "#FFFFFF",
+                    margin: 0,
+                    fontFamily: "'Poppins', sans-serif",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.5)"
+                  }}>
+                    {item.title}
+                  </h3>
+                  <p style={{
+                    fontSize: "16px",
+                    margin: "8px 0 0",
+                    fontWeight: "400",
+                    color: "rgba(255,255,255,0.85)",
+                    textShadow: "0 1px 2px rgba(0,0,0,0.5)"
+                  }}>
+                    {item.subtitle}
+                  </p>
                 </div>
               </div>
 
@@ -564,12 +530,12 @@ useEffect(() => {
                   height: "100%",
                   backfaceVisibility: "hidden",
                   transform: "rotateY(180deg)",
-                  backgroundColor: "#1a1a1a",
+                  background: "linear-gradient(135deg, #1E3A8A 0%, #10B981 100%)",
                   borderRadius: "12px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  padding: "16px",
+                  padding: "32px 24px",
                   boxSizing: "border-box",
                 }}
               >
@@ -608,34 +574,39 @@ useEffect(() => {
 
         @media (min-width: 768px) and (max-width: 1023px) {
           .flip-card {
-            width: 270px;
-            height: 175px;
+            width: 280px;
+            height: 320px;
+          }
+          .flip-card h3 {
+            font-size: 18px;
           }
         }
 
         @media (min-width: 1024px) {
           .luck-cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 16px;
-            overflow-x: hidden;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
             padding: 0;
+            overflow: visible;
           }
           .flip-card {
+            min-width: unset !important;
             width: 100% !important;
-            height: 180px;
-            min-width: 0;
           }
         }
 
         @media (max-width: 767.98px) {
           .flip-card {
-            min-width: 260px;
-            width: 280px;
-            height: 178px;
+            min-width: 300px;
+            width: 300px;
+            height: 360px;
           }
           .flip-card h3 {
-            font-size: 15px;
+            font-size: 18px;
+          }
+          .flip-card p {
+            font-size: 14px;
           }
         }
       `}</style>
