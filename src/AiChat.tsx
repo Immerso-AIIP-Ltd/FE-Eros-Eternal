@@ -10,8 +10,8 @@ import sparkle from "./sparkle.png";
 import Stars from "./components/stars";
 import VoiceMessage from "./VoiceMessage";
 import MicVisualizer from "./MicVisualizer";
-import { useNavigate } from "react-router-dom";
 import eroslogo from "../src/assets/eros-logo.png"
+import { useNavigate, useLocation } from "react-router-dom";
 
 const AiChat: React.FC = () => {
     const [inputValue, setInputValue] = useState("");
@@ -36,6 +36,7 @@ const AiChat: React.FC = () => {
     const [sessions, setSessions] = useState<any[]>([]);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
+    const location = useLocation();
 
     interface Message {
         sender: "user" | "ai";
@@ -199,8 +200,25 @@ const AiChat: React.FC = () => {
         if (!isInitialized && messages.length === 0) {
             initializeChat();
             fetchSessions();
+
+            if (location.state?.initialMessage) {
+                setInputValue(location.state.initialMessage);
+            }
         }
-    }, [isInitialized, messages.length])
+    }, [isInitialized, messages.length]);
+
+    useEffect(() => {
+        if (isInitialized && messages.length === 1 && location.state?.initialMessage) {
+            const hasUserMessage = messages.some(m => m.sender === 'user');
+            if (!hasUserMessage && inputValue) {
+                const timer = setTimeout(() => {
+                    sendMessage();
+                    location.state.initialMessage = null;
+                }, 800);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [isInitialized, messages.length, inputValue, location.state]);
 
     const initializeChat = async () => {
         if (isInitialized) return;
@@ -719,6 +737,7 @@ const AiChat: React.FC = () => {
                             <Menu size={20} />
                         </button>
                         {/* <h3 className="text-xl font-semibold" style={{ color: "#00B8F8" }}>Wellness Chat Bot</h3> */}
+
                     </div>
                     <div className="flex items-center gap-2">
                         <div

@@ -75,7 +75,7 @@ export const LuckSection: React.FC = () => {
         const formData = new FormData();
         formData.append("user_id", userId);
         formData.append("user_name", username);
-        formData.append("dob", dob);
+        // formData.append("dob", dob);
         if (dob) {
           // Split dd-mm-yyyy into parts
           const [day, month, year] = dob.split("-");
@@ -131,7 +131,7 @@ export const LuckSection: React.FC = () => {
         const formData = new FormData();
         formData.append("user_id", userId);
         formData.append("user_name", username);
-        formData.append("dob", dob);
+        // formData.append("dob", dob);
 
         if (dob) {
           // Split dd-mm-yyyy into parts
