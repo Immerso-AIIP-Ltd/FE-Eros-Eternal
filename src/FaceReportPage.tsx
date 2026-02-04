@@ -175,12 +175,6 @@ const FaceReportPage: React.FC = () => {
     if (storedUsername) {
       setUsername(storedUsername);
     }
-
-    // Get username from localStorage
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
   }, [location.state]);
 
   // Use AI report insights with fallback

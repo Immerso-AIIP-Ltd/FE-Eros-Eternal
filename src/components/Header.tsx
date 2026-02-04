@@ -39,7 +39,6 @@ export const Header: React.FC = () => {
   const [loadingStatuses, setLoadingStatuses] = useState(true);
   const [chatInput, setChatInput] = useState("");
 
-
   // Get user ID from localStorage
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
   const baseApiUrl = "http://164.52.205.108:8500/api/v1/reports/individual_report/";
@@ -169,7 +168,6 @@ export const Header: React.FC = () => {
   const handleCardClick = (card: CardData) => {
     console.log(`Clicked on ${card.title}`);
     setActiveCard(card.id);
-
 
     // For cards with report functionality
     if (card.reportType && userId) {
@@ -310,18 +308,17 @@ export const Header: React.FC = () => {
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           zIndex: 0,
-
         }}
       /> */}
 
-      {/* Top Navbar */}
+      {/* Main Content */}
       <div
         style={{
           position: "relative",
           zIndex: 5,
           width: "100%",
-
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           marginTop: "44px",
           padding: "0 40px",
@@ -356,11 +353,7 @@ export const Header: React.FC = () => {
             flexWrap: "wrap",
             width: "100%",
             marginBottom: "48px",
-
           }}
-          onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-          onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
-          onClick={handleRasiClick}
         >
           {cardsData.map((card) => {
             const isActive = activeCard === card.id;
@@ -427,7 +420,7 @@ export const Header: React.FC = () => {
                         alignItems: "center",
                         justifyContent: "center",
                         marginBottom: "24px",
-                        
+
                       }}
                     >
                       <img
@@ -446,19 +439,19 @@ export const Header: React.FC = () => {
 
 
                     <div
-                     style={{
-          background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
-          borderRadius: "12px",
-          padding: "14px 48px",
-          fontSize: "14px",
-          fontWeight: 700,
-          color: "white",
-          letterSpacing: "0.5px",
-          cursor: "pointer",
-          transition: 'all 0.3s ease',
-        
-          textShadow: "0 1px 2px rgba(0,0,0,0.4)",
-        }}
+                      style={{
+                        background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
+                        borderRadius: "12px",
+                        padding: "14px 48px",
+                        fontSize: "14px",
+                        fontWeight: 700,
+                        color: "white",
+                        letterSpacing: "0.5px",
+                        cursor: "pointer",
+                        transition: 'all 0.3s ease',
+
+                        textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+                      }}
                     >
                       {loadingStatuses ? "Loading..." : buttonText}
                     </div>
