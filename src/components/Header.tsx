@@ -386,7 +386,8 @@ export const Header: React.FC = () => {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center",
+                    // justifyContent: "center",
+                    justifyContent: "space-between",
                     cursor: "pointer",
                     backdropFilter: "blur(10px)",
                     WebkitBackdropFilter: "blur(10px)",
@@ -419,7 +420,8 @@ export const Header: React.FC = () => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        marginBottom: "16px",
+                        marginBottom: "24px",
+                        
                       }}
                     >
                       <img
@@ -438,18 +440,19 @@ export const Header: React.FC = () => {
 
 
                     <div
-                      style={{
-                        // background: "rgba(0, 0, 0, 0.5)",
-                        background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
-                        borderRadius: "8px",
-                        padding: "13px 40px",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        color: "white",
-                        letterSpacing: "0.02em",
-                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                        textShadow: "0 1px 1px rgba(0, 0, 0, 0.5)",
-                      }}
+                     style={{
+          background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
+          borderRadius: "12px",
+          padding: "14px 48px",
+          fontSize: "14px",
+          fontWeight: 700,
+          color: "white",
+          letterSpacing: "0.5px",
+          cursor: "pointer",
+          transition: 'all 0.3s ease',
+        
+          textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+        }}
                     >
                       {loadingStatuses ? "Loading..." : buttonText}
                     </div>
@@ -532,7 +535,7 @@ export const Header: React.FC = () => {
               alignItems: "center",
             }}
           >
-            <button
+            {/* <button
               style={{
                 width: "56px",
                 height: "56px",
@@ -549,7 +552,7 @@ export const Header: React.FC = () => {
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#15A7D8")}
             >
               <Paperclip color="#15A7D8" size={25} />
-            </button>
+            </button> */}
 
             <button
               style={{

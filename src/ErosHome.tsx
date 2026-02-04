@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import videoBackground from "../src/assets/webm/eroswellness.mp4";
 import notification from "../src/assets/notification.png";
 import credits from "../src/assets/credits.png";
+import eroslogo from "../src/assets/eros-logo.png"
 
 
 const ErosHome = () => {
@@ -11,7 +12,7 @@ const ErosHome = () => {
   const handleClick = () => {
     navigate("/facescan");
   };
-    const handleRasiClick = () => {
+  const handleRasiClick = () => {
     navigate("/rasi-chart");
   };
 
@@ -23,9 +24,9 @@ const ErosHome = () => {
   };
 
   return (
-    <div style={{ position: 'relative', width: '100vw',height:'100vh' }}>
+    <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
       {/* Main Hero Section */}
-      <div 
+      <div
         style={{
           position: 'relative',
           height: '100vh',
@@ -62,7 +63,7 @@ const ErosHome = () => {
         </video>
 
         {/* Dark Overlay */}
-        <div 
+        <div
           style={{
             position: 'absolute',
             top: 0,
@@ -75,73 +76,73 @@ const ErosHome = () => {
         />
 
         {/* Top Navigation Bar */}
-<div
-  style={{
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    background: 'linear-gradient(to bottom, #000 95%, transparent 95%)', // Creates the "design line" effect
-    backdropFilter: 'blur(4px)', // Subtle frosted glass effect (optional but modern)
-    WebkitBackdropFilter: 'blur(4px)', // Safari support
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    padding: '20px 40px',
-    gap: '20px',
-    zIndex: 3,
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)', // Secondary subtle line
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.3)', // Depth enhancement
-  }}
->
-  <button
-    style={{
-      background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
-      border: 'none',
-      borderRadius: '20px',
-      padding: '10px 24px',
-      fontSize: '14px',
-      cursor: 'pointer',
-      color: 'white',
-      fontWeight: '600',
-      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.25)',
-      minWidth: '140px',
-    }}
-    onClick={handleRasiClick}
-    onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-    onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-    aria-label="View Rasi Chart"
-  >
-    View Rasi Chart
-  </button>
-  
-  <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-    {/* Notification Button */}
-   
-      <img 
-        src={notification} 
-        alt="" 
-        style={{ width: '28px', height: '28px', display: 'block' }} 
-      />
- 
-    
-    {/* Credits Display */}
-   
-      <img 
-        src={credits} 
-        alt="Credits icon" 
-        style={{ width: '100%', height: '38px' }} 
-      />
-     
- 
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            background: 'linear-gradient(to bottom, #000 95%, transparent 95%)', // Creates the "design line" effect
+            backdropFilter: 'blur(4px)', // Subtle frosted glass effect (optional but modern)
+            WebkitBackdropFilter: 'blur(4px)', // Safari support
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            padding: '20px 40px',
+            gap: '20px',
+            zIndex: 3,
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)', // Secondary subtle line
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.3)', // Depth enhancement
+          }}
+        >
+          <button
+            style={{
+              background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
+              border: 'none',
+              borderRadius: '20px',
+              padding: '10px 24px',
+              fontSize: '14px',
+              cursor: 'pointer',
+              color: 'white',
+              fontWeight: '600',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.25)',
+              minWidth: '140px',
+            }}
+            onClick={handleRasiClick}
+            onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
+            onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+            aria-label="View Rasi Chart"
+          >
+            View Rasi Chart
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            {/* Notification Button */}
+
+            <img
+              src={notification}
+              alt=""
+              style={{ width: '28px', height: '28px', display: 'block' }}
+            />
 
 
-  </div>
-</div>
-        
-      
-        <div 
+            {/* Credits Display */}
+
+            <img
+              src={credits}
+              alt="Credits icon"
+              style={{ width: '100%', height: '38px' }}
+            />
+
+
+
+
+          </div>
+        </div>
+
+
+        <div
           style={{
             zIndex: 2,
             display: 'flex',
@@ -152,7 +153,7 @@ const ErosHome = () => {
             padding: '0 20px',
           }}
         >
-     
+
           <div
             style={{
               fontSize: '16px',
@@ -163,11 +164,11 @@ const ErosHome = () => {
               marginBottom: '-10px',
             }}
           >
-            EROS Universe
+            EROS Universe's
           </div>
 
-        
-          <h1 
+
+          {/* <h1 
             style={{
               fontSize: 'clamp(40px, 8vw, 96px)',
               fontFamily: '"Poppins", "Inter", system-ui, -apple-system, sans-serif',
@@ -181,13 +182,29 @@ const ErosHome = () => {
             }}
           >
             EROS Wellness
-          </h1>
-          
-  
-          <p 
+          </h1> */}
+
+          <img
+            src={eroslogo}
+            alt="EROS Wellness Logo"
+            style={{
+              width: 'clamp(200px, 40vw, 500px)',
+              height: 'auto',
+              maxWidth: '500px',
+              margin: 0,
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
+              transition: 'transform 0.3s ease',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          />
+
+
+          <p
             style={{
               fontSize: 'clamp(20px, 3vw, 25px)',
-            fontFamily: '"Poppins", "Inter", system-ui, -apple-system, sans-serif',
+              fontFamily: '"Poppins", "Inter", system-ui, -apple-system, sans-serif',
               margin: 0,
               maxWidth: '800px',
               lineHeight: 1.6,

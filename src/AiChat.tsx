@@ -10,6 +10,7 @@ import sparkle from "./sparkle.png";
 import Stars from "./components/stars";
 import VoiceMessage from "./VoiceMessage";
 import MicVisualizer from "./MicVisualizer";
+import eroslogo from "../src/assets/eros-logo.png"
 import { useNavigate, useLocation } from "react-router-dom";
 
 const AiChat: React.FC = () => {
@@ -665,14 +666,25 @@ const AiChat: React.FC = () => {
 
                 <div className="p-4 border-b border-gray-700">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold" style={{
-                            // background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
-                            // WebkitBackgroundClip: 'text',
-                            // WebkitTextFillColor: 'transparent',
-                            // backgroundClip: 'text',
-                            // color: 'transparent',
-                            color: "#00B8F8"
-                        }}>EROS Wellness</h2>
+                        {/* <h2 className="text-lg font-bold" style={{
+                           
+                            color:"#00B8F8"
+                        }}>EROS Wellness</h2> */}
+                        <img
+                            src={eroslogo}
+                            alt="EROS Wellness Logo"
+                            style={{
+                                width: 'clamp(200px, 40vw, 400px)',
+                                height: 'auto',
+                                // maxWidth: '100px',
+                                margin: 0,
+                                objectFit: 'contain',
+                                filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
+                                transition: 'transform 0.3s ease',
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        />
                         <button
                             className="md:hidden text-gray-400 hover:text-white bg-transparent"
                             onClick={() => setSidebarOpen(false)}
@@ -724,7 +736,8 @@ const AiChat: React.FC = () => {
                         >
                             <Menu size={20} />
                         </button>
-                        <h3 className="text-xl font-semibold" style={{ color: "#00B8F8" }}>Wellness Chat Bot</h3>
+                        {/* <h3 className="text-xl font-semibold" style={{ color: "#00B8F8" }}>Wellness Chat Bot</h3> */}
+
                     </div>
                     <div className="flex items-center gap-2">
                         <div
