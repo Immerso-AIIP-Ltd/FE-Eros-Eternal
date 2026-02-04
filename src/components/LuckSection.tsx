@@ -288,9 +288,9 @@ export const LuckSection: React.FC = () => {
         <p style={errorStyle}>{error[1]}</p>
       ) : personalMonth ? (
         <>
-          <p style={backText}>
+          {/* <p style={backText}>
             <strong>Theme:</strong> {personalMonth.meaning}
-          </p>
+          </p> */}
           <p style={backQuote}>"{personalMonth.detailed_meaning}"</p>
         </>
       ) : null}
