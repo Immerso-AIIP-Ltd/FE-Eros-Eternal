@@ -810,6 +810,7 @@ const AuraProfile: React.FC = () => {
             onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           />
+
                         <button
                             className="md:hidden text-gray-400 hover:text-white bg-transparent"
                             onClick={() => setSidebarOpen(false)}
@@ -864,6 +865,7 @@ const AuraProfile: React.FC = () => {
                         </button>
                         <h3 className="text-xl font-semibold">
                             EROS Wellness - {sidebarMenuItems.find(item => item.id === activeMenuItem)?.label || 'Assessment'}
+
                         </h3>
                     </div>
                     <div className="flex items-center gap-2">
@@ -988,6 +990,7 @@ const AuraProfile: React.FC = () => {
                                                     <span className="text-xs font-semibold text-white">AI</span>
                                                 </div>
                                                 <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg" style={{ border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D' }}>
+
                                                     <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
                                                         {message.isThinking ? (
                                                             <div className="flex items-center gap-2">

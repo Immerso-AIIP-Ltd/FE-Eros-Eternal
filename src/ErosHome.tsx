@@ -6,6 +6,7 @@ import credits from "../src/assets/credits.png";
 import eroslogo from "../src/assets/eros-logo.png"
 
 
+
 const ErosHome = () => {
   const navigate = useNavigate();
 
@@ -13,6 +14,7 @@ const ErosHome = () => {
     navigate("/facescan");
   };
   const handleRasiClick = () => {
+
     navigate("/rasi-chart");
   };
 
@@ -27,6 +29,7 @@ const ErosHome = () => {
     <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
       {/* Main Hero Section */}
       <div
+
         style={{
           position: 'relative',
           height: '100vh',
@@ -64,6 +67,7 @@ const ErosHome = () => {
 
         {/* Dark Overlay */}
         <div
+
           style={{
             position: 'absolute',
             top: 0,
@@ -143,6 +147,7 @@ const ErosHome = () => {
 
 
         <div
+
           style={{
             zIndex: 2,
             display: 'flex',
@@ -169,6 +174,7 @@ const ErosHome = () => {
 
 
           {/* <h1 
+
             style={{
               fontSize: 'clamp(40px, 8vw, 96px)',
               fontFamily: '"Poppins", "Inter", system-ui, -apple-system, sans-serif',
@@ -205,6 +211,7 @@ const ErosHome = () => {
             style={{
               fontSize: 'clamp(20px, 3vw, 25px)',
               fontFamily: '"Poppins", "Inter", system-ui, -apple-system, sans-serif',
+
               margin: 0,
               maxWidth: '800px',
               lineHeight: 1.6,

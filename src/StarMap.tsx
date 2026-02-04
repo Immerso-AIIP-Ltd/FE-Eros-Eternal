@@ -44,6 +44,7 @@ const sidebarMenuItems = [
     id: "star-map",
     // label: "Star Map",
     label: "Birth Chart",
+
     icon: <SquarePlus size={16} />,
     reportType: "star_map",
   },
@@ -931,6 +932,7 @@ const StarMap: React.FC = () => {
             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           />
 
+
             <button
               className="md:hidden text-gray-400 hover:text-white bg-transparent"
               onClick={() => setSidebarOpen(false)}
@@ -1133,6 +1135,7 @@ const StarMap: React.FC = () => {
                           </span>
                         </div>
                         <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg" style={{ border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D' }}>
+
                           <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
                             {message.isThinking ? (
                               <div className="flex items-center gap-2">
@@ -1337,6 +1340,7 @@ const StarMap: React.FC = () => {
               className="text-center text-xs text-gray-500"
               style={{ maxWidth: "65%", margin: "0 auto", width: "100%" }}
             >
+
               <div className="flex items-center justify-center text-xs">
                 {/* <div>© 2025 EROS Universe. All Rights Reserved.</div> */}
                 {/* <div className="flex items-center gap-6">

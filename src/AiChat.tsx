@@ -500,6 +500,7 @@ const AiChat: React.FC = () => {
                 // const response = await fetch(`http://192.168.18.5:7001/api/v1/chat/spiritual/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', },
+
                 body: new URLSearchParams({
                     user_id: userId,
                     message: currentInput,
@@ -685,6 +686,7 @@ const AiChat: React.FC = () => {
                             onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
                             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                         />
+
                         <button
                             className="md:hidden text-gray-400 hover:text-white bg-transparent"
                             onClick={() => setSidebarOpen(false)}
@@ -737,6 +739,7 @@ const AiChat: React.FC = () => {
                             <Menu size={20} />
                         </button>
                         {/* <h3 className="text-xl font-semibold" style={{ color: "#00B8F8" }}>Wellness Chat Bot</h3> */}
+
 
                     </div>
                     <div className="flex items-center gap-2">

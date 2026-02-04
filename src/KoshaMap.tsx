@@ -18,6 +18,7 @@ const sidebarMenuItems = [
     { id: 'aura-profile', label: 'Aura Profile', icon: <User size={16} />, reportType: 'aura_profile' },
     // { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} />, reportType: 'star_map' },
     { id: 'star-map', label: 'Birth Chart', icon: <SquarePlus size={16} />, reportType: 'star_map' },
+
     { id: 'kosha-map', label: 'Kosha Map', icon: <Camera size={16} />, reportType: 'kosha_map' },
     { id: 'flame-score', label: 'Flame Score', icon: <Upload size={16} />, reportType: 'flame_score' },
     { id: 'longevity-blueprint', label: 'Longevity Blueprint', icon: <Mic size={16} />, reportType: 'longevity_blueprint' },
@@ -811,6 +812,7 @@ const KoshaMap: React.FC = () => {
             onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           />
+
                         <button
                             className="md:hidden text-gray-400 hover:text-white bg-transparent"
                             onClick={() => setSidebarOpen(false)}
@@ -858,13 +860,14 @@ const KoshaMap: React.FC = () => {
                 <div className="flex items-center justify-between p-4 border-gray-800">
                     <div className="flex items-center gap-3">
                         <button
-                            className="md:hidden text-gray-400 hover:text-white"
+                            className="md:hidden text-gray-400 hover:text-white"    
                             onClick={() => setSidebarOpen(true)}
                         >
                             <Menu size={20} />
                         </button>
                         <h3 className="text-xl font-semibold">
                             EROS Wellness- {sidebarMenuItems.find(item => item.id === activeMenuItem)?.label || 'Assessment'}
+
                         </h3>
                     </div>
                     <div className="flex items-center gap-2">
@@ -989,6 +992,7 @@ const KoshaMap: React.FC = () => {
                                                     <span className="text-xs font-semibold text-white">AI</span>
                                                 </div>
                                                 <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg" style={{ border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D' }}>
+
                                                     <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
                                                         {message.isThinking ? (
                                                             <div className="flex items-center gap-2">

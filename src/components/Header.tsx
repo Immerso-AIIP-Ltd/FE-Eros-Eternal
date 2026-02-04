@@ -170,6 +170,7 @@ export const Header: React.FC = () => {
     console.log(`Clicked on ${card.title}`);
     setActiveCard(card.id);
 
+
     // For cards with report functionality
     if (card.reportType && userId) {
       const hasReport = reportStatuses[card.reportType];
@@ -309,17 +310,18 @@ export const Header: React.FC = () => {
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           zIndex: 0,
+
         }}
       /> */}
 
-      {/* Main Content */}
+      {/* Top Navbar */}
       <div
         style={{
           position: "relative",
           zIndex: 5,
           width: "100%",
+
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           marginTop: "44px",
           padding: "0 40px",
@@ -354,7 +356,11 @@ export const Header: React.FC = () => {
             flexWrap: "wrap",
             width: "100%",
             marginBottom: "48px",
+
           }}
+          onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          onClick={handleRasiClick}
         >
           {cardsData.map((card) => {
             const isActive = activeCard === card.id;
@@ -510,6 +516,7 @@ export const Header: React.FC = () => {
                 setChatInput("");
               }
             }}
+
             style={{
               width: "100%",
               flex: 1,
@@ -536,6 +543,7 @@ export const Header: React.FC = () => {
             }}
           >
             {/* <button
+
               style={{
                 width: "56px",
                 height: "56px",
@@ -554,6 +562,7 @@ export const Header: React.FC = () => {
               <Paperclip color="#15A7D8" size={25} />
             </button> */}
 
+
             <button
               style={{
                 width: "56px",
@@ -571,6 +580,7 @@ export const Header: React.FC = () => {
                 navigate('/ai-chat', { state: { initialMessage: chatInput } });
                 setChatInput("");
               }}
+
               onMouseEnter={(e) => (e.currentTarget.style.background = "#15A7D8")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "#15A7D8")}
             >

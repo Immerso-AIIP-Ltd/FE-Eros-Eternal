@@ -965,6 +965,7 @@ const VibrationTool: React.FC = () => {
               className="text-sm font-bold"
               style={{
                
+
                 color:"#00B8F8"
               }}
             >
@@ -1059,6 +1060,7 @@ const VibrationTool: React.FC = () => {
             </div>
           </div>
         </div>
+
 
         {/* Progress indicator */}
         {/* {assessmentStatus !== 'not_started' && assessmentStatus !== 'report_generated' && totalQuestions > 0 && (
@@ -1208,6 +1210,7 @@ const VibrationTool: React.FC = () => {
                             )}
                           </div>
                         </div>
+
                       </div>
                     )}
                   </div>
@@ -1416,6 +1419,7 @@ const VibrationTool: React.FC = () => {
                                 </div> */}
               </div>
             </div>
+
           </div>
         </div>
 

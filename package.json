@@ -13,6 +13,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@mediapipe/tasks-vision": "^0.10.21",
     "@mui/icons-material": "^7.3.2",
     "@mui/joy": "^5.0.0-beta.52",
     "@mui/material": "^7.3.2",
@@ -25,6 +26,7 @@
     "jspdf": "^4.1.0",
     "lucide-react": "^0.542.0",
     "moment": "^2.30.1",
+    "openai": "^6.17.0",
     "react": "^19.1.1",
     "react-audio-visualize": "^1.2.0",
     "react-bits": "^1.0.5",
@@ -34,6 +36,7 @@
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.8.2",
+    "recharts": "^3.7.0",
     "wavesurfer-react": "^3.0.4",
     "wavesurfer.js": "^7.12.1"
   },

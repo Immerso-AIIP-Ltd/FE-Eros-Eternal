@@ -76,6 +76,7 @@ export const LuckSection: React.FC = () => {
         formData.append("user_id", userId);
         formData.append("user_name", username);
         // formData.append("dob", dob);
+
         if (dob) {
           // Split dd-mm-yyyy into parts
           const [day, month, year] = dob.split("-");
@@ -132,6 +133,7 @@ export const LuckSection: React.FC = () => {
         formData.append("user_id", userId);
         formData.append("user_name", username);
         // formData.append("dob", dob);
+
 
         if (dob) {
           // Split dd-mm-yyyy into parts
@@ -291,6 +293,7 @@ export const LuckSection: React.FC = () => {
           {/* <p style={backText}>
             <strong>Theme:</strong> {personalMonth.meaning}
           </p> */}
+
           <p style={backQuote}>"{personalMonth.detailed_meaning}"</p>
         </>
       ) : null}
