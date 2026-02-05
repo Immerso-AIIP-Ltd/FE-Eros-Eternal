@@ -1577,7 +1577,7 @@ const FaceScanner: React.FC = () => {
                 </h1>
 
                 <p style={{ color: '#9CA3AF', fontSize: '1rem', fontWeight: 400, lineHeight: 1.6 }}>
-                  "Research-driven. Precision-crafted. Shen AI transforms your health journey."
+                  "Research-driven. Precision-crafted. Eternal AI transforms your health journey."
                 </p>
 
               </div>
