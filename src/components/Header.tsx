@@ -51,7 +51,7 @@ export const Header: React.FC = () => {
       title: "Vita Scan",
       buttonText: "View Report",
       reportType: "vita_scan",
-      route: "/vita-scan",
+      route: "/face-report",
     },
     {
       id: 2,

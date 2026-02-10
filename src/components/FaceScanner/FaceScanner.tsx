@@ -1100,6 +1100,9 @@ const FaceScanner: React.FC = () => {
       aiReport: aiReport || undefined,
     };
 
+    // Save to localStorage for persistence
+    localStorage.setItem('faceReportData', JSON.stringify(combinedData));
+
     navigate('/face-report', { state: combinedData });
   };
 

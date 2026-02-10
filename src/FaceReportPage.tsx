@@ -162,13 +162,34 @@ const FaceReportPage: React.FC = () => {
   const [username, setUsername] = useState<string>('');
 
   useEffect(() => {
+    // First, try to get data from navigation state
     if (location.state && location.state.success) {
-      setReport(location.state as CombinedReportData);
-      if (location.state.uploadedImage) {
-        setUploadedImage(location.state.uploadedImage);
+      const reportData = location.state as CombinedReportData;
+      setReport(reportData);
+      
+      // Save to localStorage for persistence
+      localStorage.setItem('faceReportData', JSON.stringify(reportData));
+      
+      if (reportData.uploadedImage) {
+        setUploadedImage(reportData.uploadedImage);
       }
     } else {
-      setError('No report data found. Please complete a face scan first.');
+      // Try to load from localStorage if no navigation state
+      const savedReport = localStorage.getItem('faceReportData');
+      if (savedReport) {
+        try {
+          const parsedReport = JSON.parse(savedReport) as CombinedReportData;
+          setReport(parsedReport);
+          if (parsedReport.uploadedImage) {
+            setUploadedImage(parsedReport.uploadedImage);
+          }
+        } catch (err) {
+          console.error('Failed to parse saved report data:', err);
+          setError('No report data found. Please complete a face scan first.');
+        }
+      } else {
+        setError('No report data found. Please complete a face scan first.');
+      }
     }
 
     const storedUsername = localStorage.getItem('username');
@@ -351,7 +372,7 @@ const FaceReportPage: React.FC = () => {
       }}
     >
       {/* Header */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{margin: '0 auto' }}>
         {/* Back button and title */}
         <div style={{ marginBottom: '24px' }}>
           <button
