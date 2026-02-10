@@ -10,7 +10,7 @@ import facescan from '../assets/explore/face.png';
 import angel from '../vintage.png';
 
 interface ExploreItem {
- title: string;
+  title: string;
   subtitle: string;
   image: string;
   onClick?: () => void;
@@ -37,12 +37,12 @@ export const ExploreSection: React.FC = () => {
     e.preventDefault();
     const x = e.pageX - (scrollContainerRef.current?.offsetLeft || 0);
     const walk = (x - startX) * 2;
-    
+
     // If moved more than 5 pixels, consider it a drag
     if (Math.abs(walk) > 5) {
       setHasMoved(true);
     }
-    
+
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollLeft = scrollLeft - walk;
     }
@@ -88,15 +88,15 @@ export const ExploreSection: React.FC = () => {
   ];
 
   return (
-    <div style={{ 
-      paddingBottom: '2rem', 
+    <div style={{
+      paddingBottom: '2rem',
       width: '100vw',
       // paddingTop: '1rem',
       paddingLeft: '1rem',
       paddingRight: '1rem'
     }}>
       {/* Header */}
-      <div className="header" style={{ 
+      <div className="header" style={{
         marginBottom: '1.5rem',
         paddingLeft: '1.5rem'
       }}>
@@ -115,7 +115,7 @@ export const ExploreSection: React.FC = () => {
       {/* Scrollable Container */}
       <div
         ref={scrollContainerRef}
-        className="cards-container"
+        className="card-container"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -149,7 +149,7 @@ export const ExploreSection: React.FC = () => {
             aria-label={item.locked ? `${item.title} - Coming Soon` : item.title}
             style={{
               flex: '0 0 800px',
-              width:"100vw",
+              width: "100vw",
               // minWidth: '320px',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               cursor: item.onClick && !isDragging ? 'pointer' : isDragging ? 'grabbing' : 'grab',
@@ -290,7 +290,7 @@ export const ExploreSection: React.FC = () => {
 
       {/* Injected Styles */}
       <style>{`
-        .cards-container::-webkit-scrollbar {
+        .card-container::-webkit-scrollbar {
           display: none;
         }
 
@@ -300,7 +300,7 @@ export const ExploreSection: React.FC = () => {
         }
 
         @media (max-width: 1024px) {
-          .cards-container {
+          .card-container {
             gap: 16px;
             padding: 0 1rem;
           }
@@ -324,7 +324,7 @@ export const ExploreSection: React.FC = () => {
         }
 
         @media (max-width: 768px) {
-          .cards-container {
+          .card-container {
             gap: 12px;
             padding: 0 0.75rem;
           }
@@ -348,7 +348,7 @@ export const ExploreSection: React.FC = () => {
         }
         
         @media (max-width: 600px) {
-          .cards-container {
+          .card-container {
             gap: 10px;
             padding: 0 0.5rem;
           }

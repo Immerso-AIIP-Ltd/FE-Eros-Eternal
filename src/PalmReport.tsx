@@ -124,7 +124,7 @@ const PalmReadingReportPage: React.FC = () => {
         {/* User Image and Name */}
         <div className="text-center">
           {username && <h2 className="text-white mt-3">{username}</h2>}
-          <h6 className="text-white mt-4">Face Analysis</h6>
+          <h6 className="text-white mt-4">Palm Analysis</h6>
         </div>
       </div>
 

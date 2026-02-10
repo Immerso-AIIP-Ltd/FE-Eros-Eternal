@@ -346,17 +346,20 @@ export const Header: React.FC = () => {
 
         {/* Cards Row */}
         <div
+          className="cards-container"
           style={{
             display: "flex",
             justifyContent: "center",
-            gap: "24px",
-            flexWrap: "wrap",
+            gap: "clamp(8px, 1.5vw, 24px)",
+            flexWrap: "nowrap",
             width: "100%",
+            maxWidth: "100%", // ✅ Allow full width
             marginBottom: "48px",
+            padding: "0 clamp(10px, 3vw, 40px)", // ✅ Responsive padding
+            margin: "0 auto 48px",
           }}
         >
           {cardsData.map((card) => {
-            const isActive = activeCard === card.id;
             const isHov = hoveredCard === card.id;
             const buttonText = getButtonText(card);
             const hasReport = card.reportType ? reportStatuses[card.reportType] : false;
@@ -365,8 +368,10 @@ export const Header: React.FC = () => {
               <div
                 key={card.id}
                 style={{
-                  width: "220px",
-                  position: "relative"
+                  flex: "1 1 0px",       // Allows cards to grow equally
+                  minWidth: "120px",     // Minimum size for small screens
+                  maxWidth: "220px",     // Maximum size for big screens
+                  position: "relative",
                 }}
               >
                 <div
@@ -375,18 +380,15 @@ export const Header: React.FC = () => {
                   onMouseLeave={() => setHoveredCard(null)}
                   style={{
                     width: "100%",
-                    height: "220px",
+                    aspectRatio: "1 / 1", // Forces card to stay square as it scales
                     borderRadius: "16px",
                     background: hasReport && card.backgroundImage
-                      ? `background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',, url(${card.backgroundImage})`
-                      : "background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',",
+                      ? `url(${card.backgroundImage})`
+                      : "transparent",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center",
-                    // justifyContent: "center",
-                    justifyContent: "space-between",
                     cursor: "pointer",
                     backdropFilter: "blur(10px)",
                     WebkitBackdropFilter: "blur(10px)",
@@ -395,62 +397,60 @@ export const Header: React.FC = () => {
                       : "0 0 25px rgba(0, 0, 0, 0.25)",
                     transition: "all 0.28s ease",
                     transform: isHov ? "scale(1.05)" : "scale(1)",
-                    boxSizing: "border-box",
                     position: "relative",
                     overflow: "hidden",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
                   }}
                 >
-
                   <div style={{
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center",
-                    textAlign: "center",
-                    padding: "16px",
                     width: "100%",
                     height: "100%",
-                    backgroundColor: "#00B8F833"
+                    backgroundColor: "#00B8F833",
+                    position: "relative",
+                    padding: "10%", // Relative padding
+                    boxSizing: "border-box",
                   }}>
-                    <div
-                      style={{
-                        width: "60px",
-                        height: "60px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: "24px",
-
-                      }}
-                    >
+                    {/* Icon - Scalable size */}
+                    <div style={{
+                      marginTop: "10%",
+                      height: "40%",
+                      display: "flex",
+                      alignItems: "center"
+                    }}>
                       <img
                         src={card.icon}
                         alt={card.title}
                         style={{
-                          width: "100%",
-                          height: "100%",
+                          width: "clamp(30px, 4vw, 55px)",
+                          height: "auto",
                           objectFit: "contain",
                           filter: "brightness(1.2) saturate(1.3)",
-                          transition: "filter 0.3s ease"
                         }}
                       />
                     </div>
 
-
-
+                    {/* Button - Scalable but LOCKED to bottom */}
                     <div
+                      className="card-button"
                       style={{
                         background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
                         borderRadius: "12px",
-                        padding: "14px 48px",
-                        fontSize: "14px",
+                        width: "85%",
+                        height: "clamp(28px, 3vw, 36px)", // Grows with screen
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "clamp(9px, 1vw, 12px)", // Text scales too
                         fontWeight: 700,
                         color: "white",
-                        letterSpacing: "0.5px",
-                        cursor: "pointer",
-                        transition: 'all 0.3s ease',
-
-                        textShadow: "0 1px 2px rgba(0,0,0,0.4)",
+                        position: "absolute",
+                        bottom: "10%",           // Always same relative distance from bottom
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {loadingStatuses ? "Loading..." : buttonText}
@@ -458,15 +458,18 @@ export const Header: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Title - Outside the square to prevent pushing */}
                 <div
                   style={{
                     color: "#fff",
-                    fontSize: "18px",
+                    fontSize: "clamp(18px, 1.2vw, 14px)",
                     fontWeight: 600,
-                    marginBottom: "12px",
-                    textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",
+                    marginTop: "12px",
                     textAlign: "center",
-                    padding: "12px",
+                    minHeight: "2.5em", // Ensures 2-line titles don't move the cards
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "flex-start"
                   }}
                 >
                   {card.title}
@@ -582,6 +585,79 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </div>
+      <style>{`
+        .card-button {
+          padding: 10px 20px !important;
+          font-size: 12px !important;
+        }
+
+        .cards-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.5vw;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto 48px;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+
+        @media (min-width: 1101px) {
+          .card-button {
+            padding: 14px 48px !important;
+            font-size: 14px !important;
+          }
+        }
+
+ @media (max-width: 1100px) {
+  .cards-container {
+      flex-wrap: wrap !important;
+    }
+  .cards-container > div {
+    flex: 0 0 auto !important;
+    width: 180px !important;
+    min-width: 180px !important;
+    max-width: 180px !important;
+  }
+  /* ✅ Force card inner div to be square */
+  .cards-container > div > div:first-child {
+    height: 180px !important; /* Change to match width */
+  }
+  .card-button {
+    padding: 10px 24px !important;
+    font-size: 12px !important;
+  }
+}
+@media (max-width: 1000px) {
+    .cards-container {
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+  }
+@media (max-width: 768px) {
+  .cards-container {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 16px !important;
+  }
+  .cards-container > div {
+    flex: 0 0 auto !important;
+    width: 160px !important;
+    min-width: 160px !important;
+    max-width: 160px !important;
+  }
+  /* ✅ Force card inner div to be square */
+  .cards-container > div > div:first-child {
+    height: 160px !important; /* Change to match width */
+  }
+  .card-button {
+    padding: 8px 16px !important;
+    font-size: 11px !important;
+  }
+}
+      `}
+      </style>
     </div>
   );
 };
