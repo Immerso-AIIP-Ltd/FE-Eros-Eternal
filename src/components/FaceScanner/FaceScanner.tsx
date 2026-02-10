@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Stars from '../stars';
@@ -1101,6 +1100,9 @@ const FaceScanner: React.FC = () => {
       aiReport: aiReport || undefined,
     };
 
+    // Save to localStorage for persistence
+    localStorage.setItem('faceReportData', JSON.stringify(combinedData));
+
     navigate('/face-report', { state: combinedData });
   };
 
@@ -1246,8 +1248,8 @@ const FaceScanner: React.FC = () => {
 
         .btn-skip {
           background: transparent;
-          border: 1px solid #6B7280;
-          color: #6B7280;
+          border: 1px solid #00b8d4;
+          color: #00b8d4;
           padding: 0.875rem 1.5rem;
           border-radius: 0.5rem;
           font-size: 1rem;
@@ -1268,15 +1270,20 @@ const FaceScanner: React.FC = () => {
           background: #1A1A1A;
           border: 1px solid #2D2D2D;
           border-radius: 1rem;
-          padding: 2.5rem;
+          padding: 2rem;
+          min-height: 50vh;
+          max-height: calc(100vh - 3rem);
+          display: flex;
+          flex-direction: column;
         }
 
         .drop-zone {
           border: 2px dashed #2D3748;
           border-radius: 1rem;
-          padding: 4rem 2rem;
+          padding: 3rem 2rem;
           text-align: center;
           transition: all 0.2s ease;
+          flex: 1;
         }
 
         .video-container {
@@ -1285,8 +1292,8 @@ const FaceScanner: React.FC = () => {
           overflow: hidden;
           border: 4px solid #2D3748;
           background: #0F1419;
-          aspect-ratio: 16/9;
-          min-height: 300px;
+          height: 45vh;
+          max-height: 500px;
         }
 
         video {
@@ -1503,29 +1510,87 @@ const FaceScanner: React.FC = () => {
           transition: width 0.3s ease;
         }
 
+        @media (max-width: 1280px) {
+          .card-wrapper {
+            width: 90% !important;
+          }
+        }
+
         @media (max-width: 1024px) {
           .main-container {
             flex-direction: column !important;
+            gap: 2rem !important;
           }
-          
+
           .left-side, .right-side {
             width: 100% !important;
+          }
+
+          .left-side {
+            padding-top: 0.5rem !important;
+          }
+
+          .right-side {
+            justify-content: center !important;
+          }
+
+          .card-wrapper {
+            width: 100% !important;
+          }
+
+          .card {
+            min-height: 50vh;
+          }
+        }
+
+        /* Laptop screens - better fit without scrolling */
+        @media (min-width: 769px) and (max-width: 1920px) {
+          .card-wrapper {
+            min-height: 80vh !important;
+          }
+
+          .card {
+            padding: 1.25rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+          }
+
+          h1 {
+            font-size: 2rem !important;
+            margin-bottom: 0.5rem !important;
+          }
+
+          .video-container {
+            max-height: 50vh;
+          }
+
+          .left-side h4 {
+            font-size: 1rem !important;
+            margin-bottom: 0.5rem !important;
+          }
+
+          .main-container {
+            gap: 1.5rem !important;
           }
         }
 
         @media (max-width: 768px) {
           .card {
             padding: 1.5rem;
+            min-height: 45vh;
           }
-          
+
           h1 {
             font-size: 2rem !important;
           }
-          
-          .video-container {
-            aspect-ratio: 4/3;
+
+          h2 {
+            margin-bottom: 0.5rem !important;
           }
 
+          .video-container {
+            height: 50vh;
+          }
 
           .heart-rate-card {
             top: 0.5rem;
@@ -1537,10 +1602,48 @@ const FaceScanner: React.FC = () => {
           .heart-rate-value {
             font-size: 1.25rem;
           }
+
+          .drop-zone {
+            padding: 2rem 1rem !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .card {
+            padding: 1rem;
+            min-height: 40vh;
+            border-radius: 0.75rem;
+          }
+
+          h1 {
+            font-size: 1.5rem !important;
+            margin-bottom: 0.5rem !important;
+          }
+
+          .video-container {
+            height: 40vh;
+            border-radius: 0.75rem;
+          }
+
+          .drop-zone {
+            padding: 1.5rem 0.75rem !important;
+            border-radius: 0.75rem;
+          }
+
+          .btn-primary, .btn-secondary, .btn-skip {
+            padding: 0.75rem 1rem !important;
+            font-size: 0.875rem !important;
+          }
+
+          .corner-bracket {
+            width: 2.5rem;
+            height: 2.5rem;
+          }
         }
       `}</style>
-      <div style={{ minHeight: '100vh', minWidth: '100vw', background: '#000', color: '#fff', padding: '3rem 0' }}>
-        <div className="container">
+      <div style={{ minHeight: '100vh', minWidth: '100vw', background: '#000', color: '#fff', padding: '1rem 0', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '0 3%', flex: 1, display: 'flex', flexDirection: 'column', maxHeight: '100vh', overflow: 'hidden' }}>
+        {/* <div className="container"> */}
           {error && scanState === 'initial' && (
             <div className="error-message" style={{ marginBottom: '2rem' }}>
               {error}
@@ -1557,11 +1660,11 @@ const FaceScanner: React.FC = () => {
             </div>
           )}
 
-          <div className="main-container" style={{ display: 'flex', alignItems: 'flex-start', gap: '3rem' }}>
+          <div className="main-container" style={{ display: 'flex', alignItems: 'flex-start', gap: '2rem', flex: 1, minHeight: 0 }}>
 
             {/* Left side - Info */}
-            <div className="left-side" style={{ width: '50%', paddingTop: '2rem' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="left-side" style={{ width: '50%', paddingTop: '0.5rem', display: 'flex', flexDirection: 'column', minHeight: 0, maxHeight: '100%', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h2 style={{
                   color: '#00B8D4',
                   fontSize: '0.875rem',
@@ -1569,10 +1672,10 @@ const FaceScanner: React.FC = () => {
                   letterSpacing: '0.05em',
                   marginBottom: '1rem'
                 }}>
-                  Face Scan
+                  Vita Scan
                 </h2>
 
-                <h1 style={{ fontSize: '3rem', fontWeight: 400, lineHeight: 1.2, marginBottom: '1rem', color: '#fff' }}>
+                <h1 style={{ fontSize: '2.25rem', fontWeight: 400, lineHeight: 1.2, marginBottom: '0.5rem', color: '#fff' }}>
                   Scan yourself and see how health rate works
                 </h1>
 
@@ -1580,13 +1683,80 @@ const FaceScanner: React.FC = () => {
                   "Research-driven. Precision-crafted. Eternal AI transforms your health journey."
                 </p>
 
+                {/* Do's Section */}
+                <div style={{ marginTop: '1rem' }}>
+                  <h4 style={{ color: '#fff', fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.75rem' }}>
+                    Do's
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {[
+                      'Stay as still as possible, only gentle natural breathing, no talking or facial expressions.',
+                      'Keep your gaze fixed at a point near the camera to avoid eye/head movements.',
+                      'If you see "signal quality" dropping or "poor," stop and redo the scan after adjusting light and posture.',
+                    ].map((item, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#10B981',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          marginTop: '2px'
+                        }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </div>
+                        <span style={{ color: '#D1D5DB', fontSize: '0.85rem', lineHeight: 1.5 }}>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Don'ts Section */}
+                <div style={{ marginTop: '1rem' }}>
+                  <h4 style={{ color: '#fff', fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.75rem' }}>
+                    Don'ts
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {[
+                      'Don\'t talk, smile, laugh, or move your jaw.',
+                      'Don\'t move the device, change distance, or turn your head during the measurement.',
+                      'Don\'t scan while walking, in a vehicle, or with a fan blowing directly on your face or hair & Don\'t wear specs or sunglass.',
+                    ].map((item, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#EF4444',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          marginTop: '2px'
+                        }}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                          </svg>
+                        </div>
+                        <span style={{ color: '#D1D5DB', fontSize: '0.85rem', lineHeight: 1.5 }}>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               </div>
             </div>
 
             {/* Right side - Scan Interface */}
-            <div className="right-side" style={{ width: '50%', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
-              <div style={{ width: '100%', maxWidth: '42rem' }}>
-                <div className="card">
+            <div className="right-side" style={{ width: '50%', display: 'flex', alignItems: 'stretch', justifyContent: 'center', minHeight: 0, maxHeight: '100%' }}>
+              <div className="card-wrapper" style={{ width: '80%', display: 'flex', flexDirection: 'column', minHeight: '60vh' }}>
+                <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflowY: 'auto' }}>
 
                   {/* Error message */}
                   {error && scanState !== 'initial' && (
@@ -1608,14 +1778,13 @@ const FaceScanner: React.FC = () => {
                   {/* Initial State */}
                   {scanState === 'initial' && (
                     <>
-                      <h3 style={{ color: '#00B8D4', fontSize: '1.5rem', fontWeight: 500, textAlign: 'center', marginBottom: '2rem' }}>
+                      <h3 style={{ color: '#00B8D4', fontSize: '1.25rem', fontWeight: 500, textAlign: 'center', marginBottom: '1rem' }}>
                         Scan your face
                       </h3>
 
                       <div
                         className="drop-zone"
                         style={{
-                          minHeight: '300px',
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
@@ -1644,7 +1813,7 @@ const FaceScanner: React.FC = () => {
                         </p>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                         <button
                           onClick={handleSkip}
                           className="btn-skip"
@@ -1667,11 +1836,11 @@ const FaceScanner: React.FC = () => {
                   {/* Camera/Recording State - Shows live camera feed immediately */}
                   {(scanState === 'camera' || scanState === 'recording') && (
                     <>
-                      <h3 style={{ color: '#00B8D4', fontSize: '1.5rem', fontWeight: 500, textAlign: 'center', marginBottom: '2rem' }}>
+                      <h3 style={{ color: '#00B8D4', fontSize: '1.25rem', fontWeight: 500, textAlign: 'center', marginBottom: '1rem' }}>
                         {scanState === 'camera' ? 'Camera Preview' : 'Recording...'}
                       </h3>
 
-                      <div className="video-container" style={{ marginBottom: '2rem', position: 'relative' }}>
+                      <div className="video-container" style={{ marginBottom: '1rem', position: 'relative' }}>
                         {/* Video element for camera preview */}
                         <video
                           ref={videoRef}
@@ -1794,7 +1963,7 @@ const FaceScanner: React.FC = () => {
                           display: 'grid',
                           gridTemplateColumns: '80px 80px 1fr',
                           gap: '8px',
-                          marginBottom: '1.5rem',
+                          marginBottom: '1rem',
                           marginTop: '0.5rem'
                         }}>
                           {/* ROI Panel */}
@@ -1872,7 +2041,7 @@ const FaceScanner: React.FC = () => {
 
                       {/* Camera action buttons */}
                       {scanState === 'camera' && (
-                        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
                           <button
                             onClick={startRecording}
                             className="btn-primary"
@@ -1881,8 +2050,8 @@ const FaceScanner: React.FC = () => {
                               alignItems: 'center',
                               gap: '0.5rem',
                               margin: '0 auto',
-                              padding: '1rem 2rem',
-                              fontSize: '1.1rem'
+                              padding: '0.75rem 1.5rem',
+                              fontSize: '1rem'
                             }}
                             disabled={!isCameraReady}
                           >
@@ -1896,7 +2065,7 @@ const FaceScanner: React.FC = () => {
                       )}
 
                       {scanState === 'recording' && (
-                        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
                           <button
                             onClick={stopRecording}
                             className="btn-primary"
@@ -1906,8 +2075,8 @@ const FaceScanner: React.FC = () => {
                               alignItems: 'center',
                               gap: '0.5rem',
                               margin: '0 auto',
-                              padding: '1rem 2rem',
-                              fontSize: '1.1rem'
+                              padding: '0.75rem 1.5rem',
+                              fontSize: '1rem'
                             }}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1944,11 +2113,11 @@ const FaceScanner: React.FC = () => {
                   {/* Processing State */}
                   {scanState === 'processing' && (
                     <>
-                      <h3 style={{ color: '#00B8D4', fontSize: '1.5rem', fontWeight: 500, textAlign: 'center', marginBottom: '2rem' }}>
+                      <h3 style={{ color: '#00B8D4', fontSize: '1.25rem', fontWeight: 500, textAlign: 'center', marginBottom: '1rem' }}>
                         Processing Video
                       </h3>
 
-                      <div className="video-container" style={{ marginBottom: '2rem', position: 'relative' }}>
+                      <div className="video-container" style={{ marginBottom: '1rem', position: 'relative' }}>
                         {previewUrl && (
                           previewUrl.startsWith('blob:') ? (
                             <video src={previewUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -1994,7 +2163,7 @@ const FaceScanner: React.FC = () => {
                         }}></div>
                       </div>
 
-                      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
                         <button className="btn-primary" style={{
                           background: '#00B8D4',
                           cursor: 'default',
@@ -2002,7 +2171,7 @@ const FaceScanner: React.FC = () => {
                           alignItems: 'center',
                           gap: '0.5rem',
                           margin: '0 auto',
-                          padding: '1rem 2rem'
+                          padding: '0.75rem 1.5rem'
                         }}>
                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -2038,11 +2207,11 @@ const FaceScanner: React.FC = () => {
                   {/* Complete State */}
                   {scanState === 'complete' && (
                     <>
-                      <h3 style={{ color: '#00B8D4', fontSize: '1.5rem', fontWeight: 500, textAlign: 'center', marginBottom: '2rem' }}>
+                      <h3 style={{ color: '#00B8D4', fontSize: '1.25rem', fontWeight: 500, textAlign: 'center', marginBottom: '1rem' }}>
                         Scan Complete!
                       </h3>
 
-                      <div className="video-container" style={{ marginBottom: '2rem', position: 'relative' }}>
+                      <div className="video-container" style={{ marginBottom: '1rem', position: 'relative' }}>
                         {previewUrl && (
                           previewUrl.startsWith('blob:') ? (
                             <video src={previewUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} controls />
@@ -2058,14 +2227,14 @@ const FaceScanner: React.FC = () => {
                         <div className="corner-bracket corner-br"></div>
                       </div>
 
-                      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                      <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
                         <button className="btn-success" style={{
-                          marginBottom: '1rem',
+                          marginBottom: '0.75rem',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.5rem',
                           margin: '0 auto',
-                          padding: '1rem 2rem'
+                          padding: '0.75rem 1.5rem'
                         }}>
                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
