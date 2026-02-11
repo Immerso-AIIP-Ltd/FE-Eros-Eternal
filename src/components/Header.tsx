@@ -159,6 +159,7 @@ export const Header: React.FC = () => {
   const handleCardClick = (card: CardData) => {
     if (card.reportType && userId) {
       const hasReport = reportStatuses[card.reportType];
+      debugger
       if (hasReport) {
         if (card.reportType === "vita_scan") {
           navigate('/face-report');
