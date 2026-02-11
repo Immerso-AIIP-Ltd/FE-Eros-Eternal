@@ -449,6 +449,8 @@ const SoulProfilePage: React.FC = () => {
                 height: "800px",
                 filter:
                   "brightness(4) saturate(0%) contrast(150%) invert(1) hue-rotate(0deg)",
+                aspectRatio: "1 / 1", // ✅ Ensures the image stays perfectly square
+                objectFit: "contain", // ✅ Prevents stretching/distortion
               }}
             />
             <div
@@ -479,7 +481,7 @@ const SoulProfilePage: React.FC = () => {
           </div>
 
           {/* Right Side - Form */}
-<div
+          <div
             style={{
               flex: "1 1 50%",
               display: "flex",

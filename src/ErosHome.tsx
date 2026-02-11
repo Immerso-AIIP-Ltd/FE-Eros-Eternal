@@ -214,7 +214,6 @@ const ErosHome = () => {
 
               margin: 0,
               maxWidth: '800px',
-              lineHeight: 1.6,
               opacity: 0.95,
               fontWeight: '300',
             }}
@@ -228,13 +227,13 @@ const ErosHome = () => {
         <div
           style={{
             position: 'absolute',
-            bottom: '50px',
+            bottom: '20px',
             left: 0,
             right: 0,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '40px',
+            gap: '20px',
             zIndex: 2,
           }}
         >
@@ -281,6 +280,7 @@ const ErosHome = () => {
               fontSize: '24px',
               animation: 'bounce 2s infinite',
               padding: '10px',
+              marginTop: '10px',
             }}
           >
             <svg

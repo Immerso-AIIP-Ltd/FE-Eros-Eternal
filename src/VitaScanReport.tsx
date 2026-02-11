@@ -104,53 +104,53 @@ const VitaScanReport: React.FC = () => {
         );
     });
 
-const handleExportPDF = async () => {
-    if (!reportRef.current) return;
+    const handleExportPDF = async () => {
+        if (!reportRef.current) return;
 
-    setIsExporting(true);
+        setIsExporting(true);
 
- 
-    setTimeout(async () => {
-        try {
-            const element = reportRef.current!;
-            
-            const canvas = await html2canvas(element, {
-                scale: 2, 
-                useCORS: true,
-                backgroundColor: "#0a0a0a", 
-                windowWidth: 1400, 
-                onclone: (clonedDoc) => {
-                    
-                    const el = clonedDoc.getElementById('report-container') as HTMLElement;
-                    if (el) {
-                        el.style.height = "auto";
-                        el.style.width = "1400px";
+
+        setTimeout(async () => {
+            try {
+                const element = reportRef.current!;
+
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: "#0a0a0a",
+                    windowWidth: 1400,
+                    onclone: (clonedDoc) => {
+
+                        const el = clonedDoc.getElementById('report-container') as HTMLElement;
+                        if (el) {
+                            el.style.height = "auto";
+                            el.style.width = "1400px";
+                        }
                     }
-                }
-            });
+                });
 
-            const imgData = canvas.toDataURL("image/png");
-            
-           
-            const pdf = new jsPDF({
-                orientation: "portrait",
-                unit: "mm",
-                format: "a4"
-            });
+                const imgData = canvas.toDataURL("image/png");
 
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-            pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-            pdf.save("VitaScan-Report.pdf");
+                const pdf = new jsPDF({
+                    orientation: "portrait",
+                    unit: "mm",
+                    format: "a4"
+                });
 
-        } catch (error) {
-            console.error("PDF Generation Error:", error);
-        } finally {
-            setIsExporting(false);
-        }
-    }, 150);
-};
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+                pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+                pdf.save("VitaScan-Report.pdf");
+
+            } catch (error) {
+                console.error("PDF Generation Error:", error);
+            } finally {
+                setIsExporting(false);
+            }
+        }, 150);
+    };
 
 
 
@@ -276,42 +276,47 @@ const handleExportPDF = async () => {
                             <h3 className="h6 fw-semibold mb-0">Live Scan Waveform</h3>
                         </div>
 
-                        <svg
-                            width="100%"
-                            height="200"
-                            viewBox="0 0 500 200"
-                            preserveAspectRatio="none"
-                            className="mt-3"
-                        >
-                            <defs>
-                                <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" style={{ stopColor: "#06b6d4", stopOpacity: 0.5 }} />
-                                    <stop offset="100%" style={{ stopColor: "#06b6d4", stopOpacity: 0.1 }} />
-                                </linearGradient>
-                            </defs>
-                            <path
-                                d={`M 0 100 ${waveformData
-                                    .map((y, i) => {
-                                        const x = (i / waveformData.length) * 500;
-                                        const yPos = 100 - y * 80;
-                                        return `L ${x} ${yPos}`;
-                                    })
-                                    .join(" ")} L 500 200 L 0 200 Z`}
-                                fill="url(#waveGradient)"
-                            />
-                            <path
-                                d={`M 0 100 ${waveformData
-                                    .map((y, i) => {
-                                        const x = (i / waveformData.length) * 500;
-                                        const yPos = 100 - y * 80;
-                                        return `L ${x} ${yPos}`;
-                                    })
-                                    .join(" ")}`}
-                                fill="none"
-                                stroke="#06b6d4"
-                                strokeWidth="2"
-                            />
-                        </svg>
+                        <div style={{ height: "200px", width: "100%", overflow: "hidden", position: "relative" }}>
+                            <svg
+                                width="100%"
+                                height="100%"
+                                viewBox="0 0 500 200"
+                                preserveAspectRatio="none"
+                                style={{ display: "block" }} // Prevents inline spacing issues
+                            >
+                                <defs>
+                                    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style={{ stopColor: "#06b6d4", stopOpacity: 0.5 }} />
+                                        <stop offset="100%" style={{ stopColor: "#06b6d4", stopOpacity: 0.1 }} />
+                                    </linearGradient>
+                                </defs>
+                                {/* Filled Area */}
+                                <path
+                                    d={`M 0 200 L 0 ${100 - waveformData[0] * 80} ${waveformData
+                                        .map((y, i) => {
+                                            const x = (i / (waveformData.length - 1)) * 500;
+                                            const yPos = 100 - y * 80;
+                                            return `L ${x} ${yPos}`;
+                                        })
+                                        .join(" ")} L 500 200 Z`}
+                                    fill="url(#waveGradient)"
+                                />
+                                {/* Top Stroke Line */}
+                                <path
+                                    d={`M 0 ${100 - waveformData[0] * 80} ${waveformData
+                                        .map((y, i) => {
+                                            const x = (i / (waveformData.length - 1)) * 500;
+                                            const yPos = 100 - y * 80;
+                                            return `L ${x} ${yPos}`;
+                                        })
+                                        .join(" ")}`}
+                                    fill="none"
+                                    stroke="#06b6d4"
+                                    strokeWidth="2"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+                        </div>
                     </div>
                 </div>
 

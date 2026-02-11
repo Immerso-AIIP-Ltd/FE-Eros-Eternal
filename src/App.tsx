@@ -41,6 +41,7 @@ import WellnessScreen from "./WelnessScreen";
 import ErosHome from "./ErosHome";
 import FaceScanner from "./components/FaceScanner/FaceScanner";
 import VitaScanReport from "./VitaScanReport";
+import FaceAnalyseReport from "./FaceAnalyseReport";
 
 const App: React.FC = () => {
   return (
@@ -81,6 +82,7 @@ const App: React.FC = () => {
           <Route path="/palm-report" element={<PalmReadingReportPage />} />
           <Route path="/face-upload" element={<FaceUploadPage />} />
           <Route path="/face-report" element={<FaceReadingReportPage />} />
+          <Route path="/face-analyse" element={<FaceAnalyseReport />} />
           <Route path="/rasi-chart" element={<RasiChartPage />} />
           <Route path="/star-map" element={<StarMap />} />
           <Route path="/kosha-map" element={<KoshaMap />} />
