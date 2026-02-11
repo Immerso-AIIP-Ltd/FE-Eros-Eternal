@@ -11,6 +11,7 @@ import Stars from "./components/stars";
 import VoiceMessage from "./VoiceMessage";
 import MicVisualizer from "./MicVisualizer";
 import eroslogo from "../src/assets/eros-logo.png"
+import credits from "./assets/credits.png";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const AiChat: React.FC = () => {
@@ -116,7 +117,7 @@ const AiChat: React.FC = () => {
         };
 
         return (
-            <div className="bg-gray-700 rounded-lg p-3 flex items-center gap-3 max-w-xs">
+            <div className="bg-white rounded-lg p-3 flex items-center gap-3 max-w-xs shadow-md border border-gray-200">
                 <audio ref={audioRef} src={voiceData.url} preload="metadata" />
 
                 <button
@@ -127,13 +128,13 @@ const AiChat: React.FC = () => {
                 </button>
 
                 <div className="flex-1 min-w-0">
-                    <div className="text-sm text-white font-medium truncate">
+                    <div className="text-sm text-gray-800 font-medium truncate">
                         {voiceData.file.name}
                     </div>
-                    <div className="text-xs text-gray-300">
+                    <div className="text-xs text-gray-600">
                         {formatTime(currentTime)} / {formatTime(duration)}
                     </div>
-                    <div className="w-full bg-gray-600 rounded-full h-1 mt-1">
+                    <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
                         <div
                             className="bg-cyan-500 h-1 rounded-full transition-all duration-100"
                             style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
@@ -143,7 +144,7 @@ const AiChat: React.FC = () => {
 
                 <button
                     onClick={onRemove}
-                    className="text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
+                    className="text-gray-500 hover:text-red-500 transition-colors flex-shrink-0 bg-transparent"
                 >
                     <X size={16} />
                 </button>
@@ -154,26 +155,23 @@ const AiChat: React.FC = () => {
     const formatTextWithBold = (text) => {
         if (!text || typeof text !== 'string') return text;
 
-        // Split text by double asterisks first (**text**)
         const parts = text.split(/(\*\*[^*]+\*\*)/g);
 
         return parts.map((part, index) => {
-            // Handle double asterisks
             if (part.startsWith('**') && part.endsWith('**')) {
-                const boldText = part.slice(2, -2); // Remove ** from both ends
+                const boldText = part.slice(2, -2);
                 return <strong key={index}>{boldText}</strong>;
             }
 
-            // Handle single asterisks within non-double-asterisk parts
             const singleAsteriskParts = part.split(/(\*[^*]+\*)/g);
 
             if (singleAsteriskParts.length === 1) {
-                return part; // No single asterisks found
+                return part;
             }
 
             return singleAsteriskParts.map((subPart, subIndex) => {
                 if (subPart.startsWith('*') && subPart.endsWith('*') && !subPart.startsWith('**')) {
-                    const boldText = subPart.slice(1, -1); // Remove * from both ends
+                    const boldText = subPart.slice(1, -1);
                     return <strong key={`${index}-${subIndex}`}>{boldText}</strong>;
                 }
                 return subPart;
@@ -189,12 +187,6 @@ const AiChat: React.FC = () => {
             size: Math.random() * 2 + 1,
         }))
     );
-
-    const historyItems = [
-        "How is my aura profile?",
-        "How stars are located for me?",
-        "Tell about my kosha's?"
-    ];
 
     useEffect(() => {
         if (!isInitialized && messages.length === 0) {
@@ -213,7 +205,8 @@ const AiChat: React.FC = () => {
             if (!hasUserMessage && inputValue) {
                 const timer = setTimeout(() => {
                     sendMessage();
-                    location.state.initialMessage = null;
+                    // Clear the state completely
+                    window.history.replaceState({}, document.title);
                 }, 800);
                 return () => clearTimeout(timer);
             }
@@ -233,7 +226,6 @@ const AiChat: React.FC = () => {
     };
 
     const handleNewChat = async () => {
-        // Clear all states
         setMessages([]);
         setInputValue("");
         setAttachedImages([]);
@@ -243,7 +235,6 @@ const AiChat: React.FC = () => {
         setSessionId(null);
         setIsInitialized(false);
 
-        // Initialize with welcome message
         initializeChat();
         fetchSessions();
     };
@@ -254,7 +245,6 @@ const AiChat: React.FC = () => {
 
         try {
             const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/sessions/?user_id=${userId}`);
-            // const response = await fetch(`http://192.168.18.5:7001/api/v1/chat/sessions/?user_id=${userId}`);
             const data = await response.json();
             if (data.success && data.data && data.data.sessions && Array.isArray(data.data.sessions)) {
                 setSessions(data.data.sessions);
@@ -273,7 +263,6 @@ const AiChat: React.FC = () => {
 
         try {
             const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/conversation/${sessionId}`);
-            // const response = await fetch(`http://192.168.18.5:7001/api/v1/chat/conversation/${sessionId}`);
             const data = await response.json();
             if (data.success && data.data && data.data.conversation_history && Array.isArray(data.data.conversation_history)) {
                 const formattedMessages = data.data.conversation_history.map((msg: any) => ({
@@ -470,10 +459,8 @@ const AiChat: React.FC = () => {
 
             let currentSessionId = sessionId;
 
-            // If no session ID exists, initialize a new session
             if (!currentSessionId) {
                 const initResponse = await fetch(`http://164.52.205.108:8500/api/v1/chat/spiritual/${userId}`, {
-                    // const initResponse = await fetch(`http://192.168.18.5:7001/api/v1/chat/spiritual/${userId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({
@@ -486,7 +473,6 @@ const AiChat: React.FC = () => {
                 if (initData.success) {
                     currentSessionId = initData.data.session_id;
                     setSessionId(currentSessionId);
-                    // Optionally, fetch sessions to update the sidebar
                     fetchSessions();
                 } else {
                     setMessages((prev) => [...prev, { sender: "ai", text: "Failed to initialize chat session." }]);
@@ -495,12 +481,9 @@ const AiChat: React.FC = () => {
                 }
             }
 
-            // Send the user's message
             const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/spiritual/${userId}`, {
-                // const response = await fetch(`http://192.168.18.5:7001/api/v1/chat/spiritual/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', },
-
                 body: new URLSearchParams({
                     user_id: userId,
                     message: currentInput,
@@ -570,7 +553,6 @@ const AiChat: React.FC = () => {
         };
     }, [micStream]);
 
-    // Auto-scroll to bottom when new messages are added
     useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -578,19 +560,25 @@ const AiChat: React.FC = () => {
     }, [messages, isLoading]);
 
     return (
-        <div className="d-flex w-100 h-100 min-vh-100 min-vw-100 bg-black text-white overflow-hidden">
+        <div
+            className="d-flex w-100 h-100 min-vh-100 min-vw-100 text-gray-800 overflow-hidden"
+            style={{
+                backgroundImage: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 20%, #FFFFFF 40%)"
+            }}
+        >
             <Stars />
-            <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {stars.map((star, i) => (
                     <div
                         key={i}
-                        className="absolute bg-white rounded-full animate-pulse"
+                        className="absolute rounded-full animate-pulse"
                         style={{
                             width: `${star.size}px`,
                             height: `${star.size}px`,
-                            opacity: star.opacity,
+                            opacity: star.opacity * 0.4,
                             top: `${star.y}%`,
                             left: `${star.x}%`,
+                            background: '#60A5FA',
                             animationDelay: `${Math.random() * 3}s`,
                             animationDuration: `${2 + Math.random() * 2}s`
                         }}
@@ -599,11 +587,11 @@ const AiChat: React.FC = () => {
             </div>
 
             {showCamera && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-white">Take Photo</h3>
-                            <button onClick={closeCamera} className="text-gray-400 hover:text-white">
+                            <h3 className="text-lg font-semibold text-gray-800">Take Photo</h3>
+                            <button onClick={closeCamera} className="text-gray-600 hover:text-gray-800">
                                 <X size={24} />
                             </button>
                         </div>
@@ -623,7 +611,7 @@ const AiChat: React.FC = () => {
                             </button>
                             <button
                                 onClick={closeCamera}
-                                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors"
+                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg transition-colors"
                             >
                                 Cancel
                             </button>
@@ -634,73 +622,80 @@ const AiChat: React.FC = () => {
 
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+                    className="fixed inset-0 bg-black bg-opacity-30 z-40 md:hidden"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
 
             <div
-                className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative h-screen z-50 w-64 backdrop-blur-sm transition-transform duration-300 ease-in-out overflow-y-auto`}
+                className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative h-screen z-50 w-64 bg-white bg-opacity-90 backdrop-blur-sm transition-transform duration-300 ease-in-out overflow-y-auto shadow-lg`}
                 style={{
-                    backgroundColor: '#1E2123',
-                    scrollbarWidth: 'thin', // Firefox
-                    scrollbarColor: '#4B5563 #1E2123' // Firefox
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#CBD5E0 #F7FAFC',
+                    marginLeft: '16px',
+                    marginTop: '16px',
+                    marginBottom: '16px',
+                    height: 'calc(100vh - 32px)',
+                    borderRadius: '12px'
                 }}
             >
-                {/* Add custom scrollbar styles for WebKit browsers */}
                 <style>{`
                     div::-webkit-scrollbar {
-                    width: 6px;
+                        width: 6px;
                     }
                     div::-webkit-scrollbar-track {
-                    background: #1E2123;
+                        background: #F7FAFC;
                     }
                     div::-webkit-scrollbar-thumb {
-                    background: #4B5563;
-                    border-radius: 3px;
+                        background: #CBD5E0;
+                        border-radius: 3px;
                     }
                     div::-webkit-scrollbar-thumb:hover {
-                    background: #6B7280;
+                        background: #A0AEC0;
                     }
                 `}</style>
 
+                <div className="p-4 border-gray-300">
+                    <div className="relative flex items-center justify-center">
 
-                <div className="p-4 border-b border-gray-700">
-                    <div className="flex items-center justify-between">
-                        {/* <h2 className="text-lg font-bold" style={{
-                           
-                            color:"#00B8F8"
-                        }}>EROS Wellness</h2> */}
                         <img
                             src={eroslogo}
                             alt="EROS Wellness Logo"
                             style={{
-                                width: 'clamp(200px, 40vw, 400px)',
+                                width: 'clamp(80px, 15vw, 150px)',
                                 height: 'auto',
-                                // maxWidth: '100px',
-                                margin: 0,
                                 objectFit: 'contain',
-                                filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
+                                filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1))',
                                 transition: 'transform 0.3s ease',
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            onMouseEnter={(e) =>
+                                (e.currentTarget.style.transform = 'scale(1.02)')
+                            }
+                            onMouseLeave={(e) =>
+                                (e.currentTarget.style.transform = 'scale(1)')
+                            }
                         />
 
                         <button
-                            className="md:hidden text-gray-400 hover:text-white bg-transparent"
+                            className="md:hidden absolute right-0 text-gray-600 hover:text-gray-800 bg-transparent"
                             onClick={() => setSidebarOpen(false)}
                         >
                             <X size={20} />
                         </button>
+
                     </div>
                 </div>
+
 
                 <div className="p-4">
                     <button
                         onClick={handleNewChat}
-                        className="w-full flex items-center gap-3 px-4 py-3 bg-transparent rounded text-gray-300 hover:text-white hover:bg-gray-800 transition-all duration-200 group"
-                        style={{ border: '1px solid grey' }}
+                        className="w-full flex items-center gap-3 px-4 py-3 bg-transparent rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-200 group"
+                        style={{
+                            border: '1px solid #E5E7EB',
+                            borderRadius: '20px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+                        }}
                         disabled={messages.length === 0 || (messages.length === 1 && messages[0].centered)}
                     >
                         <SquarePlus size={18} className="group-hover:scale-110 transition-transform duration-200" />
@@ -708,14 +703,14 @@ const AiChat: React.FC = () => {
                     </button>
                 </div>
 
-                <div className="p-4 border-t border-gray-700">
-                    <h5 className="font-medium text-gray-400 mb-3 text-sm">Recent Chats</h5>
+                <div className="p-4 border-gray-300">
+                    <h5 className="font-semibold text-gray-700 mb-3 text-sm">History</h5>
                     <div className="space-y-2">
                         {Array.isArray(sessions) && sessions.length > 0 ? (
                             sessions.map((session) => (
                                 <div
                                     key={session.id}
-                                    className="text-sm text-gray-300 hover:text-white hover:bg-gray-800 cursor-pointer py-2 px-3 rounded-lg transition-all duration-200 truncate"
+                                    className="text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 cursor-pointer py-2 px-3 rounded-lg transition-all duration-200 truncate"
                                     title={session.session_name}
                                     onClick={() => loadConversation(session.id)}
                                 >
@@ -730,33 +725,39 @@ const AiChat: React.FC = () => {
             </div>
 
             <div className="flex-1 flex flex-col relative z-10 h-screen">
-                <div className="flex items-center justify-between p-4 border-gray-800">
+                <div className="flex items-center justify-between p-4 bg-opacity-80 backdrop-blur-sm">
                     <div className="flex items-center gap-3">
                         <button
-                            className="md:hidden text-gray-400 hover:text-white"
+                            className="md:hidden text-gray-600 hover:text-gray-800"
                             onClick={() => setSidebarOpen(true)}
                         >
                             <Menu size={20} />
                         </button>
-                        {/* <h3 className="text-xl font-semibold" style={{ color: "#00B8F8" }}>Wellness Chat Bot</h3> */}
-
-
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-4">
                         <div
-                            className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer"
-                            onClick={() => navigate("/result")} style={{ cursor: 'pointer' }}
+                            className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-gray-100 transition-colors"
+                            onClick={() => navigate("/result")}
+                            style={{ cursor: 'pointer' }}
                         >
-                            <LogOut size={18} />
+                            <LogOut size={18} className="text-gray-700" />
                         </div>
-                        <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center text-sm font-semibold ms-2">
-                            <User size={18} />
+                        <div style={{ display: "flex", alignItems: "center", gap: "0px" }}>
+                            <img
+                                src={credits}
+                                alt="Credits"
+                                style={{
+                                    height: "34px",
+                                    width: "auto",
+                                    marginLeft: "-6px",
+                                    objectFit: "contain",
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
 
                 <div className="flex-1 flex flex-col h-full relative overflow-hidden">
-                    {/* Chat Messages Area - Scrollable */}
                     <div
                         ref={chatContainerRef}
                         className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar"
@@ -764,33 +765,15 @@ const AiChat: React.FC = () => {
                             maxWidth: "65%",
                             margin: "0 auto",
                             width: "100%",
-                            // scrollbarWidth: 'thin',
-                            // scrollbarColor: '#4B5563 #1E2123'
                         }}
                     >
                         <style>{`
-                        // .custom-scrollbar::-webkit-scrollbar {
-                        //     width: 6px;
-                        // }
-                        // .custom-scrollbar::-webkit-scrollbar-track {
-                        //     background: #1E2123;
-                        // }
-                        // .custom-scrollbar::-webkit-scrollbar-thumb {
-                        //     background: #4B5563;
-                        //     border-radius: 3px;
-                        // }
-                        // .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                        //     background: #6B7280;
-                        // }
-                         /* Hide scrollbar for Chrome, Safari and Opera */
                             .hide-scrollbar::-webkit-scrollbar {
-                            display: none;
+                                display: none;
                             }
-
-                            /* Hide scrollbar for Firefox */
                             .hide-scrollbar {
-                            scrollbar-width: none; /* Firefox */
-                            -ms-overflow-style: none; /* IE and Edge */
+                                scrollbar-width: none;
+                                -ms-overflow-style: none;
                             }
                         `}</style>
 
@@ -799,11 +782,16 @@ const AiChat: React.FC = () => {
                                 <div className="text-center">
                                     <div className="mb-4">
                                         <div className="w-16 h-16 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <span className="text-2xl font-semibold">AI</span>
+                                            <i className="bi bi-stars" style={{ color: "#fff", fontSize: "24px" }}></i>
                                         </div>
                                     </div>
-                                    <div className="text-white text-lg leading-relaxed whitespace-pre-line">
-                                        {messages[0].text}
+                                    <div className="leading-relaxed">
+                                        <div className="text-xl font-semibold text-gray-800 mb-3">
+                                            Hi, I'm EROS Wellness AI
+                                        </div>
+                                        <div className="text-sm text-gray-600 mt-1">
+                                            How can I help you today?
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -814,9 +802,15 @@ const AiChat: React.FC = () => {
                                         {message.sender === 'user' ? (
                                             <div className="flex flex-col items-end gap-2 mb-4">
                                                 <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                                    <span className="text-xs font-semibold text-white"><User size={18} /></span>
+                                                    <User size={18} className="text-white" />
                                                 </div>
-                                                <div className="bg-cyan-500 text-white rounded-2xl rounded-tr-md px-4 py-3 max-w-xs lg:max-w-md shadow-lg">
+                                                <div
+                                                    className="text-dark rounded-2xl rounded-tr-md px-4 py-3 max-w-xs lg:max-w-md font-semibold"
+                                                    style={{
+                                                        backgroundColor: "#188BEF1F",
+                                                        border: "1px solid #188BEF1F"
+                                                    }}
+                                                >
                                                     {message.imageList && message.imageList.length > 0 && (
                                                         <div className="mb-2">
                                                             {message.imageList.map((img, j) => (
@@ -844,9 +838,14 @@ const AiChat: React.FC = () => {
                                         ) : (
                                             <div className="flex flex-col items-start gap-2 mb-4">
                                                 <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                                    <span className="text-xs font-semibold text-white">AI</span>
+                                                    <i className="bi bi-stars" style={{ color: "#fff" }}></i>
                                                 </div>
-                                                <div className="text-white rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl shadow-lg" style={{ border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D' }}>
+                                                <div
+                                                    className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl"
+                                                    style={{
+                                                        border: '1px solid rgba(0, 0, 0, 0.1)',
+                                                    }}
+                                                >
                                                     <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
                                                         {message.isThinking ? (
                                                             <div className="flex items-center gap-2">
@@ -865,9 +864,9 @@ const AiChat: React.FC = () => {
                                 {isLoading && (
                                     <div className="flex flex-col items-start gap-2 mb-4">
                                         <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                            <span className="text-xs font-semibold text-white">AI</span>
+                                            <i className="bi bi-stars" style={{ color: "#fff" }}></i>
                                         </div>
-                                        <div className="bg-gray-800 text-white rounded-2xl rounded-tl-md px-4 py-3 shadow-lg" style={{ border: '1px solid #FFFFFF33', backgroundColor: '#FFFFFF0D' }}>
+                                        <div className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-cyan-500 border-t-transparent"></div>
                                                 <span className="text-sm">Thinking...</span>
@@ -879,9 +878,16 @@ const AiChat: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Fixed Input Area at Bottom */}
-                    <div className="sticky bottom-0 bg-black z-20 px-6 pb-4 pt-2 border-gray-800">
-                        <div className="bg-gray-800 rounded-2xl p-4 shadow-lg" style={{ maxWidth: '65%', margin: '0 auto', width: '100%', backgroundColor: '#1E2123' }}>
+                    <div className="sticky bottom-0 bg-transparent z-20 px-6 pb-4 pt-2">
+                        <div
+                            className="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
+                            style={{
+                                maxWidth: '65%',
+                                margin: '0 auto',
+                                width: '100%',
+                                border: '1px solid rgba(0, 0, 0, 0.1)'
+                            }}
+                        >
                             {(attachedImages.length > 0 || attachedVoices.length > 0) && (
                                 <div className="flex flex-col gap-3 mb-3">
                                     {attachedImages.length > 0 && (
@@ -895,10 +901,10 @@ const AiChat: React.FC = () => {
                                                     <img
                                                         src={img}
                                                         alt="preview"
-                                                        className="rounded object-cover w-full h-full"
+                                                        className="rounded object-cover w-full h-full border border-gray-300"
                                                     />
                                                     <button
-                                                        className="absolute -top-2 -right-2 bg-danger text-white flex items-center justify-center text-xs hover:bg-red-600 p-1 rounded-full rounded-circle"
+                                                        className="absolute -top-2 -right-2 bg-danger text-white flex items-center justify-center text-xs hover:bg-red-600 p-1 rounded"
                                                         onClick={() => removeAttachedImage(idx)}
                                                     >
                                                         <X size={12} />
@@ -922,29 +928,27 @@ const AiChat: React.FC = () => {
                                 </div>
                             )}
 
-                            <div className="flex items-end gap-4">
+                            <div className="flex flex-col gap-3">
                                 {!isRecording ? (
                                     <>
                                         <div className="flex-1">
-                                            <textarea
-                                                placeholder="Enter a prompt here"
+                                            <input
+                                                type="text"
+                                                placeholder="Message to Wellness AI"
                                                 value={inputValue}
                                                 onChange={(e) => setInputValue(e.target.value)}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
-                                                        e.preventDefault();
+                                                onKeyPress={(e) => {
+                                                    if (e.key === 'Enter' && !isLoading) {
                                                         sendMessage();
                                                     }
                                                 }}
-                                                className="w-full bg-transparent text-white placeholder-gray-400 outline-none text-sm py-2 resize-none max-h-32 overflow-y-auto"
+                                                className="w-full bg-transparent text-gray-800 placeholder-gray-500 outline-none text-sm py-2 resize-none"
                                                 disabled={isLoading}
-                                                rows={1}
-                                                style={{ minHeight: '40px' }}
                                             />
                                         </div>
 
-                                        <div className="flex items-center gap-3">
-                                            {/* <label className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent cursor-pointer">
+                                        <div className="flex items-center justify-end gap-3">
+                                            {/* <label className="text-gray-600 hover:text-gray-800 transition-colors p-1 bg-transparent cursor-pointer">
                                                 <ImagePlus size={20} />
                                                 <input
                                                     type="file"
@@ -956,13 +960,13 @@ const AiChat: React.FC = () => {
                                             </label>
 
                                             <button
-                                                className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent"
+                                                className="text-gray-600 hover:text-gray-800 transition-colors p-1 bg-transparent"
                                                 onClick={openCamera}
                                             >
                                                 <Camera size={20} />
                                             </button>
 
-                                            <label className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent cursor-pointer">
+                                            <label className="text-gray-600 hover:text-gray-800 transition-colors p-1 bg-transparent cursor-pointer">
                                                 <Upload size={20} />
                                                 <input
                                                     type="file"
@@ -973,36 +977,46 @@ const AiChat: React.FC = () => {
                                             </label>
 
                                             <button
-                                                className="text-gray-400 hover:text-white transition-colors p-1 bg-transparent"
+                                                className="text-gray-600 hover:text-gray-800 transition-colors p-1 bg-transparent"
                                                 onClick={startRecording}
                                             >
                                                 <Mic size={20} />
                                             </button> */}
 
-                                            <div className="border-l border-gray-600 pl-3">
+                                            <div className="border-gray-300 pl-3">
                                                 <button
                                                     onClick={sendMessage}
                                                     disabled={isLoading || (!inputValue.trim() && attachedImages.length === 0 && attachedVoices.length === 0)}
-                                                    className="bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-full p-2 transition-colors shadow-lg bg-transparent"
+                                                    className="d-flex align-items-center justify-content-center border-0 rounded-pill px-3 py-2"
+                                                    style={{
+                                                        backgroundColor: isLoading || (!inputValue.trim() && attachedImages.length === 0 && attachedVoices.length === 0) ? "#E5E7EB" : "#06B6D4",
+                                                        color: "white",
+                                                        fontSize: "14px",
+                                                        fontWeight: "500",
+                                                        gap: "6px",
+                                                        minWidth: "70px",
+                                                        cursor: isLoading || (!inputValue.trim() && attachedImages.length === 0 && attachedVoices.length === 0) ? "not-allowed" : "pointer"
+                                                    }}
                                                 >
-                                                    <SendHorizontal size={20} />
+                                                    Send
+                                                    <SendHorizontal size={16} />
                                                 </button>
                                             </div>
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="flex items-center bg-gray-700 rounded-xl px-4 py-2 flex-grow-1 w-full">
+                                    <div className="flex items-center bg-gray-200 rounded-xl px-4 py-2 flex-grow-1 w-full">
                                         <MicVisualizer stream={micStream} height={40} />
-                                        <span className="ml-4 text-red-400 font-bold text-lg">{formatTime(recordingTime)}</span>
+                                        <span className="ml-4 text-red-500 font-bold text-lg">{formatTime(recordingTime)}</span>
                                         <div className="ml-auto flex items-center gap-2">
                                             <button
-                                                className="bg-green-500 hover:bg-green-600 text-white rounded-full p-2 transition-colors bg-transparent"
+                                                className="bg-green-500 hover:bg-green-600 text-white rounded-full p-2 transition-colors"
                                                 onClick={stopRecording}
                                             >
                                                 <Check size={16} />
                                             </button>
                                             <button
-                                                className="bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors bg-transparent"
+                                                className="bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
                                                 onClick={cancelRecording}
                                             >
                                                 <X size={16} />
@@ -1014,24 +1028,16 @@ const AiChat: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Footer - Fixed at very bottom */}
-                    <div className="sticky bottom-0 bg-black z-10 px-6 py-2 border-gray-800">
-                        <div className="text-center text-xs text-gray-500" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
+                    <div className="sticky bottom-0 bg-transparent z-10 px-6 py-2">
+                        <div className="text-center text-xs text-gray-600" style={{ maxWidth: '65%', margin: '0 auto', width: '100%' }}>
                             <div className="flex items-center justify-center text-xs">
-                                {/* <div>© 2025 EROS Universe. All Rights Reserved.</div> */}
-                                {/* <div className="flex items-center gap-6">
-                                    <a href="#" className="hover:text-gray-300 transition-colors">FAQs</a>
-                                    <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
-                                    <a href="#" className="hover:text-gray-300 transition-colors">Terms & Conditions</a>
-                                    <a href="#" className="hover:text-gray-300 transition-colors">Refund Policy</a>
-                                </div> */}
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {previewImage && (
-                    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="relative max-w-4xl max-h-4xl p-4">
                             <button
                                 onClick={() => setPreviewImage(null)}

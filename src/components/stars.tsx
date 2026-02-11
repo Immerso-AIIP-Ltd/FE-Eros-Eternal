@@ -57,6 +57,7 @@ export default function Stars() {
             animationDelay: star.animationDelay,
             animationDuration: star.animationDuration,
             backgroundRepeat: "repeat",
+
             color: "rgb(0, 184, 248)"
           }}
         >
