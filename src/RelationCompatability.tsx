@@ -130,16 +130,17 @@ const RelationshipCompatibility: React.FC = () => {
 
     return (
       <div
-        className="w-full max-w-4xl mx-auto px-4"
-        style={{ position: "relative", zIndex: 10 }}
+        className="w-full  mx-auto px-4"
+        style={{ position: "relative", zIndex: 10,
+            minHeight: "100vh" }}
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-white mb-2">
+          <h2 className="text-3xl font-bold  mb-2">
             Relationship Compatibility
           </h2>
 
-          <p className="text-gray-300 text-lg">
+          <p className="text-lg">
             <span className="text-cyan-400 fs-4 font-semibold">{yourName}</span>{" "}
             &{" "}
             <span className="text-cyan-400 fs-4 font-semibold">
@@ -151,56 +152,57 @@ const RelationshipCompatibility: React.FC = () => {
         </div>
 
         {/* Relationship Strengths */}
-        <h5 className="text-xl font-semibold text-white mb-4 flex items-center">
+        <h5 className="text-xl font-semibold  mb-4 flex items-center">
           {/* <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div> */}
           Relationship Strengths
         </h5>
         <div
           className="mb-8 p-6 rounded-2xl border border-gray-600 shadow-xl"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-          }}
+          // style={{
+          //   background:
+          //     "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
+          // }}
+          style={{background:'#ffffff'}}
         >
           <div className="space-y-6">
             {/* Match Summary */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Match Summary
               </h3>
-              <p className="text-gray-300 leading-relaxed">
+              <p className=" leading-relaxed">
                 {data.match_summary}
               </p>
             </div>
 
             {/* Dynamic Summary */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Overview
               </h3>
-              <p className="text-gray-300 leading-relaxed">
+              <p className=" leading-relaxed">
                 {data.dynamic_summary}
               </p>
             </div>
 
             {/* Compatibility Score */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Compatibility Score
               </h3>
-              <p className="text-gray-300 text-2xl font-bold">
+              <p className=" text-2xl font-bold">
                 {data.compatibility_score}%
               </p>
             </div>
 
             {/* Strengths */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Strengths
               </h3>
-              <ul className="list-disc list-inside text-gray-300 space-y-2">
+              <ul className="list-disc list-inside  space-y-2">
                 {data.strengths?.length ? (
-                  <ul className="list-disc list-inside text-gray-300 space-y-2">
+                  <ul className="list-disc list-inside  space-y-2">
                     {data.strengths.map((strength, index) => (
                       <li key={index}>{strength}</li>
                     ))}
@@ -213,10 +215,10 @@ const RelationshipCompatibility: React.FC = () => {
 
             {/* Challenges */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Challenges
               </h3>
-              <ul className="list-disc list-inside text-gray-300 space-y-2">
+              <ul className="list-disc list-inside  space-y-2">
                 {data.challenges.map((challenge, index) => (
                   <li key={index}>{challenge}</li>
                 ))}
@@ -225,10 +227,10 @@ const RelationshipCompatibility: React.FC = () => {
 
             {/* Shared Values */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Shared Values
               </h3>
-              <ul className="list-disc list-inside text-gray-300 space-y-2">
+              <ul className="list-disc list-inside  space-y-2">
                 {data.shared_values.map((value, index) => (
                   <li key={index}>{value}</li>
                 ))}
@@ -237,10 +239,10 @@ const RelationshipCompatibility: React.FC = () => {
 
             {/* Ideal Roles */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Ideal Roles
               </h3>
-              <ul className="list-disc list-inside text-gray-300 space-y-2">
+              <ul className="list-disc list-inside  space-y-2">
                 {data.ideal_roles.map((role, index) => (
                   <li key={index}>{role}</li>
                 ))}
@@ -249,30 +251,30 @@ const RelationshipCompatibility: React.FC = () => {
 
             {/* Communication Style */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Communication Style
               </h3>
-              <p className="text-gray-300 leading-relaxed">
+              <p className=" leading-relaxed">
                 {data.communication_style}
               </p>
             </div>
 
             {/* Growth Opportunities */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Growth Opportunities
               </h3>
-              <p className="text-gray-300 leading-relaxed">
+              <p className=" leading-relaxed">
                 {data.growth_opportunities}
               </p>
             </div>
 
             {/* Warning Signs */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Warning Signs
               </h3>
-              <ul className="list-disc list-inside text-gray-300 space-y-2">
+              <ul className="list-disc list-inside  space-y-2">
                 {data.warning_signs.map((warning, index) => (
                   <li key={index}>{warning}</li>
                 ))}
@@ -281,40 +283,40 @@ const RelationshipCompatibility: React.FC = () => {
 
             {/* Advice for Main */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Advice for {data.sign_main}
               </h3>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="leading-relaxed">
                 {data.advice_for_main}
               </p>
             </div>
 
             {/* Advice for Partner */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Advice for {data.sign_partner}
               </h3>
-              <p className="text-gray-300 leading-relaxed">
+              <p className=" leading-relaxed">
                 {data.advice_for_partner}
               </p>
             </div>
 
             {/* Element Interaction */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Element Interaction
               </h3>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="leading-relaxed">
                 {data.element_interaction}
               </p>
             </div>
 
             {/* Modality Interaction */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">
+              <h3 className="text-lg font-semibold  mb-3">
                 Modality Interaction
               </h3>
-              <p className="text-gray-300 leading-relaxed">
+              <p className=" leading-relaxed">
                 {data.modality_interaction}
               </p>
             </div>
@@ -331,11 +333,12 @@ const RelationshipCompatibility: React.FC = () => {
 
   return (
     <div
-      className="vw-100 d-flex flex-column p-4"
-      style={{ position: "relative", minHeight: "100vh" }}
+      className="vw-100 d-flex flex-column"
+      style={{ position: "relative", minHeight: "100vh",color:"#000",background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%),",
+           }}
     >
-      <Stars />
-      <div
+      {/* <Stars /> */}
+      {/* <div
         className="absolute inset-0 overflow-hidden"
         style={{ zIndex: 0, pointerEvents: "none" }}
       >
@@ -354,24 +357,22 @@ const RelationshipCompatibility: React.FC = () => {
             }}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div  style={{
+            background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
+            minHeight: "100vh",color:"#000"
+          }}>
+      <div className="d-flex justify-content-between align-items-center mb-4" >
         <button
-          className="btn text-white"
+          className="btn "
           onClick={() => navigate("/result")}
           style={{ fontSize: "1rem", position: "relative", zIndex: 1000 }}
         >
           ← Back
         </button>
-        {/* <button
-          className="btn  text-white"
-          onClick={() => window.location.reload()}
-          style={{ fontSize: '1.2rem' }}
-        >
-          ↻
-        </button> */}
+      
       </div>
 
       {/* Header */}
@@ -416,13 +417,15 @@ const RelationshipCompatibility: React.FC = () => {
 
       <div
         className="flex-grow flex my-4 p-4"
-        style={{ position: "relative", zIndex: 10 }}
+        style={{ position: "relative", zIndex: 10, }}
       >
+
+        
         {/* Show Form OR Results */}
         {!compatibilityResult ? (
           <div
             className="w-full max-w-4xl mx-auto"
-            style={{ position: "relative", zIndex: 10 }}
+            style={{ position: "relative", zIndex: 10, }}
           >
             <div className="d-flex justify-content-center mb-4">
               <div
@@ -449,30 +452,30 @@ const RelationshipCompatibility: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 {/* Your Details */}
                 <div
-                  className="p-8 rounded-2xl  border border-gray-600 shadow-xl"
+                  className="p-8 rounded-2xl  "
                   style={{
-                    backgroundColor: "#262626",
+                    // backgroundColor: "#262626",
                     position: "relative",
                     zIndex: 10,
                   }}
                 >
                   <h5 className="text-2xl font-semibold mb-6 text-cyan-400">
-                    Enter Your Details
+                   Your Information
                   </h5>
 
                   <div className="mb-6">
                     <label
                       htmlFor="yourName"
-                      className="block text-sm font-medium text-gray-300 mb-2"
+                      className="block text-sm font-medium  mb-2"
                     >
                       Enter Your Name
                     </label>
                     <input
                       type="text"
                       id="yourName"
-                      className="w-full px-4 py-3  border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3  border border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
                       style={{
-                        backgroundColor: "#262626",
+                        // backgroundColor: "#262626",
                         position: "relative",
                         zIndex: 10,
                       }}
@@ -486,18 +489,19 @@ const RelationshipCompatibility: React.FC = () => {
                   <div className="mb-6">
                     <label
                       htmlFor="yourDob"
-                      className="block text-sm font-medium text-gray-300 mb-2"
+                      className="block text-sm font-medium  mb-2"
                     >
                       Date of Birth
                     </label>
                     <input
                       type="date"
                       id="yourDob"
-                      className="w-full px-4 py-3  border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3  border border-gray-600 rounded-xl  focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
                       style={{
-                        backgroundColor: "#262626",
+                        // backgroundColor: "#262626",
                         position: "relative",
                         zIndex: 10,
+                        color:"#000"
                       }}
                       value={yourDob}
                       onChange={(e) => setYourDob(e.target.value)}
@@ -509,30 +513,30 @@ const RelationshipCompatibility: React.FC = () => {
 
                 {/* Partner Details */}
                 <div
-                  className="p-8 rounded-2xl border border-gray-600 shadow-xl"
+                  className="p-8 rounded-2xl "
                   style={{
-                    backgroundColor: "#262626",
+                    // backgroundColor: "#262626",
                     position: "relative",
                     zIndex: 10,
                   }}
                 >
                   <h5 className="text-2xl font-semibold mb-6 text-pink-400">
-                    Enter Partner's Details
+                    Partner Information
                   </h5>
 
                   <div className="mb-6">
                     <label
                       htmlFor="partnerName"
-                      className="block text-sm font-medium text-gray-300 mb-2"
+                      className="block text-sm font-medium  mb-2"
                     >
-                      Enter Partner's Name
+                      Partner's Name
                     </label>
                     <input
                       type="text"
                       id="partnerName"
-                      className="w-full px-4 py-3  border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3  border border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
                       style={{
-                        backgroundColor: "#262626",
+                        // backgroundColor: "#262626",
                         position: "relative",
                         zIndex: 10,
                       }}
@@ -546,16 +550,16 @@ const RelationshipCompatibility: React.FC = () => {
                   <div className="mb-6">
                     <label
                       htmlFor="partnerDob"
-                      className="block text-sm font-medium text-gray-300 mb-2"
+                      className="block text-sm font-medium  mb-2"
                     >
                       Date of Birth
                     </label>
                     <input
                       type="date"
                       id="partnerDob"
-                      className="w-full px-4 py-3  border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3  border border-gray-600 rounded-xl  focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
                       style={{
-                        backgroundColor: "#262626",
+                        // backgroundColor: "#262626",
                         position: "relative",
                         zIndex: 10,
                       }}
@@ -570,40 +574,40 @@ const RelationshipCompatibility: React.FC = () => {
 
               {/* How It Works */}
               <div
-                className="p-8 rounded-2xl shadow-xl mb-8"
+                className="p-8  mb-8"
                 style={{
                   position: "relative",
                   zIndex: 10,
                 }}
               >
-                <h5 className="text-xl font-semibold text-white mb-4">
-                  How It Works
+                <h5 className="text-xl font-semibold  mb-4">
+                 What We’ll Analyze
                 </h5>
                 <div className="grid gap-3">
-                  <div className="flex items-center text-gray-300">
-                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Analyzes birth dates using vedic astrology</span>
-                  </div>
-                  <div className="flex items-center text-gray-300">
-                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Calculates spiritual compatibility scores</span>
-                  </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center ">
                     <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
                     <span>Provides personalized relationship insights</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center ">
                     <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
                     <span>Identifies relationship strengths</span>
                   </div>
-                  <div className="flex items-center text-gray-300">
+                  <div className="flex items-center ">
+                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                    <span>Identifies relationship Challenges</span>
+                  </div>
+                  <div className="flex items-center ">
+                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                    <span>Suggest growth oppourtunities</span>
+                  </div>
+                  {/* <div className="flex items-center text-gray-300">
                     <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
                     <span>Suggests growth opportunities</span>
-                  </div>
-                  <div className="flex items-center text-gray-300">
+                  </div> */}
+                  {/* <div className="flex items-center text-gray-300">
                     <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
                     <span>Based on ancient wisdom traditions</span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -618,17 +622,18 @@ const RelationshipCompatibility: React.FC = () => {
                     !partnerDob ||
                     isLoading
                   }
-                  className="px-12 py-4 btn text-white btn-info rounded-pill px-4 py-2 mt-4 w-full"
+                  className="px-12 py-4 btn  btn-info rounded-pill px-4 py-2 mt-4 w-full"
                   style={{
                     cursor: "pointer",
                     position: "relative",
                     zIndex: 10,
+                    color:"#ffffff"
                   }}
                 >
                   {isLoading ? (
                     <span className="flex items-center">
                       <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 "
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -650,7 +655,7 @@ const RelationshipCompatibility: React.FC = () => {
                       Generating Compatibility...
                     </span>
                   ) : (
-                    "Start Compatibility Reading"
+                    "Analyze Compatibility"
                   )}
                 </button>
               </div>
@@ -664,7 +669,7 @@ const RelationshipCompatibility: React.FC = () => {
         {/* Global Error Message */}
         {error && (
           <div
-            className="fixed bottom-4 right-4 max-w-sm p-4 bg-red-600 text-white rounded-xl shadow-xl border border-red-500"
+            className="fixed bottom-4 right-4 max-w-sm p-4 bg-red-600  rounded-xl shadow-xl border border-red-500"
             style={{ zIndex: 1000 }}
           >
             <div className="flex items-center">
@@ -683,6 +688,7 @@ const RelationshipCompatibility: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

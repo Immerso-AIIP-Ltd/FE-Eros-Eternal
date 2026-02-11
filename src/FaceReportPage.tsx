@@ -37,7 +37,7 @@ interface StatusBadgeProps {
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const color = getStatusColorCode(status);
   const normalizedStatus = status.toUpperCase();
-  
+
   let icon = <Minus size={12} />;
   if (normalizedStatus === 'LOW' || normalizedStatus === 'GOOD' || normalizedStatus === 'EXCELLENT' || normalizedStatus === 'NORMAL') {
     icon = <TrendingDown size={12} />;
@@ -82,8 +82,8 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, unit, status, ico
   return (
     <div
       style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        backgroundColor: '#ffffff',
+        border: '1px solid #E5E7EB',
         borderRadius: '16px',
         padding: '20px',
         display: 'flex',
@@ -92,12 +92,12 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, unit, status, ico
         transition: 'all 0.3s ease',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+        e.currentTarget.style.backgroundColor = '#F9FAFB';
         e.currentTarget.style.borderColor = `${color}40`;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
-        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+        e.currentTarget.style.backgroundColor = '#ffffff';
+        e.currentTarget.style.borderColor = '#E5E7EB';
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -116,13 +116,13 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, unit, status, ico
           >
             {icon}
           </div>
-          <span style={{ color: '#9CA3AF', fontSize: '0.875rem', fontWeight: 500 }}>{title}</span>
+          <span style={{ color: '#6B7280', fontSize: '0.875rem', fontWeight: 500 }}>{title}</span>
         </div>
         <StatusBadge status={status} />
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-        <span style={{ color: '#fff', fontSize: '1.875rem', fontWeight: 700 }}>{value}</span>
-        {unit && <span style={{ color: '#6B7280', fontSize: '0.875rem' }}>{unit}</span>}
+        <span style={{ color: '#111827', fontSize: '1.875rem', fontWeight: 700 }}>{value}</span>
+        {unit && <span style={{ color: '#9CA3AF', fontSize: '0.875rem' }}>{unit}</span>}
       </div>
     </div>
   );
@@ -134,13 +134,14 @@ const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
     return (
       <div
         style={{
-          backgroundColor: 'rgba(10, 10, 15, 0.95)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          border: '1px solid #E5E7EB',
           borderRadius: '8px',
           padding: '10px 14px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <p style={{ color: '#9CA3AF', fontSize: '0.75rem', margin: '0 0 4px 0' }}>
+        <p style={{ color: '#6B7280', fontSize: '0.75rem', margin: '0 0 4px 0' }}>
           Time: {label?.toFixed(1)}s
         </p>
         <p style={{ color: '#00B8D4', fontSize: '0.875rem', fontWeight: 600, margin: 0 }}>
@@ -166,10 +167,10 @@ const FaceReportPage: React.FC = () => {
     if (location.state && location.state.success) {
       const reportData = location.state as CombinedReportData;
       setReport(reportData);
-      
+
       // Save to localStorage for persistence
       localStorage.setItem('faceReportData', JSON.stringify(reportData));
-      
+
       if (reportData.uploadedImage) {
         setUploadedImage(reportData.uploadedImage);
       }
@@ -278,7 +279,7 @@ const FaceReportPage: React.FC = () => {
       <div
         style={{
           minHeight: '100vh',
-          backgroundColor: '#0a0a0f',
+          backgroundColor: '#F9FAFB',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -297,14 +298,14 @@ const FaceReportPage: React.FC = () => {
           }}
         >
           <AlertCircle size={48} style={{ color: '#EF4444', marginBottom: '16px' }} />
-          <h3 style={{ color: '#fff', margin: '0 0 8px 0', fontSize: '1.25rem' }}>Error</h3>
-          <p style={{ color: '#9CA3AF', margin: '0 0 20px 0' }}>{error}</p>
+          <h3 style={{ color: '#111827', margin: '0 0 8px 0', fontSize: '1.25rem' }}>Error</h3>
+          <p style={{ color: '#6B7280', margin: '0 0 20px 0' }}>{error}</p>
           <button
             onClick={() => navigate('/')}
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: '#fff',
+              backgroundColor: 'rgba(0, 0, 0, 0.05)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              color: '#111827',
               padding: '10px 24px',
               borderRadius: '8px',
               cursor: 'pointer',
@@ -313,10 +314,10 @@ const FaceReportPage: React.FC = () => {
               transition: 'all 0.2s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
+              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.08)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
             }}
           >
             Return Home
@@ -331,7 +332,7 @@ const FaceReportPage: React.FC = () => {
       <div
         style={{
           minHeight: '100vh',
-          backgroundColor: '#0a0a0f',
+          backgroundColor: '#F9FAFB',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -351,7 +352,7 @@ const FaceReportPage: React.FC = () => {
               margin: '0 auto 16px',
             }}
           />
-          <p style={{ color: '#9CA3AF', fontSize: '1rem' }}>Loading report...</p>
+          <p style={{ color: '#6B7280', fontSize: '1rem' }}>Loading report...</p>
         </div>
         <style>{`
           @keyframes spin {
@@ -367,7 +368,7 @@ const FaceReportPage: React.FC = () => {
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: '#0a0a0f',
+        backgroundColor: '#F9FAFB',
         padding: '24px',
       }}
     >
@@ -383,7 +384,7 @@ const FaceReportPage: React.FC = () => {
               gap: '8px',
               backgroundColor: 'transparent',
               border: 'none',
-              color: '#9CA3AF',
+              color: '#6B7280',
               cursor: 'pointer',
               fontSize: '0.875rem',
               fontWeight: 500,
@@ -392,10 +393,10 @@ const FaceReportPage: React.FC = () => {
               transition: 'color 0.2s',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.color = '#111827';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = '#9CA3AF';
+              e.currentTarget.style.color = '#6B7280';
             }}
           >
             <ArrowLeft size={18} />
@@ -403,7 +404,7 @@ const FaceReportPage: React.FC = () => {
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            {uploadedImage && (
+            {/* {uploadedImage && (
               <img
                 src={uploadedImage}
                 alt="Profile"
@@ -415,12 +416,12 @@ const FaceReportPage: React.FC = () => {
                   border: '2px solid rgba(0, 184, 212, 0.5)',
                 }}
               />
-            )}
+            )} */}
             <div>
-              <h1 style={{ color: '#fff', fontSize: '1.875rem', fontWeight: 700, margin: '0 0 4px 0' }}>
+              <h1 style={{ color: '#111827', fontSize: '1.875rem', fontWeight: 700, margin: '0 0 4px 0' }}>
                 Health Scan Report
               </h1>
-              <p style={{ color: '#6B7280', fontSize: '0.875rem', margin: 0 }}>
+              <p style={{ color: '#9CA3AF', fontSize: '0.875rem', margin: 0 }}>
                 Biometric analysis & monitoring
               </p>
             </div>
@@ -484,8 +485,8 @@ const FaceReportPage: React.FC = () => {
           {/* Live Scan Waveform */}
           <div
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              backgroundColor: '#ffffff',
+              border: '1px solid #E5E7EB',
               borderRadius: '16px',
               padding: '24px',
               minHeight: '350px',
@@ -495,7 +496,7 @@ const FaceReportPage: React.FC = () => {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
               <Activity size={20} style={{ color: '#00B8D4' }} />
-              <h3 style={{ color: '#fff', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
+              <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
                 Live Scan Waveform
               </h3>
             </div>
@@ -511,14 +512,14 @@ const FaceReportPage: React.FC = () => {
                   </defs>
                   <XAxis
                     dataKey="time"
-                    stroke="#374151"
+                    stroke="#E5E7EB"
                     tick={{ fill: '#6B7280', fontSize: 12 }}
                     tickFormatter={(value) => `${value.toFixed(0)}s`}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis
-                    stroke="#374151"
+                    stroke="#E5E7EB"
                     tick={{ fill: '#6B7280', fontSize: 12 }}
                     domain={['dataMin - 5', 'dataMax + 5']}
                     axisLine={false}
@@ -537,12 +538,12 @@ const FaceReportPage: React.FC = () => {
                 </AreaChart>
               </ResponsiveContainer>
               ) : (
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
                   height: '100%',
-                  color: '#6B7280',
+                  color: '#9CA3AF',
                   fontSize: '0.875rem'
                 }}>
                   No waveform data available
@@ -550,10 +551,10 @@ const FaceReportPage: React.FC = () => {
               )}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px' }}>
-              <span style={{ color: '#6B7280', fontSize: '0.75rem' }}>
+              <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
                 Duration: {rppg.metadata.scanDurationSeconds}s
               </span>
-              <span style={{ color: '#6B7280', fontSize: '0.75rem' }}>
+              <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
                 Samples: {rppg.metadata.samplesCollected}
               </span>
             </div>
@@ -562,15 +563,15 @@ const FaceReportPage: React.FC = () => {
           {/* AI Health Insights */}
           <div
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              backgroundColor: '#ffffff',
+              border: '1px solid #E5E7EB',
               borderRadius: '16px',
               padding: '24px',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
               <Brain size={20} style={{ color: '#A855F7' }} />
-              <h3 style={{ color: '#fff', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
+              <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
                 AI Health Insights
               </h3>
             </div>
@@ -603,7 +604,7 @@ const FaceReportPage: React.FC = () => {
                       <Info size={14} style={{ color: '#00B8D4' }} />
                     )}
                   </div>
-                  <span style={{ color: '#D1D5DB', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                  <span style={{ color: '#374151', fontSize: '0.9rem', lineHeight: 1.5 }}>
                     {insight.text}
                   </span>
                 </div>
@@ -631,7 +632,7 @@ const FaceReportPage: React.FC = () => {
                   {aiReport.riskFactors.map((risk, index) => (
                     <div key={index} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                       <span style={{ color: '#EF4444', fontSize: '0.8rem', marginTop: '2px' }}>•</span>
-                      <span style={{ color: '#FCA5A5', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                      <span style={{ color: '#DC2626', fontSize: '0.85rem', lineHeight: 1.5 }}>
                         {risk}
                       </span>
                     </div>
@@ -655,15 +656,15 @@ const FaceReportPage: React.FC = () => {
           {/* HRV Time Domain */}
           <div
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              backgroundColor: '#ffffff',
+              border: '1px solid #E5E7EB',
               borderRadius: '16px',
               padding: '24px',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
               <Clock size={20} style={{ color: '#F59E0B' }} />
-              <h3 style={{ color: '#fff', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
+              <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
                 HRV Time Domain
               </h3>
             </div>
@@ -675,16 +676,16 @@ const FaceReportPage: React.FC = () => {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '16px 20px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                  backgroundColor: '#F9FAFB',
                   borderRadius: '12px',
                 }}
               >
                 <div>
-                  <span style={{ color: '#9CA3AF', fontSize: '0.875rem', display: 'block', marginBottom: '4px' }}>
+                  <span style={{ color: '#6B7280', fontSize: '0.875rem', display: 'block', marginBottom: '4px' }}>
                     SDNN (Standard Deviation)
                   </span>
-                  <span style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 600 }}>
-                    {rppg.hrv.sdnn.value} <span style={{ color: '#6B7280', fontSize: '0.875rem' }}>ms</span>
+                  <span style={{ color: '#111827', fontSize: '1.25rem', fontWeight: 600 }}>
+                    {rppg.hrv.sdnn.value} <span style={{ color: '#9CA3AF', fontSize: '0.875rem' }}>ms</span>
                   </span>
                 </div>
                 <StatusBadge status={rppg.hrv.sdnn.status} />
@@ -697,16 +698,16 @@ const FaceReportPage: React.FC = () => {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '16px 20px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                  backgroundColor: '#F9FAFB',
                   borderRadius: '12px',
                 }}
               >
                 <div>
-                  <span style={{ color: '#9CA3AF', fontSize: '0.875rem', display: 'block', marginBottom: '4px' }}>
+                  <span style={{ color: '#6B7280', fontSize: '0.875rem', display: 'block', marginBottom: '4px' }}>
                     RMSSD (Root Mean Square)
                   </span>
-                  <span style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 600 }}>
-                    {rppg.hrv.rmssd.value} <span style={{ color: '#6B7280', fontSize: '0.875rem' }}>ms</span>
+                  <span style={{ color: '#111827', fontSize: '1.25rem', fontWeight: 600 }}>
+                    {rppg.hrv.rmssd.value} <span style={{ color: '#9CA3AF', fontSize: '0.875rem' }}>ms</span>
                   </span>
                 </div>
                 <StatusBadge status={rppg.hrv.rmssd.status} />
@@ -719,16 +720,16 @@ const FaceReportPage: React.FC = () => {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   padding: '16px 20px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                  backgroundColor: '#F9FAFB',
                   borderRadius: '12px',
                 }}
               >
                 <div>
-                  <span style={{ color: '#9CA3AF', fontSize: '0.875rem', display: 'block', marginBottom: '4px' }}>
+                  <span style={{ color: '#6B7280', fontSize: '0.875rem', display: 'block', marginBottom: '4px' }}>
                     pNN50 (Successive Differences)
                   </span>
-                  <span style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 600 }}>
-                    {rppg.hrv.pnn50.value} <span style={{ color: '#6B7280', fontSize: '0.875rem' }}>%</span>
+                  <span style={{ color: '#111827', fontSize: '1.25rem', fontWeight: 600 }}>
+                    {rppg.hrv.pnn50.value} <span style={{ color: '#9CA3AF', fontSize: '0.875rem' }}>%</span>
                   </span>
                 </div>
                 <StatusBadge status={rppg.hrv.pnn50.status} />
@@ -746,7 +747,7 @@ const FaceReportPage: React.FC = () => {
                   border: '1px solid rgba(0, 184, 212, 0.15)',
                 }}
               >
-                <span style={{ color: '#9CA3AF', fontSize: '0.875rem' }}>Recording Quality</span>
+                <span style={{ color: '#6B7280', fontSize: '0.875rem' }}>Recording Quality</span>
                 <span
                   style={{
                     color: '#00B8D4',
@@ -765,15 +766,15 @@ const FaceReportPage: React.FC = () => {
           {/* Recommendations */}
           <div
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              backgroundColor: '#ffffff',
+              border: '1px solid #E5E7EB',
               borderRadius: '16px',
               padding: '24px',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
               <Zap size={20} style={{ color: '#10B981' }} />
-              <h3 style={{ color: '#fff', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
+              <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
                 Recommendations
               </h3>
             </div>
@@ -790,7 +791,7 @@ const FaceReportPage: React.FC = () => {
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{ color: '#D1D5DB', fontSize: '0.9rem', lineHeight: 1.5 }}>{rec}</span>
+                  <span style={{ color: '#374151', fontSize: '0.9rem', lineHeight: 1.5 }}>{rec}</span>
                 </div>
               ))}
             </div>
@@ -811,7 +812,7 @@ const FaceReportPage: React.FC = () => {
                   Stress Analysis
                 </span>
               </div>
-              <p style={{ color: '#D1D5DB', fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
+              <p style={{ color: '#374151', fontSize: '0.85rem', margin: 0, lineHeight: 1.5 }}>
                 {rppg.stress.description}
               </p>
             </div>
@@ -822,25 +823,25 @@ const FaceReportPage: React.FC = () => {
         {aiReport?.summary && (
           <div
             style={{
-              backgroundColor: 'rgba(59, 130, 246, 0.08)',
-              border: '1px solid rgba(59, 130, 246, 0.25)',
+              backgroundColor: 'rgba(59, 130, 246, 0.06)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
               borderRadius: '16px',
               padding: '24px',
               marginBottom: '24px',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <Brain size={20} style={{ color: '#60A5FA' }} />
-              <h3 style={{ color: '#fff', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
+              <Brain size={20} style={{ color: '#3B82F6' }} />
+              <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
                 AI Health Summary
               </h3>
               <span
                 style={{
                   marginLeft: 'auto',
                   padding: '4px 10px',
-                  backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
                   borderRadius: '12px',
-                  color: '#60A5FA',
+                  color: '#3B82F6',
                   fontSize: '0.75rem',
                   fontWeight: 600,
                 }}
@@ -848,7 +849,7 @@ const FaceReportPage: React.FC = () => {
                 GPT-4 Powered
               </span>
             </div>
-            <p style={{ color: '#E5E7EB', fontSize: '1rem', lineHeight: 1.7, margin: 0 }}>
+            <p style={{ color: '#374151', fontSize: '1rem', lineHeight: 1.7, margin: 0 }}>
               {aiReport.summary}
             </p>
           </div>
@@ -858,23 +859,61 @@ const FaceReportPage: React.FC = () => {
         <div
           style={{
             padding: '20px 24px',
-            backgroundColor: 'rgba(255, 255, 255, 0.02)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            backgroundColor: '#F9FAFB',
+            border: '1px solid #E5E7EB',
             borderRadius: '12px',
             marginBottom: '24px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <AlertCircle size={16} style={{ color: '#6B7280' }} />
-            <span style={{ color: '#9CA3AF', fontSize: '0.875rem', fontWeight: 600 }}>
+            <AlertCircle size={16} style={{ color: '#9CA3AF' }} />
+            <span style={{ color: '#6B7280', fontSize: '0.875rem', fontWeight: 600 }}>
               DISCLAIMER
             </span>
           </div>
-          <p style={{ color: '#6B7280', fontSize: '0.8rem', margin: 0, lineHeight: 1.6 }}>
-            This report is AI-generated and for informational purposes only. It does not constitute 
-            medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider 
+          <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: 0, lineHeight: 1.6 }}>
+            This report is AI-generated and for informational purposes only. It does not constitute
+            medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider
             for medical concerns. Do not disregard professional medical advice based on these readings.
           </p>
+        </div>
+
+        {/* Continue to Chat */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px',
+            padding: '32px 0',
+            marginBottom: '24px',
+          }}
+        >
+          <p style={{ color: '#6B7280', fontSize: '0.9rem', margin: 0, textAlign: 'center' }}>
+            Discover More insights into your Vita Scan and interact to get more deeper insights
+          </p>
+          <button
+            onClick={() => navigate('/ai-chat')}
+            style={{
+              backgroundColor: '#00B8D4',
+              color: '#fff',
+              border: 'none',
+              padding: '12px 32px',
+              borderRadius: '24px',
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#00A0BC';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#00B8D4';
+            }}
+          >
+            Continue to Chat
+          </button>
         </div>
 
         {/* Footer */}
@@ -884,15 +923,15 @@ const FaceReportPage: React.FC = () => {
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '16px 0',
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            borderTop: '1px solid #E5E7EB',
             flexWrap: 'wrap',
             gap: '12px',
           }}
         >
-          <span style={{ color: '#6B7280', fontSize: '0.75rem' }}>
+          <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
             Scan Date: {new Date(rppg.metadata.timestamp).toLocaleString()}
           </span>
-          <span style={{ color: '#6B7280', fontSize: '0.75rem' }}>
+          <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
             <Info size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
             For informational purposes only - not medical advice
           </span>

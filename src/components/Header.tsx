@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import HeaderBg from "../assets/background.png";
 import StarmapIcon from "../assets/result-images/brightness_5.png";
 import VibrationalIcon from "../assets/result-images/add_reaction.png";
 import VitaScanIcon from "../assets/result-images/clinical_notes.png";
@@ -8,10 +7,9 @@ import FlameScoreIcon from "../assets/result-images/mode_heat.png";
 import AuraProfileIcon from "../assets/result-images/background_replace.png";
 import KoshaMapIcon from "../assets/result-images/map_search.png";
 import LongevityIcon from "../assets/result-images/ecg_heart.png";
-import { Paperclip, ArrowRight, Bell, ChevronDown } from 'lucide-react';
-import notification from "../assets/notification.png";
+import { Paperclip, Mic, Send, Bell, Sparkles } from 'lucide-react';
 import credits from "../assets/credits.png";
-import overlay from "../assets/result-images/overlay.png";
+import erosLogo from "../assets/LogoEros.png";
 
 // Report background images
 import vibrationalBg from "../assets/reports/vibrational.jpg";
@@ -31,32 +29,32 @@ interface CardData {
   backgroundImage?: string;
 }
 
+const chatTabs = ["Analyze", "Guide", "Recommend", "Health", "Astro", "Reco.."];
+
 export const Header: React.FC = () => {
   const navigate = useNavigate();
-  const [activeCard, setActiveCard] = useState<number | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>({});
   const [loadingStatuses, setLoadingStatuses] = useState(true);
   const [chatInput, setChatInput] = useState("");
+  const [activeTab, setActiveTab] = useState("Analyze");
 
-  // Get user ID from localStorage
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
   const baseApiUrl = "http://164.52.205.108:8500/api/v1/reports/individual_report/";
 
-  // Enhanced cards data with report mappings
   const cardsData: CardData[] = [
     {
       id: 1,
       icon: VitaScanIcon,
       title: "Vita Scan",
-      buttonText: "View Report",
+      buttonText: "View report",
       reportType: "vita_scan",
       route: "/face-report",
     },
     {
       id: 2,
       icon: VibrationalIcon,
-      title: "Vibrational Frequency",
+      title: "Vibrational frequency",
       buttonText: "Generate",
       reportType: "vibrational_frequency",
       route: "/vibrational-frequency",
@@ -64,6 +62,15 @@ export const Header: React.FC = () => {
     },
     {
       id: 3,
+      icon: AuraProfileIcon,
+      title: "Aura Profile",
+      buttonText: "Generate",
+      reportType: "aura_profile",
+      route: "/aura-profile",
+      backgroundImage: auraBg
+    },
+    {
+      id: 4,
       icon: StarmapIcon,
       title: "Star Map",
       buttonText: "Generate",
@@ -72,22 +79,13 @@ export const Header: React.FC = () => {
       backgroundImage: birthChartBg
     },
     {
-      id: 4,
+      id: 5,
       icon: FlameScoreIcon,
       title: "Flame Score",
       buttonText: "Generate",
       reportType: "flame_score",
       route: "/flame-score",
       backgroundImage: flameScoreBg
-    },
-    {
-      id: 5,
-      icon: AuraProfileIcon,
-      title: "Aura Profile",
-      buttonText: "Generate",
-      reportType: "aura_profile",
-      route: "/aura-profile",
-      backgroundImage: auraBg
     },
     {
       id: 6,
@@ -109,7 +107,6 @@ export const Header: React.FC = () => {
     },
   ];
 
-  // Fetch report statuses on mount and when userId changes
   useEffect(() => {
     const fetchReportStatuses = async () => {
       if (!userId) {
@@ -121,17 +118,14 @@ export const Header: React.FC = () => {
       const statuses: Record<string, boolean> = {};
 
       try {
-        // Fetch all report statuses concurrently
         const reportChecks = cardsData
-          .filter(card => card.reportType) // Only check cards with reportType
+          .filter(card => card.reportType)
           .map(async (card) => {
             try {
               const response = await fetch(
                 `${baseApiUrl}?user_id=${userId}&report_type=${card.reportType}`
               );
               const data = await response.json();
-
-              // Check if report exists and has data
               const hasReport = data.success && data.data && data.data.report_data;
               statuses[card.reportType!] = hasReport;
               return { reportType: card.reportType!, hasReport };
@@ -154,40 +148,24 @@ export const Header: React.FC = () => {
     fetchReportStatuses();
   }, [userId]);
 
-  // Get dynamic button text based on report status
   const getButtonText = (card: CardData): string => {
     if (!card.reportType || loadingStatuses) return card.buttonText;
-
     const hasReport = reportStatuses[card.reportType];
     if (hasReport === undefined) return card.buttonText;
-
-    return hasReport ? "View Report" : "Generate";
+    return hasReport ? "View report" : "Generate";
   };
 
-  // Handle card click with report status awareness
   const handleCardClick = (card: CardData) => {
-    console.log(`Clicked on ${card.title}`);
-    setActiveCard(card.id);
-
-    // For cards with report functionality
     if (card.reportType && userId) {
       const hasReport = reportStatuses[card.reportType];
-
       if (hasReport) {
-        // Navigate to view report page
         navigate('/view-report', {
-          state: {
-            reportType: card.reportType,
-            userId,
-            title: card.title
-          }
+          state: { reportType: card.reportType, userId, title: card.title }
         });
       } else if (card.route) {
-        // Navigate to generation page
         navigate(card.route);
       }
     } else {
-      // Fallback navigation if no status available
       if (card.route) navigate(card.route);
     }
   };
@@ -203,461 +181,587 @@ export const Header: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "flex-start",
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontFamily: '"Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         position: "relative",
-        backgroundColor: "#000",
+        backgroundColor: "#f8f8fa",
         overflowX: "hidden",
       }}
     >
-      {/* Background Image */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: "100%",
-          zIndex: 0,
-
-          backgroundImage: `
-      linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.5),
-        rgba(0, 0, 0, 1)
-      ),
-      url(${HeaderBg})
-    `,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          // transform: "rotate(180deg)",
-        }}
-      />
-
       {/* Top Navbar */}
       <div
         style={{
-          position: "relative",
-          zIndex: 10,
           width: "100%",
-          height: "52px",
-          backgroundColor: "#000",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.07)",
+          height: "60px",
+          backgroundColor: "#fff",
+          borderBottom: "1px solid #eee",
           display: "flex",
           alignItems: "center",
-          justifyContent: "flex-end",
-          padding: "0 36px",
-          gap: "18px",
+          justifyContent: "space-between",
+          padding: "0 24px 0 20px",
           boxSizing: "border-box",
           flexShrink: 0,
-        }}
-      >
-        <button
-          style={{
-            background: "linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)",
-            border: "none",
-            borderRadius: "20px",
-            padding: "8px 22px",
-            fontSize: "13.5px",
-            cursor: "pointer",
-            color: "white",
-            fontWeight: 600,
-            transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            boxShadow: "0 3px 8px rgba(0, 0, 0, 0.3)",
-            whiteSpace: "nowrap",
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-          onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
-          onClick={handleRasiClick}
-        >
-          View Rasi chart
-        </button>
-
-        <img
-          src={notification}
-          alt="Notifications"
-          style={{ width: "24px", height: "24px", cursor: "pointer", objectFit: "contain" }}
-        />
-
-        <div style={{ display: "flex", alignItems: "center", gap: "0px" }}>
-          <img
-            src={credits}
-            alt="Credits"
-            style={{
-              height: "34px",
-              width: "auto",
-              marginLeft: "-6px",
-              objectFit: "contain",
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Overlay */}
-      {/* <div
-        style={{
-          position: "absolute",
+          position: "sticky",
           top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `url('${overlay}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          zIndex: 0,
-        }}
-      /> */}
-
-      {/* Main Content */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 5,
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          marginTop: "44px",
-          padding: "0 40px",
-          boxSizing: "border-box",
+          zIndex: 100,
         }}
       >
-        <h1
-          style={{
-            fontSize: "56px",
-            fontWeight: 700,
-            marginBottom: "48px",
-            textAlign: "center",
-            letterSpacing: "-0.02em",
-            fontFamily: "Poppins, sans-serif",
-            lineHeight: 1.1,
-            background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(100, 200, 255) 50%, rgb(0, 162, 255) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
-        >
-          <span>EROS</span>{" "}
-          <span>Wellness</span>
-        </h1>
-
-        {/* Cards Row */}
-        <div
-          className="cards-container"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "clamp(8px, 1.5vw, 24px)",
-            flexWrap: "nowrap",
-            width: "100%",
-            maxWidth: "100%", // ✅ Allow full width
-            marginBottom: "48px",
-            padding: "0 clamp(10px, 3vw, 40px)", // ✅ Responsive padding
-            margin: "0 auto 48px",
-          }}
-        >
-          {cardsData.map((card) => {
-            const isHov = hoveredCard === card.id;
-            const buttonText = getButtonText(card);
-            const hasReport = card.reportType ? reportStatuses[card.reportType] : false;
-
-            return (
-              <div
-                key={card.id}
-                style={{
-                  flex: "1 1 0px",       // Allows cards to grow equally
-                  minWidth: "120px",     // Minimum size for small screens
-                  maxWidth: "220px",     // Maximum size for big screens
-                  position: "relative",
-                }}
-              >
-                <div
-                  onClick={() => handleCardClick(card)}
-                  onMouseEnter={() => setHoveredCard(card.id)}
-                  onMouseLeave={() => setHoveredCard(null)}
-                  style={{
-                    width: "100%",
-                    aspectRatio: "1 / 1", // Forces card to stay square as it scales
-                    borderRadius: "16px",
-                    background: hasReport && card.backgroundImage
-                      ? `url(${card.backgroundImage})`
-                      : "transparent",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    display: "flex",
-                    flexDirection: "column",
-                    cursor: "pointer",
-                    backdropFilter: "blur(10px)",
-                    WebkitBackdropFilter: "blur(10px)",
-                    boxShadow: hasReport
-                      ? "0 0 20px rgba(170, 225, 39, 0.4)"
-                      : "0 0 25px rgba(0, 0, 0, 0.25)",
-                    transition: "all 0.28s ease",
-                    transform: isHov ? "scale(1.05)" : "scale(1)",
-                    position: "relative",
-                    overflow: "hidden",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                  }}
-                >
-                  <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    width: "100%",
-                    height: "100%",
-                    backgroundColor: "#00B8F833",
-                    position: "relative",
-                    padding: "10%", // Relative padding
-                    boxSizing: "border-box",
-                  }}>
-                    {/* Icon - Scalable size */}
-                    <div style={{
-                      marginTop: "10%",
-                      height: "40%",
-                      display: "flex",
-                      alignItems: "center"
-                    }}>
-                      <img
-                        src={card.icon}
-                        alt={card.title}
-                        style={{
-                          width: "clamp(30px, 4vw, 55px)",
-                          height: "auto",
-                          objectFit: "contain",
-                          filter: "brightness(1.2) saturate(1.3)",
-                        }}
-                      />
-                    </div>
-
-                    {/* Button - Scalable but LOCKED to bottom */}
-                    <div
-                      className="card-button"
-                      style={{
-                        background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
-                        borderRadius: "12px",
-                        width: "85%",
-                        height: "clamp(28px, 3vw, 36px)", // Grows with screen
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "clamp(9px, 1vw, 12px)", // Text scales too
-                        fontWeight: 700,
-                        color: "white",
-                        position: "absolute",
-                        bottom: "10%",           // Always same relative distance from bottom
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {loadingStatuses ? "Loading..." : buttonText}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Title - Outside the square to prevent pushing */}
-                <div
-                  style={{
-                    color: "#fff",
-                    fontSize: "clamp(18px, 1.2vw, 14px)",
-                    fontWeight: 600,
-                    marginTop: "12px",
-                    textAlign: "center",
-                    minHeight: "2.5em", // Ensures 2-line titles don't move the cards
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "flex-start"
-                  }}
-                >
-                  {card.title}
-                </div>
-              </div>
-            );
-          })}
-
-
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <img
+            src={erosLogo}
+            alt="Eros Wellness"
+            style={{ height: "36px", objectFit: "contain" }}
+          />
         </div>
 
-        {/* Search Bar */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "880px",
-            height: "140px",
-            background: "rgba(0, 0, 0, 0.35)",
-            border: "3px solid rgba(21, 167, 216, 0.3)",
-            borderRadius: "26px",
-            padding: "20px 28px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            boxShadow: "0 0 22px rgba(21, 167, 216, 0.08), inset 0 0 20px rgba(0,0,0,0.45)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            position: "relative",
-            boxSizing: "border-box",
-          }}
-        >
-          <textarea
-            placeholder="Ask me anything..."
-            value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                navigate('/ai-chat', { state: { initialMessage: chatInput } });
-                setChatInput("");
-              }
-            }}
-
+        {/* Right Actions */}
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <button
+            onClick={handleRasiClick}
             style={{
-              width: "100%",
-              flex: 1,
-              background: "transparent",
+              background: "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
               border: "none",
-              outline: "none",
-              // color: "rgba(255,255,255,0.55)",
-              color: "#fff",
-              fontSize: "17px",
-              resize: "none",
-              fontFamily: "Poppins, sans-serif",
-              lineHeight: 1.5,
+              borderRadius: "20px",
+              padding: "8px 20px",
+              fontSize: "13px",
+              cursor: "pointer",
+              color: "white",
+              fontWeight: 600,
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              whiteSpace: "nowrap",
+              boxShadow: "0 4px 12px rgba(115, 172, 212, 0.3)",
             }}
-          />
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = "scale(1.03)";
+              e.currentTarget.style.boxShadow = "0 6px 16px rgba(115, 172, 212, 0.4)";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(115, 172, 212, 0.3)";
+            }}
+          >
+            {/* View trial chart */}
+            View Rasi chart
+          </button>
 
           <div
             style={{
-              position: "absolute",
-              bottom: "18px",
-              right: "24px",
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
               display: "flex",
-              gap: "10px",
               alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
             }}
           >
-            {/* <button
+            <Bell size={20} color="#555" />
+          </div>
 
+          <div
+            style={{
+              position: "relative",
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              backgroundColor: "#fff5ed",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            <img
+              src={credits}
+              alt="Credits"
+              style={{ width: "20px", height: "20px", objectFit: "contain" }}
+            />
+            <div
               style={{
-                width: "56px",
-                height: "56px",
-                borderRadius: "50%",
-                background: "transparent",
-                border: "2px solid rgba(21, 167, 216, 0.5)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "border-color 0.2s",
+                position: "absolute",
+                top: "-4px",
+                right: "-4px",
+                backgroundColor: "#ff6b35",
+                color: "white",
+                fontSize: "10px",
+                borderRadius: "10px",
+                padding: "2px 6px",
+                fontWeight: 700,
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#15A7D8")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#15A7D8")}
             >
-              <Paperclip color="#15A7D8" size={25} />
-            </button> */}
-
-
-            <button
-              style={{
-                width: "56px",
-                height: "56px",
-                borderRadius: "50%",
-                background: "#15A7D8",
-                border: "none",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "background 0.2s",
-              }}
-              onClick={() => {
-                navigate('/ai-chat', { state: { initialMessage: chatInput } });
-                setChatInput("");
-              }}
-
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#15A7D8")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#15A7D8")}
-            >
-              <ArrowRight color="white" size={25} />
-            </button>
+              NEW
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Hero Section - 100VH minus navbar */}
+      <div
+        style={{
+          width: "100%",
+          minHeight: "calc(100vh - 60px)",
+          background: "linear-gradient(rgb(209 233 255) 40%, rgb(255 255 255 / 18%) 100%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "40px 40px",
+          boxSizing: "border-box",
+          position: "relative",
+          // maskImage: "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 70%, rgba(0,0,0,0) 100%)",
+          // WebkitMaskImage: "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 70%, rgba(0,0,0,0) 100%)",
+        }}
+      >
+        {/* Top Section - Sparkle Icon & Heading & Description */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            flex: "0 1 auto",
+            marginBottom: "20px",
+          }}
+        >
+          {/* Sparkle Icon */}
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255,255,255,0.9)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "24px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+            }}
+          >
+            <Sparkles size={32} color="#73acd4" />
+          </div>
+
+          {/* Main Heading - Black, center-aligned, 2 lines */}
+          <h1
+            style={{
+              fontSize: "clamp(22px, 3.5vw, 62px)",
+              fontWeight: 700,
+              fontStyle: "normal",
+              textAlign: "center",
+              margin: "0 0 16px 0",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.5,
+              color: "#1a1a2e",
+              maxWidth: "1330px",
+            }}
+          >
+            Unlimited AI-powered wellness solutions for results-driven personal growth & holistic living.
+          </h1>
+
+          {/* Description */}
+          <p
+            style={{
+              fontSize: "clamp(13px, 2vw, 15px)",
+              color: "#6b6380",
+              textAlign: "center",
+              marginBottom: "0",
+              lineHeight: 1.6,
+              maxWidth: "720px",
+            }}
+          >
+            Your personal AI spiritual companion — illuminating your path through astrology, energy readings, and
+            ancient wisdom tailored uniquely for you.
+          </p>
+        </div>
+
+        {/* Middle Section - Cards Container */}
+        <div
+          style={{
+            flex: "1 1 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            minHeight: "220px",
+            paddingTop: "20px",
+            paddingBottom: "20px",
+          }}
+        >
+          <div className="cards-container">
+            {cardsData.map((card) => (
+              <div
+                key={card.id}
+                className="feature-card"
+                onClick={() => handleCardClick(card)}
+                onMouseEnter={() => setHoveredCard(card.id)}
+                onMouseLeave={() => setHoveredCard(null)}
+                style={{
+                  position: "relative",
+                  padding: "24px 20px",
+                  borderRadius: "30px",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  // backgroundColor: hoveredCard === card.id
+                  //   ? "rgba(255,255,255,0.25)"
+                  //   : "rgba(255,255,255,0.15)",
+                  backgroundColor: 'white',
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                  cursor: "pointer",
+                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                  boxShadow: hoveredCard === card.id
+                    ? "0 8px 32px rgba(115, 172, 212, 0.15), inset 0 1px 1px rgba(255,255,255,0.4)"
+                    : "0 4px 16px rgba(115, 172, 212, 0.08), inset 0 1px 1px rgba(255,255,255,0.3)",
+                  transform: hoveredCard === card.id ? "translateY(-8px) scale(1.02)" : "translateY(0) scale(1)",
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "12px",
+                  minHeight: "250px",
+                }}
+              >
+                {/* Glitter Animation Overlay */}
+                {hoveredCard === card.id && (
+                  <div
+                    className="glitter-effect"
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      pointerEvents: "none",
+                    }}
+                  />
+                )}
+
+                <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", width: "100%" }}>
+                  {/* Icon */}
+                  <div
+                    style={{
+                      width: "52px",
+                      height: "52px",
+                      borderRadius: "12px",
+                      // backgroundColor: "rgba(115, 172, 212, 0.1)",
+                      background: 'linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)',
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.3s ease",
+                      transform: hoveredCard === card.id ? "scale(1.1) rotate(5deg)" : "scale(1)",
+                    }}
+                  >
+                    <img src={card.icon} alt="" style={{ width: "28px", height: "28px" }} />
+                  </div>
+
+                  {/* Title */}
+                  <h3
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: 600,
+                      color: "#2a2040",
+                      margin: 0,
+                      textAlign: "center",
+                      lineHeight: 1.3,
+                      minHeight: "32px",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    {card.title}
+                  </h3>
+
+                  {/* Button - Uniform size */}
+                  <button
+                    className="card-button"
+                    style={{
+                      background: "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
+                      border: "none",
+                      borderRadius: "16px",
+                      padding: "10px 18px",
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: "white",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      transform: hoveredCard === card.id ? "scale(1.05)" : "scale(1)",
+                      boxShadow: hoveredCard === card.id
+                        ? "0 8px 16px rgba(115, 172, 212, 0.4)"
+                        : "0 4px 12px rgba(115, 172, 212, 0.2)",
+                      width: "100%",
+                      minHeight: "40px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      top: '20%',
+                      position: 'relative'
+                    }}
+                  >
+                    {loadingStatuses ? "Loading..." : getButtonText(card)}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom Section - Tabs & Chat */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "20px",
+            flex: "0 1 auto",
+            width: "100%",
+            maxWidth: "100%",
+          }}
+        >
+          {/* Tabs as Badges with shadow */}
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              maxWidth: "100%",
+              width: "100%",
+              justifyContent: "center",
+              paddingBottom: "10px",
+            }}
+          >
+            {chatTabs.map((tab) => {
+              const isActive = activeTab === tab;
+              return (
+                <span
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{
+                    padding: "10px 24px",
+                    borderRadius: "24px",
+                    border: isActive ? "1px solid rgb(115, 172, 212)" : "1px solid #e0dce5",
+                    background: isActive ? "linear-gradient(135deg, rgb(160, 210, 232) 0%, rgb(115, 172, 212) 100%)" : "#fff",
+                    color: isActive ? "#fff" : "#7a7490",
+                    fontSize: "14px",
+                    fontWeight: isActive ? 600 : 400,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.2s ease",
+                    flexShrink: 0,
+                    userSelect: "none",
+                    minWidth: "90px",
+                    textAlign: "center" as const,
+                    boxShadow: isActive
+                      ? "0 4px 12px rgba(115, 172, 212, 0.3)"
+                      : "0 2px 8px rgba(0, 0, 0, 0.08)",
+                  }}
+                >
+                  {tab}
+                </span>
+              );
+            })}
+          </div>
+
+          {/* Chat Input Card with shadow */}
+          {/* Chat Input Card with shadow */}
+          <div
+            style={{
+              background: "linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)",
+              borderRadius: "24px",
+              padding: "16px 16px 14px",
+              boxShadow: "0 8px 24px rgba(74, 164, 227, 0.12), 0 4px 12px rgba(74, 164, 227, 0.15)",
+              maxWidth: "900px",
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {/* Free trial notice */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "10px",
+                fontSize: "14px",
+                color: "#ffffff",
+                fontWeight: 600,
+                padding: "0 4px",
+              }}
+            >
+              <span style={{ fontSize: "18px" }}>&#9200;</span>
+              Free Trial explore it soon
+            </div>
+
+            {/* White inner input card */}
+            <div
+              style={{
+                background: "#fff",
+                borderRadius: "16px",
+                padding: "14px 16px",
+                border: "1px solid #f0eef2",
+                boxShadow: "inset 0 1px 3px rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              {/* Input area */}
+              <textarea
+                placeholder="Ask me anything..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    navigate('/ai-chat', { state: { initialMessage: chatInput } });
+                    setChatInput("");
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "#3a3550",
+                  fontSize: "14px",
+                  resize: "none",
+                  fontFamily: "Poppins, sans-serif",
+                  lineHeight: 1.5,
+                  minHeight: "32px",
+                  maxHeight: "80px",
+                  boxSizing: "border-box",
+                }}
+              />
+
+              {/* Bottom actions - Only Send button */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
+                  marginTop: "8px",
+                }}
+              >
+                <button
+                  onClick={() => {
+                    navigate('/ai-chat', { state: { initialMessage: chatInput } });
+                    setChatInput("");
+                  }}
+                  style={{
+                    background: "linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)",
+                    border: "none",
+                    borderRadius: "14px",
+                    padding: "8px 20px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    cursor: "pointer",
+                    color: "white",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    transition: "all 0.2s ease",
+                    boxShadow: "0 4px 12px rgba(74, 164, 227, 0.3)",
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = "scale(1.03)";
+                    e.currentTarget.style.boxShadow = "0 6px 16px rgba(74, 164, 227, 0.4)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(74, 164, 227, 0.3)";
+                  }}
+                >
+                  <Send size={14} />
+                  Send
+                </button>
+              </div>
+            </div>
+
+            {/* Mask gradient overlay - positioned absolutely */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: "120px",
+                borderRadius: "24px",
+                // background: "linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 60%, rgba(255, 255, 255, 0.75) 100%)",
+                pointerEvents: "none",
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
       <style>{`
-        .card-button {
-          padding: 10px 20px !important;
-          font-size: 12px !important;
+        .cards-container {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 16px;
+          width: 100%;
+          max-width: none;
+          margin: 0 auto;
+          padding: 0 30px;
+          box-sizing: border-box;
         }
 
-        .cards-container {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 1.5vw;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto 48px;
-    padding: 0 20px;
-    box-sizing: border-box;
-  }
+        .feature-card {
+          flex: 1 1 0 !important;
+          min-height: 180px;
+        }
 
-        @media (min-width: 1101px) {
-          .card-button {
-            padding: 14px 48px !important;
-            font-size: 14px !important;
+        .glitter-effect {
+          background: linear-gradient(45deg, 
+            transparent 0%, 
+            rgba(255,255,255,0.3) 20%, 
+            rgba(255,255,255,0.1) 40%, 
+            transparent 60%
+          );
+          animation: glitterShimmer 0.8s ease-in-out infinite;
+        }
+
+        @keyframes glitterShimmer {
+          0% {
+            transform: translateX(-100%) translateY(-100%);
+            opacity: 0;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(100%) translateY(100%);
+            opacity: 0;
           }
         }
 
- @media (max-width: 1100px) {
-  .cards-container {
-      flex-wrap: wrap !important;
-    }
-  .cards-container > div {
-    flex: 0 0 auto !important;
-    width: 180px !important;
-    min-width: 180px !important;
-    max-width: 180px !important;
-  }
-  /* ✅ Force card inner div to be square */
-  .cards-container > div > div:first-child {
-    height: 180px !important; /* Change to match width */
-  }
-  .card-button {
-    padding: 10px 24px !important;
-    font-size: 12px !important;
-  }
-}
-@media (max-width: 1000px) {
-    .cards-container {
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-  }
-@media (max-width: 768px) {
-  .cards-container {
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    gap: 16px !important;
-  }
-  .cards-container > div {
-    flex: 0 0 auto !important;
-    width: 160px !important;
-    min-width: 160px !important;
-    max-width: 160px !important;
-  }
-  /* ✅ Force card inner div to be square */
-  .cards-container > div > div:first-child {
-    height: 160px !important; /* Change to match width */
-  }
-  .card-button {
-    padding: 8px 16px !important;
-    font-size: 11px !important;
-  }
-}
-      `}
-      </style>
+        @media (max-width: 1100px) {
+          .cards-container {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px !important;
+            padding: 0 24px !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .cards-container {
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px !important;
+            padding: 0 20px !important;
+          }
+          .feature-card {
+            min-height: 150px;
+          }
+          .card-button {
+            padding: 6px 12px !important;
+            font-size: 11px !important;
+            min-height: 32px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .cards-container {
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+          }
+        }
+      `}</style>
     </div>
   );
 };

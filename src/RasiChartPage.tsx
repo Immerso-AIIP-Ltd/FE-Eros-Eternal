@@ -1,7 +1,15 @@
 // RasiChartPage.tsx
-import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Spinner,
+  Alert,
+} from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { Eye, Download } from "lucide-react";
 import Stars from "./components/stars";
 
@@ -33,12 +41,15 @@ const RasiChartPage: React.FC = () => {
   const fetchAstrologyData = async () => {
     try {
       const user_id = localStorage.getItem("user_id");
-      const placeOfBirth = localStorage.getItem("place_of_birth") || "Chennai, India";
+      const placeOfBirth =
+        localStorage.getItem("place_of_birth") || "Chennai, India";
       let dateOfBirth = localStorage.getItem("date_of_birth") || "07/04/2002";
       const timeOfBirth = localStorage.getItem("time_of_birth") || "01:55";
 
       if (!placeOfBirth || !dateOfBirth || !timeOfBirth) {
-        throw new Error("Missing birth details. Please complete your profile first.");
+        throw new Error(
+          "Missing birth details. Please complete your profile first.",
+        );
       }
 
       // Normalize date to MM/DD/YYYY
@@ -53,41 +64,46 @@ const RasiChartPage: React.FC = () => {
       };
 
       const response = await fetch(
-        'http://164.52.205.108:8500/api/v1/vedastro/get_astrology_data',
+        "http://164.52.205.108:8500/api/v1/vedastro/get_astrology_data",
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const result = await response.json();
-      
+
       // ✅ COMPREHENSIVE DEBUGGING - Check what we actually received
-      console.log('=== FULL API RESPONSE ===');
+      console.log("=== FULL API RESPONSE ===");
       console.log(JSON.stringify(result, null, 2));
-      
-      if (!result.success) throw new Error(result.message || 'Failed to fetch data');
+
+      if (!result.success)
+        throw new Error(result.message || "Failed to fetch data");
 
       // ✅ Parse the astrologyData string to extract chart URLs
       if (result.data?.astrologyData) {
         const astrologyText = result.data.astrologyData;
-        console.log('=== ASTROLOGY DATA ===');
+        console.log("=== ASTROLOGY DATA ===");
         console.log(astrologyText);
-        
+
         // Extract Rasi Chart URL
-        const rasiMatch = astrologyText.match(/Rasi D1 Chart URL:\s*(https?:\/\/[^\s\n]+)/);
+        const rasiMatch = astrologyText.match(
+          /Rasi D1 Chart URL:\s*(https?:\/\/[^\s\n]+)/,
+        );
         const rasiUrl = rasiMatch ? rasiMatch[1] : null;
-        
+
         // Extract Navamsha Chart URL
-        const navamshaMatch = astrologyText.match(/Navamsha D9 Chart URL:\s*(https?:\/\/[^\s\n]+)/);
+        const navamshaMatch = astrologyText.match(
+          /Navamsha D9 Chart URL:\s*(https?:\/\/[^\s\n]+)/,
+        );
         const navamshaUrl = navamshaMatch ? navamshaMatch[1] : null;
-        
-        console.log('=== EXTRACTED URLS ===');
-        console.log('Rasi URL:', rasiUrl);
-        console.log('Navamsha URL:', navamshaUrl);
-        
+
+        console.log("=== EXTRACTED URLS ===");
+        console.log("Rasi URL:", rasiUrl);
+        console.log("Navamsha URL:", navamshaUrl);
+
         // Transform the data to match our expected structure
         const transformedResult: AstrologyResponse = {
           ...result,
@@ -95,27 +111,27 @@ const RasiChartPage: React.FC = () => {
             ...result.data,
             chartImages: {
               rasiChart: {
-                inline: rasiUrl || '',
-                original: rasiUrl || '',
-                attachment: rasiUrl || ''
+                inline: rasiUrl || "",
+                original: rasiUrl || "",
+                attachment: rasiUrl || "",
               },
               navamshaChart: {
-                inline: navamshaUrl || '',
-                original: navamshaUrl || '',
-                attachment: navamshaUrl || ''
-              }
-            }
-          }
+                inline: navamshaUrl || "",
+                original: navamshaUrl || "",
+                attachment: navamshaUrl || "",
+              },
+            },
+          },
         };
-        
+
         setData(transformedResult);
       } else {
         // Store the data as-is if it already has chartImages
         setData(result);
       }
     } catch (err) {
-      console.error('Fetch error:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      console.error("Fetch error:", err);
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -126,14 +142,14 @@ const RasiChartPage: React.FC = () => {
       return input;
     }
     if (/^\d{4}-\d{2}-\d{2}$/.test(input)) {
-      const [year, month, day] = input.split('-');
+      const [year, month, day] = input.split("-");
       return `${month}/${day}/${year}`;
     }
     if (/^\d{2}-\d{2}-\d{4}$/.test(input)) {
-      const [part1, part2, year] = input.split('-');
+      const [part1, part2, year] = input.split("-");
       return `${part2}/${part1}/${year}`;
     }
-    const cleaned = input.replace(/[\.\s]/g, '/');
+    const cleaned = input.replace(/[\.\s]/g, "/");
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(cleaned)) {
       return cleaned;
     }
@@ -148,15 +164,15 @@ const RasiChartPage: React.FC = () => {
   // ✅ Fixed download function with null checks
   const downloadImage = (url: string | undefined, filename: string) => {
     if (!url) {
-      alert('Chart URL not available');
+      alert("Chart URL not available");
       return;
     }
 
     const cleanUrl = url.trim();
 
     // Handle data URLs
-    if (cleanUrl.startsWith('data:')) {
-      const link = document.createElement('a');
+    if (cleanUrl.startsWith("data:")) {
+      const link = document.createElement("a");
       link.href = cleanUrl;
       link.download = filename;
       document.body.appendChild(link);
@@ -168,11 +184,11 @@ const RasiChartPage: React.FC = () => {
     // Fetch remote URL (SVG in this case)
     fetch(cleanUrl)
       .then((response) => {
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error("Network response was not ok");
         return response.blob();
       })
       .then((blob) => {
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = filename;
         document.body.appendChild(link);
@@ -181,8 +197,8 @@ const RasiChartPage: React.FC = () => {
         URL.revokeObjectURL(link.href);
       })
       .catch((err) => {
-        console.error('Download error:', err);
-        alert('Failed to download image. Try opening in new tab.');
+        console.error("Download error:", err);
+        alert("Failed to download image. Try opening in new tab.");
       });
   };
 
@@ -192,20 +208,22 @@ const RasiChartPage: React.FC = () => {
       y: Math.random() * 100,
       opacity: 0.3 + Math.random() * 0.7,
       size: Math.random() * 2 + 1,
-    }))
+    })),
   );
 
   // === Loading State ===
   if (loading) {
     return (
       <div
-        className='tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white'
+        className="tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white"
         style={{
-          backgroundColor: '#000',
-          position: 'fixed',
+          // backgroundColor: '#000',
+          backgroundColor: "#FFFFFF",
+          color: "#000",
+          position: "fixed",
           top: 0,
           left: 0,
-          zIndex: 1050
+          zIndex: 1050,
         }}
       >
         <Stars />
@@ -232,19 +250,19 @@ const RasiChartPage: React.FC = () => {
               animation="border"
               variant="info"
               style={{
-                width: '3rem',
-                height: '3rem',
-                borderWidth: '0.25em'
+                width: "3rem",
+                height: "3rem",
+                borderWidth: "0.25em",
               }}
             />
             <div
               className="position-absolute top-50 start-50 translate-middle"
               style={{
-                width: '4.5rem',
-                height: '4.5rem',
-                borderRadius: '50%',
-                boxShadow: '0 0 0 0 rgba(0, 184, 248, 0.4)',
-                animation: 'pulse 2s infinite'
+                width: "4.5rem",
+                height: "4.5rem",
+                borderRadius: "50%",
+                boxShadow: "0 0 0 0 rgba(0, 184, 248, 0.4)",
+                animation: "pulse 2s infinite",
               }}
             />
           </div>
@@ -258,7 +276,10 @@ const RasiChartPage: React.FC = () => {
   // === Error State ===
   if (error) {
     return (
-      <div className="vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ backgroundColor: '#000' }}>
+      <div
+        className="vh-100 d-flex flex-column align-items-center justify-content-center p-4"
+        style={{ backgroundColor: "#000" }}
+      >
         <Alert variant="danger" className="text-center">
           {error}
         </Alert>
@@ -272,16 +293,27 @@ const RasiChartPage: React.FC = () => {
   // === No Data State ===
   if (!data?.data?.chartImages) {
     return (
-      <div className="vh-100 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#000' }}>
+      <div
+        className="vh-100 d-flex flex-column align-items-center justify-content-center"
+        style={{ backgroundColor: "#000" }}
+      >
         <Alert variant="warning">
           <div>No chart data available.</div>
           <div className="mt-2 small">
-            <pre style={{ textAlign: 'left', maxHeight: '200px', overflow: 'auto' }}>
+            <pre
+              style={{
+                textAlign: "left",
+                maxHeight: "200px",
+                overflow: "auto",
+              }}
+            >
               {JSON.stringify(data, null, 2)}
             </pre>
           </div>
         </Alert>
-        <Button variant="outline-light" onClick={() => navigate(-1)}>← Go Back</Button>
+        <Button variant="outline-light" onClick={() => navigate(-1)}>
+          ← Go Back
+        </Button>
       </div>
     );
   }
@@ -294,58 +326,71 @@ const RasiChartPage: React.FC = () => {
   const { rasiChart, navamshaChart } = data.data.chartImages;
 
   // ✅ DEBUG: Log the chart objects
-  console.log('=== RENDERING CHARTS ===');
-  console.log('rasiChart object:', rasiChart);
-  console.log('rasiChart.inline:', rasiChart?.inline);
-  console.log('navamshaChart object:', navamshaChart);
-  console.log('navamshaChart.inline:', navamshaChart?.inline);
+  console.log("=== RENDERING CHARTS ===");
+  console.log("rasiChart object:", rasiChart);
+  console.log("rasiChart.inline:", rasiChart?.inline);
+  console.log("navamshaChart object:", navamshaChart);
+  console.log("navamshaChart.inline:", navamshaChart?.inline);
 
   // ✅ Additional safety check before rendering
   if (!rasiChart || !navamshaChart) {
     return (
-      <div className="vh-100 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#000' }}>
+      <div
+        className="vh-100 d-flex flex-column align-items-center justify-content-center"
+        style={{ backgroundColor: "#000" }}
+      >
         <Alert variant="warning">
           <div>Chart data is incomplete.</div>
           <div className="mt-2 small">
-            rasiChart exists: {rasiChart ? 'Yes' : 'No'}<br/>
-            navamshaChart exists: {navamshaChart ? 'Yes' : 'No'}
+            rasiChart exists: {rasiChart ? "Yes" : "No"}
+            <br />
+            navamshaChart exists: {navamshaChart ? "Yes" : "No"}
           </div>
         </Alert>
-        <Button variant="outline-light" onClick={() => navigate(-1)}>← Go Back</Button>
+        <Button variant="outline-light" onClick={() => navigate(-1)}>
+          ← Go Back
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="vh-100 vw-100 p-4" style={{ backgroundColor: '#000', color: 'white' }}>
+    <div
+      className="vh-100 vw-100 p-4"
+      style={{ backgroundColor: "#FFFFFF", color: "#000" }}
+    >
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button
           className="btn btn-link text-white"
           onClick={() => navigate(-1)}
-          style={{ fontSize: '1.2rem', textDecoration: 'none' }}
+          style={{ fontSize: "1.2rem", textDecoration: "none" }}
         >
           ← Rasi Chart
         </button>
         <div></div>
       </div>
 
-      <div className='d-flex align-items-center justify-content-center mb-3'>
+      <div className="d-flex align-items-center justify-content-center mb-3">
         <h3>{username}</h3>
       </div>
 
-      <div className='d-flex align-items-center justify-content-center mb-5'>
-        <p>{dob}, {tob}, {birthPlace}</p>
+      <div className="d-flex align-items-center justify-content-center mb-5">
+        <p>
+          {dob}, {tob}, {birthPlace}
+        </p>
       </div>
 
       <Container fluid>
         <Row className="g-4">
           {/* Rasi Chart */}
           <Col md={6}>
-            <Card className="bg-dark text-white border-secondary h-100">
+            <Card className="h-100"   style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
               <Card.Body className="d-flex flex-column">
-                <Card.Title className="text-white text-center">Rasi Chart</Card.Title>
-                <p className="text-white text-center">Individual Chart</p>
+                <Card.Title className="text-center" style={{color:"#000"}}>
+                  Rasi Chart
+                </Card.Title>
+                <p className=" text-center"  style={{color:"#000"}}>Individual Chart</p>
                 <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
                   {rasiChart?.inline ? (
                     <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
@@ -356,13 +401,17 @@ const RasiChartPage: React.FC = () => {
                         width="100%"
                         height="600"
                         style={{
-                          borderRadius: '8px',
-                          overflow: 'hidden',
-                          border: 'none',
-                          backgroundColor: 'white'
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: "none",
+                          // backgroundColor: "white",
                         }}
-                        onLoad={() => console.log('✅ Rasi iframe loaded successfully')}
-                        onError={(e) => console.error('❌ Rasi iframe error:', e)}
+                        onLoad={() =>
+                          console.log("✅ Rasi iframe loaded successfully")
+                        }
+                        onError={(e) =>
+                          console.error("❌ Rasi iframe error:", e)
+                        }
                       />
                     </div>
                   ) : (
@@ -379,7 +428,10 @@ const RasiChartPage: React.FC = () => {
                     variant="outline-info"
                     size="sm"
                     className="me-2"
-                    onClick={() => rasiChart?.inline && window.open(rasiChart.inline.trim(), '_blank')}
+                    onClick={() =>
+                      rasiChart?.inline &&
+                      window.open(rasiChart.inline.trim(), "_blank")
+                    }
                     disabled={!rasiChart?.inline}
                   >
                     <Eye />
@@ -387,7 +439,9 @@ const RasiChartPage: React.FC = () => {
                   <Button
                     variant="info"
                     size="sm"
-                    onClick={() => downloadImage(rasiChart?.attachment, 'rasi_chart.svg')}
+                    onClick={() =>
+                      downloadImage(rasiChart?.attachment, "rasi_chart.svg")
+                    }
                     disabled={!rasiChart?.attachment}
                   >
                     <Download />
@@ -399,10 +453,12 @@ const RasiChartPage: React.FC = () => {
 
           {/* Navamsha Chart */}
           <Col md={6}>
-            <Card className="bg-dark text-white border-secondary h-100">
+            <Card className="h-100"   style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
               <Card.Body className="d-flex flex-column">
-                <Card.Title className="text-white text-center">Navamsha Chart</Card.Title>
-                <p className="text-white text-center">Life Partner Chart</p>
+                <Card.Title className=" text-center"  style={{color:"#000"}}>
+                  Navamsha Chart
+                </Card.Title>
+                <p className=" text-center"  style={{color:"#000"}}>Life Partner Chart</p>
                 <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
                   {navamshaChart?.inline ? (
                     <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
@@ -412,13 +468,17 @@ const RasiChartPage: React.FC = () => {
                         title="Navamsha Chart"
                         width="100%"
                         height="600"
-                        style={{ 
-                          border: 'none',
-                          backgroundColor: 'white'
+                        style={{
+                          border: "none",
+                          backgroundColor: "white",
                         }}
                         sandbox="allow-scripts allow-same-origin"
-                        onLoad={() => console.log('✅ Navamsha iframe loaded successfully')}
-                        onError={(e) => console.error('❌ Navamsha iframe error:', e)}
+                        onLoad={() =>
+                          console.log("✅ Navamsha iframe loaded successfully")
+                        }
+                        onError={(e) =>
+                          console.error("❌ Navamsha iframe error:", e)
+                        }
                       />
                     </div>
                   ) : (
@@ -435,7 +495,10 @@ const RasiChartPage: React.FC = () => {
                     variant="outline-info"
                     size="sm"
                     className="me-2"
-                    onClick={() => navamshaChart?.inline && window.open(navamshaChart.inline.trim(), '_blank')}
+                    onClick={() =>
+                      navamshaChart?.inline &&
+                      window.open(navamshaChart.inline.trim(), "_blank")
+                    }
                     disabled={!navamshaChart?.inline}
                   >
                     <Eye />
@@ -443,7 +506,12 @@ const RasiChartPage: React.FC = () => {
                   <Button
                     variant="info"
                     size="sm"
-                    onClick={() => downloadImage(navamshaChart?.attachment, 'navamsha_chart.svg')}
+                    onClick={() =>
+                      downloadImage(
+                        navamshaChart?.attachment,
+                        "navamsha_chart.svg",
+                      )
+                    }
                     disabled={!navamshaChart?.attachment}
                   >
                     <Download />
