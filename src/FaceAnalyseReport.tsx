@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Button, Container, Row, Col, Alert, Badge } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Stars from "./components/stars";
 
 const FaceAnalyseReport: React.FC = () => {
     const location = useLocation();
@@ -10,14 +9,6 @@ const FaceAnalyseReport: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [username, setUsername] = useState<string>('');
-    const [stars] = useState(() =>
-        Array.from({ length: 50 }, () => ({
-            x: Math.random() * 100,
-            y: Math.random() * 100,
-            opacity: 0.3 + Math.random() * 0.7,
-            size: Math.random() * 2 + 1,
-        }))
-    );
 
     useEffect(() => {
         if (location.state && location.state.success) {
@@ -39,11 +30,11 @@ const FaceAnalyseReport: React.FC = () => {
 
     if (error) {
         return (
-            <div className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ backgroundColor: '#000' }}>
+            <div className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)" }}>
                 <Alert variant="danger" className="w-100" style={{ maxWidth: 600 }}>
                     {error}
                 </Alert>
-                <Button variant="outline-light" onClick={() => navigate('/')}>
+                <Button variant="outline-dark" onClick={() => navigate('/')}>
                     Go Back
                 </Button>
             </div>
@@ -52,12 +43,12 @@ const FaceAnalyseReport: React.FC = () => {
 
     if (!report) {
         return (
-            <div className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ backgroundColor: '#000' }}>
+            <div className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)" }}>
                 <div className="text-center">
                     <div className="spinner-border text-info mb-3" role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
-                    <p className="text-white">Analyzing your face...</p>
+                    <p>Analyzing your face...</p>
                 </div>
             </div>
         );
@@ -66,32 +57,17 @@ const FaceAnalyseReport: React.FC = () => {
     const { data } = report;
 
     return (
-        <div className="vw-100 d-flex flex-column p-4">
-            <Stars />
-            <div className="absolute inset-0 overflow-hidden ">
-                {stars.map((star, i) => (
-                    <div
-                        key={i}
-                        className="absolute bg-white rounded-full animate-pulse"
-                        style={{
-                            width: `${star.size}px`,
-                            height: `${star.size}px`,
-                            opacity: star.opacity,
-                            top: `${star.y}%`,
-                            left: `${star.x}%`,
-                            animationDelay: `${Math.random() * 3}s`,
-                            animationDuration: `${2 + Math.random() * 2}s`
-                        }}
-                    />
-                ))}
-            </div>
-
+        <div className="vw-100 d-flex flex-column p-4" style={{
+            background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
+            minHeight: "100vh",
+            color: "#000"
+        }}>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <button
-                    className="btn  text-white"
+                    className="btn"
                     onClick={() => navigate("/result")}
-                    style={{ fontSize: '1rem', zIndex: '10' }}
+                    style={{ fontSize: '1rem', position: 'relative', zIndex: 1000 }}
                 >
                     ← Back
                 </button>
@@ -117,13 +93,13 @@ const FaceAnalyseReport: React.FC = () => {
                                 height: '150px',
                                 borderRadius: '50%',
                                 objectFit: 'cover',
-                                border: '3px solid #333'
+                                border: '3px solid #ccc'
                             }}
                         />
                         {username && (
-                            <h2 className="text-white mt-3">{username}</h2>
+                            <h2 className="mt-3">{username}</h2>
                         )}
-                        <h6 className="text-white mt-4">Face Analysis</h6>
+                        <h6 className="mt-4">Face Analysis</h6>
                     </div>
                 )}
             </div>
@@ -143,14 +119,13 @@ const FaceAnalyseReport: React.FC = () => {
             </Card> */}
                         {/* <Card.Title className='mb-5'>Spiritual Interpretation & Wellness Guidance</Card.Title> */}
                         <Card className="mb-4" style={{
-                            background:
-                                "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                            border: '1px solid grey'
+                            backgroundColor: "#ffffff",
+                            color: "#000",
                         }}>
                             <Card.Body>
 
                                 <pre
-                                    className="text-white p-3 rounded"
+                                    className="p-3 rounded"
                                     style={{
                                         whiteSpace: 'pre-wrap',
                                         fontFamily: 'sans-serif',
