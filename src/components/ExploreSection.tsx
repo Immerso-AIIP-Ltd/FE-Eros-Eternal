@@ -3,10 +3,14 @@ import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Import images
-import tarot from '../assets/explore/tarrot.png';
-import harmonyindex from '../assets/explore/harmony.png';
-import palm from '../assets/explore/palmistry.jpg';
-import facescan from '../assets/explore/face.png';
+// import tarot from '../assets/explore/tarrot.png';
+import tarot from "../images/lighttarrot.png";
+import palm from "../images/lightpalm.png";
+import harmonyindex from "../images/lightharmony.png";
+import facescan from "../images/lightface.png";
+// import harmonyindex from '../assets/explore/harmony.png';
+// import palm from '../assets/explore/palmistry.jpg';
+// import facescan from '../assets/explore/face.png';
 import angel from '../vintage.png';
 
 interface ExploreItem {
@@ -169,6 +173,7 @@ export const ExploreSection: React.FC = () => {
           width: '100%',
           padding: '0 0 40px 0',
           margin: '0',
+          color:'#000'
         }}
       >
         {items.map((item, index) => (
@@ -231,7 +236,7 @@ export const ExploreSection: React.FC = () => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.7) 85%, rgba(0,0,0,0.9) 100%)",
+                // background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.7) 85%, rgba(0,0,0,0.9) 100%)",
                 zIndex: 1,
                 pointerEvents: 'none',
               }}
@@ -246,23 +251,25 @@ export const ExploreSection: React.FC = () => {
                 left: 0,
                 right: 0,
                 padding: "1.5rem 1.5rem 1.75rem",
-                background: "rgba(15, 18, 20, 0.6)",
-                backdropFilter: "blur(12px) saturate(180%)",
-                WebkitBackdropFilter: "blur(12px) saturate(180%)",
+                // background: "rgba(15, 18, 20, 0.6)",
+                // backdropFilter: "blur(12px) saturate(180%)",
+                // WebkitBackdropFilter: "blur(12px) saturate(180%)",
                 borderTop: "1px solid rgba(255, 255, 255, 0.1)",
                 zIndex: 5,
                 pointerEvents: 'none',
+                color:'#000'
               }}
             >
               <h3
                 style={{
                   fontSize: '1.25rem',
                   fontWeight: 600,
-                  color: '#ffffff',
+                  // color: '#ffffff',
                   marginBottom: '0.5rem',
                   fontFamily: "Poppins, sans-serif",
                   lineHeight: 1.3,
-                  textShadow: '0 1px 2px rgba(0,0,0,0.5)'
+                  textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                  color:'#000'
                 }}
               >
                 {item.title}
@@ -270,11 +277,12 @@ export const ExploreSection: React.FC = () => {
               <p
                 style={{
                   fontSize: '0.9rem',
-                  color: 'rgba(255, 255, 255, 0.85)',
+                  // color: 'rgba(255, 255, 255, 0.85)',
                   margin: 0,
                   lineHeight: 1.5,
                   fontFamily: "DM Sans, sans-serif",
-                  textShadow: '0 1px 2px rgba(0,0,0,0.5)'
+                  textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                   color:'#000'
                 }}
               >
                 {item.subtitle}

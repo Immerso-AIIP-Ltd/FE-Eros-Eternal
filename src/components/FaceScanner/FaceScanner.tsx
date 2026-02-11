@@ -1182,8 +1182,8 @@ const FaceScanner: React.FC = () => {
 
         body {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: #000;
-          color: #fff;
+          background: rgb(255, 255, 255);
+          color: #000;
           overflow-x: hidden;
         }
 
@@ -1194,7 +1194,7 @@ const FaceScanner: React.FC = () => {
         }
 
         .btn-primary {
-          background: #00B8D4;
+          background: #7DD3FC;
           color: #fff;
           border: none;
           padding: 0.875rem 2rem;
@@ -1206,12 +1206,12 @@ const FaceScanner: React.FC = () => {
         }
 
         .btn-primary:hover {
-          background: #00ACC1;
+          background: #38BDF8;
         }
 
         .btn-primary:disabled {
-          background: #1E3A47;
-          color: #4A5568;
+          background: #BAE6FD;
+          color: #fff;
           cursor: not-allowed;
         }
 
@@ -1248,8 +1248,8 @@ const FaceScanner: React.FC = () => {
 
         .btn-skip {
           background: transparent;
-          border: 1px solid #00b8d4;
-          color: #00b8d4;
+          border: 1px solid #FCA5A5;
+          color: #000;
           padding: 0.875rem 1.5rem;
           border-radius: 0.5rem;
           font-size: 1rem;
@@ -1262,13 +1262,15 @@ const FaceScanner: React.FC = () => {
         }
 
         .btn-skip:hover {
-          border-color: #00B8D4;
-          color: #00B8D4;
+          border-color: #F87171;
+          color: #000;
         }
 
         .card {
-          background: #1A1A1A;
-          border: 1px solid #2D2D2D;
+          background: #fff;
+          border: 1px solid #e0e0e0;
+          border-top: 3px solid rgb(0, 184, 248);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
           border-radius: 1rem;
           padding: 2rem;
           min-height: 50vh;
@@ -1278,7 +1280,7 @@ const FaceScanner: React.FC = () => {
         }
 
         .drop-zone {
-          border: 2px dashed #2D3748;
+          border: 2px dashed #d1d5db;
           border-radius: 1rem;
           padding: 3rem 2rem;
           text-align: center;
@@ -1290,8 +1292,8 @@ const FaceScanner: React.FC = () => {
           position: relative;
           border-radius: 1rem;
           overflow: hidden;
-          border: 4px solid #2D3748;
-          background: #0F1419;
+          border: 4px solid #d1d5db;
+          background: #f9fafb;
           height: 45vh;
           max-height: 500px;
         }
@@ -1301,7 +1303,7 @@ const FaceScanner: React.FC = () => {
           height: 100%;
           display: block;
           object-fit: cover;
-          background: #000;
+          background: #fff;
         }
 
         .corner-bracket {
@@ -1641,8 +1643,116 @@ const FaceScanner: React.FC = () => {
           }
         }
       `}</style>
-      <div style={{ minHeight: '100vh', minWidth: '100vw', background: '#000', color: '#fff', padding: '1rem 0', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '0 3%', flex: 1, display: 'flex', flexDirection: 'column', maxHeight: '100vh', overflow: 'hidden' }}>
+      <div style={{ minHeight: '100vh', minWidth: '100vw', background: 'rgb(255, 255, 255)', color: '#000', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+        {/* Blurred bubbles background */}
+        <div style={{
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+          overflow: "hidden",
+          zIndex: 0,
+        }}>
+          {/* Top left area */}
+          <div style={{
+            position: "absolute",
+            width: "500px",
+            height: "500px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(0, 184, 248, 0.35), rgba(135, 206, 250, 0.25))",
+            filter: "blur(100px)",
+            top: "-10%",
+            left: "-5%",
+          }} />
+          <div style={{
+            position: "absolute",
+            width: "350px",
+            height: "350px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(197, 245, 245, 0.4), rgba(176, 224, 230, 0.3))",
+            filter: "blur(85px)",
+            top: "5%",
+            left: "15%",
+          }} />
+          
+          {/* Top right area */}
+          <div style={{
+            position: "absolute",
+            width: "400px",
+            height: "400px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(135, 206, 250, 0.32), rgba(173, 216, 230, 0.22))",
+            filter: "blur(95px)",
+            top: "0%",
+            right: "10%",
+          }} />
+          <div style={{
+            position: "absolute",
+            width: "300px",
+            height: "300px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(0, 184, 248, 0.28), rgba(135, 206, 250, 0.18))",
+            filter: "blur(75px)",
+            top: "20%",
+            right: "-5%",
+          }} />
+          
+          {/* Middle area */}
+          <div style={{
+            position: "absolute",
+            width: "450px",
+            height: "450px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(197, 245, 245, 0.38), rgba(176, 224, 230, 0.28))",
+            filter: "blur(105px)",
+            top: "35%",
+            left: "40%",
+          }} />
+          
+          {/* Bottom left area */}
+          <div style={{
+            position: "absolute",
+            width: "380px",
+            height: "380px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(135, 206, 250, 0.34), rgba(173, 216, 230, 0.24))",
+            filter: "blur(88px)",
+            bottom: "10%",
+            left: "5%",
+          }} />
+          <div style={{
+            position: "absolute",
+            width: "320px",
+            height: "320px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(0, 184, 248, 0.3), rgba(135, 206, 250, 0.2))",
+            filter: "blur(80px)",
+            bottom: "-5%",
+            left: "25%",
+          }} />
+          
+          {/* Bottom right area */}
+          <div style={{
+            position: "absolute",
+            width: "420px",
+            height: "420px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(197, 245, 245, 0.42), rgba(176, 224, 230, 0.32))",
+            filter: "blur(110px)",
+            bottom: "5%",
+            right: "8%",
+          }} />
+          <div style={{
+            position: "absolute",
+            width: "280px",
+            height: "280px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(135, 206, 250, 0.29), rgba(173, 216, 230, 0.19))",
+            filter: "blur(70px)",
+            bottom: "25%",
+            right: "-3%",
+          }} />
+        </div>
+        <div style={{ padding: '3% 3%', flex: 1, display: 'flex', flexDirection: 'column', maxHeight: '100vh', overflow: 'hidden', position: 'relative', zIndex: 1 }}>
         {/* <div className="container"> */}
           {error && scanState === 'initial' && (
             <div className="error-message" style={{ marginBottom: '2rem' }}>
@@ -1675,17 +1785,17 @@ const FaceScanner: React.FC = () => {
                   Vita Scan
                 </h2>
 
-                <h1 style={{ fontSize: '2.25rem', fontWeight: 400, lineHeight: 1.2, marginBottom: '0.5rem', color: '#fff' }}>
+                <h1 style={{ fontSize: '2.25rem', fontWeight: 400, lineHeight: 1.2, marginBottom: '0.5rem', color: '#000' }}>
                   Scan yourself and see how health rate works
                 </h1>
 
-                <p style={{ color: '#9CA3AF', fontSize: '1rem', fontWeight: 400, lineHeight: 1.6 }}>
+                <p style={{ color: '#6B7280', fontSize: '1rem', fontWeight: 400, lineHeight: 1.6 }}>
                   "Research-driven. Precision-crafted. Eternal AI transforms your health journey."
                 </p>
 
                 {/* Do's Section */}
                 <div style={{ marginTop: '1rem' }}>
-                  <h4 style={{ color: '#fff', fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.75rem' }}>
+                  <h4 style={{ color: '#000', fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.75rem' }}>
                     Do's
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -1710,7 +1820,7 @@ const FaceScanner: React.FC = () => {
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
                         </div>
-                        <span style={{ color: '#D1D5DB', fontSize: '0.85rem', lineHeight: 1.5 }}>{item}</span>
+                        <span style={{ color: '#4B5563', fontSize: '0.85rem', lineHeight: 1.5 }}>{item}</span>
                       </div>
                     ))}
                   </div>
@@ -1718,7 +1828,7 @@ const FaceScanner: React.FC = () => {
 
                 {/* Don'ts Section */}
                 <div style={{ marginTop: '1rem' }}>
-                  <h4 style={{ color: '#fff', fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.75rem' }}>
+                  <h4 style={{ color: '#000', fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.75rem' }}>
                     Don'ts
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -1744,7 +1854,7 @@ const FaceScanner: React.FC = () => {
                             <line x1="6" y1="6" x2="18" y2="18" />
                           </svg>
                         </div>
-                        <span style={{ color: '#D1D5DB', fontSize: '0.85rem', lineHeight: 1.5 }}>{item}</span>
+                        <span style={{ color: '#4B5563', fontSize: '0.85rem', lineHeight: 1.5 }}>{item}</span>
                       </div>
                     ))}
                   </div>
@@ -1902,7 +2012,7 @@ const FaceScanner: React.FC = () => {
                                   }}
                                 />
                               </div>
-                              <span style={{ fontSize: '0.75rem', color: '#9CA3AF' }}>
+                              <span style={{ fontSize: '0.75rem', color: '#6B7280' }}>
                                 {Math.round(sqi * 100)}%
                               </span>
                             </div>
@@ -1976,7 +2086,7 @@ const FaceScanner: React.FC = () => {
                             flexDirection: 'column',
                             alignItems: 'center'
                           }}>
-                            <span style={{ fontSize: '9px', color: '#9CA3AF', marginBottom: '2px' }}>ROI</span>
+                            <span style={{ fontSize: '9px', color: '#6B7280', marginBottom: '2px' }}>ROI</span>
                             <canvas
                               ref={roiCanvasRef}
                               width={36}
@@ -2000,7 +2110,7 @@ const FaceScanner: React.FC = () => {
                             flexDirection: 'column',
                             alignItems: 'center'
                           }}>
-                            <span style={{ fontSize: '9px', color: '#9CA3AF', marginBottom: '2px' }}>ATTN</span>
+                            <span style={{ fontSize: '9px', color: '#6B7280', marginBottom: '2px' }}>ATTN</span>
                             <canvas
                               ref={heatmapCanvasRef}
                               width={64}
@@ -2024,7 +2134,7 @@ const FaceScanner: React.FC = () => {
                             alignItems: 'center',
                             minHeight: '80px'
                           }}>
-                            <span style={{ fontSize: '9px', color: '#9CA3AF', marginBottom: '2px' }}>Heart State</span>
+                            <span style={{ fontSize: '9px', color: '#6B7280', marginBottom: '2px' }}>Heart State</span>
                             <canvas
                               ref={trajCanvasRef}
                               width={200}
@@ -2058,7 +2168,7 @@ const FaceScanner: React.FC = () => {
                             <VideoIcon />
                             Start Scan (Record 40s)
                           </button>
-                          <p style={{ color: '#9CA3AF', fontSize: '0.875rem', marginTop: '1rem' }}>
+                          <p style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '1rem' }}>
                             Position your face in the frame and click Start Scan to begin recording
                           </p>
                         </div>
@@ -2084,7 +2194,7 @@ const FaceScanner: React.FC = () => {
                             </svg>
                             Stop Recording ({40 - recordingTime}s remaining)
                           </button>
-                          <p style={{ color: '#9CA3AF', fontSize: '0.875rem', marginTop: '1rem' }}>
+                          <p style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '1rem' }}>
                             Recording in progress. Please keep your face still and centered.
                           </p>
                         </div>
@@ -2179,7 +2289,7 @@ const FaceScanner: React.FC = () => {
                           </svg>
                           Processing Face Scan... {progress}%
                         </button>
-                        <p style={{ color: '#9CA3AF', fontSize: '0.875rem', marginTop: '1rem' }}>
+                        <p style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '1rem' }}>
                           Analyzing facial features and generating health insights...
                         </p>
                       </div>
@@ -2242,7 +2352,7 @@ const FaceScanner: React.FC = () => {
                           </svg>
                           Face Scanned Successfully!
                         </button>
-                        <p style={{ color: '#9CA3AF', fontSize: '0.875rem' }}>
+                        <p style={{ color: '#6B7280', fontSize: '0.875rem' }}>
                           Your face scan is complete. View your report in the health AI dashboard.
                         </p>
                       </div>
