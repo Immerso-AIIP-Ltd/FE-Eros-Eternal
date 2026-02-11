@@ -11,7 +11,7 @@ const ErosHome = () => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/facescan");
+    navigate("/result");
   };
   const handleRasiClick = () => {
 
