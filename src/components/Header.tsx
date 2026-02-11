@@ -47,7 +47,7 @@ export const Header: React.FC = () => {
       id: 1,
       icon: VitaScanIcon,
       title: "Vita Scan",
-      buttonText: "View report",
+      buttonText: "Generate",
       reportType: "vita_scan",
       route: "/facescan",
       // route: "/face-report",
@@ -110,34 +110,47 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     const fetchReportStatuses = async () => {
-      if (!userId) {
-        setLoadingStatuses(false);
-        return;
-      }
-
       setLoadingStatuses(true);
       const statuses: Record<string, boolean> = {};
 
       try {
-        const reportChecks = cardsData
-          .filter(card => card.reportType)
-          .map(async (card) => {
-            try {
-              const response = await fetch(
-                `${baseApiUrl}?user_id=${userId}&report_type=${card.reportType}`
-              );
-              const data = await response.json();
-              const hasReport = data.success && data.data && data.data.report_data;
-              statuses[card.reportType!] = hasReport;
-              return { reportType: card.reportType!, hasReport };
-            } catch (error) {
-              console.error(`Error checking ${card.reportType}:`, error);
-              statuses[card.reportType!] = false;
-              return { reportType: card.reportType!, hasReport: false };
-            }
-          });
+        // Check vita_scan from localStorage
+        const vitaScanData = localStorage.getItem('faceReportData');
+        if (vitaScanData) {
+          try {
+            const parsedData = JSON.parse(vitaScanData);
+            statuses['vita_scan'] = parsedData && parsedData.success === true;
+          } catch (err) {
+            console.error('Error parsing vita_scan data:', err);
+            statuses['vita_scan'] = false;
+          }
+        } else {
+          statuses['vita_scan'] = false;
+        }
 
-        await Promise.all(reportChecks);
+        // Check other reports from API only if userId exists
+        if (userId) {
+          const reportChecks = cardsData
+            .filter(card => card.reportType && card.reportType !== 'vita_scan')
+            .map(async (card) => {
+              try {
+                const response = await fetch(
+                  `${baseApiUrl}?user_id=${userId}&report_type=${card.reportType}`
+                );
+                const data = await response.json();
+                const hasReport = data.success && data.data && data.data.report_data;
+                statuses[card.reportType!] = hasReport;
+                return { reportType: card.reportType!, hasReport };
+              } catch (error) {
+                console.error(`Error checking ${card.reportType}:`, error);
+                statuses[card.reportType!] = false;
+                return { reportType: card.reportType!, hasReport: false };
+              }
+            });
+
+          await Promise.all(reportChecks);
+        }
+
         setReportStatuses(statuses);
       } catch (error) {
         console.error("Error checking report statuses:", error);
@@ -147,6 +160,26 @@ export const Header: React.FC = () => {
     };
 
     fetchReportStatuses();
+
+    // Listen for storage changes (e.g., when vita_scan is completed)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'faceReportData') {
+        fetchReportStatuses();
+      }
+    };
+
+    // Listen for custom event when navigating back from report page
+    const handleVitaScanUpdate = () => {
+      fetchReportStatuses();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('vitaScanUpdated', handleVitaScanUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('vitaScanUpdated', handleVitaScanUpdate);
+    };
   }, [userId]);
 
   const getButtonText = (card: CardData): string => {
@@ -157,20 +190,28 @@ export const Header: React.FC = () => {
   };
 
   const handleCardClick = (card: CardData) => {
-    if (card.reportType && userId) {
+    if (card.reportType === 'vita_scan') {
+      // Special handling for vita_scan
+      const hasReport = reportStatuses['vita_scan'];
+      if (hasReport) {
+        // Navigate to face-report page to view existing report
+        navigate('/face-report');
+      } else {
+        // Navigate to facescan page to generate new report
+        navigate('/facescan');
+      }
+    } else if (card.reportType && userId) {
+      // Handle other report types
       const hasReport = reportStatuses[card.reportType];
       if (hasReport) {
-        if (card.reportType === "vita_scan") {
-          navigate('/face-report');
-        } else {
-          navigate('/view-report', {
-            state: { reportType: card.reportType, userId, title: card.title }
-          });
-        }
+        navigate('/view-report', {
+          state: { reportType: card.reportType, userId, title: card.title }
+        });
       } else if (card.route) {
         navigate(card.route);
       }
     } else {
+      // Fallback: navigate to route if available
       if (card.route) navigate(card.route);
     }
   };
@@ -328,7 +369,7 @@ export const Header: React.FC = () => {
           }}
         >
           {/* Sparkle Icon */}
-          <div
+          {/* <div
             style={{
               width: "60px",
               height: "60px",
@@ -342,7 +383,7 @@ export const Header: React.FC = () => {
             }}
           >
             <Sparkles size={32} color="#73acd4" />
-          </div>
+          </div> */}
 
           {/* Main Heading - Black, center-aligned, 2 lines */}
           <h1
