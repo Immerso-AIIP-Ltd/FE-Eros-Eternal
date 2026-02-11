@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UsersRound } from "lucide-react";
-import Stars from "./components/stars";
+import { Card, Col, Row, Container } from "react-bootstrap";
 
-// 💡 Replace this with your actual API URL
 const API_URL = "http://164.52.205.108:8500";
-
-// const API_URL =
-//   "http://192.168.18.5:7001";
 
 interface CompatibilityData {
   match_for: string;
@@ -43,26 +39,16 @@ interface ApiResponse {
 const RelationshipCompatibility: React.FC = () => {
   const navigate = useNavigate();
 
-  const [stars] = useState(() =>
-    Array.from({ length: 50 }, () => ({
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      opacity: 0.3 + Math.random() * 0.7,
-      size: Math.random() * 2 + 1,
-    })),
-  );
   const [yourName, setYourName] = useState("");
   const [yourDob, setYourDob] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [partnerDob, setPartnerDob] = useState("");
 
-  // 📊 State for API result
   const [compatibilityResult, setCompatibilityResult] =
     useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 🗃️ Load from memory on mount (using state instead of localStorage)
   useEffect(() => {
     // Data persists in component state during session
   }, []);
@@ -79,7 +65,6 @@ const RelationshipCompatibility: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
-    // 📦 Create FormData
     const formData = new FormData();
     formData.append("user_id", userId || "123");
     formData.append("user_name", yourName);
@@ -92,7 +77,7 @@ const RelationshipCompatibility: React.FC = () => {
         {
           method: "POST",
           body: formData,
-        },
+        }
       );
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -112,583 +97,913 @@ const RelationshipCompatibility: React.FC = () => {
     }
   };
 
-  // 🧮 Generate compatibility score
-  const getCompatibilityScore = () => {
-    if (!compatibilityResult?.data) return 0;
-    const isSameSign =
-      compatibilityResult.data.sign_main ===
-      compatibilityResult.data.sign_partner;
-    return isSameSign ? 90 : 75;
+  // Function to format array items with bullet points
+  const formatArrayItems = (items: string[]) => {
+    if (!items || items.length === 0) return null;
+
+    return items.map((item, index) => (
+      <li
+        key={index}
+        className="mb-3"
+        style={{
+          listStyleType: "disc",
+          marginLeft: "20px",
+          lineHeight: "1.8",
+          color: "#374151",
+        }}
+      >
+        {item}
+      </li>
+    ));
   };
 
-  // 💬 Render results UI
+  // Circular Progress Component
+  const CircularProgress: React.FC<{ score: number }> = ({ score }) => {
+    const radius = 80;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (score / 100) * circumference;
+
+    // Determine color based on score
+    const getColor = (score: number) => {
+      if (score >= 80) return "#10B981"; // Green
+      if (score >= 60) return "#F59E0B"; // Orange
+      return "#EF4444"; // Red
+    };
+
+    const color = getColor(score);
+
+    return (
+      <div className="d-flex flex-column align-items-center">
+        <svg width="200" height="200" style={{ transform: "rotate(-90deg)" }}>
+          {/* Background circle */}
+          <circle
+            cx="100"
+            cy="100"
+            r={radius}
+            fill="none"
+            stroke="#E5E7EB"
+            strokeWidth="12"
+          />
+          {/* Progress circle */}
+          <circle
+            cx="100"
+            cy="100"
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth="12"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            style={{
+              transition: "stroke-dashoffset 1s ease-in-out",
+            }}
+          />
+        </svg>
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "3rem",
+              fontWeight: 700,
+              color: color,
+            }}
+          >
+            {score}%
+          </div>
+          <div
+            style={{
+              fontSize: "1rem",
+              color: "#6B7280",
+              fontWeight: 500,
+            }}
+          >
+            Compatible
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderResults = () => {
     if (!compatibilityResult) return null;
 
     const { data } = compatibilityResult;
-    const score = getCompatibilityScore();
 
     return (
-      <div
-        className="w-full  mx-auto px-4"
-        style={{ position: "relative", zIndex: 10,
-            minHeight: "100vh" }}
-      >
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold  mb-2">
+      <Container className="py-4">
+        {/* Header Section */}
+        <div className="text-center mb-5">
+          <h2
+            className="mb-3"
+            style={{ fontSize: "2rem", fontWeight: 700, color: "#1f2937" }}
+          >
             Relationship Compatibility
           </h2>
-
-          <p className="text-lg">
-            <span className="text-cyan-400 fs-4 font-semibold">{yourName}</span>{" "}
-            &{" "}
-            <span className="text-cyan-400 fs-4 font-semibold">
-              {partnerName}
+          <p className="mb-2" style={{ fontSize: "1.25rem", color: "#6b7280" }}>
+            <span
+              style={{ color: "#00B8F8", fontWeight: 600, fontSize: "1.5rem" }}
+            >
+              {yourName}
             </span>{" "}
-            <br />
-            <span className="fs-6">{data.match_for}</span>
+            &{" "}
+            <span
+              style={{ color: "#00B8F8", fontWeight: 600, fontSize: "1.5rem" }}
+            >
+              {partnerName}
+            </span>
+          </p>
+          <p style={{ fontSize: "1rem", color: "#6b7280" }}>
+            {data.match_for}
           </p>
         </div>
 
-        {/* Relationship Strengths */}
-        <h5 className="text-xl font-semibold  mb-4 flex items-center">
-          {/* <div className="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div> */}
-          Relationship Strengths
-        </h5>
-        <div
-          className="mb-8 p-6 rounded-2xl border border-gray-600 shadow-xl"
-          // style={{
-          //   background:
-          //     "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-          // }}
-          style={{background:'#ffffff'}}
-        >
-          <div className="space-y-6">
-            {/* Match Summary */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Match Summary
-              </h3>
-              <p className=" leading-relaxed">
-                {data.match_summary}
-              </p>
-            </div>
+        {/* Compatibility Score - Circular Progress */}
+        <Row className="mb-5">
+          <Col md={12}>
+            <Card
+              className="shadow-sm"
+              style={{
+                backgroundColor: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: "16px",
+              }}
+            >
+              <Card.Body className="p-5 d-flex flex-column align-items-center">
+                <h3
+                  className="mb-4"
+                  style={{
+                    fontSize: "1.75rem",
+                    fontWeight: 700,
+                    color: "#1f2937",
+                  }}
+                >
+                  Compatibility Score
+                </h3>
+                <div style={{ position: "relative", marginBottom: "20px" }}>
+                  <CircularProgress score={data.compatibility_score} />
+                </div>
+                <p
+                  className="text-center mb-0"
+                  style={{
+                    color: "#6b7280",
+                    fontSize: "1rem",
+                    maxWidth: "500px",
+                  }}
+                >
+                  {data.compatibility_score >= 80
+                    ? "Excellent compatibility! You share a strong connection."
+                    : data.compatibility_score >= 60
+                    ? "Good compatibility with room for growth."
+                    : "Challenging compatibility that requires effort."}
+                </p>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
-            {/* Dynamic Summary */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Overview
-              </h3>
-              <p className=" leading-relaxed">
-                {data.dynamic_summary}
-              </p>
-            </div>
+        {/* Tiles Grid */}
+        <Row className="g-4">
+          {/* Match Summary */}
+          <Col md={12}>
+            <Card
+              className="h-100 shadow-sm"
+              style={{
+                backgroundColor: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: "16px",
+              }}
+            >
+              <Card.Body className="p-4">
+                <Card.Title
+                  className="mb-4 pb-3"
+                  style={{
+                    fontSize: "1.5rem",
+                    fontWeight: 700,
+                    color: "#1f2937",
+                    borderBottom: "2px solid #e5e7eb",
+                  }}
+                >
+                  Match Summary
+                </Card.Title>
+                <p style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}>
+                  {data.match_summary}
+                </p>
+              </Card.Body>
+            </Card>
+          </Col>
 
-            {/* Compatibility Score */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Compatibility Score
-              </h3>
-              <p className=" text-2xl font-bold">
-                {data.compatibility_score}%
-              </p>
-            </div>
+          {/* Overview */}
+          <Col md={12}>
+            <Card
+              className="h-100 shadow-sm"
+              style={{
+                backgroundColor: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: "16px",
+              }}
+            >
+              <Card.Body className="p-4">
+                <Card.Title
+                  className="mb-4 pb-3"
+                  style={{
+                    fontSize: "1.5rem",
+                    fontWeight: 700,
+                    color: "#1f2937",
+                    borderBottom: "2px solid #e5e7eb",
+                  }}
+                >
+                  Overview
+                </Card.Title>
+                <p style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}>
+                  {data.dynamic_summary}
+                </p>
+              </Card.Body>
+            </Card>
+          </Col>
 
-            {/* Strengths */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Strengths
-              </h3>
-              <ul className="list-disc list-inside  space-y-2">
-                {data.strengths?.length ? (
-                  <ul className="list-disc list-inside  space-y-2">
-                    {data.strengths.map((strength, index) => (
-                      <li key={index}>{strength}</li>
-                    ))}
+          {/* Strengths */}
+          {data.strengths && data.strengths.length > 0 && (
+            <Col md={6}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Strengths
+                  </Card.Title>
+                  <ul className="list-unstyled mb-0">
+                    {formatArrayItems(data.strengths)}
                   </ul>
-                ) : (
-                  <p className="text-gray-400">No strengths available</p>
-                )}
-              </ul>
-            </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            {/* Challenges */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Challenges
-              </h3>
-              <ul className="list-disc list-inside  space-y-2">
-                {data.challenges.map((challenge, index) => (
-                  <li key={index}>{challenge}</li>
-                ))}
-              </ul>
-            </div>
+          {/* Challenges */}
+          {data.challenges && data.challenges.length > 0 && (
+            <Col md={6}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Challenges
+                  </Card.Title>
+                  <ul className="list-unstyled mb-0">
+                    {formatArrayItems(data.challenges)}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            {/* Shared Values */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Shared Values
-              </h3>
-              <ul className="list-disc list-inside  space-y-2">
-                {data.shared_values.map((value, index) => (
-                  <li key={index}>{value}</li>
-                ))}
-              </ul>
-            </div>
+          {/* Shared Values */}
+          {data.shared_values && data.shared_values.length > 0 && (
+            <Col md={6}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Shared Values
+                  </Card.Title>
+                  <ul className="list-unstyled mb-0">
+                    {formatArrayItems(data.shared_values)}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            {/* Ideal Roles */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Ideal Roles
-              </h3>
-              <ul className="list-disc list-inside  space-y-2">
-                {data.ideal_roles.map((role, index) => (
-                  <li key={index}>{role}</li>
-                ))}
-              </ul>
-            </div>
+          {/* Ideal Roles */}
+          {data.ideal_roles && data.ideal_roles.length > 0 && (
+            <Col md={6}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Ideal Roles
+                  </Card.Title>
+                  <ul className="list-unstyled mb-0">
+                    {formatArrayItems(data.ideal_roles)}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            {/* Communication Style */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Communication Style
-              </h3>
-              <p className=" leading-relaxed">
-                {data.communication_style}
-              </p>
-            </div>
+          {/* Communication Style */}
+          {data.communication_style && (
+            <Col md={6}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Communication Style
+                  </Card.Title>
+                  <p
+                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
+                  >
+                    {data.communication_style}
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            {/* Growth Opportunities */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Growth Opportunities
-              </h3>
-              <p className=" leading-relaxed">
-                {data.growth_opportunities}
-              </p>
-            </div>
+          {/* Growth Opportunities */}
+          {data.growth_opportunities && (
+            <Col md={6}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Growth Opportunities
+                  </Card.Title>
+                  <p
+                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
+                  >
+                    {data.growth_opportunities}
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            {/* Warning Signs */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Warning Signs
-              </h3>
-              <ul className="list-disc list-inside  space-y-2">
-                {data.warning_signs.map((warning, index) => (
-                  <li key={index}>{warning}</li>
-                ))}
-              </ul>
-            </div>
+          {/* Warning Signs */}
+          {data.warning_signs && data.warning_signs.length > 0 && (
+            <Col md={12}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Warning Signs
+                  </Card.Title>
+                  <ul className="list-unstyled mb-0">
+                    {formatArrayItems(data.warning_signs)}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            {/* Advice for Main */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Advice for {data.sign_main}
-              </h3>
-              <p className="leading-relaxed">
-                {data.advice_for_main}
-              </p>
-            </div>
+          {/* Advice for Main */}
+          {data.advice_for_main && (
+            <Col md={6}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Advice for {data.sign_main}
+                  </Card.Title>
+                  <p
+                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
+                  >
+                    {data.advice_for_main}
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            {/* Advice for Partner */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Advice for {data.sign_partner}
-              </h3>
-              <p className=" leading-relaxed">
-                {data.advice_for_partner}
-              </p>
-            </div>
+          {/* Advice for Partner */}
+          {data.advice_for_partner && (
+            <Col md={6}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Advice for {data.sign_partner}
+                  </Card.Title>
+                  <p
+                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
+                  >
+                    {data.advice_for_partner}
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            {/* Element Interaction */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Element Interaction
-              </h3>
-              <p className="leading-relaxed">
-                {data.element_interaction}
-              </p>
-            </div>
+          {/* Element Interaction */}
+          {data.element_interaction && (
+            <Col md={6}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Element Interaction
+                  </Card.Title>
+                  <p
+                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
+                  >
+                    {data.element_interaction}
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            {/* Modality Interaction */}
-            <div>
-              <h3 className="text-lg font-semibold  mb-3">
-                Modality Interaction
-              </h3>
-              <p className=" leading-relaxed">
-                {data.modality_interaction}
-              </p>
-            </div>
-          </div>
-        </div>
+          {/* Modality Interaction */}
+          {data.modality_interaction && (
+            <Col md={6}>
+              <Card
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title
+                    className="mb-4 pb-3"
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    Modality Interaction
+                  </Card.Title>
+                  <p
+                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
+                  >
+                    {data.modality_interaction}
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
+        </Row>
 
-        {/* Back Button */}
-        <div className="text-center">
+        <style>{`
+          .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+          }
           
-        </div>
-      </div>
+          .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+          }
+        `}</style>
+      </Container>
     );
   };
 
   return (
     <div
       className="vw-100 d-flex flex-column"
-      style={{ position: "relative", minHeight: "100vh",color:"#000",background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%),",
-           }}
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        color: "#000",
+        background:
+          "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
+      }}
     >
-      {/* <Stars /> */}
-      {/* <div
-        className="absolute inset-0 overflow-hidden"
-        style={{ zIndex: 0, pointerEvents: "none" }}
-      >
-        {stars.map((star, i) => (
-          <div
-            key={i}
-            className="absolute bg-white rounded-full animate-pulse"
-            style={{
-              width: `${star.size}px`,
-              height: `${star.size}px`,
-              opacity: star.opacity,
-              top: `${star.y}%`,
-              left: `${star.x}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`,
-            }}
-          />
-        ))}
-      </div> */}
-
-      {/* Header */}
-      <div  style={{
-            background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
-            minHeight: "100vh",color:"#000"
-          }}>
-      <div className="d-flex justify-content-between align-items-center mb-4" >
-        <button
-          className="btn "
-          onClick={() => navigate("/result")}
-          style={{ fontSize: "1rem", position: "relative", zIndex: 1000 }}
-        >
-          ← Back
-        </button>
-      
-      </div>
-
-      {/* Header */}
-      {/* <div className="flex items-center justify-between p-4 w-full mx-auto" style={{ position: "relative", zIndex: 10 }}>
-        <button
-          className="p-2 text-gray-400 hover:text-white transition-colors duration-200 bg-transparent"
-          onClick={() => navigate("/result")}
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-        <button
-          className="p-2 text-gray-400 hover:text-white transition-colors duration-200 bg-transparent"
-          onClick={() => window.location.reload()}
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-        </button>
-      </div> */}
-
       <div
-        className="flex-grow flex my-4 p-4"
-        style={{ position: "relative", zIndex: 10, }}
+        style={{
+          background:
+            "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
+          minHeight: "100vh",
+          color: "#000",
+        }}
       >
-
-        
-        {/* Show Form OR Results */}
-        {!compatibilityResult ? (
-          <div
-            className="w-full max-w-4xl mx-auto"
-            style={{ position: "relative", zIndex: 10, }}
+        {/* Header */}
+        <div className="d-flex justify-content-between align-items-center p-4">
+          <button
+            className="btn btn-outline-dark"
+            onClick={() => navigate("/result")}
+            style={{ fontSize: "1rem", position: "relative", zIndex: 1000 }}
           >
-            <div className="d-flex justify-content-center mb-4">
-              <div
-                className="bg-info rounded-circle d-flex align-items-center justify-content-center"
-                style={{ width: "48px", height: "48px" }}
-              >
-                <UsersRound size={18} />
-              </div>
-            </div>
+            ← Back
+          </button>
+        </div>
 
-            {/* Intro */}
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                Relationship Compatibility
-              </h2>
-              <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-                Discover your spiritual and emotional compatibility with your
-                partner using vedic astrology
-              </p>
-            </div>
-
-            {/* Form */}
-            <div className="mb-12">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                {/* Your Details */}
+        <div
+          className="flex-grow flex p-4"
+          style={{ position: "relative", zIndex: 10 }}
+        >
+          {/* Show Form OR Results */}
+          {!compatibilityResult ? (
+            <div
+              className="w-full max-w-4xl mx-auto"
+              style={{ position: "relative", zIndex: 10 }}
+            >
+              <div className="d-flex justify-content-center mb-4">
                 <div
-                  className="p-8 rounded-2xl  "
-                  style={{
-                    // backgroundColor: "#262626",
-                    position: "relative",
-                    zIndex: 10,
-                  }}
+                  className="bg-info rounded-circle d-flex align-items-center justify-content-center"
+                  style={{ width: "48px", height: "48px" }}
                 >
-                  <h5 className="text-2xl font-semibold mb-6 text-cyan-400">
-                   Your Information
-                  </h5>
-
-                  <div className="mb-6">
-                    <label
-                      htmlFor="yourName"
-                      className="block text-sm font-medium  mb-2"
-                    >
-                      Enter Your Name
-                    </label>
-                    <input
-                      type="text"
-                      id="yourName"
-                      className="w-full px-4 py-3  border border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
-                      style={{
-                        // backgroundColor: "#262626",
-                        position: "relative",
-                        zIndex: 10,
-                      }}
-                      placeholder="Your full name"
-                      value={yourName}
-                      onChange={(e) => setYourName(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="mb-6">
-                    <label
-                      htmlFor="yourDob"
-                      className="block text-sm font-medium  mb-2"
-                    >
-                      Date of Birth
-                    </label>
-                    <input
-                      type="date"
-                      id="yourDob"
-                      className="w-full px-4 py-3  border border-gray-600 rounded-xl  focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
-                      style={{
-                        // backgroundColor: "#262626",
-                        position: "relative",
-                        zIndex: 10,
-                        color:"#000"
-                      }}
-                      value={yourDob}
-                      onChange={(e) => setYourDob(e.target.value)}
-                      max={new Date().toISOString().split("T")[0]}
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Partner Details */}
-                <div
-                  className="p-8 rounded-2xl "
-                  style={{
-                    // backgroundColor: "#262626",
-                    position: "relative",
-                    zIndex: 10,
-                  }}
-                >
-                  <h5 className="text-2xl font-semibold mb-6 text-pink-400">
-                    Partner Information
-                  </h5>
-
-                  <div className="mb-6">
-                    <label
-                      htmlFor="partnerName"
-                      className="block text-sm font-medium  mb-2"
-                    >
-                      Partner's Name
-                    </label>
-                    <input
-                      type="text"
-                      id="partnerName"
-                      className="w-full px-4 py-3  border border-gray-600 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
-                      style={{
-                        // backgroundColor: "#262626",
-                        position: "relative",
-                        zIndex: 10,
-                      }}
-                      placeholder="Partner's full name"
-                      value={partnerName}
-                      onChange={(e) => setPartnerName(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="mb-6">
-                    <label
-                      htmlFor="partnerDob"
-                      className="block text-sm font-medium  mb-2"
-                    >
-                      Date of Birth
-                    </label>
-                    <input
-                      type="date"
-                      id="partnerDob"
-                      className="w-full px-4 py-3  border border-gray-600 rounded-xl  focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
-                      style={{
-                        // backgroundColor: "#262626",
-                        position: "relative",
-                        zIndex: 10,
-                      }}
-                      value={partnerDob}
-                      onChange={(e) => setPartnerDob(e.target.value)}
-                      max={new Date().toISOString().split("T")[0]}
-                      required
-                    />
-                  </div>
+                  <UsersRound size={18} color="#fff" />
                 </div>
               </div>
 
-              {/* How It Works */}
-              <div
-                className="p-8  mb-8"
-                style={{
-                  position: "relative",
-                  zIndex: 10,
-                }}
-              >
-                <h5 className="text-xl font-semibold  mb-4">
-                 What We’ll Analyze
-                </h5>
-                <div className="grid gap-3">
-                  <div className="flex items-center ">
-                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Provides personalized relationship insights</span>
-                  </div>
-                  <div className="flex items-center ">
-                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Identifies relationship strengths</span>
-                  </div>
-                  <div className="flex items-center ">
-                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Identifies relationship Challenges</span>
-                  </div>
-                  <div className="flex items-center ">
-                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Suggest growth oppourtunities</span>
-                  </div>
-                  {/* <div className="flex items-center text-gray-300">
-                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Suggests growth opportunities</span>
-                  </div> */}
-                  {/* <div className="flex items-center text-gray-300">
-                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Based on ancient wisdom traditions</span>
-                  </div> */}
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="text-center">
-                <button
-                  onClick={handleSubmit}
-                  disabled={
-                    !yourName ||
-                    !yourDob ||
-                    !partnerName ||
-                    !partnerDob ||
-                    isLoading
-                  }
-                  className="px-12 py-4 btn  btn-info rounded-pill px-4 py-2 mt-4 w-full"
+              {/* Intro */}
+              <div className="text-center mb-5">
+                <h2
+                  className="mb-3"
                   style={{
-                    cursor: "pointer",
-                    position: "relative",
-                    zIndex: 10,
-                    color:"#ffffff"
+                    fontSize: "2.5rem",
+                    fontWeight: 700,
+                    color: "#00B8F8",
                   }}
                 >
-                  {isLoading ? (
-                    <span className="flex items-center">
-                      <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 "
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
+                  Relationship Compatibility
+                </h2>
+                <p
+                  className="mx-auto"
+                  style={{
+                    color: "#6b7280",
+                    fontSize: "1.125rem",
+                    maxWidth: "600px",
+                    lineHeight: "1.6",
+                  }}
+                >
+                  Discover your spiritual and emotional compatibility with your
+                  partner using vedic astrology
+                </p>
+              </div>
+
+              {/* Form */}
+              <div className="mb-5">
+                <div className="row g-4 mb-4">
+                  {/* Your Details */}
+                  <div className="col-lg-6">
+                    <div
+                      className="p-4 rounded-3"
+                      style={{
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #e5e7eb",
+                      }}
+                    >
+                      <h5
+                        className="mb-4"
+                        style={{ color: "#00B8F8", fontWeight: 600 }}
                       >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Generating Compatibility...
-                    </span>
-                  ) : (
-                    "Analyze Compatibility"
-                  )}
-                </button>
+                        Your Information
+                      </h5>
+
+                      <div className="mb-3">
+                        <label
+                          htmlFor="yourName"
+                          className="form-label"
+                          style={{ fontWeight: 500, color: "#374151" }}
+                        >
+                          Enter Your Name
+                        </label>
+                        <input
+                          type="text"
+                          id="yourName"
+                          className="form-control"
+                          placeholder="Your full name"
+                          value={yourName}
+                          onChange={(e) => setYourName(e.target.value)}
+                          required
+                          style={{
+                            borderColor: "#e5e7eb",
+                            padding: "0.75rem",
+                          }}
+                        />
+                      </div>
+
+                      <div className="mb-3">
+                        <label
+                          htmlFor="yourDob"
+                          className="form-label"
+                          style={{ fontWeight: 500, color: "#374151" }}
+                        >
+                          Date of Birth
+                        </label>
+                        <input
+                          type="date"
+                          id="yourDob"
+                          className="form-control"
+                          value={yourDob}
+                          onChange={(e) => setYourDob(e.target.value)}
+                          max={new Date().toISOString().split("T")[0]}
+                          required
+                          style={{
+                            borderColor: "#e5e7eb",
+                            padding: "0.75rem",
+                            color: "#000",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Partner Details */}
+                  <div className="col-lg-6">
+                    <div
+                      className="p-4 rounded-3"
+                      style={{
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #e5e7eb",
+                      }}
+                    >
+                      <h5
+                        className="mb-4"
+                        style={{ color: "#EC4899", fontWeight: 600 }}
+                      >
+                        Partner Information
+                      </h5>
+
+                      <div className="mb-3">
+                        <label
+                          htmlFor="partnerName"
+                          className="form-label"
+                          style={{ fontWeight: 500, color: "#374151" }}
+                        >
+                          Partner's Name
+                        </label>
+                        <input
+                          type="text"
+                          id="partnerName"
+                          className="form-control"
+                          placeholder="Partner's full name"
+                          value={partnerName}
+                          onChange={(e) => setPartnerName(e.target.value)}
+                          required
+                          style={{
+                            borderColor: "#e5e7eb",
+                            padding: "0.75rem",
+                          }}
+                        />
+                      </div>
+
+                      <div className="mb-3">
+                        <label
+                          htmlFor="partnerDob"
+                          className="form-label"
+                          style={{ fontWeight: 500, color: "#374151" }}
+                        >
+                          Date of Birth
+                        </label>
+                        <input
+                          type="date"
+                          id="partnerDob"
+                          className="form-control"
+                          value={partnerDob}
+                          onChange={(e) => setPartnerDob(e.target.value)}
+                          max={new Date().toISOString().split("T")[0]}
+                          required
+                          style={{
+                            borderColor: "#e5e7eb",
+                            padding: "0.75rem",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* How It Works */}
+                <div
+                  className="p-4 mb-4 rounded-3"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
+                  <h5
+                    className="mb-3"
+                    style={{ fontWeight: 600, color: "#1f2937" }}
+                  >
+                    What We'll Analyze
+                  </h5>
+                  <div className="d-flex flex-column gap-2">
+                    {[
+                      "Provides personalized relationship insights",
+                      "Identifies relationship strengths",
+                      "Identifies relationship Challenges",
+                      "Suggest growth opportunities",
+                    ].map((item, index) => (
+                      <div key={index} className="d-flex align-items-center">
+                        <div
+                          className="rounded-circle me-2"
+                          style={{
+                            width: "8px",
+                            height: "8px",
+                            backgroundColor: "#00B8F8",
+                            flexShrink: 0,
+                          }}
+                        />
+                        <span style={{ color: "#374151" }}>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="text-center">
+                  <button
+                    onClick={handleSubmit}
+                    disabled={
+                      !yourName ||
+                      !yourDob ||
+                      !partnerName ||
+                      !partnerDob ||
+                      isLoading
+                    }
+                    className="btn btn-info text-white px-5 py-3 rounded-pill"
+                    style={{
+                      fontSize: "1.125rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {isLoading ? (
+                      <span className="d-flex align-items-center justify-content-center">
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true"
+                        />
+                        Generating Compatibility...
+                      </span>
+                    ) : (
+                      "Analyze Compatibility"
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          // 👇 Show Results
-          renderResults()
-        )}
+          ) : (
+            renderResults()
+          )}
 
-        {/* Global Error Message */}
-        {error && (
-          <div
-            className="fixed bottom-4 right-4 max-w-sm p-4 bg-red-600  rounded-xl shadow-xl border border-red-500"
-            style={{ zIndex: 1000 }}
-          >
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 mr-2 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-sm">{error}</span>
+          {/* Global Error Message */}
+          {error && (
+            <div
+              className="position-fixed bottom-0 end-0 m-4 p-3 bg-danger text-white rounded-3 shadow"
+              style={{ zIndex: 1000, maxWidth: "400px" }}
+            >
+              <div className="d-flex align-items-center">
+                <svg
+                  className="me-2"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span style={{ fontSize: "0.875rem" }}>{error}</span>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       </div>
     </div>
   );

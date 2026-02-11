@@ -29,7 +29,7 @@ interface CardData {
   backgroundImage?: string;
 }
 
-const chatTabs = ["Analyze", "Guide", "Recommend", "Health", "Astro", "Reco.."];
+const chatTabs = ["Analyze", "Guide", "Recommend", "Health", "Astro", "Report"];
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -323,7 +323,7 @@ export const Header: React.FC = () => {
           }}
         >
           {/* Sparkle Icon */}
-          <div
+          {/* <div
             style={{
               width: "60px",
               height: "60px",
@@ -337,7 +337,7 @@ export const Header: React.FC = () => {
             }}
           >
             <Sparkles size={32} color="#73acd4" />
-          </div>
+          </div> */}
 
           {/* Main Heading - Black, center-aligned, 2 lines */}
           <h1
@@ -539,9 +539,9 @@ export const Header: React.FC = () => {
                   style={{
                     padding: "10px 24px",
                     borderRadius: "24px",
-                    border: isActive ? "1px solid rgb(115, 172, 212)" : "1px solid #e0dce5",
-                    background: isActive ? "linear-gradient(135deg, rgb(160, 210, 232) 0%, rgb(115, 172, 212) 100%)" : "#fff",
-                    color: isActive ? "#fff" : "#7a7490",
+                    border: "1px solid #e0dce5",
+                    background: "#fff",
+                    color: "#7a7490",
                     fontSize: "14px",
                     fontWeight: isActive ? 600 : 400,
                     cursor: "pointer",
