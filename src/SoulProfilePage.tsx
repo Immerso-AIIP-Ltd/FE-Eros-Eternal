@@ -871,7 +871,7 @@ const SoulProfilePage: React.FC = () => {
 
               {/* Gender */}
               <StyledFormControl variant="outlined">
-                <InputLabel id="gender-label">Gender</InputLabel>
+                <InputLabel id="gender-label" shrink>Gender</InputLabel>
                 <IconLeftWrapper>
                   <ArrowDropDownIcon />
                 </IconLeftWrapper>

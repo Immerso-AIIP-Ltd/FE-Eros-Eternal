@@ -57,3 +57,8 @@
   border-color: #00b8f8 !important;
 }
 
+/* Date picker icon color */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0);
+}
+
