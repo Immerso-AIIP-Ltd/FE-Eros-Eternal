@@ -47,7 +47,7 @@ export default function Stars() {
       {stars.map((star) => (
         <div
           key={star.id}
-          className="text-white star-blink"
+          className="star-blink"
           style={{
             position: "absolute",
             top: `${star.top}%`,
@@ -56,7 +56,8 @@ export default function Stars() {
             opacity: star.opacity,
             animationDelay: star.animationDelay,
             animationDuration: star.animationDuration,
-            backgroundRepeat: "repeat"
+            backgroundRepeat: "repeat",
+            color: "rgb(0, 184, 248)"
           }}
         >
           ✦

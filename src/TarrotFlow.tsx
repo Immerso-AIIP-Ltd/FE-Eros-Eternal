@@ -96,89 +96,75 @@ const TarotFlow: React.FC = () => {
 
   return (
 
-    <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white" style={{ backgroundColor: "rgb(0, 0, 0);" }}>
-
-
-
-
-
-      {/* {step === 1 && (
-        <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-around text-center min-vh-100 min-vw-100 ">
-        
-            <img 
-      src={Tarrot}
-      alt="Tarot" 
-      style={{ 
-        maxWidth: "100%", 
-     
-      }} 
-    />
-          <a
-            href="/result"
-            type="button"
-            className="btn btn-primary absolute "
-            style={{
-              top: "2%",
-              left: "2%",
-              fontSize: "large",
-              background: "none",
-              width: "10%",
-              border: "none",
-            }}
-          >
-            <i className="bi bi-arrow-left m-3"></i> Tarot Reading
-          </a>
-        
-          <div className="d-flex h-50 flex-column align-items-center justify-content-center">
-          
-          </div>
-
-        
-          <div className="text-center p-4">
-            <h3 className="fw-bold">Unlock the Secrets of Your Life</h3>
-            <p className="text-white mt-4">
-              Discover insights into your personality, relationship, and future
-              with our traot cards
-            </p>
-            <button
-              className="btn btn-primary rounded-pill px-4 py-2 mt-4 w-full"
-              style={{ backgroundColor: "#00B8F8" }}
-              onClick={() => setStep(2)}
-            >
-              Start Tarot Reading
-            </button>
-          </div>
-        </div>
-      )} */}
+    <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100" style={{ backgroundColor: "rgb(255, 255, 255)" }}>
 
       {step === 1 && (
-        <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden">
-
-          <img
-            src={Tarrot}
-            alt="Face Reading Background"
-            className="position-absolute top-0 start-0 w-100  object-fit-cover"
-          />
-
-
-          <a
-            href="/result"
-            className="position-absolute top-0 start-0 btn btn-link text-white p-3"
-            style={{ fontSize: '1.5rem', zIndex: 10, textDecoration: 'none' }}
+        <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
+          {/* Back button */}
+          <button
+            onClick={() => navigate("/result")}
+            className="position-absolute top-0 start-0 btn btn-link"
+            style={{ 
+              fontSize: '1.2rem', 
+              zIndex: 10, 
+              textDecoration: 'none', 
+              // color: '#000',
+              color: 'black',
+              background: 'none',
+              border: 'none',
+              backgroundColor: 'white',
+              width: '100%',
+              textAlign: 'left',
+              height: '7%',
+              padding: '0 3%',
+            }}
           >
-            <i className="bi bi-arrow-left mr-3"></i> Tarot Reading
-          </a>
+            <i className="bi bi-arrow-left me-2"></i> Tarot Reading
+          </button>
 
+          {/* Tarot card image section - top 75% */}
+          <div className="position-relative" style={{ height: '75vh', overflow: 'hidden' }}>
+            <img
+              src={Tarrot}
+              alt="Tarot Cards"
+              className="w-100 h-100"
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
+            />
+            {/* Gradient overlay at bottom of image */}
+            <div 
+              className="position-absolute bottom-0 w-100" 
+              style={{ 
+                height: '150px', 
+                background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))' 
+              }}
+            ></div>
+          </div>
 
-          <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-end text-center text-white position-relative pb-5" style={{ zIndex: 5 }}>
-            <h3 className="fw-semibold display-5 mb-3">Unlock the Secrets of Your Life</h3>
-            <p className="text-xl text-white-50 mb-4">
-              Discover insights into your personality, relationship, and future with
-              our tarot cards
+          {/* Content section - bottom 25% */}
+          <div 
+            className="d-flex flex-column align-items-center justify-content-center text-center px-4" 
+            style={{ 
+              backgroundColor: 'rgb(255, 255, 255)', 
+              height: '25vh',
+              paddingTop: '1rem',
+              paddingBottom: '2rem'
+            }}
+          >
+            <h3 className="fw-semibold mb-3" style={{ fontSize: '1.8rem', color: '#000' }}>
+              Unlock the Secrets of Your life
+            </h3>
+            <p className="mb-4" style={{ color: '#6B7280', fontSize: '0.9rem', maxWidth: '600px' }}>
+              Discover insights into your personality, relationship, and future with our tarot cards
             </p>
             <button
-              className="btn btn-primary rounded-pill px-5 py-3 fs-5 w-25"
-              style={{ backgroundColor: '#00B8F8', border: 'none' }}
+              className="btn btn-primary rounded-pill px-5 py-3"
+              style={{ 
+                backgroundColor: '#00B8F8', 
+                border: 'none',
+                fontSize: '1rem',
+                fontWeight: '500',
+                minWidth: '22%'
+              }}
               onClick={() => setStep(2)}
             >
               Continue
@@ -190,7 +176,10 @@ const TarotFlow: React.FC = () => {
       {step === 2 && (
         <div
           className="d-flex justify-content-center align-items-center flex-grow-1 w-100"
-          style={{ backgroundColor: "#000" }}
+          style={{ 
+            background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
+            minHeight: "100vh"
+          }}
         >
           <button
             type="button"
@@ -202,48 +191,60 @@ const TarotFlow: React.FC = () => {
               background: "none",
               width: "10%",
               border: "none",
+              color: "#000"
             }}
             onClick={() => navigate("/result")}
           >
             <i className="bi bi-arrow-left m-3"></i> Back
           </button>
-          <Stars />
           <div
-            className="card p-4 text-white shadow-lg "
+            className="card p-4 shadow-lg "
             style={{
               width: "600px",
               borderRadius: "15px",
-              background: "#000", // dark background
-              border: "1px solid #444",
+              background: "#FFFFFF",
+              border: "none",
             }}
           >
-            <h3 className="fw-bold mb-4" style={{ fontSize: "xxx-large" }}>
+            <h3 className="fw-bold mb-4" style={{ fontSize: "xxx-large", color: "#000" }}>
               Enter Your Details
             </h3>
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label className="form-label">Enter Your Name</label>
+                <label className="form-label" style={{ color: "#000" }}>Enter Your Name</label>
                 <input
                   type="text"
-                  className={`form-control tarot-input ${formData.name ? "has-value" : ""
-                    }`}
+                  className="form-control"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Name"
+                  style={{
+                    backgroundColor: "transparent",
+                    border: "1px solid #D1D5DB",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    color: "#000"
+                  }}
                 />
               </div>
 
               <div className="mb-3">
-                <label className="form-label">Gender</label>
+                <label className="form-label" style={{ color: "#000" }}>Gender</label>
                 <select
-                  className={`form-select tarot-input ${formData.gender ? "has-value" : ""
-                    }`}
+                  className="form-select"
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    border: "1px solid #D1D5DB",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    color: formData.gender ? "#000" : "#9CA3AF"
+                  }}
                 >
-                  <option value="">Select Gender</option>
+                  <option value="">♂</option>
                   <option value="male">♂ Male</option>
                   <option value="female">♀ Female</option>
                   <option value="other">⚧ Other</option>
@@ -251,28 +252,39 @@ const TarotFlow: React.FC = () => {
               </div>
 
               <div className="mb-3 position-relative">
-                <label className="form-label">Date of Birth</label>
+                <label className="form-label" style={{ color: "#000" }}>Date of birth</label>
                 <div className="input-group">
                   <input
                     type="date"
-                    className={`form-control tarot-input ${formData.dob ? "has-value" : ""}`}
+                    className="form-control"
                     name="dob"
                     value={formData.dob}
                     onChange={handleChange}
                     ref={dateInputRef}
+                    style={{
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #D1D5DB",
+                      borderRadius: "8px",
+                      padding: "12px",
+                      color: "#000"
+                    }}
                   />
-                  {/* <span className="input-group-text" onClick={openDatePicker} style={{ cursor: 'pointer' }}>
-                    <Calendar size={20} />
-                  </span> */}
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="btn btn-primary w-100 mt-4 p-2"
-                style={{ backgroundColor: "#00B8F8" }}
+                className="btn btn-primary w-100 mt-4 p-3"
+                style={{ 
+                  backgroundColor: "#7DD3FC", 
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  fontWeight: "500",
+                  color: "#FFFFFF"
+                }}
               >
-                Continue
+                Start Your Tarot Reading
               </button>
             </form>
 
