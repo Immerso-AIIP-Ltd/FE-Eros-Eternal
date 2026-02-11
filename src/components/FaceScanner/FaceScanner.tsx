@@ -1203,6 +1203,9 @@ const FaceScanner: React.FC = () => {
     // Save to localStorage for persistence
     localStorage.setItem('faceReportData', JSON.stringify(combinedData));
 
+    // Dispatch custom event to notify Header component
+    window.dispatchEvent(new Event('vitaScanUpdated'));
+
     navigate('/face-report', { state: combinedData });
   };
 
