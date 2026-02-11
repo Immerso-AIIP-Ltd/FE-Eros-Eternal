@@ -130,7 +130,7 @@ const RelationshipCompatibility: React.FC = () => {
 
     return (
       <div
-        className="w-full max-w-4xl mx-auto px-4"
+        className="w-full  mx-auto px-4"
         style={{ position: "relative", zIndex: 10 }}
       >
         {/* Header */}
@@ -449,7 +449,7 @@ const RelationshipCompatibility: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 {/* Your Details */}
                 <div
-                  className="p-8 rounded-2xl  border border-gray-600 shadow-xl"
+                  className="p-8 rounded-2xl  "
                   style={{
                     backgroundColor: "#262626",
                     position: "relative",
@@ -457,7 +457,7 @@ const RelationshipCompatibility: React.FC = () => {
                   }}
                 >
                   <h5 className="text-2xl font-semibold mb-6 text-cyan-400">
-                    Enter Your Details
+                   Your Information
                   </h5>
 
                   <div className="mb-6">
@@ -509,7 +509,7 @@ const RelationshipCompatibility: React.FC = () => {
 
                 {/* Partner Details */}
                 <div
-                  className="p-8 rounded-2xl border border-gray-600 shadow-xl"
+                  className="p-8 rounded-2xl "
                   style={{
                     backgroundColor: "#262626",
                     position: "relative",
@@ -517,7 +517,7 @@ const RelationshipCompatibility: React.FC = () => {
                   }}
                 >
                   <h5 className="text-2xl font-semibold mb-6 text-pink-400">
-                    Enter Partner's Details
+                    Partner Information
                   </h5>
 
                   <div className="mb-6">
@@ -525,7 +525,7 @@ const RelationshipCompatibility: React.FC = () => {
                       htmlFor="partnerName"
                       className="block text-sm font-medium text-gray-300 mb-2"
                     >
-                      Enter Partner's Name
+                      Partner's Name
                     </label>
                     <input
                       type="text"
@@ -577,17 +577,9 @@ const RelationshipCompatibility: React.FC = () => {
                 }}
               >
                 <h5 className="text-xl font-semibold text-white mb-4">
-                  How It Works
+                 What We’ll Analyze
                 </h5>
                 <div className="grid gap-3">
-                  <div className="flex items-center text-gray-300">
-                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Analyzes birth dates using vedic astrology</span>
-                  </div>
-                  <div className="flex items-center text-gray-300">
-                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Calculates spiritual compatibility scores</span>
-                  </div>
                   <div className="flex items-center text-gray-300">
                     <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
                     <span>Provides personalized relationship insights</span>
@@ -598,12 +590,20 @@ const RelationshipCompatibility: React.FC = () => {
                   </div>
                   <div className="flex items-center text-gray-300">
                     <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Suggests growth opportunities</span>
+                    <span>Identifies relationship Challenges</span>
                   </div>
                   <div className="flex items-center text-gray-300">
                     <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
-                    <span>Based on ancient wisdom traditions</span>
+                    <span>Suggest growth oppourtunities</span>
                   </div>
+                  {/* <div className="flex items-center text-gray-300">
+                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                    <span>Suggests growth opportunities</span>
+                  </div> */}
+                  {/* <div className="flex items-center text-gray-300">
+                    <div className="w-2 h-2 bg-white rounded-full mr-3 flex-shrink-0"></div>
+                    <span>Based on ancient wisdom traditions</span>
+                  </div> */}
                 </div>
               </div>
 
@@ -650,7 +650,7 @@ const RelationshipCompatibility: React.FC = () => {
                       Generating Compatibility...
                     </span>
                   ) : (
-                    "Start Compatibility Reading"
+                    "Analyze Compatibility"
                   )}
                 </button>
               </div>
