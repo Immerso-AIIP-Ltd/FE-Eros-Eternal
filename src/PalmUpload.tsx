@@ -184,7 +184,7 @@ const PalmUploadPage: React.FC = () => {
   };
 
   return (
-    <div className="vh-100 vw-100 d-flex flex-column">
+    <div className="vh-100 vw-100 d-flex flex-column" style={{ overflow: 'auto' }}>
       <Stars />
       <div className="absolute inset-0 overflow-hidden">
         {stars.map((star, i) => (
@@ -223,57 +223,69 @@ const PalmUploadPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Main Content - Centered */}
-      <div className="d-flex align-items-center justify-content-center flex-grow-1 px-4">
+      {/* Main Content - Top aligned */}
+      <div className="d-flex justify-content-center px-4 mb-5" style={{"marginTop" : "100px"}}>
         
         {/* UPLOAD STATE */}
         {pageState === 'upload' && (
           <Card
-            className="p-4"
+            className="p-5"
             style={{
               width: '100%',
-              maxWidth: '600px',
+              maxWidth: '750px',
               backgroundColor: '#1a1a1a',
               border: '1px solid #333',
               borderRadius: '12px',
             }}
           >
             <Card.Body>
-              <h6 className="text-info text-center mb-3">Upload Image</h6>
+              <h6 className="text-info text-center mb-4">Upload Image</h6>
 
               {/* Drag & Drop Area */}
               <div
-                className="rounded p-5 text-center"
+                className="rounded text-center"
                 style={{
                   border: '2px dashed #00B8F8',
                   cursor: 'pointer',
-                  backgroundColor: '#0d0d0d'
+                  backgroundColor: '#0d0d0d',
+                  padding: '80px 40px',
+                  minHeight: '280px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onClick={handleBrowseClick}
               >
-                <div className="mb-3">
-                  <i className="bi bi-upload fs-1 text-info"></i>
+                <div className="mb-4">
+                  <i className="bi bi-upload text-info" style={{ fontSize: '3.5rem' }}></i>
                 </div>
-                <p className="mb-2 text-white">Drag and Drop files</p>
-                <p className="mb-2 text-white">or</p>
-                <span
-                  className="text-info fw-bold"
-                  style={{ textDecoration: 'none', cursor: 'pointer' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleBrowseClick();
-                  }}
-                >
-                  Browse file
-                </span>
-                <span className="text-white"> from your computer</span>
+                <p className="mb-2 text-white" style={{ fontSize: '1.05rem' }}>Drag and Drop files</p>
+                <p className="mb-2 text-white" style={{ fontSize: '1.05rem' }}>or</p>
+                <div>
+                  <span
+                    className="text-info fw-bold"
+                    style={{ 
+                      textDecoration: 'none', 
+                      cursor: 'pointer',
+                      fontSize: '1.05rem'
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBrowseClick();
+                    }}
+                  >
+                    Browse file
+                  </span>
+                  <span className="text-white" style={{ fontSize: '1.05rem' }}> from your computer</span>
+                </div>
               </div>
 
               {/* Supported Formats */}
-              <div className="mt-3 text-white">
-                <small>Supported format : XLS, XLSX</small>
+              <div className="mt-4 text-white">
+                <small style={{ fontSize: '0.9rem' }}>Supported format : XLS, XLSX</small>
               </div>
 
               {/* Error Message */}
@@ -284,13 +296,14 @@ const PalmUploadPage: React.FC = () => {
               )}
 
               {/* Buttons */}
-              <div className="d-flex justify-content-end mt-4 gap-2">
+              <div className="d-flex justify-content-end mt-4 gap-3">
                 <Button 
                   variant="outline-danger" 
                   onClick={handleCancel}
                   style={{
                     borderColor: '#dc3545',
-                    color: '#dc3545'
+                    color: '#dc3545',
+                    padding: '8px 24px'
                   }}
                 >
                   <i className="bi bi-x me-1"></i> Cancel
@@ -299,7 +312,8 @@ const PalmUploadPage: React.FC = () => {
                   style={{
                     backgroundColor: '#00B8F8',
                     border: 'none',
-                    color: '#fff'
+                    color: '#fff',
+                    padding: '8px 24px'
                   }}
                   disabled
                 >
@@ -313,24 +327,24 @@ const PalmUploadPage: React.FC = () => {
         {/* PREVIEW STATE */}
         {pageState === 'preview' && selectedFile && (
           <Card
-            className="p-4"
+            className="p-5"
             style={{
               width: '100%',
-              maxWidth: '600px',
+              maxWidth: '750px',
               backgroundColor: '#1a1a1a',
               border: '1px solid #333',
               borderRadius: '12px',
             }}
           >
             <Card.Body>
-              <h6 className="text-info text-center mb-3">Palm Preview</h6>
+              <h6 className="text-info text-center mb-4">Palm Preview</h6>
 
               {/* Image Preview */}
               <div
                 className="rounded overflow-hidden"
                 style={{
                   width: '100%',
-                  height: '300px',
+                  minHeight: '280px',
                   backgroundColor: '#0d0d0d',
                   display: 'flex',
                   alignItems: 'center',
@@ -357,13 +371,14 @@ const PalmUploadPage: React.FC = () => {
               )}
 
               {/* Buttons */}
-              <div className="d-flex justify-content-end mt-4 gap-2">
+              <div className="d-flex justify-content-end mt-4 gap-3">
                 <Button 
                   variant="outline-danger" 
                   onClick={handleCancel}
                   style={{
                     borderColor: '#dc3545',
-                    color: '#dc3545'
+                    color: '#dc3545',
+                    padding: '8px 24px'
                   }}
                 >
                   <i className="bi bi-x me-1"></i> Cancel
@@ -372,7 +387,8 @@ const PalmUploadPage: React.FC = () => {
                   style={{
                     backgroundColor: '#00B8F8',
                     border: 'none',
-                    color: '#fff'
+                    color: '#fff',
+                    padding: '8px 24px'
                   }}
                   onClick={handleStartPalmReading}
                 >
@@ -386,10 +402,10 @@ const PalmUploadPage: React.FC = () => {
         {/* LOADING STATE */}
         {pageState === 'loading' && selectedFile && (
           <Card
-            className="p-4"
+            className="p-5"
             style={{
               width: '100%',
-              maxWidth: '600px',
+              maxWidth: '750px',
               backgroundColor: '#1a1a1a',
               border: '1px solid #333',
               borderRadius: '12px',
@@ -403,12 +419,16 @@ const PalmUploadPage: React.FC = () => {
                 className="rounded p-4"
                 style={{
                   border: '2px dashed #00B8F8',
-                  backgroundColor: '#0d0d0d'
+                  backgroundColor: '#0d0d0d',
+                  minHeight: '200px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
                 }}
               >
-                <div className="mb-2">
+                <div className="mb-3">
                   <p className="text-white mb-1"><strong>File Name</strong></p>
-                  <p className="text-white mb-3" style={{ fontSize: '0.9rem' }}>
+                  <p className="text-white mb-4" style={{ fontSize: '0.9rem' }}>
                     {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                   </p>
                 </div>
@@ -434,14 +454,15 @@ const PalmUploadPage: React.FC = () => {
               </div>
 
               {/* Buttons */}
-              <div className="d-flex justify-content-end mt-4 gap-2">
+              <div className="d-flex justify-content-end mt-4 gap-3">
                 <Button 
                   variant="outline-danger" 
                   onClick={handleCancel}
                   disabled={uploadProgress === 100 || isApiCalling}
                   style={{
                     borderColor: '#dc3545',
-                    color: '#dc3545'
+                    color: '#dc3545',
+                    padding: '8px 24px'
                   }}
                 >
                   <i className="bi bi-x me-1"></i> Cancel
@@ -450,7 +471,8 @@ const PalmUploadPage: React.FC = () => {
                   style={{
                     backgroundColor: (uploadProgress === 100 || isApiCalling) ? '#00B8F8' : '#555',
                     border: 'none',
-                    color: '#fff'
+                    color: '#fff',
+                    padding: '8px 24px'
                   }}
                   disabled
                 >
