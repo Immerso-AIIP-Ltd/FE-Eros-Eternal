@@ -49,7 +49,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
     },
     headerContainer: {
       position: "absolute",
-      top: "10rem",
+      top: "3rem",
       left: "50%",
       transform: "translateX(-50%)",
       zIndex: 30,

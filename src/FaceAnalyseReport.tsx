@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Button, Container, Row, Col, Alert, Badge } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Stars from "./components/stars";
 
 const FaceAnalyseReport: React.FC = () => {
     const location = useLocation();
@@ -10,19 +9,10 @@ const FaceAnalyseReport: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
     const [username, setUsername] = useState<string>('');
-    const [stars] = useState(() =>
-        Array.from({ length: 50 }, () => ({
-            x: Math.random() * 100,
-            y: Math.random() * 100,
-            opacity: 0.3 + Math.random() * 0.7,
-            size: Math.random() * 2 + 1,
-        }))
-    );
 
     useEffect(() => {
         if (location.state && location.state.success) {
             setReport(location.state);
-            // Get uploaded image from location state
             if (location.state.uploadedImage) {
                 setUploadedImage(location.state.uploadedImage);
             }
@@ -30,20 +20,78 @@ const FaceAnalyseReport: React.FC = () => {
             setError('No report data found. Please upload a face image first.');
         }
 
-        // Get username from localStorage
         const storedUsername = localStorage.getItem('username');
         if (storedUsername) {
             setUsername(storedUsername);
         }
     }, [location.state]);
 
+    // Function to parse and categorize the spiritual interpretation
+    const parseInterpretation = (text: string) => {
+        if (!text) return [];
+
+        const lines = text.split('\n').filter(line => line.trim() && !/^[=-]+\s*$/.test(line));
+        const sections: Array<{ title: string; content: string[] }> = [];
+        let currentSection: { title: string; content: string[] } | null = null;
+
+        lines.forEach(line => {
+            const trimmedLine = line.trim();
+            
+            // Check if line is a section header (contains ** at start and end or is all caps)
+            const isHeader = /^\*\*(.*?)\*\*:?$/.test(trimmedLine) || 
+                           (/^[A-Z\s]+:?$/.test(trimmedLine) && trimmedLine.length < 50);
+            
+            if (isHeader) {
+                // Save previous section
+                if (currentSection && currentSection.content.length > 0) {
+                    sections.push(currentSection);
+                }
+                
+                // Start new section
+                const title = trimmedLine.replace(/\*\*/g, '').replace(/:$/, '').trim();
+                currentSection = { title, content: [] };
+            } else if (currentSection) {
+                // Add content to current section
+                if (trimmedLine.startsWith('-')) {
+                    currentSection.content.push(trimmedLine.substring(1).trim());
+                } else if (trimmedLine) {
+                    currentSection.content.push(trimmedLine);
+                }
+            } else {
+                // No section yet, create a general one
+                if (!currentSection) {
+                    currentSection = { title: 'Overview', content: [] };
+                }
+                if (trimmedLine.startsWith('-')) {
+                    currentSection.content.push(trimmedLine.substring(1).trim());
+                } else if (trimmedLine) {
+                    currentSection.content.push(trimmedLine);
+                }
+            }
+        });
+
+        // Add last section
+        if (currentSection && currentSection.content.length > 0) {
+            sections.push(currentSection);
+        }
+
+        return sections;
+    };
+
+    // Function to format text with bold
+    const formatText = (text: string) => {
+        const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        return <span dangerouslySetInnerHTML={{ __html: formatted }} />;
+    };
+
     if (error) {
         return (
-            <div className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ backgroundColor: '#000' }}>
+            <div className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4" 
+                 style={{ background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)" }}>
                 <Alert variant="danger" className="w-100" style={{ maxWidth: 600 }}>
                     {error}
                 </Alert>
-                <Button variant="outline-light" onClick={() => navigate('/')}>
+                <Button variant="outline-dark" onClick={() => navigate('/')}>
                     Go Back
                 </Button>
             </div>
@@ -52,141 +100,226 @@ const FaceAnalyseReport: React.FC = () => {
 
     if (!report) {
         return (
-            <div className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ backgroundColor: '#000' }}>
+            <div className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4" 
+                 style={{ background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)" }}>
                 <div className="text-center">
                     <div className="spinner-border text-info mb-3" role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
-                    <p className="text-white">Analyzing your face...</p>
+                    <p style={{ color: '#374151' }}>Analyzing your face...</p>
                 </div>
             </div>
         );
     }
 
     const { data } = report;
+    const sections = parseInterpretation(data.spiritual_interpretation);
 
     return (
-        <div className="vw-100 d-flex flex-column p-4">
-            <Stars />
-            <div className="absolute inset-0 overflow-hidden ">
-                {stars.map((star, i) => (
-                    <div
-                        key={i}
-                        className="absolute bg-white rounded-full animate-pulse"
-                        style={{
-                            width: `${star.size}px`,
-                            height: `${star.size}px`,
-                            opacity: star.opacity,
-                            top: `${star.y}%`,
-                            left: `${star.x}%`,
-                            animationDelay: `${Math.random() * 3}s`,
-                            animationDuration: `${2 + Math.random() * 2}s`
-                        }}
-                    />
-                ))}
-            </div>
-
+        <div className="vw-100 d-flex flex-column p-4" style={{
+            background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
+            minHeight: "100vh",
+            color: "#000"
+        }}>
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <button
-                    className="btn  text-white"
+                    className="btn btn-outline-dark"
                     onClick={() => navigate("/result")}
-                    style={{ fontSize: '1rem', zIndex: '10' }}
+                    style={{ fontSize: '1rem', position: 'relative', zIndex: 1000 }}
                 >
                     ← Back
                 </button>
-                {/* <button
-          className="btn  text-white"
-          onClick={() => window.location.reload()}
-          style={{ fontSize: '1.2rem' }}
-        >
-          ↻
-        </button> */}
             </div>
 
-            {/* Title */}
-            <div className="d-flex flex-column align-items-center justify-content-center mb-4">
-                {/* User Image and Name */}
+            {/* User Info with Image */}
+            <div className="d-flex flex-column align-items-center justify-content-center mb-5">
                 {uploadedImage && (
                     <div className="text-center">
                         <img
                             src={uploadedImage}
                             alt="Uploaded face"
+                            className="shadow"
                             style={{
                                 width: '150px',
                                 height: '150px',
                                 borderRadius: '50%',
                                 objectFit: 'cover',
-                                border: '3px solid #333'
+                                border: '3px solid #e5e7eb'
                             }}
                         />
                         {username && (
-                            <h2 className="text-white mt-3">{username}</h2>
+                            <h2 className="mt-3 fw-bold" style={{ color: '#1f2937' }}>
+                                {username}
+                            </h2>
                         )}
-                        <h6 className="text-white mt-4">Face Analysis</h6>
+                        <h6 className="mt-2" style={{ color: '#6b7280', fontWeight: 500 }}>
+                            Face Analysis
+                        </h6>
                     </div>
                 )}
             </div>
 
-
-            {/* Face Analysis Text */}
+            {/* Analysis Sections - Tile Design */}
             <Container>
-                <Row>
-                    <Col md={12}>
-                        {/* <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333', color: "#ffffff" }}>
-              <Card.Body>
-                <Card.Title>Comprehensive Model Analysis</Card.Title>
-                <pre className="bg-dark text-white p-3 rounded" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-                  {data.face_analysis_text}
-                </pre>
-              </Card.Body>
-            </Card> */}
-                        {/* <Card.Title className='mb-5'>Spiritual Interpretation & Wellness Guidance</Card.Title> */}
-                        <Card className="mb-4" style={{
-                            background:
-                                "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                            border: '1px solid grey'
-                        }}>
-                            <Card.Body>
+                <Row className="g-4">
+                    {sections.map((section, index) => {
+                        // Determine if section should be full width or half
+                        const isFullWidth = section.content.length > 3 || 
+                                          section.content.join(' ').length > 200 ||
+                                          section.title.toLowerCase().includes('overview') ||
+                                          section.title.toLowerCase().includes('summary');
 
-                                <pre
-                                    className="text-white p-3 rounded"
+                        return (
+                            <Col key={index} md={isFullWidth ? 12 : 6}>
+                                <Card 
+                                    className="h-100 shadow-sm"
                                     style={{
-                                        whiteSpace: 'pre-wrap',
-                                        fontFamily: 'sans-serif',
-                                        overflowWrap: 'break-word',
-                                        fontSize: '16px',
-                                        lineHeight: '2'
+                                        backgroundColor: "#ffffff",
+                                        border: '1px solid #e5e7eb',
+                                        borderRadius: '16px'
                                     }}
                                 >
-                                    {data.spiritual_interpretation
-                                        ?.split('\n')
-                                        .filter(line => !/^[=-]+\s*$/.test(line)) // Remove lines with only = or -
-                                        .map(line => {
-                                            // Replace *text* with <strong>text</strong> for bold
-                                            const formattedLine = line.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
-                                            // Use dangerouslySetInnerHTML to render HTML
-                                            return <span dangerouslySetInnerHTML={{ __html: formattedLine }} />;
-                                        })
-                                        .map((line, index) => (
-                                            <span key={index}>
-                                                {line}
-                                                <br />
-                                            </span>
-                                        )) || ''}
-                                </pre>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
+                                    <Card.Body className="p-4">
+                                        <Card.Title 
+                                            className="mb-4 pb-3" 
+                                            style={{ 
+                                                fontSize: '1.5rem', 
+                                                fontWeight: 700,
+                                                color: '#1f2937',
+                                                borderBottom: '2px solid #e5e7eb'
+                                            }}
+                                        >
+                                            {section.title}
+                                        </Card.Title>
+                                        
+                                        {section.content.length === 1 ? (
+                                            // Single paragraph
+                                            <p style={{ 
+                                                color: '#374151', 
+                                                lineHeight: '1.8', 
+                                                margin: 0,
+                                                fontSize: '1rem'
+                                            }}>
+                                                {formatText(section.content[0])}
+                                            </p>
+                                        ) : (
+                                            // Multiple items as list
+                                            <ul className="list-unstyled mb-0">
+                                                {section.content.map((item, idx) => (
+                                                    <li 
+                                                        key={idx} 
+                                                        className="mb-3"
+                                                        style={{
+                                                            listStyleType: 'disc',
+                                                            marginLeft: '20px',
+                                                            lineHeight: '1.8',
+                                                            color: '#374151',
+                                                            fontSize: '1rem'
+                                                        }}
+                                                    >
+                                                        {formatText(item)}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        );
+                    })}
 
-                {/* Footer */}
-                {/* <div className="d-flex justify-content-center mt-4">
-          <Button variant="outline-light" onClick={() => navigate('/')}>
-            ← Start Over
-          </Button>
-        </div> */}
+                    {/* If no sections parsed, show full text */}
+                    {sections.length === 0 && (
+                        <Col md={12}>
+                            <Card 
+                                className="shadow-sm"
+                                style={{
+                                    backgroundColor: "#ffffff",
+                                    border: '1px solid #e5e7eb',
+                                    borderRadius: '16px'
+                                }}
+                            >
+                                <Card.Body className="p-4">
+                                    <Card.Title 
+                                        className="mb-4 pb-3" 
+                                        style={{ 
+                                            fontSize: '1.5rem', 
+                                            fontWeight: 700,
+                                            color: '#1f2937',
+                                            borderBottom: '2px solid #e5e7eb'
+                                        }}
+                                    >
+                                        Spiritual Interpretation
+                                    </Card.Title>
+                                    <div style={{
+                                        fontSize: "1rem",
+                                        lineHeight: "1.8",
+                                        color: '#374151'
+                                    }}>
+                                        {data.spiritual_interpretation
+                                            ?.split('\n')
+                                            .filter(line => line.trim() && !/^[=-]+\s*$/.test(line))
+                                            .map((line, index) => {
+                                                const trimmedLine = line.trim();
+                                                const isBullet = trimmedLine.startsWith('-');
+                                                const cleanLine = isBullet ? trimmedLine.substring(1).trim() : trimmedLine;
+                                                const formattedLine = cleanLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                                
+                                                if (isBullet) {
+                                                    return (
+                                                        <li 
+                                                            key={index}
+                                                            className="mb-2"
+                                                            style={{
+                                                                listStyleType: 'disc',
+                                                                marginLeft: '20px',
+                                                                lineHeight: '1.8'
+                                                            }}
+                                                        >
+                                                            <span dangerouslySetInnerHTML={{ __html: formattedLine }} />
+                                                        </li>
+                                                    );
+                                                } else {
+                                                    return (
+                                                        <p key={index} className="mb-2">
+                                                            <span dangerouslySetInnerHTML={{ __html: formattedLine }} />
+                                                        </p>
+                                                    );
+                                                }
+                                            })}
+                                    </div>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    )}
+                </Row>
             </Container>
+
+            <style>{`
+                strong {
+                    font-weight: 700;
+                    color: #1f2937;
+                }
+                
+                ul {
+                    padding-left: 0;
+                }
+                
+                li {
+                    color: #374151;
+                    font-size: 1rem;
+                }
+                
+                .card {
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
+                
+                .card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+                }
+            `}</style>
         </div>
     );
 };

@@ -10,19 +10,10 @@ import {
   Alert,
 } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
-import Stars from "./components/stars";
 
 const PalmReadingReportPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [stars] = useState(() =>
-    Array.from({ length: 50 }, () => ({
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      opacity: 0.3 + Math.random() * 0.7,
-      size: Math.random() * 2 + 1,
-    }))
-  );
   const [report, setReport] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
@@ -39,16 +30,66 @@ const PalmReadingReportPage: React.FC = () => {
     }
   }, [location.state]);
 
+  // Function to format text with ** for bold and - for bullet points
+  const formatText = (text: string) => {
+    if (!text) return null;
+
+    // Split by lines
+    const lines = text.split('\n').filter(line => line.trim());
+    
+    return lines.map((line, index) => {
+      // Check if line starts with - (bullet point)
+      const isBullet = line.trim().startsWith('-');
+      const cleanLine = isBullet ? line.trim().substring(1).trim() : line.trim();
+      
+      // Replace **text** with <strong>text</strong>
+      const formattedLine = cleanLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      
+      if (isBullet) {
+        return (
+          <li key={index} className="mb-2" style={{ listStyleType: 'disc', marginLeft: '20px' }}>
+            <span dangerouslySetInnerHTML={{ __html: formattedLine }} />
+          </li>
+        );
+      } else {
+        return (
+          <p key={index} className="mb-2">
+            <span dangerouslySetInnerHTML={{ __html: formattedLine }} />
+          </p>
+        );
+      }
+    });
+  };
+
+  // Function to format array items
+  const formatArrayItems = (items: string[]) => {
+    if (!items || items.length === 0) return null;
+    
+    return items.map((item, index) => {
+      const formattedItem = item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      const cleanItem = item.trim().startsWith('-') 
+        ? item.trim().substring(1).trim() 
+        : item.trim();
+      const finalFormatted = cleanItem.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      
+      return (
+        <li key={index} className="mb-3" style={{ listStyleType: 'disc', marginLeft: '20px', lineHeight: '1.8' }}>
+          <span dangerouslySetInnerHTML={{ __html: finalFormatted }} />
+        </li>
+      );
+    });
+  };
+
   if (error) {
     return (
       <div
         className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4"
-        style={{ backgroundColor: "#000" }}
+        style={{ backgroundColor: "#fff" }}
       >
         <Alert variant="danger" className="w-100" style={{ maxWidth: 600 }}>
           {error}
         </Alert>
-        <Button variant="outline-light" onClick={() => navigate("/result")}>
+        <Button variant="outline-dark" onClick={() => navigate("/result")}>
           Go Back
         </Button>
       </div>
@@ -59,13 +100,13 @@ const PalmReadingReportPage: React.FC = () => {
     return (
       <div
         className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4"
-        style={{ backgroundColor: "#000" }}
+        style={{ backgroundColor: "#fff" }}
       >
         <div className="text-center">
           <div className="spinner-border text-info mb-3" role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
-          <p className="text-white">Generating your palm reading...</p>
+          <p className="text-dark">Generating your palm reading...</p>
         </div>
       </div>
     );
@@ -75,282 +116,269 @@ const PalmReadingReportPage: React.FC = () => {
   const { palm_reading_detail } = data;
 
   return (
-    <div className="vw-100 d-flex flex-column p-4"  style={{
-            background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
-            minHeight: "100vh",
-            color:"#000"
-          }}>
-      {/* <Stars /> */}
-      {/* <div className="absolute inset-0 overflow-hidden ">
-        {stars.map((star, i) => (
-          <div
-            key={i}
-            className="absolute bg-white rounded-full animate-pulse"
-            style={{
-              width: `${star.size}px`,
-              height: `${star.size}px`,
-              opacity: star.opacity,
-              top: `${star.y}%`,
-              left: `${star.x}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`,
-            }}
-          />
-        ))}
-      </div> */}
+    <div 
+      className="vw-100 d-flex flex-column p-4" 
+      style={{
+        background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
+        minHeight: "100vh",
+        color: "#000"
+      }}
+    >
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button
-          className="btn "
+          className="btn btn-outline-dark"
           onClick={() => navigate("/result")}
           style={{ fontSize: "1rem", position: "relative", zIndex: 1000 }}
         >
           ← Back
         </button>
-        {/* <button
-          className="btn  text-white"
-          onClick={() => window.location.reload()}
-          style={{ fontSize: '1.2rem' }}
-        >
-          ↻
-        </button> */}
       </div>
 
-      {/* Title */}
-      {/* <div className="text-center mb-4">
-        <h2 className="fw-bold text-white">Palm Reading Report</h2>
-        <p className="text-white">
-          Generated on: {new Date(data.reading_timestamp).toLocaleString()}
-        </p>
-      </div> */}
-
+      {/* User Info */}
       <div className="d-flex flex-column align-items-center justify-content-center mb-4">
-        {/* User Image and Name */}
         <div className="text-center">
-          {username && <h2 className=" mt-3">{username}</h2>}
-          <h6 className=" mt-4">Palm Analysis</h6>
+          {username && <h2 className="mt-3 fw-bold" style={{ color: '#1f2937' }}>{username}</h2>}
+          <h6 className="mt-2" style={{ color: '#6b7280', fontWeight: 500 }}>Palm Analysis</h6>
         </div>
       </div>
 
       {/* Image Preview */}
-      <div className="d-flex justify-content-center mb-4">
+      <div className="d-flex justify-content-center mb-5">
         <img
           src={data.image_url}
           alt="Uploaded Palm"
-          className="img-fluid rounded"
-          style={{ maxWidth: "80%", maxHeight: "300px", objectFit: "contain" }}
+          className="img-fluid rounded shadow"
+          style={{ 
+            maxWidth: "80%", 
+            maxHeight: "400px", 
+            objectFit: "contain",
+            border: '1px solid #e5e7eb'
+          }}
         />
       </div>
 
-      {/* Report Sections */}
+      {/* Report Sections - Tile Based Design */}
       <Container>
-        <Row>
-          {/* <Col md={6}> */}
-          {/* <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff",height:""}}>
-              <Card.Body>
-                <Card.Title>Hand Shape</Card.Title>
-                <Card.Text>{palm_reading_detail.hand_shape}</Card.Text>
-              </Card.Body>
-            </Card> */}
+        <Row className="g-4">
+          {/* Personality Traits */}
+          {palm_reading_detail.personality_traits && palm_reading_detail.personality_traits.length > 0 && (
+            <Col md={6} lg={6}>
+              <Card 
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '16px'
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title 
+                    className="mb-4 pb-3" 
+                    style={{ 
+                      fontSize: '1.5rem', 
+                      fontWeight: 700,
+                      color: '#1f2937',
+                      borderBottom: '2px solid #e5e7eb'
+                    }}
+                  >
+                    Personality Traits
+                  </Card.Title>
+                  <ul className="list-unstyled mb-0">
+                    {formatArrayItems(palm_reading_detail.personality_traits)}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-          {/* <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff" }}>
-              <Card.Body>
-                <Card.Title>Finger Analysis</Card.Title>
-                <Card.Text>{palm_reading_detail.finger_analysis}</Card.Text>
-              </Card.Body>
-            </Card>
+          {/* Life Patterns */}
+          {palm_reading_detail.life_patterns && palm_reading_detail.life_patterns.length > 0 && (
+            <Col md={6} lg={6}>
+              <Card 
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '16px'
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title 
+                    className="mb-4 pb-3" 
+                    style={{ 
+                      fontSize: '1.5rem', 
+                      fontWeight: 700,
+                      color: '#1f2937',
+                      borderBottom: '2px solid #e5e7eb'
+                    }}
+                  >
+                    Life Patterns
+                  </Card.Title>
+                  <ul className="list-unstyled mb-0">
+                    {formatArrayItems(palm_reading_detail.life_patterns)}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff"}}>
-              <Card.Body>
-                <Card.Title>Palm Lines</Card.Title>
-                <Card.Text>{palm_reading_detail.palm_lines}</Card.Text>
-              </Card.Body>
-            </Card>
+          {/* Career Insights */}
+          {palm_reading_detail.career_insights && palm_reading_detail.career_insights.length > 0 && (
+            <Col md={6} lg={6}>
+              <Card 
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '16px'
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title 
+                    className="mb-4 pb-3" 
+                    style={{ 
+                      fontSize: '1.5rem', 
+                      fontWeight: 700,
+                      color: '#1f2937',
+                      borderBottom: '2px solid #e5e7eb'
+                    }}
+                  >
+                    Career Insights
+                  </Card.Title>
+                  <ul className="list-unstyled mb-0">
+                    {formatArrayItems(palm_reading_detail.career_insights)}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-            <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff" }}>
-              <Card.Body>
-                <Card.Title>Characteristics</Card.Title>
-                <Card.Text>{palm_reading_detail.characteristics}</Card.Text>
-              </Card.Body>
-            </Card> */}
-          {/* </Col> */}
+          {/* Health Observations */}
+          {palm_reading_detail.health_observations && palm_reading_detail.health_observations.length > 0 && (
+            <Col md={6} lg={6}>
+              <Card 
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '16px'
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title 
+                    className="mb-4 pb-3" 
+                    style={{ 
+                      fontSize: '1.5rem', 
+                      fontWeight: 700,
+                      color: '#1f2937',
+                      borderBottom: '2px solid #e5e7eb'
+                    }}
+                  >
+                    Health Observations
+                  </Card.Title>
+                  <ul className="list-unstyled mb-0">
+                    {formatArrayItems(palm_reading_detail.health_observations)}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
 
-          <Col md={12}>
-            {palm_reading_detail.personality_traits && (
-              <>
-                <Card.Title className="mb-3">Personality Traits</Card.Title>
-                <Card
-                  className="mb-4"
-                  style={{
-                    // background:
-                    //   "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                    backgroundColor:"#ffffff",
-                    color: "#000",
-                  }}
-                >
-                  <Card.Body>
-                    <ul className="list-unstyled">
-                      {palm_reading_detail.personality_traits.map(
-                        (trait, i) => (
-                          <li key={i} className="mb-2">
-                            {trait}
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </Card.Body>
-                </Card>
-              </>
-            )}
-
-            {palm_reading_detail.life_patterns && (
-              <>
-                <Card.Title className="mb-3">Life Patterns</Card.Title>
-                <Card
-                  className="mb-4"
-                  style={{
-                    // background:
-                    //   "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                    backgroundColor:"#ffffff",
-                    color: "#000",
-                  }}
-                >
-                  <Card.Body>
-                    <ul className="list-unstyled">
-                      {palm_reading_detail.life_patterns.map((pattern, i) => (
-                        <li key={i} className="mb-2">
-                          {pattern}
-                        </li>
-                      ))}
-                    </ul>
-                  </Card.Body>
-                </Card>
-              </>
-            )}
-
-            {palm_reading_detail.career_insights && (
-              <>
-                <Card.Title className="mb-3">Career Insights</Card.Title>
-                <Card
-                  className="mb-4"
-                   style={{
-                    // background:
-                    //   "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                    backgroundColor:"#ffffff",
-                    color: "#000",
-                  }}
-                >
-                  <Card.Body>
-                    <ul className="list-unstyled">
-                      {palm_reading_detail.career_insights.map((insight, i) => (
-                        <li key={i} className="mb-2">
-                          {insight}
-                        </li>
-                      ))}
-                    </ul>
-                  </Card.Body>
-                </Card>
-              </>
-            )}
-
-            {palm_reading_detail.health_observations && (
-              <>
-                <Card.Title className="mb-3">Health Observations</Card.Title>
-                <Card
-                  className="mb-4"
-                  style={{
-                    // background:
-                    //   "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                    backgroundColor:"#ffffff",
-                    color: "#000",
-                  }}
-                >
-                  <Card.Body>
-                    <ul className="list-unstyled">
-                      {palm_reading_detail.health_observations.map((obs, i) => (
-                        <li key={i} className="mb-2">
-                          {obs}
-                        </li>
-                      ))}
-                    </ul>
-                  </Card.Body>
-                </Card>
-              </>
-            )}
-
-            {/* <Card className="mb-4" style={{ backgroundColor: '#121212', border: '1px solid #333',color:"#ffffff"}}>
-              <Card.Body>
-                <Card.Title>Spiritual Guidance</Card.Title>
-                <ul className="list-unstyled">
-                  {palm_reading_detail.spiritual_guidance.map((guide, i) => (
-                    <li key={i} className="mb-2">
-                      <Badge bg="info" className="me-2">•</Badge>
-                      {guide}
-                    </li>
-                  ))}
-                </ul>
-              </Card.Body>
-            </Card> */}
-          </Col>
+          {/* Spiritual Guidance */}
+          {palm_reading_detail.spiritual_guidance && palm_reading_detail.spiritual_guidance.length > 0 && (
+            <Col md={6} lg={6}>
+              <Card 
+                className="h-100 shadow-sm"
+                style={{
+                  backgroundColor: "#ffffff",
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '16px'
+                }}
+              >
+                <Card.Body className="p-4">
+                  <Card.Title 
+                    className="mb-4 pb-3" 
+                    style={{ 
+                      fontSize: '1.5rem', 
+                      fontWeight: 700,
+                      color: '#1f2937',
+                      borderBottom: '2px solid #e5e7eb'
+                    }}
+                  >
+                    Spiritual Guidance
+                  </Card.Title>
+                  <ul className="list-unstyled mb-0">
+                    {formatArrayItems(palm_reading_detail.spiritual_guidance)}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
         </Row>
 
-        {/* Raw Analysis */}
-        <Card.Title className="mb-3">Raw Analysis</Card.Title>
-        <Card
-          className="mb-4"
-          style={{
-                    // background:
-                    //   "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                    backgroundColor:"#ffffff",
-                    color: "#000",
-                  }}
-        >
-          <Card.Body>
-            <pre
-              className=" p-3 rounded"
+        {/* Raw Analysis - Full Width */}
+        <Row className="mt-4">
+          <Col md={12}>
+            <Card 
+              className="shadow-sm"
               style={{
-                whiteSpace: "pre-wrap",
-                fontFamily: "sans-serif",
-                overflowWrap: "break-word",
-                fontSize: "16px",
-                lineHeight: "2",
+                backgroundColor: "#ffffff",
+                border: '1px solid #e5e7eb',
+                borderRadius: '16px'
               }}
             >
-              {data.raw_analysis
-                ?.split("\n")
-                .filter((line) => !/^[=-]+\s*$/.test(line)) // Remove lines with only = or -
-                .map((line) => {
-                  // Replace *text* with <strong>text</strong> for bold
-                  const formattedLine = line.replace(
-                    /\*(.*?)\*/g,
-                    "<strong>$1</strong>"
-                  );
-                  // Use dangerouslySetInnerHTML to render HTML
-                  return (
-                    <span dangerouslySetInnerHTML={{ __html: formattedLine }} />
-                  );
-                })
-                .map((line, index) => (
-                  <span key={index}>
-                    {line}
-                    <br />
-                  </span>
-                )) || ""}
-            </pre>
-
-            {/* <pre className="bg-dark text-white p-3 rounded" style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-              {data.raw_analysis}
-            </pre> */}
-          </Card.Body>
-        </Card>
-
-        {/* Footer */}
-        {/* <div className="d-flex justify-content-center mt-4">
-          <Button variant="outline-light" onClick={() => navigate('/')}>
-            ← Start Over
-          </Button>
-        </div> */}
+              <Card.Body className="p-4">
+                <Card.Title 
+                  className="mb-4 pb-3" 
+                  style={{ 
+                    fontSize: '1.5rem', 
+                    fontWeight: 700,
+                    color: '#1f2937',
+                    borderBottom: '2px solid #e5e7eb'
+                  }}
+                >
+                  Detailed Analysis
+                </Card.Title>
+                <div 
+                  style={{
+                    fontSize: "1rem",
+                    lineHeight: "1.8",
+                    color: '#374151'
+                  }}
+                >
+                  {formatText(data.raw_analysis)}
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
       </Container>
+
+      <style>{`
+        strong {
+          font-weight: 700;
+          color: #1f2937;
+        }
+        
+        ul {
+          padding-left: 0;
+        }
+        
+        li {
+          color: #374151;
+          font-size: 1rem;
+        }
+        
+        .card {
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+        }
+      `}</style>
     </div>
   );
 };

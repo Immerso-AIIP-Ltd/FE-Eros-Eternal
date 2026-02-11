@@ -100,40 +100,37 @@ const FaceUploadPage: React.FC = () => {
     setUploadProgress(0);
   };
 
-  // Progress simulation and API call
-  useEffect(() => {
-    if (pageState !== "loading") return;
-
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 15;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        // Call API when progress reaches 100%
-        setTimeout(() => {
-          callFaceAPI();
-        }, 300);
-      }
-      setUploadProgress(Math.min(progress, 100));
-    }, 200);
-
-    return () => clearInterval(interval);
-  }, [pageState]);
-
-  const callFaceAPI = async () => {
-    if (!selectedFile) return;
+  const handleContinue = async () => {
+    if (!selectedFile) {
+      setError("Please select a file first.");
+      return;
+    }
 
     setIsApiCalling(true);
+    setError(null);
 
     try {
+      // Convert image to base64
+      const imageBase64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(selectedFile);
+      });
+
       const userId = localStorage.getItem("user_id");
+
+      if (!userId) {
+        setError("User ID not found. Please log in again.");
+        setIsApiCalling(false);
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("user_id", userId || "");
-      formData.append("image_data", selectedFile);
+      formData.append("user_id", userId);
+      formData.append("image", selectedFile);
 
       const response = await fetch(
-        "http://164.52.205.108:8500/api/v1/analysis/face", // CHANGED TO FACE ENDPOINT
+        "http://164.52.205.108:8500/api/v1/face_reading/analyze",
         {
           method: "POST",
           body: formData,
@@ -148,21 +145,91 @@ const FaceUploadPage: React.FC = () => {
       }
 
       if (data.success) {
-        navigate("/face-analyse", { state: data }); // CHANGED TO FACE REPORT ROUTE
+        navigate("/face-analyse", {
+          state: {
+            ...data,
+            uploadedImage: imageBase64,
+          },
+        });
       } else {
-        setError(data.message || "Failed to generate face analysis.");
+        setError(data.message || "Failed to generate face reading.");
         setPageState("upload");
-        setUploadProgress(0);
-        setIsApiCalling(false);
       }
-    } catch (err) {
-      console.error("Upload error:", err.message);
-      setError(err.message || "Failed to generate face analysis.");
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setError(err.message || "Something went wrong. Please try again.");
       setPageState("upload");
-      setUploadProgress(0);
+    } finally {
       setIsApiCalling(false);
     }
   };
+
+  // Progress simulation and API call
+  useEffect(() => {
+    if (pageState !== "loading") return;
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        setTimeout(() => {
+          handleContinue();
+        }, 300);
+        // Call API when progress reaches 100%
+        // setTimeout(() => {
+        //   callFaceAPI();
+        // }, 300);
+      }
+      setUploadProgress(Math.min(progress, 100));
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [pageState]);
+
+  // const callFaceAPI = async () => {
+  //   if (!selectedFile) return;
+
+  //   setIsApiCalling(true);
+
+  //   try {
+  //     const userId = localStorage.getItem("user_id");
+  //     const formData = new FormData();
+  //     formData.append("user_id", userId || "");
+  //     formData.append("image_data", selectedFile);
+
+  //     const response = await fetch(
+  //       "http://164.52.205.108:8500/api/v1/face_reading/analyze", // CHANGED TO FACE ENDPOINT
+  //       {
+  //         method: "POST",
+  //         body: formData,
+  //       },
+  //     );
+
+  //     const data = await response.json().catch(() => ({}));
+
+  //     if (!response.ok) {
+  //       const errMsg = data.message || `HTTP ${response.status}`;
+  //       throw new Error(errMsg);
+  //     }
+
+  //     if (data.success) {
+  //       navigate("/face-analyse", { state: data }); // CHANGED TO FACE REPORT ROUTE
+  //     } else {
+  //       setError(data.message || "Failed to generate face analysis.");
+  //       setPageState("upload");
+  //       setUploadProgress(0);
+  //       setIsApiCalling(false);
+  //     }
+  //   } catch (err) {
+  //     console.error("Upload error:", err.message);
+  //     setError(err.message || "Failed to generate face analysis.");
+  //     setPageState("upload");
+  //     setUploadProgress(0);
+  //     setIsApiCalling(false);
+  //   }
+  // };
 
   const getPageTitle = () => {
     switch (pageState) {
@@ -257,7 +324,7 @@ const FaceUploadPage: React.FC = () => {
               maxWidth: "750px",
               // backgroundColor: "#1a1a1a",
               // border: "1px solid #333",
-                  backgroundColor:"#FFFFFF",
+              backgroundColor: "#FFFFFF",
               // backgroundColor: "#1a1a1a",
               border: "1px solid #00B8F8",
               borderRadius: "12px",
@@ -273,10 +340,10 @@ const FaceUploadPage: React.FC = () => {
                   // border: "2px dashed #00B8F8",
                   // cursor: "pointer",
                   // backgroundColor: "#0d0d0d",
-                      border: "2px dashed #00B8F8",
+                  border: "2px dashed #00B8F8",
                   cursor: "pointer",
                   // backgroundColor: "#0d0d0d",
-                  backgroundColor:"#00B8F80D",
+                  backgroundColor: "#00B8F80D",
                   padding: "80px 40px",
                   minHeight: "280px",
                   display: "flex",
@@ -373,7 +440,7 @@ const FaceUploadPage: React.FC = () => {
               width: "100%",
               maxWidth: "750px",
               // backgroundColor: "#1a1a1a",
-               backgroundColor:"#ffffff",
+              backgroundColor: "#ffffff",
               border: "1px solid #00B8F8",
               borderRadius: "12px",
             }}
@@ -388,7 +455,7 @@ const FaceUploadPage: React.FC = () => {
                   width: "100%",
                   minHeight: "280px",
                   // backgroundColor: "#0d0d0d",
-                   backgroundColor:"#ffffff",
+                  backgroundColor: "#ffffff",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -450,7 +517,7 @@ const FaceUploadPage: React.FC = () => {
               width: "100%",
               maxWidth: "750px",
               // backgroundColor: "#1a1a1a",
-               backgroundColor:"#ffffff",
+              backgroundColor: "#ffffff",
               border: "1px solid #00B8F8",
               borderRadius: "12px",
             }}
@@ -466,7 +533,7 @@ const FaceUploadPage: React.FC = () => {
                 style={{
                   border: "2px dashed #00B8F8",
                   // backgroundColor: "#0d0d0d",
-                   backgroundColor:"#ffffff",
+                  backgroundColor: "#ffffff",
                   minHeight: "200px",
                   display: "flex",
                   flexDirection: "column",
