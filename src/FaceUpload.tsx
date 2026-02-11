@@ -148,7 +148,7 @@ const FaceUploadPage: React.FC = () => {
       }
 
       if (data.success) {
-        navigate("/face-report", { state: data }); // CHANGED TO FACE REPORT ROUTE
+        navigate("/face-analyse", { state: data }); // CHANGED TO FACE REPORT ROUTE
       } else {
         setError(data.message || "Failed to generate face analysis.");
         setPageState("upload");

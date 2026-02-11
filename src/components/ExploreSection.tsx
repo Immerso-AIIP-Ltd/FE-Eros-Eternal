@@ -3,14 +3,10 @@ import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Import images
-// import tarot from '../assets/explore/tarrot.png';
 import tarot from "../images/lighttarrot.png";
 import palm from "../images/lightpalm.png";
 import harmonyindex from "../images/lightharmony.png";
 import facescan from "../images/lightface.png";
-// import harmonyindex from '../assets/explore/harmony.png';
-// import palm from '../assets/explore/palmistry.jpg';
-// import facescan from '../assets/explore/face.png';
 import angel from '../vintage.png';
 
 interface ExploreItem {
@@ -42,7 +38,6 @@ export const ExploreSection: React.FC = () => {
     const x = e.pageX - (scrollContainerRef.current?.offsetLeft || 0);
     const walk = (x - startX) * 2;
 
-    // If moved more than 5 pixels, consider it a drag
     if (Math.abs(walk) > 5) {
       setHasMoved(true);
     }
@@ -110,7 +105,6 @@ export const ExploreSection: React.FC = () => {
         <h1 style={{
           fontSize: '1.75rem',
           fontWeight: 600,
-          // color: '#ffffff',
           fontFamily: "Poppins, sans-serif",
           margin: 0,
           letterSpacing: '-0.02em',
@@ -122,7 +116,6 @@ export const ExploreSection: React.FC = () => {
         <button
           onClick={() => {
             if (scrollContainerRef.current) {
-              // Scroll by one card width (33.333% of container + gap)
               const scrollAmount = scrollContainerRef.current.offsetWidth / 3 + 24;
               scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
             }
@@ -161,9 +154,9 @@ export const ExploreSection: React.FC = () => {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
         style={{
-          display: 'flex',  // Change back to flex
+          display: 'flex',
           gap: '24px',
-          overflowX: 'auto',  // Enable horizontal scroll
+          overflowX: 'auto',
           overflowY: 'hidden',
           scrollBehavior: isDragging ? 'auto' : 'smooth',
           cursor: isDragging ? 'grabbing' : 'grab',
@@ -173,7 +166,6 @@ export const ExploreSection: React.FC = () => {
           width: '100%',
           padding: '0 0 40px 0',
           margin: '0',
-          color:'#000'
         }}
       >
         {items.map((item, index) => (
@@ -189,87 +181,75 @@ export const ExploreSection: React.FC = () => {
             tabIndex={item.onClick ? 0 : -1}
             aria-label={item.locked ? `${item.title} - Coming Soon` : item.title}
             style={{
-              flex: '0 0 calc(33.333% - 16px)',  // Each card takes 1/3 width minus gap
+              flex: '0 0 calc(33.333% - 16px)',
               minWidth: 'calc(33.333% - 16px)',
               height: '420px',
               borderRadius: '16px',
-              // border: '1px solid rgba(255, 255, 255, 0.1)',
-              // backgroundColor: '#1a1d1f',
+              border: '1px solid #e5e7eb',
+              backgroundColor: '#ffffff',
               overflow: 'hidden',
               position: 'relative',
               cursor: item.onClick && !isDragging ? 'pointer' : isDragging ? 'grabbing' : 'grab',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               fontFamily: "DM Sans, sans-serif",
               fontSize: "16px",
-              // boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
             }}
             onMouseEnter={(e) => {
               if (item.onClick && !isDragging) {
                 e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 0, 0, 0.5)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)';
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.3)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
             }}
           >
-            {/* Image */}
-            <img
-              src={item.image}
-              alt={item.title}
-              draggable={false}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                userSelect: 'none',
-                pointerEvents: 'none',
-              }}
-            />
+            {/* Image Container */}
+            <div style={{
+              width: '100%',
+              height: '60%',
+              overflow: 'hidden',
+              backgroundColor: '#f9fafb',
+            }}>
+              <img
+                src={item.image}
+                alt={item.title}
+                draggable={false}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  userSelect: 'none',
+                  pointerEvents: 'none',
+                }}
+              />
+            </div>
 
-            {/* Gradient Overlay - Subtle */}
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                // background: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.7) 85%, rgba(0,0,0,0.9) 100%)",
-                zIndex: 1,
-                pointerEvents: 'none',
-              }}
-            />
-
-            {/* Text Content with Strong Blur */}
+            {/* Text Content */}
             <div
               className="text-content"
               style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                padding: "1.5rem 1.5rem 1.75rem",
-                // background: "rgba(15, 18, 20, 0.6)",
-                // backdropFilter: "blur(12px) saturate(180%)",
-                // WebkitBackdropFilter: "blur(12px) saturate(180%)",
-                borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                position: "relative",
+                padding: "1.5rem",
+                backgroundColor: '#ffffff',
+                height: '40%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
                 zIndex: 5,
                 pointerEvents: 'none',
-                color:'#000'
               }}
             >
               <h3
                 style={{
                   fontSize: '1.25rem',
                   fontWeight: 600,
-                  // color: '#ffffff',
+                  color: '#1f2937',
                   marginBottom: '0.5rem',
                   fontFamily: "Poppins, sans-serif",
                   lineHeight: 1.3,
-                  textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-                  color:'#000'
                 }}
               >
                 {item.title}
@@ -277,12 +257,10 @@ export const ExploreSection: React.FC = () => {
               <p
                 style={{
                   fontSize: '0.9rem',
-                  // color: 'rgba(255, 255, 255, 0.85)',
+                  color: '#6b7280',
                   margin: 0,
                   lineHeight: 1.5,
                   fontFamily: "DM Sans, sans-serif",
-                  textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-                   color:'#000'
                 }}
               >
                 {item.subtitle}
@@ -330,86 +308,87 @@ export const ExploreSection: React.FC = () => {
           </div>
         ))}
       </div>
+      
       <style>{`
-  .card-container::-webkit-scrollbar {
-    display: none;
-  }
-  .card-container {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
+        .card-container::-webkit-scrollbar {
+          display: none;
+        }
+        .card-container {
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
+        }
 
-  .card-item {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+        .card-item {
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                      box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-  @media (min-width: 1024px) {
-    .card-container {
-      display: flex;
-      gap: 24px;
-      padding: 0 0 40px 0;
-    }
-    
-    .card-item {
-      flex: 0 0 calc(33.333% - 16px) !important;
-      min-width: calc(33.333% - 16px) !important;
-      height: 420px;
-    }
-  }
+        @media (min-width: 1024px) {
+          .card-container {
+            display: flex;
+            gap: 24px;
+            padding: 0 0 40px 0;
+          }
+          
+          .card-item {
+            flex: 0 0 calc(33.333% - 16px) !important;
+            min-width: calc(33.333% - 16px) !important;
+            height: 420px;
+          }
+        }
 
-  @media (min-width: 768px) and (max-width: 1023px) {
-    .card-container {
-      display: flex;
-      gap: 16px;
-      padding: 0 0 40px 0;
-    }
-    
-    .card-item {
-      flex: 0 0 calc(50% - 8px) !important;
-      min-width: calc(50% - 8px) !important;
-      height: 360px;
-    }
-    
-    .text-content {
-      padding: 1.25rem;
-    }
-    
-    h3 {
-      font-size: 1.125rem;
-    }
-    
-    p {
-      font-size: 0.85rem;
-    }
-  }
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .card-container {
+            display: flex;
+            gap: 16px;
+            padding: 0 0 40px 0;
+          }
+          
+          .card-item {
+            flex: 0 0 calc(50% - 8px) !important;
+            min-width: calc(50% - 8px) !important;
+            height: 360px;
+          }
+          
+          .text-content {
+            padding: 1.25rem;
+          }
+          
+          h3 {
+            font-size: 1.125rem;
+          }
+          
+          p {
+            font-size: 0.85rem;
+          }
+        }
 
-  @media (max-width: 767.98px) {
-    .card-container {
-      display: flex;
-      gap: 12px;
-      padding: 0 0 40px 0;
-    }
-    
-    .card-item {
-      flex: 0 0 calc(100% - 12px) !important;
-      min-width: calc(100% - 12px) !important;
-      height: 380px;
-    }
-    
-    .text-content {
-      padding: 1.1rem;
-    }
-    
-    h3 {
-      font-size: 1.05rem;
-    }
-    
-    p {
-      font-size: 0.8rem;
-    }
-  }
-`}</style>
+        @media (max-width: 767.98px) {
+          .card-container {
+            display: flex;
+            gap: 12px;
+            padding: 0 0 40px 0;
+          }
+          
+          .card-item {
+            flex: 0 0 calc(100% - 12px) !important;
+            min-width: calc(100% - 12px) !important;
+            height: 380px;
+          }
+          
+          .text-content {
+            padding: 1.1rem;
+          }
+          
+          h3 {
+            font-size: 1.05rem;
+          }
+          
+          p {
+            font-size: 0.8rem;
+          }
+        }
+      `}</style>
     </div>
   );
 };
