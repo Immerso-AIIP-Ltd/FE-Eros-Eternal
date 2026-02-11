@@ -203,7 +203,6 @@ export const Header: React.FC = () => {
     } else if (card.reportType && userId) {
       // Handle other report types
       const hasReport = reportStatuses[card.reportType];
-      debugger
       if (hasReport) {
         navigate('/view-report', {
           state: { reportType: card.reportType, userId, title: card.title }
