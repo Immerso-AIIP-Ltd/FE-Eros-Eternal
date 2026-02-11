@@ -1,10 +1,10 @@
 // FaceUploadPage.tsx
-import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Card, Button, Alert } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { Card, Button, Alert } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import Stars from "./components/stars";
 
-type PageState = 'upload' | 'preview' | 'loading';
+type PageState = "upload" | "preview" | "loading";
 
 const FaceUploadPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -14,10 +14,10 @@ const FaceUploadPage: React.FC = () => {
       y: Math.random() * 100,
       opacity: 0.3 + Math.random() * 0.7,
       size: Math.random() * 2 + 1,
-    }))
+    })),
   );
   const [error, setError] = useState<string | null>(null);
-  const [pageState, setPageState] = useState<PageState>('upload');
+  const [pageState, setPageState] = useState<PageState>("upload");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isApiCalling, setIsApiCalling] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,15 +30,19 @@ const FaceUploadPage: React.FC = () => {
     const file = files[0];
     const fileName = file.name.toLowerCase();
 
-    if (!fileName.endsWith('.jpg') && !fileName.endsWith('.jpeg') && !fileName.endsWith('.png')) {
-      setError('Only .JPG, .JPEG, and .PNG files are supported.');
+    if (
+      !fileName.endsWith(".jpg") &&
+      !fileName.endsWith(".jpeg") &&
+      !fileName.endsWith(".png")
+    ) {
+      setError("Only .JPG, .JPEG, and .PNG files are supported.");
       setSelectedFile(null);
       return;
     }
 
     setError(null);
     setSelectedFile(file);
-    setPageState('preview');
+    setPageState("preview");
   };
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -56,15 +60,19 @@ const FaceUploadPage: React.FC = () => {
     const file = files[0];
     const fileName = file.name.toLowerCase();
 
-    if (!fileName.endsWith('.jpg') && !fileName.endsWith('.jpeg') && !fileName.endsWith('.png')) {
-      setError('Only .JPG, .JPEG, and .PNG files are supported.');
+    if (
+      !fileName.endsWith(".jpg") &&
+      !fileName.endsWith(".jpeg") &&
+      !fileName.endsWith(".png")
+    ) {
+      setError("Only .JPG, .JPEG, and .PNG files are supported.");
       setSelectedFile(null);
       return;
     }
 
     setError(null);
     setSelectedFile(file);
-    setPageState('preview');
+    setPageState("preview");
   }, []);
 
   const handleBrowseClick = () => {
@@ -74,27 +82,27 @@ const FaceUploadPage: React.FC = () => {
   const handleCancel = () => {
     setSelectedFile(null);
     setError(null);
-    setPageState('upload');
+    setPageState("upload");
     setUploadProgress(0);
     setIsApiCalling(false);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const handleStartFaceAnalysis = () => {
     if (!selectedFile) {
-      setError('Please select a file first.');
+      setError("Please select a file first.");
       return;
     }
 
-    setPageState('loading');
+    setPageState("loading");
     setUploadProgress(0);
   };
 
   // Progress simulation and API call
   useEffect(() => {
-    if (pageState !== 'loading') return;
+    if (pageState !== "loading") return;
 
     let progress = 0;
     const interval = setInterval(() => {
@@ -119,17 +127,17 @@ const FaceUploadPage: React.FC = () => {
     setIsApiCalling(true);
 
     try {
-      const userId = localStorage.getItem('user_id');
+      const userId = localStorage.getItem("user_id");
       const formData = new FormData();
       formData.append("user_id", userId || "");
       formData.append("image_data", selectedFile);
 
       const response = await fetch(
-        'http://164.52.205.108:8500/api/v1/analysis/face', // CHANGED TO FACE ENDPOINT
+        "http://164.52.205.108:8500/api/v1/analysis/face", // CHANGED TO FACE ENDPOINT
         {
-          method: 'POST',
+          method: "POST",
           body: formData,
-        }
+        },
       );
 
       const data = await response.json().catch(() => ({}));
@@ -140,18 +148,17 @@ const FaceUploadPage: React.FC = () => {
       }
 
       if (data.success) {
-        navigate('/face-report', { state: data }); // CHANGED TO FACE REPORT ROUTE
+        navigate("/face-report", { state: data }); // CHANGED TO FACE REPORT ROUTE
       } else {
-        setError(data.message || 'Failed to generate face analysis.');
-        setPageState('upload');
+        setError(data.message || "Failed to generate face analysis.");
+        setPageState("upload");
         setUploadProgress(0);
         setIsApiCalling(false);
       }
-
     } catch (err) {
-      console.error('Upload error:', err.message);
-      setError(err.message || 'Failed to generate face analysis.');
-      setPageState('upload');
+      console.error("Upload error:", err.message);
+      setError(err.message || "Failed to generate face analysis.");
+      setPageState("upload");
       setUploadProgress(0);
       setIsApiCalling(false);
     }
@@ -159,34 +166,44 @@ const FaceUploadPage: React.FC = () => {
 
   const getPageTitle = () => {
     switch (pageState) {
-      case 'upload':
-        return 'Upload Your Face';
-      case 'preview':
-        return 'Face Preview';
-      case 'loading':
-        return 'Analyzing Your Facial Features';
+      case "upload":
+        return "Upload Your Face";
+      case "preview":
+        return "Face Preview";
+      case "loading":
+        return "Analyzing Your Facial Features";
       default:
-        return 'Upload Your Face';
+        return "Upload Your Face";
     }
   };
 
   const getPageSubtitle = () => {
     switch (pageState) {
-      case 'upload':
-        return 'Discover insights into your personality, emotions, and traits with our AI-powered face analysis technology';
-      case 'preview':
-        return 'Discover insights into your personality, emotions, and traits with our AI-powered face analysis technology';
-      case 'loading':
-        return 'Please wait while our AI generates your personalized analysis.';
+      case "upload":
+        return "Discover insights into your personality, emotions, and traits with our AI-powered face analysis technology";
+      case "preview":
+        return "Discover insights into your personality, emotions, and traits with our AI-powered face analysis technology";
+      case "loading":
+        return "Please wait while our AI generates your personalized analysis.";
       default:
-        return '';
+        return "";
     }
   };
 
   return (
-    <div className="vh-100 vw-100 d-flex flex-column" style={{ overflow: 'auto' }}>
-      <Stars />
-      <div className="absolute inset-0 overflow-hidden">
+    <div
+      className="vh-100 vw-100 d-flex flex-column"
+      style={{
+        overflow: "auto",
+        background:
+          "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
+
+        minHeight: "100vh",
+        color: "#000",
+      }}
+    >
+      {/* <Stars /> */}
+      {/* <div className="absolute inset-0 overflow-hidden">
         {stars.map((star, i) => (
           <div
             key={i}
@@ -202,14 +219,14 @@ const FaceUploadPage: React.FC = () => {
             }}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center px-4 py-3">
         <button
-          className="btn text-white"
+          className="btn"
           onClick={() => window.history.back()}
-          style={{ fontSize: '1rem', zIndex: 2 }}
+          style={{ fontSize: "1rem", zIndex: 2 }}
         >
           ← Back
         </button>
@@ -217,60 +234,79 @@ const FaceUploadPage: React.FC = () => {
 
       {/* Title */}
       <div className="text-center px-4 mb-4">
-        <h2 className="fw-bold text-white">{getPageTitle()}</h2>
-        <p className="text-white" style={{ maxWidth: 600, margin: 'auto', fontSize: '0.95rem' }}>
+        <h2 className="fw-bold ">{getPageTitle()}</h2>
+        <p
+          className=""
+          style={{ maxWidth: 600, margin: "auto", fontSize: "0.95rem" }}
+        >
           {getPageSubtitle()}
         </p>
       </div>
 
       {/* Main Content - Top aligned */}
-      <div className="d-flex justify-content-center px-4 mb-5" style={{"marginTop" : "100px"}}>
-        
+      <div
+        className="d-flex justify-content-center px-4 mb-5"
+        style={{ marginTop: "100px" }}
+      >
         {/* UPLOAD STATE */}
-        {pageState === 'upload' && (
+        {pageState === "upload" && (
           <Card
             className="p-5"
             style={{
-              width: '100%',
-              maxWidth: '750px',
-              backgroundColor: '#1a1a1a',
-              border: '1px solid #333',
-              borderRadius: '12px',
+              width: "100%",
+              maxWidth: "750px",
+              // backgroundColor: "#1a1a1a",
+              // border: "1px solid #333",
+                  backgroundColor:"#FFFFFF",
+              // backgroundColor: "#1a1a1a",
+              border: "1px solid #00B8F8",
+              borderRadius: "12px",
             }}
           >
             <Card.Body>
-              <h6 className="text-info text-center mb-4">Upload Image</h6>
+              <h6 className="text-info text-center mb-4">Upload file</h6>
 
               {/* Drag & Drop Area */}
               <div
                 className="rounded text-center"
                 style={{
-                  border: '2px dashed #00B8F8',
-                  cursor: 'pointer',
-                  backgroundColor: '#0d0d0d',
-                  padding: '80px 40px',
-                  minHeight: '280px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  // border: "2px dashed #00B8F8",
+                  // cursor: "pointer",
+                  // backgroundColor: "#0d0d0d",
+                      border: "2px dashed #00B8F8",
+                  cursor: "pointer",
+                  // backgroundColor: "#0d0d0d",
+                  backgroundColor:"#00B8F80D",
+                  padding: "80px 40px",
+                  minHeight: "280px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onClick={handleBrowseClick}
               >
                 <div className="mb-4">
-                  <i className="bi bi-upload text-info" style={{ fontSize: '3.5rem' }}></i>
+                  <i
+                    className="bi bi-upload text-info"
+                    style={{ fontSize: "3.5rem" }}
+                  ></i>
                 </div>
-                <p className="mb-2 text-white" style={{ fontSize: '1.05rem' }}>Drag and Drop files</p>
-                <p className="mb-2 text-white" style={{ fontSize: '1.05rem' }}>or</p>
+                <p className="mb-2 " style={{ fontSize: "1.05rem" }}>
+                  Drag and Drop files
+                </p>
+                <p className="mb-2 " style={{ fontSize: "1.05rem" }}>
+                  or
+                </p>
                 <div>
                   <span
                     className="text-info fw-bold"
-                    style={{ 
-                      textDecoration: 'none', 
-                      cursor: 'pointer',
-                      fontSize: '1.05rem'
+                    style={{
+                      textDecoration: "none",
+                      cursor: "pointer",
+                      fontSize: "1.05rem",
                     }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -279,13 +315,18 @@ const FaceUploadPage: React.FC = () => {
                   >
                     Browse file
                   </span>
-                  <span className="text-white" style={{ fontSize: '1.05rem' }}> from your computer</span>
+                  <span className="" style={{ fontSize: "1.05rem" }}>
+                    {" "}
+                    from your computer
+                  </span>
                 </div>
               </div>
 
               {/* Supported Formats - CORRECTED FROM PALM VERSION */}
-              <div className="mt-4 text-white">
-                <small style={{ fontSize: '0.9rem' }}>Supported formats: JPG, JPEG, PNG</small>
+              <div className="mt-4 ">
+                <small style={{ fontSize: "0.9rem" }}>
+                  Supported formats: JPG, JPEG, PNG
+                </small>
               </div>
 
               {/* Error Message */}
@@ -297,23 +338,23 @@ const FaceUploadPage: React.FC = () => {
 
               {/* Buttons */}
               <div className="d-flex justify-content-end mt-4 gap-3">
-                <Button 
-                  variant="outline-danger" 
+                <Button
+                  variant="outline-danger"
                   onClick={handleCancel}
                   style={{
-                    borderColor: '#dc3545',
-                    color: '#dc3545',
-                    padding: '8px 24px'
+                    borderColor: "#dc3545",
+                    color: "#dc3545",
+                    padding: "8px 24px",
                   }}
                 >
                   <i className="bi bi-x me-1"></i> Cancel
                 </Button>
                 <Button
                   style={{
-                    backgroundColor: '#00B8F8',
-                    border: 'none',
-                    color: '#fff',
-                    padding: '8px 24px'
+                    backgroundColor: "#00B8F8",
+                    border: "none",
+                    color: "#fff",
+                    padding: "8px 24px",
                   }}
                   disabled
                 >
@@ -325,15 +366,16 @@ const FaceUploadPage: React.FC = () => {
         )}
 
         {/* PREVIEW STATE */}
-        {pageState === 'preview' && selectedFile && (
+        {pageState === "preview" && selectedFile && (
           <Card
             className="p-5"
             style={{
-              width: '100%',
-              maxWidth: '750px',
-              backgroundColor: '#1a1a1a',
-              border: '1px solid #333',
-              borderRadius: '12px',
+              width: "100%",
+              maxWidth: "750px",
+              // backgroundColor: "#1a1a1a",
+               backgroundColor:"#ffffff",
+              border: "1px solid #00B8F8",
+              borderRadius: "12px",
             }}
           >
             <Card.Body>
@@ -343,22 +385,23 @@ const FaceUploadPage: React.FC = () => {
               <div
                 className="rounded overflow-hidden"
                 style={{
-                  width: '100%',
-                  minHeight: '280px',
-                  backgroundColor: '#0d0d0d',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid #333'
+                  width: "100%",
+                  minHeight: "280px",
+                  // backgroundColor: "#0d0d0d",
+                   backgroundColor:"#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px solid #00B8F8",
                 }}
               >
                 <img
                   src={URL.createObjectURL(selectedFile)}
                   alt="Face Preview"
                   style={{
-                    maxHeight: '100%',
-                    maxWidth: '100%',
-                    objectFit: 'contain',
+                    maxHeight: "100%",
+                    maxWidth: "100%",
+                    objectFit: "contain",
                   }}
                 />
               </div>
@@ -372,23 +415,23 @@ const FaceUploadPage: React.FC = () => {
 
               {/* Buttons */}
               <div className="d-flex justify-content-end mt-4 gap-3">
-                <Button 
-                  variant="outline-danger" 
+                <Button
+                  variant="outline-danger"
                   onClick={handleCancel}
                   style={{
-                    borderColor: '#dc3545',
-                    color: '#dc3545',
-                    padding: '8px 24px'
+                    borderColor: "#dc3545",
+                    color: "#dc3545",
+                    padding: "8px 24px",
                   }}
                 >
                   <i className="bi bi-x me-1"></i> Cancel
                 </Button>
                 <Button
                   style={{
-                    backgroundColor: '#00B8F8',
-                    border: 'none',
-                    color: '#fff',
-                    padding: '8px 24px'
+                    backgroundColor: "#00B8F8",
+                    border: "none",
+                    color: "#fff",
+                    padding: "8px 24px",
                   }}
                   onClick={handleStartFaceAnalysis}
                 >
@@ -400,86 +443,101 @@ const FaceUploadPage: React.FC = () => {
         )}
 
         {/* LOADING STATE */}
-        {pageState === 'loading' && selectedFile && (
+        {pageState === "loading" && selectedFile && (
           <Card
             className="p-5"
             style={{
-              width: '100%',
-              maxWidth: '750px',
-              backgroundColor: '#1a1a1a',
-              border: '1px solid #333',
-              borderRadius: '12px',
+              width: "100%",
+              maxWidth: "750px",
+              // backgroundColor: "#1a1a1a",
+               backgroundColor:"#ffffff",
+              border: "1px solid #00B8F8",
+              borderRadius: "12px",
             }}
           >
             <Card.Body>
-              <h6 className="text-info text-center mb-4">Uploaded Face Image</h6>
+              <h6 className="text-info text-center mb-4">
+                Uploaded Face Image
+              </h6>
 
               {/* Loading Container */}
               <div
                 className="rounded p-4"
                 style={{
-                  border: '2px dashed #00B8F8',
-                  backgroundColor: '#0d0d0d',
-                  minHeight: '200px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center'
+                  border: "2px dashed #00B8F8",
+                  // backgroundColor: "#0d0d0d",
+                   backgroundColor:"#ffffff",
+                  minHeight: "200px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
                 }}
               >
                 <div className="mb-3">
-                  <p className="text-white mb-1"><strong>File Name</strong></p>
-                  <p className="text-white mb-1" style={{ fontSize: '0.9rem' }}>
+                  <p className=" mb-1">
+                    <strong>File Name</strong>
+                  </p>
+                  <p className=" mb-1" style={{ fontSize: "0.9rem" }}>
                     {selectedFile.name}
                   </p>
-                  <p className="text-white mb-4" style={{ fontSize: '0.9rem' }}>
+                  <p className=" mb-4" style={{ fontSize: "0.9rem" }}>
                     {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
                   </p>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="progress" style={{ height: '8px', backgroundColor: '#333' }}>
+                <div
+                  className="progress"
+                  style={{ height: "8px", backgroundColor: "#333" }}
+                >
                   <div
                     className="progress-bar"
                     role="progressbar"
                     style={{
                       width: `${uploadProgress}%`,
-                      backgroundColor: '#00B8F8',
-                      transition: 'width 0.2s ease'
+                      backgroundColor: "#00B8F8",
+                      transition: "width 0.2s ease",
                     }}
                     aria-valuenow={uploadProgress}
                     aria-valuemin={0}
                     aria-valuemax={100}
                   ></div>
                 </div>
-                <p className="text-end text-white mt-2 mb-0" style={{ fontSize: '0.85rem' }}>
+                <p
+                  className="text-end  mt-2 mb-0"
+                  style={{ fontSize: "0.85rem" }}
+                >
                   {Math.round(uploadProgress)}%
                 </p>
               </div>
 
               {/* Buttons */}
               <div className="d-flex justify-content-end mt-4 gap-3">
-                <Button 
-                  variant="outline-danger" 
+                <Button
+                  variant="outline-danger"
                   onClick={handleCancel}
                   disabled={uploadProgress === 100 || isApiCalling}
                   style={{
-                    borderColor: '#dc3545',
-                    color: '#dc3545',
-                    padding: '8px 24px'
+                    borderColor: "#dc3545",
+                    color: "#dc3545",
+                    padding: "8px 24px",
                   }}
                 >
                   <i className="bi bi-x me-1"></i> Cancel
                 </Button>
                 <Button
                   style={{
-                    backgroundColor: (uploadProgress === 100 || isApiCalling) ? '#00B8F8' : '#555',
-                    border: 'none',
-                    color: '#fff',
-                    padding: '8px 24px'
+                    backgroundColor:
+                      uploadProgress === 100 || isApiCalling
+                        ? "#00B8F8"
+                        : "#555",
+                    border: "none",
+                    color: "#fff",
+                    padding: "8px 24px",
                   }}
                   disabled
                 >
-                  {isApiCalling ? 'Generating...' : 'Continue'}
+                  {isApiCalling ? "Generating..." : "Continue"}
                 </Button>
               </div>
             </Card.Body>
@@ -493,7 +551,7 @@ const FaceUploadPage: React.FC = () => {
         type="file"
         accept=".jpg,.jpeg,.png"
         onChange={handleFileChange}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
     </div>
   );

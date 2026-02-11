@@ -8,7 +8,8 @@ import { BsArrowLeft } from "react-icons/bs";
 import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "./components/Tarot/TarotCardSelector";
 import Stars from "./components/stars";
-import Harmony from "../src/images/final-harmony.png"
+// import Harmony from "../src/images/final-harmony.png"
+import Harmony from "../src/images/lightharmony.png"
 
 interface TarotReading {
   card_backcover: string;
