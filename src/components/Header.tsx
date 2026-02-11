@@ -304,39 +304,27 @@ export const Header: React.FC = () => {
             <Bell size={20} color="#555" />
           </div>
 
-          <div
-            style={{
-              position: "relative",
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              backgroundColor: "#fff5ed",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            {/* Notification Button */}
+
+            {/* <img
+              src={notification}
+              alt=""
+              style={{ width: '28px', height: '28px', display: 'block' }}
+            /> */}
+
+
+            {/* Credits Display */}
+
             <img
               src={credits}
-              alt="Credits"
-              style={{ width: "20px", height: "20px", objectFit: "contain" }}
+              alt="Credits icon"
+              style={{ width: '100%', height: '38px' }}
             />
-            <div
-              style={{
-                position: "absolute",
-                top: "-4px",
-                right: "-4px",
-                backgroundColor: "#ff6b35",
-                color: "white",
-                fontSize: "10px",
-                borderRadius: "10px",
-                padding: "2px 6px",
-                fontWeight: 700,
-              }}
-            >
-              NEW
-            </div>
+
+
+
+
           </div>
         </div>
       </div>
