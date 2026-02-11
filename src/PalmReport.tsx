@@ -75,9 +75,13 @@ const PalmReadingReportPage: React.FC = () => {
   const { palm_reading_detail } = data;
 
   return (
-    <div className="vw-100 d-flex flex-column p-4">
-      <Stars />
-      <div className="absolute inset-0 overflow-hidden ">
+    <div className="vw-100 d-flex flex-column p-4"  style={{
+            background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
+            minHeight: "100vh",
+            color:"#000"
+          }}>
+      {/* <Stars /> */}
+      {/* <div className="absolute inset-0 overflow-hidden ">
         {stars.map((star, i) => (
           <div
             key={i}
@@ -93,11 +97,11 @@ const PalmReadingReportPage: React.FC = () => {
             }}
           />
         ))}
-      </div>
+      </div> */}
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <button
-          className="btn text-white"
+          className="btn "
           onClick={() => navigate("/result")}
           style={{ fontSize: "1rem", position: "relative", zIndex: 1000 }}
         >
@@ -123,8 +127,8 @@ const PalmReadingReportPage: React.FC = () => {
       <div className="d-flex flex-column align-items-center justify-content-center mb-4">
         {/* User Image and Name */}
         <div className="text-center">
-          {username && <h2 className="text-white mt-3">{username}</h2>}
-          <h6 className="text-white mt-4">Palm Analysis</h6>
+          {username && <h2 className=" mt-3">{username}</h2>}
+          <h6 className=" mt-4">Palm Analysis</h6>
         </div>
       </div>
 
@@ -178,9 +182,10 @@ const PalmReadingReportPage: React.FC = () => {
                 <Card
                   className="mb-4"
                   style={{
-                    background:
-                      "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                    color: "white",
+                    // background:
+                    //   "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
+                    backgroundColor:"#ffffff",
+                    color: "#000",
                   }}
                 >
                   <Card.Body>
@@ -204,9 +209,10 @@ const PalmReadingReportPage: React.FC = () => {
                 <Card
                   className="mb-4"
                   style={{
-                    background:
-                      "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                    color: "white",
+                    // background:
+                    //   "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
+                    backgroundColor:"#ffffff",
+                    color: "#000",
                   }}
                 >
                   <Card.Body>
@@ -227,10 +233,11 @@ const PalmReadingReportPage: React.FC = () => {
                 <Card.Title className="mb-3">Career Insights</Card.Title>
                 <Card
                   className="mb-4"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                    color: "white",
+                   style={{
+                    // background:
+                    //   "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
+                    backgroundColor:"#ffffff",
+                    color: "#000",
                   }}
                 >
                   <Card.Body>
@@ -252,9 +259,10 @@ const PalmReadingReportPage: React.FC = () => {
                 <Card
                   className="mb-4"
                   style={{
-                    background:
-                      "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-                    color: "white",
+                    // background:
+                    //   "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
+                    backgroundColor:"#ffffff",
+                    color: "#000",
                   }}
                 >
                   <Card.Body>
@@ -291,14 +299,15 @@ const PalmReadingReportPage: React.FC = () => {
         <Card
           className="mb-4"
           style={{
-            background:
-              "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-            color: "white",
-          }}
+                    // background:
+                    //   "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
+                    backgroundColor:"#ffffff",
+                    color: "#000",
+                  }}
         >
           <Card.Body>
             <pre
-              className="text-white p-3 rounded"
+              className=" p-3 rounded"
               style={{
                 whiteSpace: "pre-wrap",
                 fontFamily: "sans-serif",

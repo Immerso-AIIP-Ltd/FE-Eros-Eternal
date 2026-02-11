@@ -696,7 +696,7 @@ export const Header: React.FC = () => {
           display: grid;
           grid-template-columns: repeat(7, 1fr);
           gap: 16px;
-          width: 80%;
+          width: 100%;
           max-width: none;
           margin: 0 auto;
           padding: 0 30px;

@@ -158,10 +158,11 @@ const RelationshipCompatibility: React.FC = () => {
         </h5>
         <div
           className="mb-8 p-6 rounded-2xl border border-gray-600 shadow-xl"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
-          }}
+          // style={{
+          //   background:
+          //     "linear-gradient(180deg, rgba(42, 22, 159, 0.3) 0%, rgba(145, 174, 232, 0.3) 100%)",
+          // }}
+          style={{background:'#ffffff'}}
         >
           <div className="space-y-6">
             {/* Match Summary */}
