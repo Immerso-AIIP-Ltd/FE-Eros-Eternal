@@ -8,7 +8,8 @@ import { BsArrowLeft } from "react-icons/bs";
 import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "./components/Tarot/TarotCardSelector";
 import Stars from "./components/stars";
-import Palm from "../src/images/final-palm.jpg"
+// import Palm from "../src/images/final-palm.jpg"
+import Palm from "../src/images/lightpalm.png"
 
 interface TarotReading {
   card_backcover: string;
@@ -85,7 +86,7 @@ const PalmFlow: React.FC = () => {
   };
 
   return (
-    <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100 text-white">
+    <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100" style={{ backgroundColor: "rgb(255, 255, 255)",color:"#000" }}>
       {/* <button
         type="button"
         className="absolute btn"
@@ -139,8 +140,8 @@ const PalmFlow: React.FC = () => {
         </div>
       )} */}
 
-      {step === 1 && (
-        <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden">
+      {/* {step === 1 && (
+        <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden" style={{ backgroundColor: "rgb(255, 255, 255)" }}>
 
           <img
             src={Palm}
@@ -158,7 +159,7 @@ const PalmFlow: React.FC = () => {
           </a>
 
 
-          <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-end text-center text-white position-relative pb-5" style={{ zIndex: 5 }}>
+          <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-end text-center position-relative pb-5" style={{ zIndex: 5 }}>
             <h3 className="fw-semibold display-5 mb-3">Unlock the Secrets of Your Plam</h3>
             <p className="text-white-50 mb-4 text-xl">
               Discover insights into your personality, relationship, and future with our AI-powered
@@ -173,7 +174,80 @@ const PalmFlow: React.FC = () => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
+      {step === 1 && (
+  <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
+    {/* Back button - EXACT Tarot style */}
+    <button
+      onClick={() => navigate("/result")}
+      className="position-absolute top-0 start-0 btn btn-link"
+      style={{ 
+        fontSize: '1.2rem', 
+        zIndex: 10, 
+        textDecoration: 'none', 
+        color: 'black',
+        background: 'none',
+        border: 'none',
+        backgroundColor: 'white',
+        width: '100%',
+        textAlign: 'left',
+        height: '7%',
+        padding: '0 3%',
+      }}
+    >
+      <i className="bi bi-arrow-left me-2"></i> Palmistry
+    </button>
+
+    {/* Palm image section - top 75% with gradient overlay */}
+    <div className="position-relative" style={{ height: '75vh', overflow: 'hidden' }}>
+      <img
+        src={Palm}
+        alt="Palm Reading Background"
+        className="w-100 h-100"
+        style={{ objectFit: 'cover', objectPosition: 'center' }}
+      />
+      {/* Gradient overlay at bottom of image - EXACT Tarot style */}
+      <div 
+        className="position-absolute bottom-0 w-100" 
+        style={{ 
+          height: '150px', 
+          background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))' 
+        }}
+      ></div>
+    </div>
+
+    {/* Content section - bottom 25% with EXACT Tarot styling */}
+    <div 
+      className="d-flex flex-column align-items-center justify-content-center text-center px-4" 
+      style={{ 
+        backgroundColor: 'rgb(255, 255, 255)', 
+        height: '25vh',
+        paddingTop: '1rem',
+        paddingBottom: '2rem'
+      }}
+    >
+      <h3 className="fw-semibold mb-3" style={{ fontSize: '1.8rem', color: '#000' }}>
+        Unlock the Secrets of Your Palm {/* FIXED TYPO: "Plam" → "Palm" */}
+      </h3>
+      <p className="mb-4" style={{ color: '#6B7280', fontSize: '0.9rem', maxWidth: '600px' }}>
+        Discover insights into your personality, relationship, and future with our AI-powered palm reading technology
+      </p>
+      <button
+        className="btn btn-primary rounded-pill px-5 py-3"
+        style={{ 
+          backgroundColor: '#00B8F8', 
+          border: 'none',
+          fontSize: '1rem',
+          fontWeight: '500',
+          minWidth: '22%'
+        }}
+        onClick={() => navigate('/upload')}
+      >
+        Continue
+      </button>
+    </div>
+  </div>
+)}
 
       {step === 2 && (
         <div

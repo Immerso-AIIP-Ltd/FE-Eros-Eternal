@@ -9,7 +9,8 @@ import TarotCardSelector from "./components/Tarot/TarotCardSelector";
 import Stars from "./components/stars";
 import { Calendar } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
-import Tarrot from "../src/images/final-tarrot.png"
+// import Tarrot from "../src/images/final-tarrot.png"
+import Tarrot from "../src/images/lighttarrot.png"
 
 interface TarotReading {
   card_backcover: string;

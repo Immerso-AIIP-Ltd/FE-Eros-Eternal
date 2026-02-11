@@ -118,7 +118,7 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
         alignItems: "center",
         gap: 12,
         // background: "#00b8f8",
-        color: "#fff",
+        // color: "#fff",
         padding: "4px 4px",
         borderRadius: 24,
         maxWidth: 250,
@@ -159,7 +159,7 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
                   style={{
                     width: 3,
                     height: h,
-                    background: "rgba(255,255,255,0.28)",
+                    background: "black",
                     borderRadius: 2,
                   }}
                 />
@@ -188,7 +188,7 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
                     style={{
                       width: 3,
                       height: h,
-                      background: "rgba(255,255,255,0.95)",
+                      background: "#00B8DB",
                       borderRadius: 2,
                     }}
                   />

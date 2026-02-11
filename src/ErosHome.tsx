@@ -101,7 +101,7 @@ const ErosHome = () => {
         >
           <button
             style={{
-              background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
+              // background: 'linear-gradient(135deg, rgb(170, 225, 39) 0%, rgb(0, 162, 255) 100%)',
               border: 'none',
               borderRadius: '20px',
               padding: '10px 24px',
@@ -112,6 +112,7 @@ const ErosHome = () => {
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               boxShadow: '0 4px 8px rgba(0, 0, 0, 0.25)',
               minWidth: '140px',
+              background:"linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)"
             }}
             onClick={handleRasiClick}
             onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}

@@ -240,7 +240,8 @@ export const Header: React.FC = () => {
               e.currentTarget.style.boxShadow = "0 4px 12px rgba(115, 172, 212, 0.3)";
             }}
           >
-            View trial chart
+            {/* View trial chart */}
+            View Rasi chart
           </button>
 
           <div
