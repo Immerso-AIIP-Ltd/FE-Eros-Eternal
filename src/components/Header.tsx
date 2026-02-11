@@ -219,7 +219,7 @@ export const Header: React.FC = () => {
           <button
             onClick={handleRasiClick}
             style={{
-              background: "linear-gradient(135deg, rgb(160, 210, 232) 0%, rgb(115, 172, 212) 100%)",
+              background: "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
               border: "none",
               borderRadius: "20px",
               padding: "8px 20px",
@@ -395,11 +395,12 @@ export const Header: React.FC = () => {
                 style={{
                   position: "relative",
                   padding: "24px 20px",
-                  borderRadius: "16px",
+                  borderRadius: "30px",
                   border: "1px solid rgba(255,255,255,0.3)",
-                  backgroundColor: hoveredCard === card.id
-                    ? "rgba(255,255,255,0.25)"
-                    : "rgba(255,255,255,0.15)",
+                  // backgroundColor: hoveredCard === card.id
+                  //   ? "rgba(255,255,255,0.25)"
+                  //   : "rgba(255,255,255,0.15)",
+                  backgroundColor: 'white',
                   backdropFilter: "blur(10px)",
                   WebkitBackdropFilter: "blur(10px)",
                   cursor: "pointer",
@@ -439,7 +440,8 @@ export const Header: React.FC = () => {
                       width: "52px",
                       height: "52px",
                       borderRadius: "12px",
-                      backgroundColor: "rgba(115, 172, 212, 0.1)",
+                      // backgroundColor: "rgba(115, 172, 212, 0.1)",
+                      background: 'linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)',
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -471,7 +473,7 @@ export const Header: React.FC = () => {
                   <button
                     className="card-button"
                     style={{
-                      background: "linear-gradient(135deg, rgb(160, 210, 232) 0%, rgb(115, 172, 212) 100%)",
+                      background: "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
                       border: "none",
                       borderRadius: "16px",
                       padding: "10px 18px",
@@ -560,13 +562,14 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Chat Input Card with shadow */}
+          {/* Chat Input Card with shadow */}
           <div
             style={{
-              background: "linear-gradient(135deg, rgb(209, 233, 255) 0%, rgb(209, 233, 255) 30%, rgb(209, 233, 255) 60%, rgb(209, 233, 255) 100%)",
+              background: "linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)",
               borderRadius: "24px",
               padding: "16px 16px 14px",
-              boxShadow: "0 8px 24px rgba(115, 172, 212, 0.12), 0 4px 12px rgba(115, 172, 212, 0.15)",
-              maxWidth: "720px",
+              boxShadow: "0 8px 24px rgba(74, 164, 227, 0.12), 0 4px 12px rgba(74, 164, 227, 0.15)",
+              maxWidth: "900px",
               width: "100%",
               position: "relative",
             }}
@@ -579,7 +582,7 @@ export const Header: React.FC = () => {
                 gap: "8px",
                 marginBottom: "10px",
                 fontSize: "14px",
-                color: "#2a2040",
+                color: "#ffffff",
                 fontWeight: 600,
                 padding: "0 4px",
               }}
@@ -626,94 +629,47 @@ export const Header: React.FC = () => {
                 }}
               />
 
-              {/* Bottom actions */}
+              {/* Bottom actions - Only Send button */}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
+                  justifyContent: "flex-end",
                   marginTop: "8px",
                 }}
               >
                 <button
+                  onClick={() => {
+                    navigate('/ai-chat', { state: { initialMessage: chatInput } });
+                    setChatInput("");
+                  }}
                   style={{
+                    background: "linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)",
+                    border: "none",
+                    borderRadius: "14px",
+                    padding: "8px 20px",
                     display: "flex",
                     alignItems: "center",
                     gap: "6px",
-                    background: "none",
-                    border: "1px solid #e8e5ec",
-                    borderRadius: "20px",
-                    color: "#5a5370",
-                    fontSize: "13px",
                     cursor: "pointer",
-                    padding: "6px 14px",
-                    fontWeight: 500,
+                    color: "white",
+                    fontSize: "13px",
+                    fontWeight: 600,
                     transition: "all 0.2s ease",
-                    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.05)",
+                    boxShadow: "0 4px 12px rgba(74, 164, 227, 0.3)",
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = "0 4px 10px rgba(115, 172, 212, 0.2)";
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = "scale(1.03)";
+                    e.currentTarget.style.boxShadow = "0 6px 16px rgba(74, 164, 227, 0.4)";
                   }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = "0 2px 6px rgba(0, 0, 0, 0.05)";
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(74, 164, 227, 0.3)";
                   }}
                 >
-                  <Paperclip size={14} />
-                  Attach
+                  <Send size={14} />
+                  Send
                 </button>
-
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      background: "none",
-                      border: "none",
-                      color: "#5a5370",
-                      fontSize: "13px",
-                      cursor: "pointer",
-                      padding: "6px 4px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    <Mic size={14} />
-                    Voice
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      navigate('/ai-chat', { state: { initialMessage: chatInput } });
-                      setChatInput("");
-                    }}
-                    style={{
-                      background: "linear-gradient(135deg, rgb(160, 210, 232) 0%, rgb(115, 172, 212) 100%)",
-                      border: "none",
-                      borderRadius: "14px",
-                      padding: "8px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      cursor: "pointer",
-                      color: "white",
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      transition: "all 0.2s ease",
-                      boxShadow: "0 4px 12px rgba(115, 172, 212, 0.3)",
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.transform = "scale(1.03)";
-                      e.currentTarget.style.boxShadow = "0 6px 16px rgba(115, 172, 212, 0.4)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.transform = "scale(1)";
-                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(115, 172, 212, 0.3)";
-                    }}
-                  >
-                    <Send size={14} />
-                    Send
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -726,7 +682,7 @@ export const Header: React.FC = () => {
                 right: 0,
                 height: "120px",
                 borderRadius: "24px",
-                background: "linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 60%, rgba(255, 255, 255, 0.75) 100%)",
+                // background: "linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 60%, rgba(255, 255, 255, 0.75) 100%)",
                 pointerEvents: "none",
               }}
             />
