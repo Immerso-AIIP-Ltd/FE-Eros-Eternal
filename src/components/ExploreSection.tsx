@@ -110,7 +110,7 @@ export const ExploreSection: React.FC = () => {
         <h1 style={{
           fontSize: '1.75rem',
           fontWeight: 600,
-          color: '#ffffff',
+          // color: '#ffffff',
           fontFamily: "Poppins, sans-serif",
           margin: 0,
           letterSpacing: '-0.02em',
@@ -193,15 +193,15 @@ export const ExploreSection: React.FC = () => {
               minWidth: 'calc(33.333% - 16px)',
               height: '420px',
               borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: '#1a1d1f',
+              // border: '1px solid rgba(255, 255, 255, 0.1)',
+              // backgroundColor: '#1a1d1f',
               overflow: 'hidden',
               position: 'relative',
               cursor: item.onClick && !isDragging ? 'pointer' : isDragging ? 'grabbing' : 'grab',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
               fontFamily: "DM Sans, sans-serif",
               fontSize: "16px",
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+              // boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
             }}
             onMouseEnter={(e) => {
               if (item.onClick && !isDragging) {

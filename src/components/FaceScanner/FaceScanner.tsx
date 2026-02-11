@@ -48,6 +48,8 @@ const FaceScanner: React.FC = () => {
   const [recordingTime, setRecordingTime] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
+  const [isUploadingData, setIsUploadingData] = useState<boolean>(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const navigate = useNavigate();
 
 
@@ -888,7 +890,8 @@ const FaceScanner: React.FC = () => {
         setProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
-            setScanState('complete');
+            // When processing completes, send data to API
+            sendScanDataToAPI();
             return 100;
           }
           return prev + 10;
@@ -1023,6 +1026,107 @@ const FaceScanner: React.FC = () => {
     });
   };
 
+  // Send scan data to API
+  const sendScanDataToAPI = async () => {
+    setIsUploadingData(true);
+    setUploadError(null);
+
+    try {
+      // Get rPPG metrics
+      const rppgData = await getFinalRppgMetrics();
+      
+      // Generate AI health report
+      let aiReport = null;
+      try {
+        const { generateHealthReport } = await import('../../services/openaiReport');
+        const healthData = {
+          vitals: {
+            heartRate: rppgData?.vitals.heartRate || { value: Math.round(heartRate) || 72, unit: 'BPM', status: 'NORMAL' },
+            signalQuality: rppgData?.vitals.signalQuality || { value: sqi || 0.5, percentage: Math.round((sqi || 0.5) * 100), status: 'FAIR' },
+            breathingRate: rppgData?.vitals.breathingRate || { value: 15, unit: 'breaths/min', status: 'NORMAL' },
+          },
+          hrv: {
+            sdnn: rppgData?.hrv.sdnn || { value: 45, unit: 'ms', status: 'NORMAL' },
+            rmssd: rppgData?.hrv.rmssd || { value: 35, unit: 'ms', status: 'NORMAL' },
+            pnn50: rppgData?.hrv.pnn50 || { value: 15, unit: '%', status: 'NORMAL' },
+          },
+          stress: {
+            level: rppgData?.stress.level || 'moderate',
+            index: rppgData?.stress.index || 50,
+          },
+          metadata: {
+            scanDurationSeconds: recordingTime,
+            timestamp: new Date().toISOString(),
+          },
+        };
+        aiReport = await generateHealthReport(healthData);
+      } catch (err) {
+        console.error('Failed to generate AI report:', err);
+      }
+
+      // Prepare API payload matching the expected format
+      const apiPayload = {
+        data: {
+          metadata: {
+            timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            scan_duration_seconds: recordingTime,
+            frames_processed: hrLogRef.current.length || 0,
+          },
+          vitals: {
+            heart_rate: {
+              value_bpm: rppgData?.vitals.heartRate?.value || Math.round(heartRate) || 72,
+            },
+            signal_quality: {
+              value: rppgData?.vitals.signalQuality?.value || sqi || 0.5,
+            },
+            blood_pressure: {
+              systolic_mmHg: 120, // Default values - adjust based on your actual data
+              diastolic_mmHg: 80,
+              confidence: 0.5,
+            },
+          },
+          hrv: {
+            sdnn: rppgData?.hrv.sdnn?.value || 45,
+            rmssd: rppgData?.hrv.rmssd?.value || 35,
+            pnn50: rppgData?.hrv.pnn50?.value ? rppgData.hrv.pnn50.value / 100 : 0.15,
+            breathing_rate: rppgData?.vitals.breathingRate?.value || 15,
+          },
+          latency: 0.0,
+          ai_report: aiReport || "Health assessment completed successfully.",
+        },
+      };
+
+      // Send data to API
+      const response = await fetch(
+        'https://db3e22d7b631.ngrok-free.app/api/v1/health/scan/dbfb40fa-83bc-4f5f-9f13-71429d47b903',
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(apiPayload),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('API response:', result);
+
+      // Set scan state to complete after successful API call
+      setScanState('complete');
+    } catch (err) {
+      console.error('Error sending data to API:', err);
+      setUploadError('Failed to upload scan data. You can still continue.');
+      // Still set to complete even if API fails
+      setScanState('complete');
+    } finally {
+      setIsUploadingData(false);
+    }
+  };
+
   // Handle continue to results
   const handleContinue = async () => {
     if (!recordedVideo) {
@@ -1030,14 +1134,10 @@ const FaceScanner: React.FC = () => {
       return;
     }
 
-
-    setScanState('processing');
-    setProgress(0);
-
-    // Get rPPG metrics
+    // Get rPPG metrics for navigation state
     const rppgData = await getFinalRppgMetrics();
     
-    // Generate AI health report
+    // Generate AI health report for local storage
     let aiReport = null;
     try {
       const { generateHealthReport } = await import('../../services/openaiReport');
@@ -1358,6 +1458,10 @@ const FaceScanner: React.FC = () => {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+          animation: spin 1s linear infinite;
         }
 
         .scan-overlay {
@@ -2287,10 +2391,12 @@ const FaceScanner: React.FC = () => {
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12 6 12 12 16 14"></polyline>
                           </svg>
-                          Processing Face Scan... {progress}%
+                          {progress === 100 ? 'Uploading data...' : `Processing Face Scan... ${progress}%`}
                         </button>
                         <p style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '1rem' }}>
-                          Analyzing facial features and generating health insights...
+                          {progress === 100 
+                            ? 'Sending health data to server...' 
+                            : 'Analyzing facial features and generating health insights...'}
                         </p>
                       </div>
 
@@ -2355,6 +2461,11 @@ const FaceScanner: React.FC = () => {
                         <p style={{ color: '#6B7280', fontSize: '0.875rem' }}>
                           Your face scan is complete. View your report in the health AI dashboard.
                         </p>
+                        {uploadError && (
+                          <p style={{ color: '#EF4444', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                            {uploadError}
+                          </p>
+                        )}
                       </div>
 
                       <div style={{ display: 'flex', gap: '1rem' }}>
@@ -2362,6 +2473,7 @@ const FaceScanner: React.FC = () => {
                           onClick={resetScan}
                           className="btn-secondary"
                           style={{ flex: 1, justifyContent: 'center' }}
+                          disabled={isUploadingData}
                         >
                           <XIcon />
                           Scan Again
@@ -2369,20 +2481,33 @@ const FaceScanner: React.FC = () => {
                         <button
                           onClick={handleContinue}
                           className="btn-primary"
+                          disabled={isUploadingData}
                           style={{
                             flex: 1,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: '0.5rem',
-                            padding: '1rem'
+                            padding: '1rem',
+                            opacity: isUploadingData ? 0.7 : 1,
                           }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                          </svg>
-                          Continue to spiritual journey
+                          {isUploadingData ? (
+                            <>
+                              <svg className="spinner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                              </svg>
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                              </svg>
+                              Continue to spiritual journey
+                            </>
+                          )}
                         </button>
                       </div>
                     </>
