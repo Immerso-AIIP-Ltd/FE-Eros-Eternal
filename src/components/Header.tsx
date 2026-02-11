@@ -49,7 +49,8 @@ export const Header: React.FC = () => {
       title: "Vita Scan",
       buttonText: "View report",
       reportType: "vita_scan",
-      route: "/face-report",
+      route: "/facescan",
+      // route: "/face-report",
     },
     {
       id: 2,
@@ -159,9 +160,13 @@ export const Header: React.FC = () => {
     if (card.reportType && userId) {
       const hasReport = reportStatuses[card.reportType];
       if (hasReport) {
-        navigate('/view-report', {
-          state: { reportType: card.reportType, userId, title: card.title }
-        });
+        if (card.reportType === "vita_scan") {
+          navigate('/face-report');
+        } else {
+          navigate('/view-report', {
+            state: { reportType: card.reportType, userId, title: card.title }
+          });
+        }
       } else if (card.route) {
         navigate(card.route);
       }
