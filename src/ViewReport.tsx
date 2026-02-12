@@ -14,6 +14,7 @@ interface ReportData {
     assessment: {
       vibrational_frequency?: number;
       current_flame_score?: number;
+      // calculated_vibrational_frequency?: number;
       current_energy_assessment: {
         vibrational_frequency?: number;
       };
@@ -22,12 +23,17 @@ interface ReportData {
       spiritual_evolution: {
         current_flame_score?: string;
       };
+      current_energy_score?: string;
       flame_score?: string;
       aura_intensity?: string;
       kosha_alignment?: string;
       star_magnitude?: string;
       longevity_score?: string;
+      calculated_vibrational_frequency?: number;
     };
+    flame_vitality_assessment: {
+      current_score?: number;
+    }
     detailed_analysis?: string;
     recommendations?: {
       practices?: string[];
@@ -153,11 +159,15 @@ const ViewReport = () => {
 
   const getFrequencyValue = () => {
     const assessment = reportData?.report_data?.assessment;
-    if (!assessment) return "N/A";
+    const flameVitality = reportData?.report_data?.flame_vitality_assessment;
+
+    if (!assessment && !flameVitality) return "N/A";
 
     return (
+      assessment?.calculated_vibrational_frequency ||
       assessment?.current_energy_assessment?.vibrational_frequency ||
       assessment?.vibrational_frequency ||
+      assessment?.current_energy_score ||
       assessment?.current_vibrational_frequency ||
       assessment?.spiritual_evolution?.current_flame_score ||
       assessment?.current_flame_score ||
@@ -166,6 +176,7 @@ const ViewReport = () => {
       assessment?.kosha_alignment ||
       assessment?.star_magnitude ||
       assessment?.longevity_score ||
+      flameVitality?.current_score ||
       "N/A"
     );
   };
@@ -190,41 +201,15 @@ const ViewReport = () => {
     return Math.max(0, Math.min(100, frequency));
   };
 
-  const getAssessmentSections = () => {
-    const assessment = reportData?.report_data?.assessment;
-    if (!assessment) return [];
+  const getReportContent = () => {
+    const detailedAnalysis = reportData?.report_data?.detailed_analysis;
+    if (!detailedAnalysis) return [];
 
-    const sections = [];
-
-    if (assessment.personal_context) {
-      sections.push({
-        title: "Personal Context",
-        content: assessment.personal_context,
-      });
-    }
-
-    if (assessment.astrological_insights) {
-      sections.push({
-        title: "Astrological Insights",
-        content: assessment.astrological_insights,
-      });
-    }
-
-    if (assessment.karmic_life_path) {
-      sections.push({
-        title: "Karmic Life Path",
-        content: assessment.karmic_life_path,
-      });
-    }
-
-    if (assessment.actionable_recommendations) {
-      sections.push({
-        title: "Actionable Recommendations",
-        content: assessment.actionable_recommendations,
-      });
-    }
-
-    return sections;
+    // Split by newlines to get paragraphs
+    return detailedAnalysis
+      .split('\n')
+      .map(paragraph => paragraph.trim())
+      .filter(paragraph => paragraph.length > 0);
   };
 
   const getReportItems = () => {
@@ -314,7 +299,7 @@ const ViewReport = () => {
   const frequency = getFrequencyValue();
   const level = getLevel();
   const gaugeValue = getGaugeValue();
-  const assessmentSections = getAssessmentSections();
+  const reportContent = getReportContent();
   const reportItems = getReportItems();
   const recommendationSections = getRecommendations();
 
@@ -388,9 +373,13 @@ const ViewReport = () => {
         <div className="row justify-content-center">
           <div className="col-12 col-md-10 col-lg-8 col-xl-6">
             {/* Gauge Card */}
+            {/* Gauge Card */}
             {(reportData?.report_type === "vibrational_frequency" ||
               reportData?.report_type === "flame_score" ||
-              reportData?.report_data?.assessment?.vibrational_frequency != null) && (
+              reportData?.report_type === "longevity_blueprint" ||
+              reportData?.report_data?.assessment?.vibrational_frequency != null ||
+              reportData?.report_data?.assessment?.calculated_vibrational_frequency != null ||
+              reportData?.report_data?.flame_vitality_assessment?.current_score != null) && (
                 <div
                   className="card mb-4"
                   style={{
@@ -463,43 +452,32 @@ const ViewReport = () => {
               )}
 
             {/* Report Section */}
-            {assessmentSections.length > 0 && (
+            {/* Report Section */}
+            {reportContent.length > 0 && (
               <div className="mb-4">
                 <h4 className="mb-3" style={{ fontWeight: "700", color: "black" }}>
                   Report
                 </h4>
-                <div
-                  className=""
-
-                >
-                  <div className="card-body p-4">
-                    <ul className="list-unstyled mb-0">
-                      {assessmentSections.map((section, index) => (
-                        <li key={index} className="mb-3 d-flex align-items-start">
-                          <span
-                            className="me-2"
-                            style={{
-                              fontSize: "15px"
-                            }}
-                          >
-                            •
-                          </span>
-                          <span
-                            style={{
-                              color: "#4B5563",
-                              fontSize: "14px",
-                              lineHeight: "1.6",
-                            }}
-                          >
-                            {section.content}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                <div className="card-body p-0">
+                  <ul className="mb-0" style={{ paddingLeft: "20px", listStyleType: "disc" }}>
+                    {reportContent.map((paragraph, index) => (
+                      <li
+                        key={index}
+                        className="mb-3"
+                        style={{
+                          color: "#4B5563",
+                          fontSize: "14px",
+                          lineHeight: "1.6",
+                        }}
+                      >
+                        {paragraph}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             )}
+
             {/* Recommendations Section */}
             {recommendationSections.length > 0 && (
               <div className="mb-4" ref={recommendationsRef}>
@@ -596,7 +574,6 @@ const ViewReport = () => {
             )}
 
             {/* Bottom Section */}
-            {/* Bottom Section */}
             <div className="text-center mb-4 mt-5">
               <p
                 style={{
@@ -611,7 +588,7 @@ const ViewReport = () => {
                 deeper insights
               </p>
 
-              <button
+              {/* <button
                 className="btn px-5 py-2"
                 style={{
                   background: "#00B8F8",
@@ -636,6 +613,30 @@ const ViewReport = () => {
                       },
                     });
                   }
+                }}
+              >
+                Continue to Chat
+              </button> */}
+              <button
+                className="btn px-5 py-2"
+                style={{
+                  background: "#00B8F8",
+                  border: "none",
+                  borderRadius: "25px",
+                  color: "white",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  minWidth: "180px",
+                  boxShadow: "0 2px 8px rgba(6, 182, 212, 0.3)",
+                }}
+                onClick={() => {
+                  navigate("/ai-chat", {
+                    state: {
+                      userId: location.state?.userId,
+                      reportType: reportData?.report_type,
+                      fromContinueChat: true,
+                    },
+                  });
                 }}
               >
                 Continue to Chat

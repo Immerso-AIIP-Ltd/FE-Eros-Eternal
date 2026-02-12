@@ -4,9 +4,12 @@ import moment from "moment";
 // import StartlightBg from "../assets/discover/planetary.png";
 // import SpiritualBg from "../assets/discover/personalMonth.jpg";
 // import LuckyBg from "../assets/discover/luckyNumber.jpg";
-import StartlightBg from "../images/lightphase.png";
-import SpiritualBg from "../images/lightjournal.png";
-import LuckyBg from "../images/lightnumber.png"
+// import StartlightBg from "../images/lightphase.png";
+// import SpiritualBg from "../images/lightjournal.png";
+// import LuckyBg from "../images/lightnumber.png"
+import StartlightBg from "../images/horoscope.png"
+import SpiritualBg from "../images/personalMonth.png"
+import LuckyBg from "../images/luckyNumber.png"
 
 interface LuckyNumbers {
   destiny_number: number;
