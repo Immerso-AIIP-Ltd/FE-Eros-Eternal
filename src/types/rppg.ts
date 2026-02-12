@@ -238,6 +238,21 @@ export interface CombinedReportData {
   rppg: RppgReportData;
   /** Full FacePhys report data (new comprehensive structure) */
   facephysReport?: CompleteReportData;
+  /** AI-generated health report from OpenAI */
+  aiReport?: {
+    summary: string;
+    insights: string[];
+    recommendations: string[];
+    riskFactors: string[];
+    disclaimer: string;
+  };
+  /** Health data from backend API (merged after scan) */
+  apiHealthData?: {
+    heart_rate: number;
+    bp_systolic: number;
+    bp_diastolic: number;
+    scan_duration_seconds: number;
+  };
 }
 
 // ============================================

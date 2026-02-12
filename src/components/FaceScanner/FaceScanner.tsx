@@ -69,6 +69,7 @@ const FaceScanner: React.FC = () => {
   const bufferPtrRef = useRef<number>(0);
   const bufferFullRef = useRef<boolean>(false);
   const hrLogRef = useRef<Array<[number, number, number]>>([]); // [timestamp, hr, sqi]
+  const apiResponseRef = useRef<any>(null); // Store API PUT response for report page
   const bvpLogRef = useRef<Array<[number, number]>>([]); // [timestamp, bvp_value]
   const lastFaceDetectTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
@@ -186,9 +187,9 @@ const FaceScanner: React.FC = () => {
             `/models/${filename}`,          // Absolute from root
             `${import.meta.env.BASE_URL || ''}models/${filename}` // Vite base URL
           ];
-          
+
           let lastError: Error | null = null;
-          
+
           for (const path of paths) {
             try {
               console.log(`Fetching ${name} from: ${path}`);
@@ -202,7 +203,7 @@ const FaceScanner: React.FC = () => {
               console.warn(`Failed to fetch from ${path}:`, err.message);
             }
           }
-          
+
           throw lastError || new Error('All paths failed');
         } catch (err: any) {
           console.error(`❌ Failed to fetch ${name}:`, err.message);
@@ -214,7 +215,7 @@ const FaceScanner: React.FC = () => {
       console.log('Starting model file fetch...');
       console.log('Current location:', window.location.href);
       console.log('Base URL:', import.meta.env.BASE_URL);
-      
+
       const modelRes = await fetchModel('model.tflite', 'FacePhys Model');
       const projRes = await fetchModel('proj.tflite', 'Projection Layer');
       const sqiRes = await fetchModel('sqi_model.tflite', 'SQI Model');
@@ -250,7 +251,7 @@ const FaceScanner: React.FC = () => {
           `/workers/${filename}`,
           `${import.meta.env.BASE_URL || ''}workers/${filename}`
         ];
-        
+
         let lastError: Error | null = null;
         for (const path of paths) {
           try {
@@ -263,7 +264,7 @@ const FaceScanner: React.FC = () => {
             console.warn(`Failed to load worker from ${path}:`, err.message);
           }
         }
-        
+
         throw lastError || new Error(`Failed to create worker ${filename}`);
       };
 
@@ -280,7 +281,7 @@ const FaceScanner: React.FC = () => {
           const timeout = setTimeout(() => {
             reject(new Error('Inference worker initialization timeout (30s). Check LiteRT CDN connectivity.'));
           }, 30000);
-          
+
           worker.onmessage = (e: MessageEvent) => {
             if (e.data.type === 'initDone') {
               clearTimeout(timeout);
@@ -291,25 +292,25 @@ const FaceScanner: React.FC = () => {
               reject(new Error(`Inference worker error: ${e.data.msg}`));
             }
           };
-          
+
           worker.onerror = (err) => {
             clearTimeout(timeout);
             reject(new Error(`Inference worker load error: ${err.message}`));
           };
-          
+
           worker.postMessage({
             type: 'init',
             payload: { modelBuffer, stateJson, projBuffer }
           }, [modelBuffer, projBuffer]);
         }),
-        
+
         // PSD worker init
         new Promise<void>((resolve, reject) => {
           const worker = psdWorkerRef.current!;
           const timeout = setTimeout(() => {
             reject(new Error('PSD worker initialization timeout (30s). Check LiteRT CDN connectivity.'));
           }, 30000);
-          
+
           worker.onmessage = (e: MessageEvent) => {
             if (e.data.type === 'initDone') {
               clearTimeout(timeout);
@@ -320,25 +321,25 @@ const FaceScanner: React.FC = () => {
               reject(new Error(`PSD worker error: ${e.data.msg}`));
             }
           };
-          
+
           worker.onerror = (err) => {
             clearTimeout(timeout);
             reject(new Error(`PSD worker load error: ${err.message}`));
           };
-          
+
           worker.postMessage({
             type: 'init',
             payload: { sqiBuffer, psdBuffer }
           }, [sqiBuffer, psdBuffer]);
         }),
-        
+
         // HRV worker init
         new Promise<void>((resolve, reject) => {
           const worker = hrvWorkerRef.current!;
           const timeout = setTimeout(() => {
             reject(new Error('HRV worker initialization timeout (10s)'));
           }, 10000);
-          
+
           worker.onmessage = (e: MessageEvent) => {
             if (e.data.type === 'initDone') {
               clearTimeout(timeout);
@@ -349,12 +350,12 @@ const FaceScanner: React.FC = () => {
               reject(new Error(`HRV worker error: ${e.data.msg}`));
             }
           };
-          
+
           worker.onerror = (err) => {
             clearTimeout(timeout);
             reject(new Error(`HRV worker load error: ${err.message}`));
           };
-          
+
           worker.postMessage({ type: 'init' });
         })
       ];
@@ -364,7 +365,7 @@ const FaceScanner: React.FC = () => {
 
       // NOW set up the permanent message handlers for runtime
       setupWorkerHandlers();
-      
+
       console.log('All rPPG workers initialized successfully');
       return true;
     } catch (err: any) {
@@ -387,7 +388,7 @@ const FaceScanner: React.FC = () => {
           canvas.style.height = rect.height + 'px';
         }
       };
-      
+
       resizeOverlay();
       window.addEventListener('resize', resizeOverlay);
       return () => window.removeEventListener('resize', resizeOverlay);
@@ -438,7 +439,7 @@ const FaceScanner: React.FC = () => {
           }
         }
       };
-      
+
       inferenceWorkerRef.current.onerror = (err) => {
         console.error('Inference worker runtime error:', err);
       };
@@ -480,7 +481,7 @@ const FaceScanner: React.FC = () => {
           }
         }
       };
-      
+
       psdWorkerRef.current.onerror = (err) => {
         console.error('PSD worker runtime error:', err);
       };
@@ -501,7 +502,7 @@ const FaceScanner: React.FC = () => {
           console.log('HRV full data:', e.data.payload);
         }
       };
-      
+
       hrvWorkerRef.current.onerror = (err) => {
         console.error('HRV worker runtime error:', err);
       };
@@ -747,13 +748,13 @@ const FaceScanner: React.FC = () => {
     bufferFullRef.current = false;
     inputBufferRef.current = new Float32Array(INPUT_BUFFER_SIZE);
     kalmanFiltersRef.current = {};
-    
+
     // Reset visualization state
     projOutputRef.current = null;
     trajHistoryRef.current = [];
     heatmapRangeRef.current = { min: 0, max: 1 };
     faceBboxRef.current = null;
-    
+
     // Clear canvas contexts
     if (overlayCanvasRef.current) {
       const ctx = overlayCanvasRef.current.getContext('2d');
@@ -767,7 +768,7 @@ const FaceScanner: React.FC = () => {
       const ctx = trajCanvasRef.current.getContext('2d');
       if (ctx) ctx.clearRect(0, 0, trajCanvasRef.current.width, trajCanvasRef.current.height);
     }
-    
+
     dvalRef.current = 1 / 30;
     lastCaptureTimeRef.current = 0;
 
@@ -938,7 +939,7 @@ const FaceScanner: React.FC = () => {
     hrLogRef.current = [];
     bvpLogRef.current = [];
     kalmanFiltersRef.current = {};
-    
+
     // Reset visualization refs
     projOutputRef.current = null;
     trajHistoryRef.current = [];
@@ -1034,7 +1035,7 @@ const FaceScanner: React.FC = () => {
     try {
       // Get rPPG metrics
       const rppgData = await getFinalRppgMetrics();
-      
+
       // Generate AI health report
       let aiReport = null;
       try {
@@ -1097,8 +1098,10 @@ const FaceScanner: React.FC = () => {
       };
 
       // Send data to API
+      const userId = localStorage.getItem('user_id');
       const response = await fetch(
-        'https://db3e22d7b631.ngrok-free.app/api/v1/health/scan/dbfb40fa-83bc-4f5f-9f13-71429d47b903',
+        // 'https://db3e22d7b631.ngrok-free.app/api/v1/health/scan/dbfb40fa-83bc-4f5f-9f13-71429d47b903',
+        `http://164.52.205.108:8500/api/v1/health/scan/${userId}`,
         {
           method: 'PUT',
           headers: {
@@ -1114,6 +1117,11 @@ const FaceScanner: React.FC = () => {
 
       const result = await response.json();
       console.log('API response:', result);
+
+      // Store API response for use in report page
+      if (result.success) {
+        apiResponseRef.current = result.data;
+      }
 
       // Set scan state to complete after successful API call
       setScanState('complete');
@@ -1136,7 +1144,7 @@ const FaceScanner: React.FC = () => {
 
     // Get rPPG metrics for navigation state
     const rppgData = await getFinalRppgMetrics();
-    
+
     // Generate AI health report for local storage
     let aiReport = null;
     try {
@@ -1165,6 +1173,9 @@ const FaceScanner: React.FC = () => {
     } catch (err) {
       console.error('Failed to generate AI report:', err);
     }
+
+    // Get stored API response data
+    const apiRes = apiResponseRef.current;
 
     const combinedData: CombinedReportData = {
       success: true,
@@ -1197,7 +1208,23 @@ const FaceScanner: React.FC = () => {
         },
         hrHistory: hrLogRef.current.map(([time, hr, sqi]) => ({ time, hr: Math.round(hr), sqi })),
       },
-      aiReport: aiReport || undefined,
+      aiReport: apiRes?.ai_report
+        ? {
+          summary: apiRes.ai_report.summary || '',
+          insights: apiRes.ai_report.insights || [],
+          recommendations: apiRes.ai_report.recommendations || [],
+          riskFactors: (aiReport as any)?.riskFactors || [],
+          disclaimer: 'This report is AI-generated and for informational purposes only.',
+        }
+        : aiReport || undefined,
+      apiHealthData: apiRes
+        ? {
+          heart_rate: apiRes.heart_rate,
+          bp_systolic: apiRes.bp_systolic,
+          bp_diastolic: apiRes.bp_diastolic,
+          scan_duration_seconds: apiRes.scan_duration_seconds,
+        }
+        : undefined,
     };
 
     // Save to localStorage for persistence
@@ -1268,7 +1295,7 @@ const FaceScanner: React.FC = () => {
 
   const HeartIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
     </svg>
   );
 
@@ -1780,7 +1807,7 @@ const FaceScanner: React.FC = () => {
             top: "5%",
             left: "15%",
           }} />
-          
+
           {/* Top right area */}
           <div style={{
             position: "absolute",
@@ -1802,7 +1829,7 @@ const FaceScanner: React.FC = () => {
             top: "20%",
             right: "-5%",
           }} />
-          
+
           {/* Middle area */}
           <div style={{
             position: "absolute",
@@ -1814,7 +1841,7 @@ const FaceScanner: React.FC = () => {
             top: "35%",
             left: "40%",
           }} />
-          
+
           {/* Bottom left area */}
           <div style={{
             position: "absolute",
@@ -1836,7 +1863,7 @@ const FaceScanner: React.FC = () => {
             bottom: "-5%",
             left: "25%",
           }} />
-          
+
           {/* Bottom right area */}
           <div style={{
             position: "absolute",
@@ -1860,7 +1887,7 @@ const FaceScanner: React.FC = () => {
           }} />
         </div>
         <div style={{ padding: '3% 3%', flex: 1, display: 'flex', flexDirection: 'column', maxHeight: '100vh', overflow: 'hidden', position: 'relative', zIndex: 1 }}>
-        {/* <div className="container"> */}
+          {/* <div className="container"> */}
           {error && scanState === 'initial' && (
             <div className="error-message" style={{ marginBottom: '2rem' }}>
               {error}
@@ -2397,8 +2424,8 @@ const FaceScanner: React.FC = () => {
                           {progress === 100 ? 'Uploading data...' : `Processing Face Scan... ${progress}%`}
                         </button>
                         <p style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '1rem' }}>
-                          {progress === 100 
-                            ? 'Sending health data to server...' 
+                          {progress === 100
+                            ? 'Sending health data to server...'
                             : 'Analyzing facial features and generating health insights...'}
                         </p>
                       </div>
