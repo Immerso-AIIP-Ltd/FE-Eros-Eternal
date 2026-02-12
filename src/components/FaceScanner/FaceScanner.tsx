@@ -69,6 +69,7 @@ const FaceScanner: React.FC = () => {
   const bufferPtrRef = useRef<number>(0);
   const bufferFullRef = useRef<boolean>(false);
   const hrLogRef = useRef<Array<[number, number, number]>>([]); // [timestamp, hr, sqi]
+  const apiResponseRef = useRef<any>(null); // Store API PUT response for report page
   const bvpLogRef = useRef<Array<[number, number]>>([]); // [timestamp, bvp_value]
   const lastFaceDetectTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
@@ -1097,8 +1098,10 @@ const FaceScanner: React.FC = () => {
       };
 
       // Send data to API
+      const userId = localStorage.getItem('user_id');
       const response = await fetch(
         'https://db3e22d7b631.ngrok-free.app/api/v1/health/scan/dbfb40fa-83bc-4f5f-9f13-71429d47b903',
+        // http://164.52.205.108:8500/api/v1/health/scan/${userId}
         {
           method: 'PUT',
           headers: {
@@ -1114,6 +1117,11 @@ const FaceScanner: React.FC = () => {
 
       const result = await response.json();
       console.log('API response:', result);
+
+      // Store API response for use in report page
+      if (result.success) {
+        apiResponseRef.current = result.data;
+      }
 
       // Set scan state to complete after successful API call
       setScanState('complete');
@@ -1166,6 +1174,9 @@ const FaceScanner: React.FC = () => {
       console.error('Failed to generate AI report:', err);
     }
 
+    // Get stored API response data
+    const apiRes = apiResponseRef.current;
+
     const combinedData: CombinedReportData = {
       success: true,
       uploadedImage: previewUrl || '',
@@ -1197,7 +1208,23 @@ const FaceScanner: React.FC = () => {
         },
         hrHistory: hrLogRef.current.map(([time, hr, sqi]) => ({ time, hr: Math.round(hr), sqi })),
       },
-      aiReport: aiReport || undefined,
+      aiReport: apiRes?.ai_report
+        ? {
+            summary: apiRes.ai_report.summary || '',
+            insights: apiRes.ai_report.insights || [],
+            recommendations: apiRes.ai_report.recommendations || [],
+            riskFactors: (aiReport as any)?.riskFactors || [],
+            disclaimer: 'This report is AI-generated and for informational purposes only.',
+          }
+        : aiReport || undefined,
+      apiHealthData: apiRes
+        ? {
+            heart_rate: apiRes.heart_rate,
+            bp_systolic: apiRes.bp_systolic,
+            bp_diastolic: apiRes.bp_diastolic,
+            scan_duration_seconds: apiRes.scan_duration_seconds,
+          }
+        : undefined,
     };
 
     // Save to localStorage for persistence
