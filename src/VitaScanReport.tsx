@@ -1,8 +1,9 @@
 import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import ReactMarkdown from "react-markdown";
 
 interface MetricCardProps {
     icon: string;
@@ -91,8 +92,18 @@ const MetricCard: React.FC<MetricCardProps> = ({
 
 const VitaScanReport: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const reportRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
+
+    // Get health scan data from location state or localStorage
+    const healthScanData = location.state?.healthScanData ||
+                          (localStorage.getItem('latestHealthScan')
+                            ? JSON.parse(localStorage.getItem('latestHealthScan')!)
+                            : null);
+
+    // Extract AI report (check both snake_case and camelCase)
+    const aiReport = healthScanData?.ai_report || healthScanData?.aiReport || null;
 
     const waveformData = Array.from({ length: 150 }, (_, i) => {
         const x = (i / 150) * Math.PI * 6;
@@ -155,7 +166,7 @@ const VitaScanReport: React.FC = () => {
 
 
     const handleContinueToChat = () => {
-        navigate("/chat");
+        window.location.href = 'http://164.52.205.107:5174/ai-chat';
     };
 
     return (
@@ -343,16 +354,21 @@ const VitaScanReport: React.FC = () => {
                         </div>
 
                         <div className="mt-3">
-                            {[1, 2, 3, 4].map((_, idx) => (
-                                <div key={idx} className="d-flex align-items-start mb-3">
-                                    <span className="text-white fw-semibold me-3" style={{ fontSize: "14px", minWidth: "20px" }}>
-                                        {idx + 1}.
-                                    </span>
-                                    <p className="text-secondary mb-0" style={{ fontSize: "13px", lineHeight: "1.6" }}>
-                                        Lorem ipsum dolor sit amet consectetur. Sed imperdiet luctus vestibulum ereu. Massa amet cursus ultricies elementum venenatis et. Volutpat at nisi mattis in morbi quis.
-                                    </p>
+                            {aiReport ? (
+                                <div className="ai-insights-content">
+                                    <ReactMarkdown
+                                        className="text-secondary"
+                                        style={{ fontSize: "13px", lineHeight: "1.6" }}
+                                    >
+                                        {aiReport}
+                                    </ReactMarkdown>
                                 </div>
-                            ))}
+                            ) : (
+                                <div className="text-secondary" style={{ fontSize: "13px" }}>
+                                    <p>AI health insights are being generated or not available.</p>
+                                    <p className="text-muted">Complete a face scan to generate personalized health insights.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

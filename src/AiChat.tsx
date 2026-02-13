@@ -457,16 +457,25 @@ const AiChat: React.FC = () => {
                 return;
             }
 
+            // Get report_type from URL query params
+            const searchParams = new URLSearchParams(location.search);
+            const reportType = searchParams.get('report_type');
+
             let currentSessionId = sessionId;
 
             if (!currentSessionId) {
+                const initParams: any = {
+                    user_id: userId,
+                    message: "start"
+                };
+                if (reportType) {
+                    initParams.report_type = reportType;
+                }
+
                 const initResponse = await fetch(`http://164.52.205.108:8500/api/v1/chat/spiritual/${userId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        user_id: userId,
-                        message: "start"
-                    })
+                    body: new URLSearchParams(initParams)
                 });
 
                 const initData = await initResponse.json();
@@ -481,14 +490,19 @@ const AiChat: React.FC = () => {
                 }
             }
 
+            const messageParams: any = {
+                user_id: userId,
+                message: currentInput,
+                session_id: currentSessionId?.toString() || ""
+            };
+            if (reportType) {
+                messageParams.report_type = reportType;
+            }
+
             const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/spiritual/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', },
-                body: new URLSearchParams({
-                    user_id: userId,
-                    message: currentInput,
-                    session_id: currentSessionId?.toString() || ""
-                })
+                body: new URLSearchParams(messageParams)
             });
 
             const data = await response.json();

@@ -113,7 +113,11 @@ const readings = [
             }}
             onClick={() => {
               if (!reading.locked) {
-                navigate(reading.path);
+                if (reading.path === '/ai-chat') {
+                  window.location.href = 'http://164.52.205.107:5174/ai-chat';
+                } else {
+                  navigate(reading.path);
+                }
               }
             }}
           >

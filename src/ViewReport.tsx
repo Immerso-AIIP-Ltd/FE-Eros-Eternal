@@ -624,18 +624,7 @@ const ViewReport = () => {
                   boxShadow: "0 2px 8px rgba(6, 182, 212, 0.3)",
                 }}
                 onClick={() => {
-                  const matchedCard = reportCards.find(
-                    (card) => card.reportType === reportData?.report_type
-                  );
-                  if (matchedCard) {
-                    navigate(matchedCard.route, {
-                      state: {
-                        userId: location.state?.userId,
-                        reportType: reportData?.report_type,
-                        fromContinueChat: true,
-                      },
-                    });
-                  }
+                  window.location.href = 'http://164.52.205.107:5174/ai-chat';
                 }}
               >
                 Continue to Chat
