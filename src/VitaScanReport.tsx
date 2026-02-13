@@ -166,7 +166,7 @@ const VitaScanReport: React.FC = () => {
 
 
     const handleContinueToChat = () => {
-        window.location.href = 'http://164.52.205.107:5174/ai-chat';
+        navigate('/ai-chat');
     };
 
     return (

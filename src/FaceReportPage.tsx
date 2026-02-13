@@ -893,7 +893,7 @@ const FaceReportPage: React.FC = () => {
             Discover More insights into your Vita Scan and interact to get more deeper insights
           </p>
           <button
-            onClick={() => window.location.href = 'http://164.52.205.107:5174/ai-chat'}
+            onClick={() => navigate('/ai-chat')}
             style={{
               backgroundColor: '#00B8D4',
               color: '#fff',

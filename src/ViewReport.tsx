@@ -624,7 +624,7 @@ const ViewReport = () => {
                   boxShadow: "0 2px 8px rgba(6, 182, 212, 0.3)",
                 }}
                 onClick={() => {
-                  window.location.href = 'http://164.52.205.107:5174/ai-chat';
+                  navigate('/ai-chat');
                 }}
               >
                 Continue to Chat
