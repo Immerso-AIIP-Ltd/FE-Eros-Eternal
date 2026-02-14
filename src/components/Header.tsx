@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import StarmapIcon from "../assets/result-images/brightness_5.png";
 import VibrationalIcon from "../assets/result-images/add_reaction.png";
@@ -7,7 +7,7 @@ import FlameScoreIcon from "../assets/result-images/mode_heat.png";
 import AuraProfileIcon from "../assets/result-images/background_replace.png";
 import KoshaMapIcon from "../assets/result-images/map_search.png";
 import LongevityIcon from "../assets/result-images/ecg_heart.png";
-import { Paperclip, Mic, Send, Bell, Sparkles } from 'lucide-react';
+import { Paperclip, Mic, Send, Bell, Sparkles } from "lucide-react";
 import credits from "../assets/credits.png";
 import erosLogo from "../assets/LogoEros.png";
 
@@ -34,13 +34,17 @@ const chatTabs = ["Analyze", "Guide", "Recommend", "Health", "Astro", "Report"];
 export const Header: React.FC = () => {
   const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-  const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>({});
+  const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>(
+    {},
+  );
   const [loadingStatuses, setLoadingStatuses] = useState(true);
   const [chatInput, setChatInput] = useState("");
   const [activeTab, setActiveTab] = useState("Analyze");
 
-  const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
-  const baseApiUrl = "http://164.52.205.108:8500/api/v1/reports/individual_report/";
+  const userId =
+    localStorage.getItem("userId") || localStorage.getItem("user_id");
+  const baseApiUrl =
+    "http://164.52.205.108:8500/api/v1/reports/individual_report/";
 
   const cardsData: CardData[] = [
     {
@@ -59,7 +63,7 @@ export const Header: React.FC = () => {
       buttonText: "Generate",
       reportType: "vibrational_frequency",
       route: "/vibrational-frequency",
-      backgroundImage: vibrationalBg
+      backgroundImage: vibrationalBg,
     },
     {
       id: 3,
@@ -68,7 +72,7 @@ export const Header: React.FC = () => {
       buttonText: "Generate",
       reportType: "aura_profile",
       route: "/aura-profile",
-      backgroundImage: auraBg
+      backgroundImage: auraBg,
     },
     {
       id: 4,
@@ -77,7 +81,7 @@ export const Header: React.FC = () => {
       buttonText: "Generate",
       reportType: "star_map",
       route: "/star-map",
-      backgroundImage: birthChartBg
+      backgroundImage: birthChartBg,
     },
     {
       id: 5,
@@ -86,7 +90,7 @@ export const Header: React.FC = () => {
       buttonText: "Generate",
       reportType: "flame_score",
       route: "/flame-score",
-      backgroundImage: flameScoreBg
+      backgroundImage: flameScoreBg,
     },
     {
       id: 6,
@@ -95,7 +99,7 @@ export const Header: React.FC = () => {
       buttonText: "Generate",
       reportType: "kosha_map",
       route: "/kosha-map",
-      backgroundImage: koshaBg
+      backgroundImage: koshaBg,
     },
     {
       id: 7,
@@ -104,7 +108,7 @@ export const Header: React.FC = () => {
       buttonText: "Generate",
       reportType: "longevity_blueprint",
       route: "/longevity-blueprint",
-      backgroundImage: longevityBg
+      backgroundImage: longevityBg,
     },
   ];
 
@@ -115,30 +119,33 @@ export const Header: React.FC = () => {
 
       try {
         // Check vita_scan from localStorage
-        const vitaScanData = localStorage.getItem('faceReportData');
+        const vitaScanData = localStorage.getItem("faceReportData");
         if (vitaScanData) {
           try {
             const parsedData = JSON.parse(vitaScanData);
-            statuses['vita_scan'] = parsedData && parsedData.success === true;
+            statuses["vita_scan"] = parsedData && parsedData.success === true;
           } catch (err) {
-            console.error('Error parsing vita_scan data:', err);
-            statuses['vita_scan'] = false;
+            console.error("Error parsing vita_scan data:", err);
+            statuses["vita_scan"] = false;
           }
         } else {
-          statuses['vita_scan'] = false;
+          statuses["vita_scan"] = false;
         }
 
         // Check other reports from API only if userId exists
         if (userId) {
           const reportChecks = cardsData
-            .filter(card => card.reportType && card.reportType !== 'vita_scan')
+            .filter(
+              (card) => card.reportType && card.reportType !== "vita_scan",
+            )
             .map(async (card) => {
               try {
                 const response = await fetch(
-                  `${baseApiUrl}?user_id=${userId}&report_type=${card.reportType}`
+                  `${baseApiUrl}?user_id=${userId}&report_type=${card.reportType}`,
                 );
                 const data = await response.json();
-                const hasReport = data.success && data.data && data.data.report_data;
+                const hasReport =
+                  data.success && data.data && data.data.report_data;
                 statuses[card.reportType!] = hasReport;
                 return { reportType: card.reportType!, hasReport };
               } catch (error) {
@@ -163,7 +170,7 @@ export const Header: React.FC = () => {
 
     // Listen for storage changes (e.g., when vita_scan is completed)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'faceReportData') {
+      if (e.key === "faceReportData") {
         fetchReportStatuses();
       }
     };
@@ -173,12 +180,12 @@ export const Header: React.FC = () => {
       fetchReportStatuses();
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('vitaScanUpdated', handleVitaScanUpdate);
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("vitaScanUpdated", handleVitaScanUpdate);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('vitaScanUpdated', handleVitaScanUpdate);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("vitaScanUpdated", handleVitaScanUpdate);
     };
   }, [userId]);
 
@@ -190,22 +197,22 @@ export const Header: React.FC = () => {
   };
 
   const handleCardClick = (card: CardData) => {
-    if (card.reportType === 'vita_scan') {
+    if (card.reportType === "vita_scan") {
       // Special handling for vita_scan
-      const hasReport = reportStatuses['vita_scan'];
+      const hasReport = reportStatuses["vita_scan"];
       if (hasReport) {
         // Navigate to face-report page to view existing report
-        navigate('/face-report');
+        navigate("/face-report");
       } else {
         // Navigate to facescan page to generate new report
-        navigate('/facescan');
+        navigate("/facescan");
       }
     } else if (card.reportType && userId) {
       // Handle other report types
       const hasReport = reportStatuses[card.reportType];
       if (hasReport) {
-        navigate('/view-report', {
-          state: { reportType: card.reportType, userId, title: card.title }
+        navigate("/view-report", {
+          state: { reportType: card.reportType, userId, title: card.title },
         });
       } else if (card.route) {
         navigate(card.route);
@@ -227,7 +234,8 @@ export const Header: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        fontFamily: '"Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontFamily:
+          '"Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         position: "relative",
         backgroundColor: "#f8f8fa",
         overflowX: "hidden",
@@ -265,7 +273,8 @@ export const Header: React.FC = () => {
           <button
             onClick={handleRasiClick}
             style={{
-              background: "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
+              background:
+                "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
               border: "none",
               borderRadius: "20px",
               padding: "8px 20px",
@@ -279,11 +288,13 @@ export const Header: React.FC = () => {
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.transform = "scale(1.03)";
-              e.currentTarget.style.boxShadow = "0 6px 16px rgba(115, 172, 212, 0.4)";
+              e.currentTarget.style.boxShadow =
+                "0 6px 16px rgba(115, 172, 212, 0.4)";
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(115, 172, 212, 0.3)";
+              e.currentTarget.style.boxShadow =
+                "0 4px 12px rgba(115, 172, 212, 0.3)";
             }}
           >
             {/* View trial chart */}
@@ -304,7 +315,7 @@ export const Header: React.FC = () => {
             <Bell size={20} color="#555" />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
             {/* Notification Button */}
 
             {/* <img
@@ -313,18 +324,13 @@ export const Header: React.FC = () => {
               style={{ width: '28px', height: '28px', display: 'block' }}
             /> */}
 
-
             {/* Credits Display */}
 
             <img
               src={credits}
               alt="Credits icon"
-              style={{ width: '100%', height: '38px' }}
+              style={{ width: "100%", height: "38px" }}
             />
-
-
-
-
           </div>
         </div>
       </div>
@@ -334,12 +340,13 @@ export const Header: React.FC = () => {
         style={{
           width: "100%",
           minHeight: "calc(100vh - 60px)",
-          background: "linear-gradient(rgb(209 233 255) 40%, rgb(255 255 255 / 18%) 100%)",
+          background:
+            "linear-gradient(rgb(209 233 255) 40%, rgb(255 255 255 / 18%) 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "40px 40px",
+          padding: "48px",
           boxSizing: "border-box",
           position: "relative",
           // maskImage: "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 70%, rgba(0,0,0,0) 100%)",
@@ -374,35 +381,62 @@ export const Header: React.FC = () => {
           </div> */}
 
           {/* Main Heading - Black, center-aligned, 2 lines */}
-          <h1
+        <h1
+  style={{
+    fontSize: "clamp(22px, 3.5vw, 85px)",
+    fontWeight: 700,
+    fontStyle: "normal",
+    textAlign: "center",
+    margin: "0 0 16px 0",
+    letterSpacing: "-0.02em",
+    lineHeight: 1,
+    maxWidth: "1330px",
+    fontFamily: "Roboto, sans-serif",
+    background: "linear-gradient(90deg, rgb(146 152 198) 0%, rgb(121 156 196) 50%, rgb(229 156 176) 100%) text",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text",
+color: "transparent",
+
+  }}
+>
+  Eros Wellness
+</h1>
+
+
+          {/* Main Heading - Black, center-aligned, 2 lines */}
+          <h2
             style={{
-              fontSize: "clamp(22px, 3.5vw, 62px)",
-              fontWeight: 700,
+              fontSize: "clamp(20px, 1vw, 30px)",
+              fontWeight: 500,
               fontStyle: "normal",
               textAlign: "center",
               margin: "0 0 16px 0",
               letterSpacing: "-0.02em",
-              lineHeight: 1.5,
-              color: "#1a1a2e",
+              lineHeight: 1,
+              color: "rgb(26, 26, 46)",
               maxWidth: "1330px",
+               
+              
             }}
           >
-            Unlimited AI-powered wellness solutions for results-driven personal growth & holistic living.
-          </h1>
+          Your personal AI spiritual companion
+          </h2>
 
           {/* Description */}
           <p
             style={{
               fontSize: "clamp(13px, 2vw, 15px)",
-              color: "#6b6380",
+              color: "gb(107, 99, 128)",
               textAlign: "center",
               marginBottom: "0",
               lineHeight: 1.6,
               maxWidth: "720px",
             }}
           >
-            Your personal AI spiritual companion — illuminating your path through astrology, energy readings, and
-            ancient wisdom tailored uniquely for you.
+             illuminating your path
+            through astrology, energy readings, and ancient wisdom tailored
+            uniquely for you.
           </p>
         </div>
 
@@ -435,15 +469,19 @@ export const Header: React.FC = () => {
                   // backgroundColor: hoveredCard === card.id
                   //   ? "rgba(255,255,255,0.25)"
                   //   : "rgba(255,255,255,0.15)",
-                  backgroundColor: 'white',
+                  backgroundColor: "white",
                   backdropFilter: "blur(10px)",
                   WebkitBackdropFilter: "blur(10px)",
                   cursor: "pointer",
                   transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                  boxShadow: hoveredCard === card.id
-                    ? "0 8px 32px rgba(115, 172, 212, 0.15), inset 0 1px 1px rgba(255,255,255,0.4)"
-                    : "0 4px 16px rgba(115, 172, 212, 0.08), inset 0 1px 1px rgba(255,255,255,0.3)",
-                  transform: hoveredCard === card.id ? "translateY(-8px) scale(1.02)" : "translateY(0) scale(1)",
+                  boxShadow:
+                    hoveredCard === card.id
+                      ? "0 8px 32px rgba(115, 172, 212, 0.15), inset 0 1px 1px rgba(255,255,255,0.4)"
+                      : "0 4px 16px rgba(115, 172, 212, 0.08), inset 0 1px 1px rgba(255,255,255,0.3)",
+                  transform:
+                    hoveredCard === card.id
+                      ? "translateY(-8px) scale(1.02)"
+                      : "translateY(0) scale(1)",
                   overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",
@@ -468,7 +506,17 @@ export const Header: React.FC = () => {
                   />
                 )}
 
-                <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", width: "100%" }}>
+                <div
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "8px",
+                    width: "100%",
+                  }}
+                >
                   {/* Icon */}
                   <div
                     style={{
@@ -476,15 +524,23 @@ export const Header: React.FC = () => {
                       height: "52px",
                       borderRadius: "12px",
                       // backgroundColor: "rgba(115, 172, 212, 0.1)",
-                      background: 'linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)',
+                      background:
+                        "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       transition: "all 0.3s ease",
-                      transform: hoveredCard === card.id ? "scale(1.1) rotate(5deg)" : "scale(1)",
+                      transform:
+                        hoveredCard === card.id
+                          ? "scale(1.1) rotate(5deg)"
+                          : "scale(1)",
                     }}
                   >
-                    <img src={card.icon} alt="" style={{ width: "28px", height: "28px" }} />
+                    <img
+                      src={card.icon}
+                      alt=""
+                      style={{ width: "28px", height: "28px" }}
+                    />
                   </div>
 
                   {/* Title */}
@@ -508,7 +564,8 @@ export const Header: React.FC = () => {
                   <button
                     className="card-button"
                     style={{
-                      background: "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
+                      background:
+                        "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
                       border: "none",
                       borderRadius: "16px",
                       padding: "10px 18px",
@@ -517,17 +574,19 @@ export const Header: React.FC = () => {
                       color: "white",
                       cursor: "pointer",
                       transition: "all 0.3s ease",
-                      transform: hoveredCard === card.id ? "scale(1.05)" : "scale(1)",
-                      boxShadow: hoveredCard === card.id
-                        ? "0 8px 16px rgba(115, 172, 212, 0.4)"
-                        : "0 4px 12px rgba(115, 172, 212, 0.2)",
+                      transform:
+                        hoveredCard === card.id ? "scale(1.05)" : "scale(1)",
+                      boxShadow:
+                        hoveredCard === card.id
+                          ? "0 8px 16px rgba(115, 172, 212, 0.4)"
+                          : "0 4px 12px rgba(115, 172, 212, 0.2)",
                       width: "100%",
                       minHeight: "40px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      top: '20%',
-                      position: 'relative'
+                      top: "20%",
+                      position: "relative",
                     }}
                   >
                     {loadingStatuses ? "Loading..." : getButtonText(card)}
@@ -600,10 +659,12 @@ export const Header: React.FC = () => {
           {/* Chat Input Card with shadow */}
           <div
             style={{
-              background: "linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)",
+              background:
+                "linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)",
               borderRadius: "24px",
               padding: "16px 16px 14px",
-              boxShadow: "0 8px 24px rgba(74, 164, 227, 0.12), 0 4px 12px rgba(74, 164, 227, 0.15)",
+              boxShadow:
+                "0 8px 24px rgba(74, 164, 227, 0.12), 0 4px 12px rgba(74, 164, 227, 0.15)",
               maxWidth: "900px",
               width: "100%",
               position: "relative",
@@ -642,9 +703,11 @@ export const Header: React.FC = () => {
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    navigate('/ai-chat', { state: { initialMessage: chatInput } });
+                    navigate("/ai-chat", {
+                      state: { initialMessage: chatInput },
+                    });
                     setChatInput("");
                   }
                 }}
@@ -675,11 +738,14 @@ export const Header: React.FC = () => {
               >
                 <button
                   onClick={() => {
-                    navigate('/ai-chat', { state: { initialMessage: chatInput } });
+                    navigate("/ai-chat", {
+                      state: { initialMessage: chatInput },
+                    });
                     setChatInput("");
                   }}
                   style={{
-                    background: "linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)",
+                    background:
+                      "linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)",
                     border: "none",
                     borderRadius: "14px",
                     padding: "8px 20px",
@@ -695,11 +761,13 @@ export const Header: React.FC = () => {
                   }}
                   onMouseOver={(e) => {
                     e.currentTarget.style.transform = "scale(1.03)";
-                    e.currentTarget.style.boxShadow = "0 6px 16px rgba(74, 164, 227, 0.4)";
+                    e.currentTarget.style.boxShadow =
+                      "0 6px 16px rgba(74, 164, 227, 0.4)";
                   }}
                   onMouseOut={(e) => {
                     e.currentTarget.style.transform = "scale(1)";
-                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(74, 164, 227, 0.3)";
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 12px rgba(74, 164, 227, 0.3)";
                   }}
                 >
                   <Send size={14} />

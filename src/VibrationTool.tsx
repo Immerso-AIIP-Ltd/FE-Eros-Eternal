@@ -641,18 +641,57 @@ const VibrationTool: React.FC = () => {
     e.target.value = "";
   };
 
-  const openCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  // const openCamera = async () => {
+  //   try {
+  //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  //     if (videoRef.current) {
+  //       videoRef.current.srcObject = stream;
+  //       videoRef.current.play();
+  //     }
+  //     setShowCamera(true);
+  //   } catch (err) {
+  //     console.error("Camera error:", err);
+  //   }
+
+  // };
+
+const openCamera = async () => {
+  try {
+    setShowCamera(true); // Open modal first
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "user",
+      },
+      audio: false,
+    });
+
+    // Small delay to ensure modal renders
+    setTimeout(() => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
       }
-      setShowCamera(true);
-    } catch (err) {
-      console.error("Camera error:", err);
-    }
-  };
+    }, 200);
+  } catch (error: any) {
+    console.error("Camera error:", error);
+    alert("Unable to access camera.");
+    setShowCamera(false);
+  }
+};
+
+
+
+const closeCamera = () => {
+  if (videoRef.current && videoRef.current.srcObject) {
+    const stream = videoRef.current.srcObject as MediaStream;
+    stream.getTracks().forEach((track) => track.stop());
+    videoRef.current.srcObject = null;
+  }
+
+  setShowCamera(false);
+};
+
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -679,14 +718,14 @@ const VibrationTool: React.FC = () => {
     }
   };
 
-  const closeCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      (videoRef.current.srcObject as MediaStream)
-        .getTracks()
-        .forEach((t) => t.stop());
-    }
-    setShowCamera(false);
-  };
+  // const closeCamera = () => {
+  //   if (videoRef.current && videoRef.current.srcObject) {
+  //     (videoRef.current.srcObject as MediaStream)
+  //       .getTracks()
+  //       .forEach((t) => t.stop());
+  //   }
+  //   setShowCamera(false);
+  // };
 
   const startRecording = async () => {
     try {
@@ -845,7 +884,7 @@ const VibrationTool: React.FC = () => {
         ))}
       </div>
 
-      {showCamera && (
+      {/* {showCamera && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <div className="flex justify-between items-center mb-4">
@@ -880,7 +919,57 @@ const VibrationTool: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
+
+      {showCamera && (
+  <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div className="bg-white rounded-2xl shadow-2xl w-[400px] max-w-[95%] p-4 relative">
+
+      {/* Close Button */}
+      <button
+        onClick={closeCamera}
+        className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-2"
+      >
+        <X size={18} />
+      </button>
+
+      <h3 className="text-center font-semibold mb-3 text-gray-800">
+        Capture Photo
+      </h3>
+
+      {/* Camera Preview */}
+      <div className="rounded-xl overflow-hidden bg-black">
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="w-full h-[300px] object-cover"
+        />
+      </div>
+
+      <canvas ref={canvasRef} className="hidden" />
+
+      {/* Buttons */}
+      <div className="flex justify-center gap-4 mt-4">
+        <button
+          onClick={capturePhoto}
+          className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-full"
+        >
+          Capture
+        </button>
+
+        <button
+          onClick={closeCamera}
+          className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-full"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       {/* 
       {sidebarOpen && (
         <div

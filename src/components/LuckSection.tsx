@@ -4,9 +4,12 @@ import moment from "moment";
 // import StartlightBg from "../assets/discover/planetary.png";
 // import SpiritualBg from "../assets/discover/personalMonth.jpg";
 // import LuckyBg from "../assets/discover/luckyNumber.jpg";
-import StartlightBg from "../images/lightphase.png";
-import SpiritualBg from "../images/lightjournal.png";
-import LuckyBg from "../images/lightnumber.png"
+// import StartlightBg from "../images/lightphase.png";
+// import SpiritualBg from "../images/lightjournal.png";
+// import LuckyBg from "../images/lightnumber.png"
+import StartlightBg from "../images/horoscope.png"
+import SpiritualBg from "../images/personalMonth.png"
+import LuckyBg from "../images/luckyNumber.png"
 
 interface LuckyNumbers {
   destiny_number: number;
@@ -143,7 +146,7 @@ export const LuckSection: React.FC = () => {
   const luckItems = [
     { title: "Starlight Journal", subtitle: "Planetary Daily", bg: StartlightBg },
     { title: "Spiritual Phase", subtitle: "Personal Month Number", bg: SpiritualBg },
-    { title: "Spiritual Phase", subtitle: "Lucky number of the day", bg: LuckyBg },
+    { title: "Spiritual Numbers", subtitle: "Lucky number of the day", bg: LuckyBg },
   ];
 
   const renderHoroscopeBack = () => (

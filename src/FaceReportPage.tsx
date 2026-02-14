@@ -162,20 +162,16 @@ const FaceReportPage: React.FC = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [username, setUsername] = useState<string>('');
 
+  // Load report data from navigation state or localStorage
   useEffect(() => {
-    // First, try to get data from navigation state
     if (location.state && location.state.success) {
       const reportData = location.state as CombinedReportData;
       setReport(reportData);
-
-      // Save to localStorage for persistence
       localStorage.setItem('faceReportData', JSON.stringify(reportData));
-
       if (reportData.uploadedImage) {
         setUploadedImage(reportData.uploadedImage);
       }
     } else {
-      // Try to load from localStorage if no navigation state
       const savedReport = localStorage.getItem('faceReportData');
       if (savedReport) {
         try {
@@ -199,33 +195,52 @@ const FaceReportPage: React.FC = () => {
     }
   }, [location.state]);
 
-  // Use AI report insights with fallback
+  // Helper: classify insight text
+  const classifyInsight = (text: string) => {
+    const lower = text.toLowerCase();
+    if (lower.includes('good') || lower.includes('excellent') || lower.includes('normal') || lower.includes('optimal') || lower.includes('healthy')) {
+      return 'positive';
+    }
+    if (lower.includes('high') || lower.includes('elevated') || lower.includes('warning') || lower.includes('risk') || lower.includes('concerning') || lower.includes('low blood pressure')) {
+      return 'warning';
+    }
+    return 'info';
+  };
+
+  // Use AI report insights from report (includes merged API data)
   const insights = useMemo(() => {
     const aiData = report?.aiReport;
-    if (!aiData?.insights || aiData.insights.length === 0) {
-      return [{ type: 'info', text: 'Complete a scan to receive AI-generated insights.' }];
+    if (aiData?.insights && aiData.insights.length > 0) {
+      return aiData.insights.map((insight: string) => ({ type: classifyInsight(insight), text: insight }));
     }
-    return aiData.insights.map((insight: string) => {
-      // Determine type based on content
-      const text = insight.toLowerCase();
-      let type = 'info';
-      if (text.includes('good') || text.includes('excellent') || text.includes('normal') || text.includes('optimal')) {
-        type = 'positive';
-      } else if (text.includes('high') || text.includes('elevated') || text.includes('warning') || text.includes('risk')) {
-        type = 'warning';
-      }
-      return { type, text: insight };
-    });
+    return [{ type: 'info', text: 'Complete a scan to receive AI-generated insights.' }];
   }, [report?.aiReport]);
 
-  // Use AI report recommendations with fallback
+  // Use AI report recommendations from report (includes merged API data)
   const recommendations = useMemo(() => {
     const aiData = report?.aiReport;
-    if (!aiData?.recommendations || aiData.recommendations.length === 0) {
-      return ['Complete a scan to receive personalized recommendations.'];
-    }
-    return aiData.recommendations;
+    if (aiData?.recommendations && aiData.recommendations.length > 0) return aiData.recommendations;
+    return ['Complete a scan to receive personalized recommendations.'];
   }, [report?.aiReport]);
+
+  // Helper: determine heart rate status
+  const getHeartRateStatus = (hr: number): string => {
+    if (hr < 60) return 'LOW';
+    if (hr > 100) return 'HIGH';
+    return 'NORMAL';
+  };
+
+  // Helper: determine blood pressure status
+  const getBpStatus = (systolic: number, diastolic: number) => {
+    let systolicStatus = 'NORMAL';
+    let diastolicStatus = 'NORMAL';
+    if (systolic < 90) systolicStatus = 'LOW';
+    else if (systolic >= 130) systolicStatus = 'HIGH';
+    else if (systolic >= 120) systolicStatus = 'ELEVATED';
+    if (diastolic < 60) diastolicStatus = 'LOW';
+    else if (diastolic >= 80) diastolicStatus = 'HIGH';
+    return { systolicStatus, diastolicStatus };
+  };
 
   // Safely get rppg data with fallbacks - MUST be before any conditional returns
   const rppg = report?.rppg || {
@@ -253,16 +268,28 @@ const FaceReportPage: React.FC = () => {
     hrHistory: [],
   };
 
-  // Get AI report with fallbacks - MUST be before any conditional returns
+  // Get AI report from report state (includes merged API data)
   const aiReport = report?.aiReport || {
     summary: 'No AI analysis available. Please complete a scan to generate insights.',
     insights: ['Complete a health scan to receive personalized insights.'],
     recommendations: ['Scan for at least 30 seconds for best results.'],
-    riskFactors: [],
+    riskFactors: [] as string[],
     disclaimer: 'This report is AI-generated and for informational purposes only.',
   };
 
-  // Convert timestamps to relative seconds for chart - MUST be before any conditional returns
+  // Override vitals with API health data from report
+  const heartRateValue = report?.apiHealthData?.heart_rate ?? rppg.vitals.heartRate.value;
+  const heartRateStatus = report?.apiHealthData?.heart_rate
+    ? getHeartRateStatus(report.apiHealthData.heart_rate)
+    : rppg.vitals.heartRate.status;
+  const scanDuration = report?.apiHealthData?.scan_duration_seconds ?? rppg.metadata.scanDurationSeconds;
+
+  // Blood pressure from API health data
+  const bpSystolic = report?.apiHealthData?.bp_systolic ?? 0;
+  const bpDiastolic = report?.apiHealthData?.bp_diastolic ?? 0;
+  const { systolicStatus, diastolicStatus } = getBpStatus(bpSystolic, bpDiastolic);
+
+  // Convert timestamps to relative seconds for chart (from modal data) - MUST be before any conditional returns
   const chartData = useMemo(() => {
     if (!rppg.hrHistory || rppg.hrHistory.length === 0) return [];
     const startTime = rppg.hrHistory[0]?.time || 0;
@@ -428,23 +455,39 @@ const FaceReportPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Top Metrics Row - 4 columns */}
+        {/* Top Metrics Row */}
         <div
           className="metrics-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '16px',
             marginBottom: '24px',
           }}
         >
           <MetricCard
             title="Heart Rate"
-            value={rppg.vitals.heartRate.value}
+            value={heartRateValue.toFixed(1)}
             unit="BPM"
-            status={rppg.vitals.heartRate.status}
+            status={heartRateStatus}
             icon={<Heart size={20} />}
             color="#EF4444"
+          />
+          <MetricCard
+            title="BP Systolic"
+            value={bpSystolic.toFixed(1)}
+            unit="mmHg"
+            status={systolicStatus}
+            icon={<Activity size={20} />}
+            color="#3B82F6"
+          />
+          <MetricCard
+            title="BP Diastolic"
+            value={bpDiastolic.toFixed(1)}
+            unit="mmHg"
+            status={diastolicStatus}
+            icon={<Activity size={20} />}
+            color="#8B5CF6"
           />
           <MetricCard
             title="Breathing Rate"
@@ -552,7 +595,7 @@ const FaceReportPage: React.FC = () => {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px' }}>
               <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
-                Duration: {rppg.metadata.scanDurationSeconds}s
+                Duration: {scanDuration}s
               </span>
               <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
                 Samples: {rppg.metadata.samplesCollected}
@@ -576,7 +619,7 @@ const FaceReportPage: React.FC = () => {
               </h3>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {insights.map((insight, index) => (
+              {insights.map((insight: { type: string; text: string }, index: number) => (
                 <div key={index} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <div
                     style={{
@@ -779,7 +822,7 @@ const FaceReportPage: React.FC = () => {
               </h3>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {recommendations.map((rec, index) => (
+              {recommendations.map((rec: string, index: number) => (
                 <div key={index} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                   <div
                     style={{

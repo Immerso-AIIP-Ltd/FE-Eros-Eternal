@@ -320,7 +320,7 @@ const PalmUploadPage: React.FC = () => {
               {/* Supported Formats */}
               <div className="mt-4 ">
                 <small style={{ fontSize: "0.9rem" }}>
-                  Supported format : XLS, XLSX
+                  Supported format : JPG, JPEG, PNG
                 </small>
               </div>
 
