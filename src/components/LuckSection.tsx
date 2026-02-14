@@ -146,7 +146,7 @@ export const LuckSection: React.FC = () => {
   const luckItems = [
     { title: "Starlight Journal", subtitle: "Planetary Daily", bg: StartlightBg },
     { title: "Spiritual Phase", subtitle: "Personal Month Number", bg: SpiritualBg },
-    { title: "Spiritual Phase", subtitle: "Lucky number of the day", bg: LuckyBg },
+    { title: "Spiritual Numbers", subtitle: "Lucky number of the day", bg: LuckyBg },
   ];
 
   const renderHoroscopeBack = () => (
