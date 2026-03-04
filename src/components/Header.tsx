@@ -339,14 +339,15 @@ export const Header: React.FC = () => {
       <div
         style={{
           width: "100%",
-          minHeight: "calc(100vh - 60px)",
+          minHeight: "calc(100vh - 300px)",
           background:
             "linear-gradient(rgb(209 233 255) 40%, rgb(255 255 255 / 18%) 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "48px",
+          // padding: "48px",
+          padding: "clamp(16px, 3vw, 32px) clamp(12px, 3vw, 48px) clamp(24px, 4vw, 48px)",
           boxSizing: "border-box",
           position: "relative",
           // maskImage: "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 70%, rgba(0,0,0,0) 100%)",
@@ -360,7 +361,9 @@ export const Header: React.FC = () => {
             flexDirection: "column",
             alignItems: "center",
             flex: "0 1 auto",
-            marginBottom: "20px",
+            // marginBottom: "20px",
+            marginBottom: "0px",
+            // marginTop: "clamp(12px, 3vw, 10px)"
           }}
         >
           {/* Sparkle Icon */}
@@ -381,50 +384,75 @@ export const Header: React.FC = () => {
           </div> */}
 
           {/* Main Heading - Black, center-aligned, 2 lines */}
-        <h1
-  style={{
-    fontSize: "clamp(22px, 3.5vw, 85px)",
-    fontWeight: 700,
-    fontStyle: "normal",
-    textAlign: "center",
-    margin: "0 0 16px 0",
-    letterSpacing: "-0.02em",
-    lineHeight: 1,
-    maxWidth: "1330px",
-    fontFamily: "Roboto, sans-serif",
-    background: "linear-gradient(90deg, rgb(146 152 198) 0%, rgb(121 156 196) 50%, rgb(229 156 176) 100%) text",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    backgroundClip: "text",
-color: "transparent",
-
-  }}
->
-  Eros Wellness
-</h1>
-
-
-          {/* Main Heading - Black, center-aligned, 2 lines */}
-          <h2
+          {/* <h1
             style={{
-              fontSize: "clamp(20px, 1vw, 30px)",
-              fontWeight: 500,
+              fontSize: "clamp(22px, 3.5vw, 85px)",
+              fontWeight: 700,
               fontStyle: "normal",
               textAlign: "center",
               margin: "0 0 16px 0",
               letterSpacing: "-0.02em",
               lineHeight: 1,
-              color: "rgb(26, 26, 46)",
               maxWidth: "1330px",
-               
-              
+              fontFamily: "Roboto, sans-serif",
+              background: "linear-gradient(90deg, rgb(146 152 198) 0%, rgb(121 156 196) 50%, rgb(229 156 176) 100%) text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              color: "transparent",
+
             }}
           >
-          Your personal AI spiritual companion
+            EROS Wellness <span className="text-dark" style={{color: "black"}}>– AI-driven holistic growth.</span>
+          </h1> */}
+
+          <h1
+            className="hero-title"
+            style={{
+              fontSize: "clamp(18px, 3.5vw, 55px)",
+              fontWeight: 600,
+              fontStyle: "normal",
+              textAlign: "center",
+              // margin: "0 0 30px 0",
+              margin: "0 0 12px 0",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.2,
+              maxWidth: "800px",
+              fontFamily: '"Geist", sans-serif',
+              background: "linear-gradient(90deg, rgb(146 152 198) 0%, rgb(121 156 196) 30%, rgb(229 156 176) 60%) text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              color: "transparent",
+            }}
+          >
+            EROS Wellness <span style={{ WebkitTextFillColor: "#1a1a2e", fontFamily: '"Geist", sans-serif' }}>– AI Driven Holistic Growth</span>
+          </h1>
+
+
+          {/* Main Heading - Black, center-aligned, 2 lines */}
+          <h2
+            className="hero-subtitle"
+            style={{
+              fontSize: "clamp(12px, 1.5vw, 16px)",
+              fontWeight: 400,
+              fontStyle: "normal",
+              textAlign: "center",
+              // margin: "0 0 16px 0",
+              margin: "0 0 0 0",
+              letterSpacing: "0.2px",
+              lineHeight: 1,
+              color: "#838c99ff",
+              maxWidth: "800px",
+              fontFamily: '"Poppins", sans-serif',
+              marginTop: "20px"
+            }}
+          >
+            Your personal AI spiritual companion — illuminating your path through astrology, energy readings, and ancient wisdom tailored uniquely for you.
           </h2>
 
           {/* Description */}
-          <p
+          {/* <p
             style={{
               fontSize: "clamp(13px, 2vw, 15px)",
               color: "gb(107, 99, 128)",
@@ -434,23 +462,26 @@ color: "transparent",
               maxWidth: "720px",
             }}
           >
-             illuminating your path
+            illuminating your path
             through astrology, energy readings, and ancient wisdom tailored
             uniquely for you.
-          </p>
+          </p> */}
         </div>
 
         {/* Middle Section - Cards Container */}
         <div
+          className="cards-wrapper"
           style={{
             flex: "1 1 auto",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             width: "100%",
-            minHeight: "220px",
-            paddingTop: "20px",
-            paddingBottom: "20px",
+            // minHeight: "220px",
+            // paddingTop: "20px",
+            // paddingBottom: "20px",
+            paddingTop: "100px",
+            paddingBottom: "100px",
           }}
         >
           <div className="cards-container">
@@ -463,7 +494,7 @@ color: "transparent",
                 onMouseLeave={() => setHoveredCard(null)}
                 style={{
                   position: "relative",
-                  padding: "24px 20px",
+                  // padding: "24px 20px",
                   borderRadius: "30px",
                   border: "1px solid rgba(255,255,255,0.3)",
                   // backgroundColor: hoveredCard === card.id
@@ -486,9 +517,11 @@ color: "transparent",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  justifyContent: "center",
+                  justifyContent: "flex-start",
                   gap: "12px",
-                  minHeight: "250px",
+                  // minHeight: "250px",
+                  minHeight: "unset",
+                  padding: "16px 12px",
                 }}
               >
                 {/* Glitter Animation Overlay */}
@@ -513,12 +546,13 @@ color: "transparent",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: "8px",
+                    gap: "12px",
                     width: "100%",
                   }}
                 >
                   {/* Icon */}
                   <div
+                    className="card-icon"
                     style={{
                       width: "52px",
                       height: "52px",
@@ -545,6 +579,7 @@ color: "transparent",
 
                   {/* Title */}
                   <h3
+                    className="card-title"
                     style={{
                       fontSize: "15px",
                       fontWeight: 600,
@@ -564,29 +599,21 @@ color: "transparent",
                   <button
                     className="card-button"
                     style={{
-                      background:
-                        "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
+                      background: "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
                       border: "none",
                       borderRadius: "16px",
-                      padding: "10px 18px",
-                      fontSize: "13px",
                       fontWeight: 600,
                       color: "white",
                       cursor: "pointer",
                       transition: "all 0.3s ease",
-                      transform:
-                        hoveredCard === card.id ? "scale(1.05)" : "scale(1)",
-                      boxShadow:
-                        hoveredCard === card.id
-                          ? "0 8px 16px rgba(115, 172, 212, 0.4)"
-                          : "0 4px 12px rgba(115, 172, 212, 0.2)",
+                      transform: hoveredCard === card.id ? "scale(1.05)" : "scale(1)",
+                      boxShadow: hoveredCard === card.id
+                        ? "0 8px 16px rgba(115, 172, 212, 0.4)"
+                        : "0 4px 12px rgba(115, 172, 212, 0.2)",
                       width: "100%",
-                      minHeight: "40px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      top: "20%",
-                      position: "relative",
                     }}
                   >
                     {loadingStatuses ? "Loading..." : getButtonText(card)}
@@ -620,7 +647,7 @@ color: "transparent",
               maxWidth: "100%",
               width: "100%",
               justifyContent: "center",
-              paddingBottom: "10px",
+              paddingBottom: "0",
             }}
           >
             {chatTabs.map((tab) => {
@@ -628,6 +655,7 @@ color: "transparent",
               return (
                 <span
                   key={tab}
+                  className="chat-tab"
                   onClick={() => setActiveTab(tab)}
                   style={{
                     padding: "10px 24px",
@@ -658,6 +686,7 @@ color: "transparent",
           {/* Chat Input Card with shadow */}
           {/* Chat Input Card with shadow */}
           <div
+            className="chat-input-wrapper"
             style={{
               background:
                 "linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)",
@@ -672,6 +701,7 @@ color: "transparent",
           >
             {/* Free trial notice */}
             <div
+              className="free-trial-text"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -721,7 +751,7 @@ color: "transparent",
                   resize: "none",
                   fontFamily: "Poppins, sans-serif",
                   lineHeight: 1.5,
-                  minHeight: "32px",
+                  // minHeight: "32px",
                   maxHeight: "80px",
                   boxSizing: "border-box",
                 }}
@@ -743,6 +773,7 @@ color: "transparent",
                     });
                     setChatInput("");
                   }}
+                  className="send-btn"
                   style={{
                     background:
                       "linear-gradient(135deg, rgb(137, 219, 255) 0%, rgb(74, 164, 227) 100%)",
@@ -794,76 +825,117 @@ color: "transparent",
       </div>
 
       <style>{`
-        .cards-container {
-          display: grid;
-          grid-template-columns: repeat(7, 1fr);
-          gap: 16px;
-          width: 100%;
-          max-width: none;
-          margin: 0 auto;
-          padding: 0 30px;
-          box-sizing: border-box;
-        }
+  .cards-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 16px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 30px;
+    box-sizing: border-box;
+  }
 
-        .feature-card {
-          flex: 1 1 0 !important;
-          min-height: 180px;
-        }
+.feature-card {
+  height: auto !important;
+  min-height: unset !important;
+  padding: 16px 12px 12px !important;
+  overflow: hidden !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  border-radius: 20px !important;
+}
 
-        .glitter-effect {
-          background: linear-gradient(45deg, 
-            transparent 0%, 
-            rgba(255,255,255,0.3) 20%, 
-            rgba(255,255,255,0.1) 40%, 
-            transparent 60%
-          );
-          animation: glitterShimmer 0.8s ease-in-out infinite;
-        }
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
 
-        @keyframes glitterShimmer {
-          0% {
-            transform: translateX(-100%) translateY(-100%);
-            opacity: 0;
-          }
-          50% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(100%) translateY(100%);
-            opacity: 0;
-          }
-        }
+@media (max-width: 1100px) {
+  .cards-container { gap: 8px; padding: 0 12px; }
+  .feature-card { padding: 12px 8px 10px !important; gap: 8px !important; }
+  .card-icon { width: 38px !important; height: 38px !important; }
+  .card-icon img { width: 22px !important; height: 22px !important; }
+  .card-title { font-size: 12px !important; min-height: unset !important; }
+  .card-button { font-size: 11px !important; padding: 7px 6px !important; min-height: 30px !important; }
+}
 
-        @media (max-width: 1100px) {
-          .cards-container {
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 14px !important;
-            padding: 0 24px !important;
-          }
-        }
+@media (max-width: 768px) {
+  .cards-container { gap: 5px; padding: 0 8px; }
+  .feature-card { padding: 8px 5px 8px !important; gap: 5px !important; border-radius: 12px !important; }
+  .card-icon { width: 26px !important; height: 26px !important; border-radius: 7px !important; }
+  .card-icon img { width: 15px !important; height: 15px !important; }
+  .card-title { font-size: 9px !important; min-height: unset !important; line-height: 1.1 !important; }
+  .card-button { font-size: 8px !important; padding: 4px 2px !important; min-height: 22px !important; border-radius: 7px !important; }
+  .cards-wrapper { padding-top: 20px !important; padding-bottom: 20px !important; }
+  .hero-title { margin: 0 0 6px 0 !important; }
+  .hero-subtitle { margin-top: 8px !important; }
+  .chat-tab { padding: 6px 12px !important; font-size: 11px !important; min-width: 55px !important; border-radius: 16px !important; }
+  .chat-input-wrapper { max-width: 100% !important; padding: 8px 8px 6px !important; border-radius: 14px !important; }
+.free-trial-text { font-size: 10px !important; margin-bottom: 5px !important; }
+.chat-input-wrapper textarea { font-size: 11px !important; min-height: 20px !important; }
+.chat-input-wrapper .send-btn { font-size: 10px !important; padding: 5px 10px !important; border-radius: 10px !important; }
+}
 
-        @media (max-width: 768px) {
-          .cards-container {
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px !important;
-            padding: 0 20px !important;
-          }
-          .feature-card {
-            min-height: 150px;
-          }
-          .card-button {
-            padding: 6px 12px !important;
-            font-size: 11px !important;
-            min-height: 32px !important;
-          }
-        }
+@media (max-width: 480px) {
+  .cards-container { gap: 3px; padding: 0 4px; }
+  .feature-card { padding: 6px 3px 6px !important; gap: 4px !important; border-radius: 10px !important; }
+  .card-icon { width: 20px !important; height: 20px !important; border-radius: 5px !important; }
+  .card-icon img { width: 12px !important; height: 12px !important; }
+  .card-title { font-size: 7px !important; }
+  .card-button { font-size: 7px !important; padding: 3px 2px !important; min-height: 18px !important; border-radius: 5px !important; }
+  .cards-wrapper { padding-top: 12px !important; padding-bottom: 12px !important; }
+  .chat-tab { padding: 5px 8px !important; font-size: 9px !important; min-width: 40px !important; border-radius: 12px !important; }
+  .chat-input-wrapper { padding: 8px 8px 6px !important; border-radius: 12px !important; }
+.chat-input-wrapper .free-trial-text { font-size: 9px !important; margin-bottom: 4px !important; }
+.chat-input-wrapper textarea { font-size: 10px !important; min-height: 18px !important; }
+.chat-input-wrapper .send-btn { font-size: 9px !important; padding: 4px 8px !important; }
+}
 
-        @media (max-width: 480px) {
-          .cards-container {
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-          }
-        }
-      `}</style>
+@media (max-width: 1280px) {
+  .cards-container { gap: 10px; padding: 0 16px; }
+  .feature-card { padding: 14px 10px 10px !important; gap: 8px !important; }
+  .card-icon { width: 42px !important; height: 42px !important; }
+  .card-icon img { width: 24px !important; height: 24px !important; }
+  .card-title { font-size: 13px !important; min-height: unset !important; }
+  .card-button { font-size: 12px !important; padding: 8px 6px !important; height: 28px !important; width: 100px !important;}
+}
+
+/* Laptop layout adjustments only (do not affect large monitors) */
+@media (max-width: 1440px) and (min-width: 1024px) {
+  .hero-title {
+    font-size: clamp(18px, 3.5vw, 35px) !important;
+    max-width: 500px !important;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(12px, 1.5vw, 12px) !important;
+    margin-top: 5px !important;
+    line-height: 1.5 !important;
+    max-width: 600px !important;
+  }
+
+  .cards-wrapper {
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
+  }
+
+  .card-icon {
+    width: 35px !important;
+    height: 35px !important;
+    transform: scale(1) !important;
+  }
+    .chat-tab { padding: 8px 16px !important; font-size: 12px !important; min-width: 70px !important; }
+.chat-input-wrapper { max-width: 600px !important; padding: 10px 10px 8px !important; }
+.free-trial-text { font-size: 11px !important; margin-bottom: 6px !important; }
+.chat-input-wrapper textarea { font-size: 12px !important; min-height: 24px !important; }
+.chat-input-wrapper .send-btn { font-size: 11px !important; padding: 6px 14px !important; }
+}
+`}</style>
     </div>
   );
 };
