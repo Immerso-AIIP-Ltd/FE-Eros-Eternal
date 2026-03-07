@@ -2,7 +2,7 @@
  * rPPG Helper Functions - Utility functions for rPPG calculations and status determination
  */
 
-import type { RppgVitals, RppgHrv, RppgStress } from '../types/rppg';
+import type { RppgVitals, RppgHrv, RppgStress, RppgFrequencyDomain, RppgNonlinear, RppgRespiratoryExtended } from '../types/rppg';
 
 /**
  * Get Bootstrap badge color based on status
@@ -148,7 +148,11 @@ export const generateHrv = (
   sdnn: number,
   rmssd: number,
   pnn50: number,
-  recordingClass: 'insufficient_data' | 'ultra-short' | 'short-term' | 'standard'
+  recordingClass: 'insufficient_data' | 'ultra-short' | 'short-term' | 'standard',
+  frequencyDomain?: RppgFrequencyDomain,
+  nonlinear?: RppgNonlinear,
+  respiratoryExtended?: RppgRespiratoryExtended,
+  rrIntervalCount?: number,
 ): RppgHrv => ({
   sdnn: {
     value: Math.round(sdnn * 10) / 10,
@@ -166,6 +170,45 @@ export const generateHrv = (
     status: calculatePnn50Status(pnn50),
   },
   recordingClass,
+  frequencyDomain,
+  nonlinear,
+  respiratoryExtended,
+  rrIntervalCount,
+});
+
+/**
+ * Generate RppgNonlinear from worker metrics
+ */
+export const generateNonlinear = (
+  sd1: number,
+  sd2: number,
+  sd1Sd2Ratio: number,
+  sampleEntropy: number | null,
+  dfaAlpha1: number | null,
+  dfaAlpha1Reliable: boolean,
+): RppgNonlinear => ({
+  sd1: { value: Math.round(sd1 * 10) / 10, unit: 'ms', description: 'Short-term HRV variability (Poincare)' },
+  sd2: { value: Math.round(sd2 * 10) / 10, unit: 'ms', description: 'Long-term HRV variability (Poincare)' },
+  sd1Sd2Ratio: Math.round(sd1Sd2Ratio * 1000) / 1000,
+  sampleEntropy: { value: sampleEntropy !== null ? Math.round(sampleEntropy * 1000) / 1000 : null, description: 'Signal complexity measure' },
+  dfaAlpha1: { value: dfaAlpha1, reliable: dfaAlpha1Reliable, description: 'Detrended fluctuation analysis' },
+});
+
+/**
+ * Generate RppgRespiratoryExtended from worker metrics
+ */
+export const generateRespiratoryExtended = (
+  breathingRateMean: number,
+  breathingRateSd: number,
+  breathingRateCv: number,
+  stability: 'stable' | 'variable' | 'unstable',
+  breathCyclesDetected: number,
+): RppgRespiratoryExtended => ({
+  breathingRateMean: { value: breathingRateMean, unit: 'breaths/min' },
+  breathingRateSd: { value: breathingRateSd, unit: 'breaths/min' },
+  breathingRateCv,
+  stability,
+  breathCyclesDetected,
 });
 
 /**
@@ -173,11 +216,17 @@ export const generateHrv = (
  */
 export const generateStress = (
   level: 'low' | 'moderate' | 'high' | 'unknown',
-  index: number
+  index: number,
+  description?: string,
+  sympathovagalBalance?: number | null,
+  sdnn?: number,
+  rmssd?: number,
 ): RppgStress => ({
   level,
   index: Math.round(index),
-  description: getStressDescription(level),
+  description: description || getStressDescription(level),
+  sympathovagalBalance,
+  components: sdnn !== undefined && rmssd !== undefined ? { sdnn, rmssd } : undefined,
 });
 
 /**

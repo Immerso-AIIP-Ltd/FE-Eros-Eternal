@@ -7,6 +7,8 @@ import {
   generateVitals,
   generateHrv,
   generateStress,
+  generateNonlinear,
+  generateRespiratoryExtended,
   calculateAverage,
   getStatusColorCode
 } from '../../utils/rppgHelpers';
@@ -463,6 +465,12 @@ const FaceScanner: React.FC = () => {
           if (isReliable && hr > 0) {
             // Convert HR to BPM (same formula as FacePhys-Demo: hr / 30.0 / dval)
             const hrValue = hr / 30.0 / dvalRef.current;
+
+            // Skip warm-up readings below physiological minimum (model needs ~5s to stabilize)
+            if (hrValue < 45) {
+              return;
+            }
+
             setHeartRate(hrValue);
 
             // Send to HRV worker
@@ -970,25 +978,51 @@ const FaceScanner: React.FC = () => {
         if (e.data.type === 'full_data') {
           hrvWorkerRef.current!.removeEventListener('message', handleHrvData);
 
-          const { metrics } = e.data.payload;
+          const { metrics, rrIntervals: rrData, poincareData } = e.data.payload;
+
+          // Filter out any warm-up readings below 45 BPM
+          const stableReadings = hrLogRef.current.filter(([_, hr]) => hr >= 45);
 
           // Calculate average HR from valid readings
-          const validHr = hrLogRef.current.filter(([_, __, s]) => s > SQI_THRESHOLD);
+          const validHr = stableReadings.filter(([_, __, s]) => s > SQI_THRESHOLD);
           const avgHr = validHr.length > 0
             ? calculateAverage(validHr.map(([_, hr]) => hr))
             : heartRate || 72;
 
           // Calculate average SQI
-          const avgSqi = hrLogRef.current.length > 0
-            ? calculateAverage(hrLogRef.current.map(([_, __, s]) => s))
+          const avgSqi = stableReadings.length > 0
+            ? calculateAverage(stableReadings.map(([_, __, s]) => s))
             : sqi || 0.5;
 
           // Generate report data
-          const hrHistory: HrHistoryPoint[] = hrLogRef.current.map(([time, hr, sqi]) => ({
+          const hrHistory: HrHistoryPoint[] = stableReadings.map(([time, hr, sqi]) => ({
             time,
             hr: Math.round(hr),
             sqi: Math.round(sqi * 100) / 100
           }));
+
+          // Build nonlinear metrics
+          const nl = metrics.nonlinear;
+          const nonlinear = nl ? generateNonlinear(
+            nl.sd1 || 0, nl.sd2 || 0, nl.sd1Sd2Ratio || 0,
+            nl.sampleEntropy, nl.dfaAlpha1, nl.dfaAlpha1Reliable || false
+          ) : undefined;
+
+          // Build respiratory extended
+          const re = metrics.respiratoryExtended;
+          const respiratoryExtended = re ? generateRespiratoryExtended(
+            re.breathingRateMean || 0, re.breathingRateSd || 0,
+            re.breathingRateCv || 0, re.stability || 'stable', re.breathCyclesDetected || 0
+          ) : undefined;
+
+          // Build frequency domain
+          const fd = metrics.frequencyDomain;
+          const frequencyDomain = fd ? {
+            vlf: fd.vlf || 0, lf: fd.lf || 0, hf: fd.hf || 0, tp: fd.tp || 0, lfHfRatio: fd.lfHfRatio || 0
+          } : undefined;
+
+          // Build stress with sympathovagal balance
+          const sa = metrics.stressAnalysis;
 
           resolve({
             vitals: generateVitals(
@@ -1000,18 +1034,28 @@ const FaceScanner: React.FC = () => {
               metrics.sdnn || 0,
               metrics.rmssd || 0,
               metrics.pnn50 || 0,
-              metrics.recordingClass || 'insufficient_data'
+              metrics.recordingClass || 'insufficient_data',
+              frequencyDomain,
+              nonlinear,
+              respiratoryExtended,
+              rrData?.length || 0,
             ),
             stress: generateStress(
-              metrics.stressLevel || 'unknown',
-              metrics.stressIndex || 0
+              sa?.stressLevel || metrics.stressLevel || 'unknown',
+              sa?.stressIndex || metrics.stressIndex || 0,
+              sa?.stressDescription,
+              sa?.sympathovagalBalance,
+              metrics.sdnn || 0,
+              metrics.rmssd || 0,
             ),
             metadata: {
               timestamp: new Date().toISOString(),
               scanDurationSeconds: recordingTime,
-              samplesCollected: hrLogRef.current.length
+              samplesCollected: stableReadings.length
             },
-            hrHistory
+            hrHistory,
+            rrIntervals: rrData || [],
+            poincareData: poincareData || [],
           });
         }
       };
@@ -1091,7 +1135,22 @@ const FaceScanner: React.FC = () => {
             rmssd: rppgData?.hrv.rmssd?.value || 35,
             pnn50: rppgData?.hrv.pnn50?.value ? rppgData.hrv.pnn50.value / 100 : 0.15,
             breathing_rate: rppgData?.vitals.breathingRate?.value || 15,
+            frequency_domain: rppgData?.hrv.frequencyDomain || undefined,
+            nonlinear: rppgData?.hrv.nonlinear ? {
+              sd1: rppgData.hrv.nonlinear.sd1.value,
+              sd2: rppgData.hrv.nonlinear.sd2.value,
+              sd1_sd2_ratio: rppgData.hrv.nonlinear.sd1Sd2Ratio,
+              sample_entropy: rppgData.hrv.nonlinear.sampleEntropy.value,
+              dfa_alpha1: rppgData.hrv.nonlinear.dfaAlpha1.value,
+            } : undefined,
+            rr_interval_count: rppgData?.hrv.rrIntervalCount || 0,
           },
+          stress_analysis: rppgData ? {
+            sympathovagal_balance: rppgData.stress.sympathovagalBalance,
+            stress_level: rppgData.stress.level,
+            stress_description: rppgData.stress.description,
+            components: rppgData.stress.components,
+          } : undefined,
           latency: 0.0,
           ai_report: aiReport || "Health assessment completed successfully.",
         },
@@ -1145,10 +1204,11 @@ const FaceScanner: React.FC = () => {
     // Get rPPG metrics for navigation state
     const rppgData = await getFinalRppgMetrics();
 
-    // Generate AI health report for local storage
+    // Generate AI health report + section insights in parallel
     let aiReport = null;
+    let sectionInsights = null;
     try {
-      const { generateHealthReport } = await import('../../services/openaiReport');
+      const { generateHealthReport, generateSectionInsights } = await import('../../services/openaiReport');
       const healthData = {
         vitals: {
           heartRate: rppgData?.vitals.heartRate || { value: Math.round(heartRate) || 72, unit: 'BPM', status: 'NORMAL' },
@@ -1169,7 +1229,44 @@ const FaceScanner: React.FC = () => {
           timestamp: new Date().toISOString(),
         },
       };
-      aiReport = await generateHealthReport(healthData);
+
+      // Build section insights input
+      const fd = rppgData?.hrv.frequencyDomain;
+      const nl = rppgData?.hrv.nonlinear;
+      const re = rppgData?.hrv.respiratoryExtended;
+      const sectionInput = {
+        heartRate: rppgData?.vitals.heartRate?.value || Math.round(heartRate) || 72,
+        heartRateStatus: rppgData?.vitals.heartRate?.status || 'NORMAL',
+        signalQuality: rppgData?.vitals.signalQuality?.percentage || Math.round((sqi || 0.5) * 100),
+        breathingRate: rppgData?.vitals.breathingRate?.value || 15,
+        breathingRateStatus: rppgData?.vitals.breathingRate?.status || 'NORMAL',
+        sdnn: rppgData?.hrv.sdnn?.value || 0,
+        sdnnStatus: rppgData?.hrv.sdnn?.status || 'NORMAL',
+        rmssd: rppgData?.hrv.rmssd?.value || 0,
+        rmssdStatus: rppgData?.hrv.rmssd?.status || 'NORMAL',
+        pnn50: rppgData?.hrv.pnn50?.value || 0,
+        pnn50Status: rppgData?.hrv.pnn50?.status || 'NORMAL',
+        rrIntervalCount: rppgData?.hrv.rrIntervalCount || 0,
+        recordingClass: rppgData?.hrv.recordingClass || 'insufficient_data',
+        vlf: fd?.vlf, lf: fd?.lf, hf: fd?.hf, tp: fd?.tp, lfHfRatio: fd?.lfHfRatio,
+        sd1: nl?.sd1?.value, sd2: nl?.sd2?.value, sd1Sd2Ratio: nl?.sd1Sd2Ratio,
+        sampleEntropy: nl?.sampleEntropy?.value, dfaAlpha1: nl?.dfaAlpha1?.value,
+        stressLevel: rppgData?.stress.level || 'unknown',
+        stressIndex: rppgData?.stress.index || 0,
+        sympathovagalBalance: rppgData?.stress.sympathovagalBalance,
+        breathingRateSd: re?.breathingRateSd?.value,
+        breathingStability: re?.stability,
+        breathCyclesDetected: re?.breathCyclesDetected,
+      };
+
+      // Run both GPT calls in parallel
+      const [reportResult, insightsResult] = await Promise.allSettled([
+        generateHealthReport(healthData),
+        generateSectionInsights(sectionInput),
+      ]);
+
+      aiReport = reportResult.status === 'fulfilled' ? reportResult.value : null;
+      sectionInsights = insightsResult.status === 'fulfilled' ? insightsResult.value : null;
     } catch (err) {
       console.error('Failed to generate AI report:', err);
     }
@@ -1217,6 +1314,7 @@ const FaceScanner: React.FC = () => {
           disclaimer: 'This report is AI-generated and for informational purposes only.',
         }
         : aiReport || undefined,
+      sectionInsights: sectionInsights || undefined,
       apiHealthData: apiRes
         ? {
           heart_rate: apiRes.heart_rate,
