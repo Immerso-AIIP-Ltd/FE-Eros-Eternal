@@ -895,12 +895,16 @@ const FaceScanner: React.FC = () => {
   // Processing progress simulation
   useEffect(() => {
     if (scanState === 'processing') {
+      let sent = false;
       const interval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
-            // When processing completes, send data to API
-            sendScanDataToAPI();
+            // When processing completes, send data to API (only once)
+            if (!sent) {
+              sent = true;
+              sendScanDataToAPI();
+            }
             return 100;
           }
           return prev + 10;
@@ -1072,13 +1076,63 @@ const FaceScanner: React.FC = () => {
   };
 
   // Send scan data to API
+  // Call BP prediction endpoint with raw PPG signal
+  const predictBP = async (): Promise<{ bp_systolic: number; bp_diastolic: number; confidence: number; method: string } | null> => {
+    try {
+      const ppgSignal = bvpLogRef.current
+        .filter(([_, v]) => v !== 0) // skip zero-init values
+        .map(([_, v]) => v);
+
+      if (ppgSignal.length < 150) { // need at least 5 seconds at 30fps
+        console.warn('PPG signal too short for BP prediction:', ppgSignal.length);
+        return null;
+      }
+
+      const userId = localStorage.getItem('user_id');
+      const response = await fetch(
+        `http://164.52.205.108:8500/api/v1/health/bp-predict`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ppg_signal: ppgSignal,
+            sample_rate: 30,
+            scan_duration_seconds: recordingTime,
+            user_id: userId || undefined,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`BP API returned ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success && result.data) {
+        console.log('BP prediction:', result.data);
+        return result.data;
+      }
+      return null;
+    } catch (err) {
+      console.error('BP prediction failed:', err);
+      return null;
+    }
+  };
+
   const sendScanDataToAPI = async () => {
     setIsUploadingData(true);
     setUploadError(null);
 
     try {
-      // Get rPPG metrics
-      const rppgData = await getFinalRppgMetrics();
+      // Get rPPG metrics and BP prediction in parallel
+      const [rppgData, bpResult] = await Promise.all([
+        getFinalRppgMetrics(),
+        predictBP(),
+      ]);
+
+      const bpSystolic = bpResult?.bp_systolic ?? 0;
+      const bpDiastolic = bpResult?.bp_diastolic ?? 0;
+      const bpConfidence = bpResult?.confidence ?? 0;
 
       // Generate AI health report
       let aiReport = null;
@@ -1125,9 +1179,9 @@ const FaceScanner: React.FC = () => {
               value: rppgData?.vitals.signalQuality?.value || sqi || 0.5,
             },
             blood_pressure: {
-              systolic_mmHg: 120, // Default values - adjust based on your actual data
-              diastolic_mmHg: 80,
-              confidence: 0.5,
+              systolic_mmHg: bpSystolic,
+              diastolic_mmHg: bpDiastolic,
+              confidence: bpConfidence,
             },
           },
           hrv: {
@@ -1159,7 +1213,6 @@ const FaceScanner: React.FC = () => {
       // Send data to API
       const userId = localStorage.getItem('user_id');
       const response = await fetch(
-        // 'https://db3e22d7b631.ngrok-free.app/api/v1/health/scan/dbfb40fa-83bc-4f5f-9f13-71429d47b903',
         `http://164.52.205.108:8500/api/v1/health/scan/${userId}`,
         {
           method: 'PUT',
@@ -1177,9 +1230,13 @@ const FaceScanner: React.FC = () => {
       const result = await response.json();
       console.log('API response:', result);
 
-      // Store API response for use in report page
+      // Store API response for use in report page — merge BP data
       if (result.success) {
-        apiResponseRef.current = result.data;
+        apiResponseRef.current = {
+          ...result.data,
+          bp_systolic: bpSystolic || result.data?.bp_systolic || 0,
+          bp_diastolic: bpDiastolic || result.data?.bp_diastolic || 0,
+        };
       }
 
       // Set scan state to complete after successful API call
