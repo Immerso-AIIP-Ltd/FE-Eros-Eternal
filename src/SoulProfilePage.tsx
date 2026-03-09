@@ -146,7 +146,8 @@ const lightTheme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: "transparent",
-          height: "3.5rem",
+          height: "2.75rem",
+          marginBottom: "12px",
           "& input": {
             color: "#000",
           },
@@ -473,16 +474,16 @@ const SoulProfilePage: React.FC = () => {
       padding: 0.5rem !important;
       gap: 0 !important;
     }
-    
+
     .left-side {
       display: none !important;
     }
-    
+
     .right-side {
       flex: 1 1 100% !important;
-      padding: 0.5rem !important;
+      padding: 0 !important;
     }
-    
+
     .soul-profile-form {
       width: 100% !important;
       padding: 1.25rem !important;
@@ -495,7 +496,7 @@ const SoulProfilePage: React.FC = () => {
       width: 300px !important;
       height: 300px !important;
     }
-    
+
     .logo-eros {
       width: 180px !important;
     }
@@ -532,27 +533,29 @@ const SoulProfilePage: React.FC = () => {
       padding: 1rem !important;
       gap: 1rem !important;
     }
-    
+
     .left-side {
       display: none !important;
     }
-    
+
     .right-side {
       flex: 1 1 100% !important;
-      padding: 1rem !important;
+      padding: 0 !important;
     }
-    
+
     .soul-profile-form {
       width: 100% !important;
       padding: 1.75rem !important;
       max-width: 600px !important;
+      overflow-y: visible !important;
+  max-height: none !important;
     }
 
     .rotate-image-bg {
       width: 400px !important;
       height: 400px !important;
     }
-    
+
     .logo-eros {
       width: 220px !important;
     }
@@ -595,6 +598,7 @@ const SoulProfilePage: React.FC = () => {
 
     .right-side {
       flex: 1 1 60% !important;
+      padding: 0 !important;
     }
 
     .soul-profile-form {
@@ -607,7 +611,7 @@ const SoulProfilePage: React.FC = () => {
       width: 500px !important;
       height: 500px !important;
     }
-    
+
     .logo-eros {
       width: 240px !important;
     }
@@ -625,20 +629,25 @@ const SoulProfilePage: React.FC = () => {
 
     .right-side {
       flex: 1 1 55% !important;
+      padding: 0 !important;
     }
 
     .soul-profile-form {
       max-width: 600px !important;
-      padding: 2.25rem !important;
+      padding: 2.5rem !important;
+      gap: 0.75rem !important;
     }
 
     .rotate-image-bg {
       width: 600px !important;
       height: 600px !important;
     }
-    
+
     .logo-eros {
       width: 260px !important;
+    }
+    .soul-profile-form h1 {
+      font-size: 1.35rem !important;
     }
   }
 
@@ -652,7 +661,7 @@ const SoulProfilePage: React.FC = () => {
       width: 700px !important;
       height: 700px !important;
     }
-    
+
     .logo-eros {
       width: 280px !important;
     }
@@ -673,7 +682,7 @@ const SoulProfilePage: React.FC = () => {
       width: 900px !important;
       height: 900px !important;
     }
-    
+
     .logo-eros {
       width: 320px !important;
     }
@@ -747,7 +756,7 @@ const SoulProfilePage: React.FC = () => {
             alignItems: "center",
             justifyContent: "center",
             minHeight: "100vh",
-            padding: "2rem",
+            padding: "1rem",
             gap: "2rem",
             position: "relative",
             zIndex: 1,
@@ -808,7 +817,7 @@ const SoulProfilePage: React.FC = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              padding: "2rem", // Added padding to the container
+              padding: "0", // Added padding to the container
             }}
             className="right-side"
           >
@@ -828,6 +837,10 @@ const SoulProfilePage: React.FC = () => {
                 gap: "1.5rem", // Increased gap between fields
                 fontFamily: "Inter,sans-serif",
                 boxSizing: "border-box",
+                overflowY: "auto",
+                maxHeight: "95vh",
+                scrollbarWidth: "thin",          // Firefox
+                scrollbarColor: "#fafafaff transparent",
               }}
               className="soul-profile-form"
             >
