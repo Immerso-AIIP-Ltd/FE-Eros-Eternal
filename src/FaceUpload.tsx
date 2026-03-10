@@ -259,9 +259,8 @@ const FaceUploadPage: React.FC = () => {
 
   return (
     <div
-      className="vh-100 vw-100 d-flex flex-column"
+      className="min-vh-100 w-100 d-flex flex-column"
       style={{
-        overflow: "auto",
         background:
           "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
 
@@ -299,53 +298,44 @@ const FaceUploadPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Title */}
-      <div className="text-center px-4 mb-4">
-        <h2 className="fw-bold ">{getPageTitle()}</h2>
+      <div className="text-center px-4 mb-3">
+        <h2 className="fw-bold fs-4">{getPageTitle()}</h2>
         <p
-          className=""
-          style={{ maxWidth: 600, margin: "auto", fontSize: "0.95rem" }}
+          className="text-muted"
+          style={{ maxWidth: 500, margin: "auto", fontSize: "0.9rem" }}
         >
           {getPageSubtitle()}
         </p>
       </div>
 
-      {/* Main Content - Top aligned */}
       <div
-        className="d-flex justify-content-center px-4 mb-5"
-        style={{ marginTop: "100px" }}
+        className="d-flex justify-content-center px-3 px-md-4 mb-4 card-container"
+        style={{ marginTop: "20px" }}
       >
         {/* UPLOAD STATE */}
         {pageState === "upload" && (
           <Card
-            className="p-5"
+            className="upload-card shadow-sm"
             style={{
               width: "100%",
-              maxWidth: "750px",
-              // backgroundColor: "#1a1a1a",
-              // border: "1px solid #333",
+              maxWidth: "650px",
               backgroundColor: "#FFFFFF",
-              // backgroundColor: "#1a1a1a",
               border: "1px solid #00B8F8",
               borderRadius: "12px",
             }}
           >
-            <Card.Body>
+            <Card.Body className="p-3 p-md-4">
               <h6 className="text-info text-center mb-4">Upload file</h6>
 
               {/* Drag & Drop Area */}
               <div
                 className="rounded text-center"
                 style={{
-                  // border: "2px dashed #00B8F8",
-                  // cursor: "pointer",
-                  // backgroundColor: "#0d0d0d",
                   border: "2px dashed #00B8F8",
                   cursor: "pointer",
-                  // backgroundColor: "#0d0d0d",
                   backgroundColor: "#00B8F80D",
-                  padding: "80px 40px",
-                  minHeight: "280px",
+                  padding: "40px 20px",
+                  minHeight: "200px",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -358,7 +348,7 @@ const FaceUploadPage: React.FC = () => {
                 <div className="mb-4">
                   <i
                     className="bi bi-upload text-info"
-                    style={{ fontSize: "3.5rem" }}
+                    style={{ fontSize: "2.5rem" }}
                   ></i>
                 </div>
                 <p className="mb-2 " style={{ fontSize: "1.05rem" }}>
@@ -435,17 +425,16 @@ const FaceUploadPage: React.FC = () => {
         {/* PREVIEW STATE */}
         {pageState === "preview" && selectedFile && (
           <Card
-            className="p-5"
+            className="upload-card shadow-sm"
             style={{
               width: "100%",
               maxWidth: "750px",
-              // backgroundColor: "#1a1a1a",
               backgroundColor: "#ffffff",
               border: "1px solid #00B8F8",
               borderRadius: "12px",
             }}
           >
-            <Card.Body>
+            <Card.Body className="p-3 p-md-5">
               <h6 className="text-info text-center mb-4">Face Preview</h6>
 
               {/* Image Preview */}
@@ -512,17 +501,16 @@ const FaceUploadPage: React.FC = () => {
         {/* LOADING STATE */}
         {pageState === "loading" && selectedFile && (
           <Card
-            className="p-5"
+            className="upload-card shadow-sm"
             style={{
               width: "100%",
               maxWidth: "750px",
-              // backgroundColor: "#1a1a1a",
               backgroundColor: "#ffffff",
               border: "1px solid #00B8F8",
               borderRadius: "12px",
             }}
           >
-            <Card.Body>
+            <Card.Body className="p-3 p-md-5">
               <h6 className="text-info text-center mb-4">
                 Uploaded Face Image
               </h6>
@@ -620,6 +608,36 @@ const FaceUploadPage: React.FC = () => {
         onChange={handleFileChange}
         style={{ display: "none" }}
       />
+
+      <style>{`
+        @media (max-width: 768px) {
+          .card-container {
+            margin-top: 20px !important;
+          }
+          .upload-card {
+            border-radius: 12px !important;
+          }
+          .upload-card .card-body {
+            padding: 20px !important;
+          }
+          .upload-card h6 {
+            font-size: 1rem !important;
+          }
+          .upload-card i.bi-upload {
+            font-size: 2.5rem !important;
+          }
+          .upload-card p {
+            font-size: 0.95rem !important;
+          }
+          .upload-card span {
+            font-size: 0.95rem !important;
+          }
+          .upload-card .btn {
+            padding: 8px 16px !important;
+            font-size: 0.9rem !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
