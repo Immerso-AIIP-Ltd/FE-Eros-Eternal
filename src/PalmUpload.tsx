@@ -199,7 +199,7 @@ const PalmUploadPage: React.FC = () => {
           "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
 
         minHeight: "100vh",
-        color:"#000"
+        color: "#000"
       }}
     >
       {/* <Stars /> */}
@@ -226,7 +226,7 @@ const PalmUploadPage: React.FC = () => {
         <button
           className="btn"
           onClick={() => window.history.back()}
-          style={{ fontSize: "1rem", zIndex: 2,color:"#000" }}
+          style={{ fontSize: "1rem", zIndex: 2, color: "#000" }}
         >
           ← Back
         </button>
@@ -255,7 +255,7 @@ const PalmUploadPage: React.FC = () => {
             style={{
               width: "100%",
               maxWidth: "750px",
-              backgroundColor:"#FFFFFF",
+              backgroundColor: "#FFFFFF",
               // backgroundColor: "#1a1a1a",
               border: "1px solid #00B8F8",
               borderRadius: "12px",
@@ -271,7 +271,7 @@ const PalmUploadPage: React.FC = () => {
                   border: "2px dashed #00B8F8",
                   cursor: "pointer",
                   // backgroundColor: "#0d0d0d",
-                  backgroundColor:"#00B8F80D",
+                  backgroundColor: "#00B8F80D",
                   padding: "80px 40px",
                   minHeight: "280px",
                   display: "flex",
@@ -367,7 +367,7 @@ const PalmUploadPage: React.FC = () => {
             style={{
               width: "100%",
               maxWidth: "750px",
-               backgroundColor:"#ffffff",
+              backgroundColor: "#ffffff",
               // backgroundColor: "#1a1a1a",
               border: "1px solid #00B8F8",
               borderRadius: "12px",
@@ -382,7 +382,7 @@ const PalmUploadPage: React.FC = () => {
                 style={{
                   width: "100%",
                   minHeight: "280px",
-                  backgroundColor:"#ffffff",
+                  backgroundColor: "#ffffff",
                   // backgroundColor: "#0d0d0d",
                   display: "flex",
                   alignItems: "center",
@@ -411,7 +411,7 @@ const PalmUploadPage: React.FC = () => {
               {/* Buttons */}
               <div className="d-flex justify-content-end mt-4 gap-3">
                 <Button
-                  variant="outline-danger"
+                  variant=""
                   onClick={handleCancel}
                   style={{
                     borderColor: "#dc3545",
@@ -445,7 +445,7 @@ const PalmUploadPage: React.FC = () => {
               width: "100%",
               maxWidth: "750px",
               // backgroundColor: "#1a1a1a",
-              backgroundColor:"#ffffff",
+              backgroundColor: "#ffffff",
               border: "1px solid #00B8F8",
               borderRadius: "12px",
             }}
@@ -459,7 +459,7 @@ const PalmUploadPage: React.FC = () => {
                 style={{
                   border: "2px dashed #00B8F8",
                   // backgroundColor: "#0d0d0d",
-                   backgroundColor:"#ffffff",
+                  backgroundColor: "#ffffff",
                   minHeight: "200px",
                   display: "flex",
                   flexDirection: "column",

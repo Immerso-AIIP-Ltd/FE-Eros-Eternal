@@ -406,7 +406,7 @@ const FaceUploadPage: React.FC = () => {
               {/* Buttons */}
               <div className="d-flex justify-content-end mt-4 gap-3">
                 <Button
-                  variant="outline-danger"
+                  variant=""
                   onClick={handleCancel}
                   style={{
                     borderColor: "#dc3545",
@@ -483,7 +483,7 @@ const FaceUploadPage: React.FC = () => {
               {/* Buttons */}
               <div className="d-flex justify-content-end mt-4 gap-3">
                 <Button
-                  variant="outline-danger"
+                  variant=""
                   onClick={handleCancel}
                   style={{
                     borderColor: "#dc3545",

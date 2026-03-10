@@ -261,8 +261,8 @@ const RelationshipCompatibility: React.FC = () => {
                   {data.compatibility_score >= 80
                     ? "Excellent compatibility! You share a strong connection."
                     : data.compatibility_score >= 60
-                    ? "Good compatibility with room for growth."
-                    : "Challenging compatibility that requires effort."}
+                      ? "Good compatibility with room for growth."
+                      : "Challenging compatibility that requires effort."}
                 </p>
               </Card.Body>
             </Card>
@@ -719,7 +719,7 @@ const RelationshipCompatibility: React.FC = () => {
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center p-4">
           <button
-            className="btn btn-outline-dark"
+            className="btn"
             onClick={() => navigate("/result")}
             style={{ fontSize: "1rem", position: "relative", zIndex: 1000 }}
           >
