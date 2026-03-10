@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from 'react-router-dom';
 import TarotCard from "./TarrotCard"; 
 import "./harmony.css";
+import "./HarmonyIndex.css";
 import { BsArrowLeft } from "react-icons/bs";
 import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "./components/Tarot/TarotCardSelector";
@@ -185,7 +186,7 @@ const HarmonyIndex: React.FC = () => {
       )} */}
 
       {step === 1 && (
-  <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
+  <div className="harmony-intro-screen d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
     {/* Back button - EXACT Tarot style */}
     <button
       onClick={() => navigate("/result")}
@@ -208,7 +209,7 @@ const HarmonyIndex: React.FC = () => {
     </button>
 
     {/* Harmony image section - top 75% with gradient overlay */}
-    <div className="position-relative" style={{ height: '75vh', overflow: 'hidden' }}>
+    <div className="harmony-intro-image-section position-relative" style={{ height: '75vh', overflow: 'hidden' }}>
       <img
         src={Harmony}
         alt="Harmony Index Background"
@@ -227,7 +228,7 @@ const HarmonyIndex: React.FC = () => {
 
     {/* Content section - bottom 25% with EXACT Tarot styling */}
     <div 
-      className="d-flex flex-column align-items-center justify-content-center text-center px-4" 
+      className="harmony-intro-content-section d-flex flex-column align-items-center justify-content-center text-center px-4" 
       style={{ 
         backgroundColor: 'rgb(255, 255, 255)', 
         height: '25vh',
@@ -235,10 +236,10 @@ const HarmonyIndex: React.FC = () => {
         paddingBottom: '2rem'
       }}
     >
-      <h3 className="fw-semibold mb-3" style={{ fontSize: '1.8rem', color: '#000' }}>
+      <h3 className="harmony-intro-title fw-semibold mb-3" style={{ fontSize: '1.8rem', color: '#000' }}>
         Unlock the Secrets of Your Relationship
       </h3>
-      <p className="mb-4" style={{ color: '#6B7280', fontSize: '0.9rem', maxWidth: '600px' }}>
+      <p className="harmony-intro-desc mb-4" style={{ color: '#6B7280', fontSize: '0.9rem', maxWidth: '600px' }}>
         Discover insights into your personality, relationship, and future with our AI-powered
       </p>
       <button
