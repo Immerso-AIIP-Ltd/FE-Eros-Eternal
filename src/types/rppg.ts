@@ -52,6 +52,7 @@ export interface RppgHrv {
   sdnn: { value: number; unit: 'ms'; status: string };
   rmssd: { value: number; unit: 'ms'; status: string };
   pnn50: { value: number; unit: '%'; status: string };
+  pnn20: { value: number; unit: '%'; status: string };
   recordingClass: 'insufficient_data' | 'ultra-short' | 'short-term' | 'standard';
   frequencyDomain?: RppgFrequencyDomain;
   nonlinear?: RppgNonlinear;
@@ -141,6 +142,7 @@ export interface TimeDomainHRV {
   sdnn: VitalMeasurement;
   rmssd: VitalMeasurement;
   pnn50: VitalMeasurement;
+  pnn20: VitalMeasurement;
 }
 
 /**

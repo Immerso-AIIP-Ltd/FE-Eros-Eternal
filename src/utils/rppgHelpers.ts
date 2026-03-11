@@ -117,6 +117,16 @@ export const calculatePnn50Status = (pnn50: number): string => {
 };
 
 /**
+ * Calculate pNN20 status - adapted threshold for rPPG-derived RR intervals.
+ * pNN20 is more sensitive than pNN50 and better suited for HR-derived data.
+ */
+export const calculatePnn20Status = (pnn20: number): string => {
+  if (pnn20 < 5) return 'LOW';
+  if (pnn20 > 75) return 'HIGH';
+  return 'NORMAL';
+};
+
+/**
  * Generate complete RppgVitals object from raw values
  */
 export const generateVitals = (
@@ -153,6 +163,7 @@ export const generateHrv = (
   nonlinear?: RppgNonlinear,
   respiratoryExtended?: RppgRespiratoryExtended,
   rrIntervalCount?: number,
+  pnn20?: number,
 ): RppgHrv => ({
   sdnn: {
     value: Math.round(sdnn * 10) / 10,
@@ -168,6 +179,11 @@ export const generateHrv = (
     value: Math.round(pnn50 * 10) / 10,
     unit: '%',
     status: calculatePnn50Status(pnn50),
+  },
+  pnn20: {
+    value: Math.round((pnn20 ?? 0) * 10) / 10,
+    unit: '%',
+    status: calculatePnn20Status(pnn20 ?? 0),
   },
   recordingClass,
   frequencyDomain,

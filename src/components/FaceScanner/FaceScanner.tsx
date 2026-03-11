@@ -1043,6 +1043,7 @@ const FaceScanner: React.FC = () => {
               nonlinear,
               respiratoryExtended,
               rrData?.length || 0,
+              metrics.pnn20 || 0,
             ),
             stress: generateStress(
               sa?.stressLevel || metrics.stressLevel || 'unknown',
@@ -1148,6 +1149,7 @@ const FaceScanner: React.FC = () => {
             sdnn: rppgData?.hrv.sdnn || { value: 45, unit: 'ms', status: 'NORMAL' },
             rmssd: rppgData?.hrv.rmssd || { value: 35, unit: 'ms', status: 'NORMAL' },
             pnn50: rppgData?.hrv.pnn50 || { value: 15, unit: '%', status: 'NORMAL' },
+            pnn20: rppgData?.hrv.pnn20 || { value: 25, unit: '%', status: 'NORMAL' },
           },
           stress: {
             level: rppgData?.stress.level || 'moderate',
@@ -1276,6 +1278,7 @@ const FaceScanner: React.FC = () => {
           sdnn: rppgData?.hrv.sdnn || { value: 45, unit: 'ms', status: 'NORMAL' },
           rmssd: rppgData?.hrv.rmssd || { value: 35, unit: 'ms', status: 'NORMAL' },
           pnn50: rppgData?.hrv.pnn50 || { value: 15, unit: '%', status: 'NORMAL' },
+          pnn20: rppgData?.hrv.pnn20 || { value: 25, unit: '%', status: 'NORMAL' },
         },
         stress: {
           level: rppgData?.stress.level || 'moderate',
@@ -1303,6 +1306,8 @@ const FaceScanner: React.FC = () => {
         rmssdStatus: rppgData?.hrv.rmssd?.status || 'NORMAL',
         pnn50: rppgData?.hrv.pnn50?.value || 0,
         pnn50Status: rppgData?.hrv.pnn50?.status || 'NORMAL',
+        pnn20: rppgData?.hrv.pnn20?.value || 0,
+        pnn20Status: rppgData?.hrv.pnn20?.status || 'NORMAL',
         rrIntervalCount: rppgData?.hrv.rrIntervalCount || 0,
         recordingClass: rppgData?.hrv.recordingClass || 'insufficient_data',
         vlf: fd?.vlf, lf: fd?.lf, hf: fd?.hf, tp: fd?.tp, lfHfRatio: fd?.lfHfRatio,
@@ -1348,6 +1353,7 @@ const FaceScanner: React.FC = () => {
           sdnn: { value: 45, unit: 'ms', status: 'NORMAL' },
           rmssd: { value: 35, unit: 'ms', status: 'NORMAL' },
           pnn50: { value: 15, unit: '%', status: 'NORMAL' },
+          pnn20: { value: 25, unit: '%', status: 'NORMAL' },
           recordingClass: 'ultra-short',
         },
         stress: {
