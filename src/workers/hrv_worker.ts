@@ -40,6 +40,7 @@ interface HrvMetrics {
   sdnn: number;
   rmssd: number;
   pnn50: number;
+  pnn20: number;
   sd1: number;
   sd2: number;
   respiratoryRate: number;
@@ -77,7 +78,7 @@ const defaultRespiratoryExtended: RespiratoryExtended = { breathingRateMean: 0, 
 const defaultStressAnalysis: StressAnalysisData = { sympathovagalBalance: null, stressLevel: 'unknown', stressIndex: 0, stressDescription: 'Insufficient HRV data' };
 
 let currentMetrics: HrvMetrics = {
-  sdnn: 0, rmssd: 0, pnn50: 0, sd1: 0, sd2: 0,
+  sdnn: 0, rmssd: 0, pnn50: 0, pnn20: 0, sd1: 0, sd2: 0,
   respiratoryRate: 0, stressLevel: 'unknown', stressIndex: 0,
   recordingClass: 'insufficient_data',
   frequencyDomain: { ...defaultFrequencyDomain },
@@ -88,7 +89,7 @@ let currentMetrics: HrvMetrics = {
 
 function resetMetrics(): HrvMetrics {
   return {
-    sdnn: 0, rmssd: 0, pnn50: 0, sd1: 0, sd2: 0,
+    sdnn: 0, rmssd: 0, pnn50: 0, pnn20: 0, sd1: 0, sd2: 0,
     respiratoryRate: 0, stressLevel: 'unknown', stressIndex: 0,
     recordingClass: 'insufficient_data',
     frequencyDomain: { ...defaultFrequencyDomain },
@@ -189,6 +190,7 @@ function calculateMetrics(isFinal: boolean) {
   currentMetrics.sdnn = calculateSDNN(validRR);
   currentMetrics.rmssd = calculateRMSSD(validRR);
   currentMetrics.pnn50 = calculatePNN50(validRR);
+  currentMetrics.pnn20 = calculatePNNx(validRR, 20);
 
   // Poincare (SD1/SD2)
   const { sd1, sd2 } = calculatePoincare(validRR);
@@ -250,6 +252,24 @@ function calculatePNN50(rrIntervals: number[]): number {
   let total = 0;
   for (let i = 1; i < rrIntervals.length; i++) {
     if (Math.abs(rrIntervals[i] - rrIntervals[i - 1]) > 50) {
+      count++;
+    }
+    total++;
+  }
+  return total > 0 ? (count / total) * 100 : 0;
+}
+
+/**
+ * Generalized pNNx: percentage of successive RR differences exceeding x ms.
+ * pNN20 is more suitable for rPPG-derived RR intervals where HR-based
+ * computation produces smaller beat-to-beat differences than ECG peak detection.
+ */
+function calculatePNNx(rrIntervals: number[], thresholdMs: number): number {
+  if (rrIntervals.length < 2) return 0;
+  let count = 0;
+  let total = 0;
+  for (let i = 1; i < rrIntervals.length; i++) {
+    if (Math.abs(rrIntervals[i] - rrIntervals[i - 1]) > thresholdMs) {
       count++;
     }
     total++;

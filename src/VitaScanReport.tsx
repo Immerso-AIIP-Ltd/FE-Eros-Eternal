@@ -401,7 +401,8 @@ const VitaScanReport: React.FC = () => {
                             {[
                                 { label: "SDNN", value: "76ms", status: "Normal" },
                                 { label: "RMSSD", value: "106.1ms", status: "High" },
-                                { label: "pNN50", value: "61.5%", status: "High" },
+                                { label: "pNN20", value: "42.3%", status: "Normal" },
+                                { label: "pNN50", value: "18.5%", status: "Normal" },
                             ].map((item, idx) => (
                                 <div key={idx} className="d-flex justify-content-between align-items-center mb-3 pb-3" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.1)" }}>
                                     <span className="text-white" style={{ fontSize: "14px" }}>{item.label}</span>
