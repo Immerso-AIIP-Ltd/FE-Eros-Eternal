@@ -15,7 +15,7 @@ import Stars from "./components/stars";
 
 // Define proper types
 interface ChartImage {
-  original?: string;
+  // original?: string;
   inline?: string;
   attachment?: string;
 }
@@ -112,12 +112,12 @@ const RasiChartPage: React.FC = () => {
             chartImages: {
               rasiChart: {
                 inline: rasiUrl || "",
-                original: rasiUrl || "",
+                // original: rasiUrl || "",
                 attachment: rasiUrl || "",
               },
               navamshaChart: {
                 inline: navamshaUrl || "",
-                original: navamshaUrl || "",
+                // original: navamshaUrl || "",
                 attachment: navamshaUrl || "",
               },
             },
@@ -385,17 +385,22 @@ const RasiChartPage: React.FC = () => {
         <Row className="g-4">
           {/* Rasi Chart */}
           <Col md={6}>
-            <Card className="h-100"   style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
+            <Card
+              className="h-100"
+              style={{ backgroundColor: "#FFFFFF", color: "#000" }}
+            >
               <Card.Body className="d-flex flex-column">
-                <Card.Title className="text-center" style={{color:"#000"}}>
+                <Card.Title className="text-center" style={{ color: "#000" }}>
                   Rasi Chart
                 </Card.Title>
-                <p className=" text-center"  style={{color:"#000"}}>Individual Chart</p>
+                <p className=" text-center" style={{ color: "#000" }}>
+                  Individual Chart
+                </p>
                 <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
                   {rasiChart?.inline ? (
                     <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
                       {/* Render as iframe for URLs */}
-                      <iframe
+                      {/*  <iframe
                         src={rasiChart.inline.trim()}
                         title="Rasi Chart"
                         width="100%"
@@ -404,7 +409,6 @@ const RasiChartPage: React.FC = () => {
                           borderRadius: "8px",
                           overflow: "hidden",
                           border: "none",
-                          // backgroundColor: "white",
                         }}
                         onLoad={() =>
                           console.log("✅ Rasi iframe loaded successfully")
@@ -412,6 +416,16 @@ const RasiChartPage: React.FC = () => {
                         onError={(e) =>
                           console.error("❌ Rasi iframe error:", e)
                         }
+                      />*/}
+                      <img
+                        src={rasiChart.inline.trim()}
+                        alt="Rasi Chart"
+                        style={{
+                          width: "100%",
+                          borderRadius: "8px",
+                          border: "none",
+                        }}
+                        onError={(e) => console.error("❌ Rasi img error:", e)}
                       />
                     </div>
                   ) : (
@@ -453,17 +467,22 @@ const RasiChartPage: React.FC = () => {
 
           {/* Navamsha Chart */}
           <Col md={6}>
-            <Card className="h-100"   style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
+            <Card
+              className="h-100"
+              style={{ backgroundColor: "#FFFFFF", color: "#000" }}
+            >
               <Card.Body className="d-flex flex-column">
-                <Card.Title className=" text-center"  style={{color:"#000"}}>
+                <Card.Title className=" text-center" style={{ color: "#000" }}>
                   Navamsha Chart
                 </Card.Title>
-                <p className=" text-center"  style={{color:"#000"}}>Life Partner Chart</p>
+                <p className=" text-center" style={{ color: "#000" }}>
+                  Life Partner Chart
+                </p>
                 <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
                   {navamshaChart?.inline ? (
                     <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
                       {/* Render as iframe for URLs */}
-                      <iframe
+                      {/* <iframe
                         src={navamshaChart.inline.trim()}
                         title="Navamsha Chart"
                         width="100%"
@@ -478,6 +497,14 @@ const RasiChartPage: React.FC = () => {
                         }
                         onError={(e) =>
                           console.error("❌ Navamsha iframe error:", e)
+                        }
+                      /> */}
+                      <img
+                        src={navamshaChart.inline.trim()}
+                        alt="Navamsha Chart"
+                        style={{ width: "100%", border: "none" }}
+                        onError={(e) =>
+                          console.error("❌ Navamsha img error:", e)
                         }
                       />
                     </div>

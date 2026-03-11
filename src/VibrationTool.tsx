@@ -93,7 +93,7 @@ const VibrationTool: React.FC = () => {
 
   // New states for API integration
   const [currentReportType, setCurrentReportType] = useState<string>(
-    "vibrational_frequency"
+    "vibrational_frequency",
   );
   const [assessmentStatus, setAssessmentStatus] =
     useState<string>("not_started");
@@ -190,7 +190,8 @@ const VibrationTool: React.FC = () => {
         <audio ref={audioRef} src={voiceData.url} preload="metadata" />
         <button
           onClick={togglePlay}
-          className="hover:bg-cyan-600 text-white rounded-full p-2 transition-colors flex-shrink-0" style={{ "backgroundColor": "#00B8DB" }}
+          className="hover:bg-cyan-600 text-white rounded-full p-2 transition-colors flex-shrink-0"
+          style={{ backgroundColor: "#00B8DB" }}
         >
           {isPlaying ? <Pause size={16} /> : <Play size={16} />}
         </button>
@@ -212,7 +213,8 @@ const VibrationTool: React.FC = () => {
         </div>
         <span
           onClick={onRemove}
-          className="text-gray-500 hover:text-red-500 transition-colors flex-shrink-0 bg-transparent" role="button"
+          className="text-gray-500 hover:text-red-500 transition-colors flex-shrink-0 bg-transparent"
+          role="button"
         >
           <X size={16} />
         </span>
@@ -252,7 +254,7 @@ const VibrationTool: React.FC = () => {
       y: Math.random() * 100,
       opacity: 0.3 + Math.random() * 0.7,
       size: Math.random() * 2 + 1,
-    }))
+    })),
   );
 
   useEffect(() => {
@@ -285,7 +287,7 @@ const VibrationTool: React.FC = () => {
               reportType: reportType,
               userId: localStorage.getItem("user_id"),
               title: sidebarMenuItems.find(
-                (item) => item.reportType === reportType
+                (item) => item.reportType === reportType,
               )?.label,
             },
           });
@@ -322,7 +324,7 @@ const VibrationTool: React.FC = () => {
           body: new URLSearchParams({
             report_type: reportType,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -418,7 +420,7 @@ const VibrationTool: React.FC = () => {
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
 
       const data = await response.json();
@@ -489,7 +491,7 @@ const VibrationTool: React.FC = () => {
           body: new URLSearchParams({
             report_type: currentReportType,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -567,9 +569,7 @@ const VibrationTool: React.FC = () => {
   };
 
   const formatKey = (key: string) => {
-    return key
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+    return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
   const renderReportDynamic = (report: any) => {
@@ -655,43 +655,40 @@ const VibrationTool: React.FC = () => {
 
   // };
 
-const openCamera = async () => {
-  try {
-    setShowCamera(true); // Open modal first
+  const openCamera = async () => {
+    try {
+      setShowCamera(true); // Open modal first
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: "user",
-      },
-      audio: false,
-    });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user",
+        },
+        audio: false,
+      });
 
-    // Small delay to ensure modal renders
-    setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-    }, 200);
-  } catch (error: any) {
-    console.error("Camera error:", error);
-    alert("Unable to access camera.");
+      // Small delay to ensure modal renders
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
+      }, 200);
+    } catch (error: any) {
+      console.error("Camera error:", error);
+      alert("Unable to access camera.");
+      setShowCamera(false);
+    }
+  };
+
+  const closeCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+
     setShowCamera(false);
-  }
-};
-
-
-
-const closeCamera = () => {
-  if (videoRef.current && videoRef.current.srcObject) {
-    const stream = videoRef.current.srcObject as MediaStream;
-    stream.getTracks().forEach((track) => track.stop());
-    videoRef.current.srcObject = null;
-  }
-
-  setShowCamera(false);
-};
-
+  };
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -763,7 +760,7 @@ const closeCamera = () => {
         const recordedFile = new File(
           [audioBlob],
           `recording_${Date.now()}.webm`,
-          { type: "audio/webm" }
+          { type: "audio/webm" },
         );
         setAttachedVoices((prev) => [
           ...prev,
@@ -826,7 +823,7 @@ const closeCamera = () => {
 
     try {
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
+        `http://164.52.205.108:8500/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
       );
 
       return response.ok && response.status === 200;
@@ -854,14 +851,26 @@ const closeCamera = () => {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, isGeneratingReport]);
+
+  useEffect(() => {
+    if (isGeneratingReport || isLoading) {
+      setTimeout(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop =
+            chatContainerRef.current.scrollHeight;
+        }
+      }, 100);
+    }
+  }, [isGeneratingReport, isLoading]);
 
   return (
     <div
       className="d-flex w-100 h-100 min-vh-100 min-vw-100 text-gray-800 overflow-hidden"
       style={{
         backgroundColor: "red",
-        backgroundImage: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 20%, #FFFFFF 40%)"
+        backgroundImage:
+          "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 20%, #FFFFFF 40%)",
       }}
     >
       <Stars />
@@ -876,7 +885,7 @@ const closeCamera = () => {
               opacity: star.opacity * 0.4,
               top: `${star.y}%`,
               left: `${star.x}%`,
-              background: '#60A5FA',
+              background: "#60A5FA",
               animationDelay: `${Math.random() * 3}s`,
               animationDuration: `${2 + Math.random() * 2}s`,
             }}
@@ -922,53 +931,52 @@ const closeCamera = () => {
       )} */}
 
       {showCamera && (
-  <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-    <div className="bg-white rounded-2xl shadow-2xl w-[400px] max-w-[95%] p-4 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-[400px] max-w-[95%] p-4 relative">
+            {/* Close Button */}
+            <button
+              onClick={closeCamera}
+              className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-2"
+            >
+              <X size={18} />
+            </button>
 
-      {/* Close Button */}
-      <button
-        onClick={closeCamera}
-        className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-2"
-      >
-        <X size={18} />
-      </button>
+            <h3 className="text-center font-semibold mb-3 text-gray-800">
+              Capture Photo
+            </h3>
 
-      <h3 className="text-center font-semibold mb-3 text-gray-800">
-        Capture Photo
-      </h3>
+            {/* Camera Preview */}
+            <div className="rounded-xl overflow-hidden bg-black">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-[300px] object-cover"
+              />
+            </div>
 
-      {/* Camera Preview */}
-      <div className="rounded-xl overflow-hidden bg-black">
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="w-full h-[300px] object-cover"
-        />
-      </div>
+            <canvas ref={canvasRef} className="hidden" />
 
-      <canvas ref={canvasRef} className="hidden" />
+            {/* Buttons */}
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={capturePhoto}
+                className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-full"
+              >
+                Capture
+              </button>
 
-      {/* Buttons */}
-      <div className="flex justify-center gap-4 mt-4">
-        <button
-          onClick={capturePhoto}
-          className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-full"
-        >
-          Capture
-        </button>
-
-        <button
-          onClick={closeCamera}
-          className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-full"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+              <button
+                onClick={closeCamera}
+                className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-full"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 
       {sidebarOpen && (
@@ -1064,7 +1072,7 @@ const closeCamera = () => {
       </div> */}
 
       <div className="flex-1 flex flex-col relative z-10 h-screen">
-        <div className="flex items-center justify-between p-4 bg-opacity-80 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-3 py-2 sm:p-4 bg-opacity-80 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <button
               className="md:hidden text-gray-600 hover:text-gray-800"
@@ -1080,7 +1088,7 @@ const closeCamera = () => {
           </div>
           <div className="flex items-center gap-4">
             <div
-              className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-gray-400 transition-colors"
+              className="w-10 h-10 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-gray-400 transition-colors"
               onClick={() => navigate("/result")}
               style={{ cursor: "pointer" }}
             >
@@ -1094,7 +1102,7 @@ const closeCamera = () => {
                 src={credits}
                 alt="Credits"
                 style={{
-                  height: "34px",
+                  height: "clamp(22px, 3.5vw, 34px)",
                   width: "auto",
                   marginLeft: "-6px",
                   objectFit: "contain",
@@ -1109,7 +1117,7 @@ const closeCamera = () => {
             ref={chatContainerRef}
             className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar"
             style={{
-              maxWidth: "65%",
+              maxWidth: "min(65%, 90vw)",
               margin: "0 auto",
               width: "100%",
             }}
@@ -1129,7 +1137,7 @@ const closeCamera = () => {
                 <div className="text-center">
                   <div className="mb-4">
                     <div className="w-16 h-16 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <i className="bi bi-stars" style={{ "color": "#fff" }}></i>
+                      <i className="bi bi-stars" style={{ color: "#fff" }}></i>
                     </div>
                   </div>
                   <div className="leading-relaxed">
@@ -1153,7 +1161,13 @@ const closeCamera = () => {
                             <User size={18} className="text-white" />
                           </div>
                         </div>
-                        <div className="text-dark rounded-2xl rounded-tr-md px-4 py-3 max-w-xs lg:max-w-md font-semibold" style={{ "backgroundColor": "#188BEF1F", "border": "1px solid #188BEF1F" }}>
+                        <div
+                          className="text-dark rounded-2xl rounded-tr-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-md text-sm sm:text-md font-semibold"
+                          style={{
+                            backgroundColor: "#188BEF1F",
+                            border: "1px solid #188BEF1F",
+                          }}
+                        >
                           {message.imageList &&
                             message.imageList.length > 0 && (
                               <div className="mb-2">
@@ -1189,10 +1203,13 @@ const closeCamera = () => {
                     ) : (
                       <div className="flex flex-col items-start gap-2 mb-4">
                         <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                          <i className="bi bi-stars" style={{ "color": "#fff" }}></i>
+                          <i
+                            className="bi bi-stars"
+                            style={{ color: "#fff" }}
+                          ></i>
                         </div>
                         <div
-                          className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl"
+                          className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-2xl text-sm sm:text-md"
                           style={{
                             border: "1px solid rgba(0, 0, 0, 0.1)",
                           }}
@@ -1215,9 +1232,12 @@ const closeCamera = () => {
                 {(isLoading || isGeneratingReport) && (
                   <div className="flex flex-col items-start gap-2 mb-4">
                     <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <i className="bi bi-stars" style={{ "color": "#fff" }}></i>
+                      <i className="bi bi-stars" style={{ color: "#fff" }}></i>
                     </div>
-                    <div className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3" style={{ "border": "1px solid #E6E6E6" }}>
+                    <div
+                      className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3"
+                      style={{ border: "1px solid #E6E6E6" }}
+                    >
                       <div className="flex items-center gap-2">
                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-cyan-500 border-t-transparent"></div>
                         <span className="text-sm">
@@ -1258,7 +1278,7 @@ const closeCamera = () => {
               <div
                 className="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
                 style={{
-                  maxWidth: "65%",
+                  maxWidth: "min(65%, 92vw)",
                   margin: "0 auto",
                   width: "100%",
                   border: "1px solid rgba(0, 0, 0, 0.1)",
@@ -1364,13 +1384,27 @@ const closeCamera = () => {
                           }
                           className="d-flex align-items-center justify-content-center border-0 rounded-pill px-4 py-2"
                           style={{
-                            backgroundColor: isLoading || isGeneratingReport || (!inputValue.trim() && attachedImages.length === 0 && attachedVoices.length === 0) ? "#E5E7EB" : "#06B6D4",
+                            backgroundColor:
+                              isLoading ||
+                              isGeneratingReport ||
+                              (!inputValue.trim() &&
+                                attachedImages.length === 0 &&
+                                attachedVoices.length === 0)
+                                ? "#E5E7EB"
+                                : "#06B6D4",
                             color: "white",
                             fontSize: "14px",
                             fontWeight: "500",
                             gap: "6px",
                             minWidth: "80px",
-                            cursor: isLoading || isGeneratingReport || (!inputValue.trim() && attachedImages.length === 0 && attachedVoices.length === 0) ? "not-allowed" : "pointer"
+                            cursor:
+                              isLoading ||
+                              isGeneratingReport ||
+                              (!inputValue.trim() &&
+                                attachedImages.length === 0 &&
+                                attachedVoices.length === 0)
+                                ? "not-allowed"
+                                : "pointer",
                           }}
                         >
                           Send
@@ -1410,8 +1444,7 @@ const closeCamera = () => {
               className="text-center text-xs text-gray-600"
               style={{ maxWidth: "65%", margin: "0 auto", width: "100%" }}
             >
-              <div className="flex items-center justify-center text-xs">
-              </div>
+              <div className="flex items-center justify-center text-xs"></div>
             </div>
           </div>
         </div>
