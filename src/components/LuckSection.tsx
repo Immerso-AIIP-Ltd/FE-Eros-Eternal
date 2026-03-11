@@ -150,7 +150,7 @@ export const LuckSection: React.FC = () => {
   ];
 
   const renderHoroscopeBack = () => (
-    <div style={backContainerStyle}>
+    <div style={backContainerStyle} className="back-scroll">
       <h4 style={backTitleStyle}>Horoscope: {horoscope?.zodiac_sign}</h4>
       {loading[0] ? <p style={loadingStyle}>Loading horoscope...</p> : error[0] ? <p style={errorStyle}>{error[0]}</p> : (
         <>
@@ -162,7 +162,7 @@ export const LuckSection: React.FC = () => {
   );
 
   const renderPersonalMonthBack = () => (
-    <div style={backContainerStyle}>
+    <div style={backContainerStyle} className="back-scroll">
       <h4 style={backTitleStyle}>Personal Month: <strong>{personalMonth?.personal_month_number || "?"}</strong></h4>
       {loading[1] ? <p style={loadingStyle}>Calculating your energy...</p> : error[1] ? <p style={errorStyle}>{error[1]}</p> : personalMonth ? (
         <p style={backQuote}>"{personalMonth.detailed_meaning}"</p>
@@ -171,7 +171,7 @@ export const LuckSection: React.FC = () => {
   );
 
   const renderLuckyNumbersBack = () => (
-    <div style={backContainerStyle}>
+    <div style={backContainerStyle} className="back-scroll">
       <h4 style={backTitleStyle}>Your Numerology Numbers</h4>
       {loading[2] ? <p style={loadingStyle}>Loading numbers...</p> : error[2] ? <p style={errorStyle}>{error[2]}</p> : luckyNumbers ? (
         <>
@@ -188,7 +188,8 @@ export const LuckSection: React.FC = () => {
   const backContainerStyle: React.CSSProperties = {
     display: "flex", flexDirection: "column", gap: "8px",
     textAlign: "center", color: "#6b6380", fontSize: "14px",
-    fontWeight: 500, lineHeight: 1.6, padding: "0 14px",
+    fontWeight: 500, lineHeight: 1.6, padding: "10px 14px",
+    overflowY: "auto", maxHeight: "100%", width: "100%", boxSizing: "border-box"
   };
   const backTitleStyle: React.CSSProperties = {
     margin: "0 0 10px 0", color: "#2a2040", fontSize: "17px", fontWeight: "700",
@@ -375,8 +376,8 @@ export const LuckSection: React.FC = () => {
       </div>
 
       <style>{`
-        .luck-cards-container::-webkit-scrollbar { display: none; }
-        .luck-cards-container { scrollbar-width: none; }
+        .luck-cards-container::-webkit-scrollbar, .back-scroll::-webkit-scrollbar { display: none; }
+        .luck-cards-container, .back-scroll { scrollbar-width: none; }
 
         .card-glitter {
           background: linear-gradient(45deg, 
