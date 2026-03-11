@@ -3,6 +3,7 @@ import React, { useState, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import TarotCard from "./TarrotCard"; // your third screen
 import "./Tarot.css";
+import "./TarrotFlow.css";
 import { BsArrowLeft } from "react-icons/bs";
 import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "./components/Tarot/TarotCardSelector";
@@ -100,7 +101,7 @@ const TarotFlow: React.FC = () => {
     <div className="tarot-container d-flex flex-column min-vh-100 min-vw-100" style={{ backgroundColor: "rgb(255, 255, 255)" }}>
 
       {step === 1 && (
-        <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
+        <div className="tarot-intro-screen d-flex flex-column min-vh-100 min-vw-100 position-relative overflow-hidden" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
           {/* Back button */}
           <button
             onClick={() => navigate("/result")}
@@ -124,7 +125,7 @@ const TarotFlow: React.FC = () => {
           </button>
 
           {/* Tarot card image section - top 75% */}
-          <div className="position-relative" style={{ height: '75vh', overflow: 'hidden' }}>
+          <div className="tarot-intro-image-section position-relative" style={{ height: '75vh', overflow: 'hidden' }}>
             <img
               src={Tarrot}
               alt="Tarot Cards"
@@ -143,7 +144,7 @@ const TarotFlow: React.FC = () => {
 
           {/* Content section - bottom 25% */}
           <div 
-            className="d-flex flex-column align-items-center justify-content-center text-center px-4" 
+            className="tarot-intro-content-section d-flex flex-column align-items-center justify-content-center text-center px-4" 
             style={{ 
               backgroundColor: 'rgb(255, 255, 255)', 
               height: '25vh',
@@ -151,10 +152,10 @@ const TarotFlow: React.FC = () => {
               paddingBottom: '2rem'
             }}
           >
-            <h3 className="fw-semibold mb-3" style={{ fontSize: '1.8rem', color: '#000' }}>
+            <h3 className="tarot-intro-title fw-semibold mb-3" style={{ fontSize: '1.8rem', color: '#000' }}>
               Unlock the Secrets of Your life
             </h3>
-            <p className="mb-4" style={{ color: '#6B7280', fontSize: '0.9rem', maxWidth: '600px' }}>
+            <p className="tarot-intro-desc mb-4" style={{ color: '#6B7280', fontSize: '0.9rem', maxWidth: '600px' }}>
               Discover insights into your personality, relationship, and future with our tarot cards
             </p>
             <button
@@ -176,7 +177,7 @@ const TarotFlow: React.FC = () => {
 
       {step === 2 && (
         <div
-          className="d-flex justify-content-center align-items-center flex-grow-1 w-100"
+          className="tarot-form-screen d-flex justify-content-center align-items-center flex-grow-1 w-100 position-relative"
           style={{ 
             background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
             minHeight: "100vh"
@@ -184,7 +185,7 @@ const TarotFlow: React.FC = () => {
         >
           <button
             type="button"
-            className="btn btn-primary absolute "
+            className="btn btn-primary position-absolute"
             style={{
               top: "2%",
               left: "2%",
@@ -192,14 +193,15 @@ const TarotFlow: React.FC = () => {
               background: "none",
               width: "10%",
               border: "none",
-              color: "#000"
+              color: "#000",
+              zIndex: 10
             }}
             onClick={() => navigate("/result")}
           >
             <i className="bi bi-arrow-left m-3"></i> Back
           </button>
           <div
-            className="card p-4 shadow-lg "
+            className="tarot-form-card card p-4 shadow-lg"
             style={{
               width: "600px",
               borderRadius: "15px",

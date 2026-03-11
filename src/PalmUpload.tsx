@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Card, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Stars from "./components/stars";
+import "./PalmUpload.css";
 
 type PageState = "upload" | "preview" | "loading";
 
@@ -192,12 +193,13 @@ const PalmUploadPage: React.FC = () => {
 
   return (
     <div
+
       className="min-vh-100 w-100 d-flex flex-column"
       style={{
         background:
           "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
-
         minHeight: "100vh",
+
         color: "#000"
       }}
     >
@@ -231,6 +233,7 @@ const PalmUploadPage: React.FC = () => {
         </button>
       </div>
 
+
       <div className="text-center px-4 mb-3">
         <h2 className="fw-bold fs-4">{getPageTitle()}</h2>
         <p
@@ -241,6 +244,7 @@ const PalmUploadPage: React.FC = () => {
         </p>
       </div>
 
+
       <div
         className="d-flex justify-content-center px-3 px-md-4 mb-4 card-container"
         style={{ marginTop: "20px" }}
@@ -248,6 +252,7 @@ const PalmUploadPage: React.FC = () => {
         {/* UPLOAD STATE */}
         {pageState === "upload" && (
           <Card
+
             className="upload-card shadow-sm"
             style={{
               width: "100%",
@@ -262,7 +267,7 @@ const PalmUploadPage: React.FC = () => {
 
               {/* Drag & Drop Area */}
               <div
-                className="rounded text-center"
+                className="palm-upload-drop-zone rounded text-center"
                 style={{
                   border: "2px dashed #00B8F8",
                   cursor: "pointer",
@@ -358,6 +363,7 @@ const PalmUploadPage: React.FC = () => {
         {/* PREVIEW STATE */}
         {pageState === "preview" && selectedFile && (
           <Card
+
             className="upload-card shadow-sm"
             style={{
               width: "100%",
@@ -372,7 +378,7 @@ const PalmUploadPage: React.FC = () => {
 
               {/* Image Preview */}
               <div
-                className="rounded overflow-hidden"
+                className="palm-upload-preview-box rounded overflow-hidden"
                 style={{
                   width: "100%",
                   minHeight: "280px",
@@ -434,6 +440,7 @@ const PalmUploadPage: React.FC = () => {
         {/* LOADING STATE */}
         {pageState === "loading" && selectedFile && (
           <Card
+
             className="upload-card shadow-sm"
             style={{
               width: "100%",
