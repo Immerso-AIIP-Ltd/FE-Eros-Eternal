@@ -814,7 +814,17 @@ const StarMap: React.FC = () => {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, isGeneratingReport]);
+
+  useEffect(() => {
+    if (isGeneratingReport || isLoading) {
+        setTimeout(() => {
+            if (chatContainerRef.current) {
+                chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            }
+        }, 100);
+    }
+}, [isGeneratingReport, isLoading]);
 
   return (
     <div
@@ -975,7 +985,7 @@ const StarMap: React.FC = () => {
       </div> */}
 
       <div className="flex-1 flex flex-col relative z-10 h-screen">
-        <div className="flex items-center justify-between p-4 bg-opacity-80 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-3 py-2 sm:p-4 bg-opacity-80 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <button className="md:hidden text-gray-600 hover:text-gray-800" onClick={() => setSidebarOpen(true)}>
               <Menu size={20} />
@@ -988,7 +998,7 @@ const StarMap: React.FC = () => {
           </div>
           <div className="flex items-center gap-4">
             <div
-              className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-gray-400 transition-colors"
+              className="w-10 h-10 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-gray-400 transition-colors"
               onClick={() => navigate("/result")}
               style={{ cursor: "pointer" }}
             >
@@ -998,12 +1008,7 @@ const StarMap: React.FC = () => {
               <img
                 src={credits}
                 alt="Credits"
-                style={{
-                  height: "34px",
-                  width: "auto",
-                  marginLeft: "-6px",
-                  objectFit: "contain",
-                }}
+                style={{ height: "clamp(22px, 3.5vw, 34px)", width: "auto", marginLeft: "-6px", objectFit: "contain" }}
               />
             </div>
           </div>
@@ -1031,7 +1036,7 @@ const StarMap: React.FC = () => {
             ref={chatContainerRef}
             className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar"
             style={{
-              maxWidth: "65%",
+              maxWidth: "min(65%, 90vw)",
               margin: "0 auto",
               width: "100%",
               // scrollbarWidth: 'thin',
@@ -1103,7 +1108,7 @@ const StarMap: React.FC = () => {
                             <User size={18} />
                           </span>
                         </div>
-                        <div className="text-dark rounded-2xl rounded-tr-md px-4 py-3 max-w-xs lg:max-w-md font-semibold"
+                        <div className="text-dark rounded-2xl rounded-tr-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-md text-sm sm:text-md font-semibold"
                           style={{ backgroundColor: "#188BEF1F", border: "1px solid #188BEF1F" }}>
                           {message.imageList &&
                             message.imageList.length > 0 && (
@@ -1142,7 +1147,7 @@ const StarMap: React.FC = () => {
                         <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                           <i className="bi bi-stars" style={{ color: "#fff" }}></i>
                         </div>
-                        <div className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3 max-w-xs lg:max-w-2xl"
+                        <div className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-2xl text-sm sm:text-md"
                           style={{ border: "1px solid rgba(0, 0, 0, 0.1)" }}>
 
                           <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
@@ -1205,7 +1210,7 @@ const StarMap: React.FC = () => {
           {assessmentStatus !== "report_generated" && (
             <div className="sticky bottom-0 bg-transparent z-20 px-6 pb-4 pt-2">
               <div className="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
-                style={{ maxWidth: "65%", margin: "0 auto", width: "100%", border: "1px solid rgba(0, 0, 0, 0.1)" }}>
+                style={{ maxWidth: "min(65%, 92vw)", margin: "0 auto", width: "100%", border: "1px solid rgba(0, 0, 0, 0.1)" }}>
                 {(attachedImages.length > 0 || attachedVoices.length > 0) && (
                   <div className="flex flex-col gap-3 mb-3">
                     {attachedImages.length > 0 && (
