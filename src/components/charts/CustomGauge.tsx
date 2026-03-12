@@ -11,6 +11,7 @@ import {
   Chip,
 } from "@mui/material";
 import { FaFire, FaInfoCircle, FaTimes } from "react-icons/fa";
+import { baseApiUrl } from "@/config/api";
  
 // Define interfaces for the API response
 interface CurrentAssessment {
@@ -84,7 +85,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
  
       try {
         const response = await fetch(
-          `http://192.168.29.154:8002/api/v1/reports/individual_report/?report_type=vibrational_frequency&user_id=${userId}`,
+          `${baseApiUrl}/api/v1/reports/individual_report/?report_type=vibrational_frequency&user_id=${userId}`,
           {
             method: "GET",
             headers: {

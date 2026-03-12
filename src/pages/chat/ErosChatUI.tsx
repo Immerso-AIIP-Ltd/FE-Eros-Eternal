@@ -14,6 +14,7 @@ import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
 
 import { useNavigate } from "react-router-dom";
+import { baseApiUrl } from "@/config/api";
 
 const sidebarMenuItems = [
   { id: 'vibrational-frequency', label: 'Vibrational Frequency', icon: <ImagePlus size={16} /> },
@@ -387,7 +388,7 @@ const ErosChatUI: React.FC = () => {
       let currentSessionId = sessionId;
 
       if (!currentSessionId) {
-        const initResponse = await fetch('http://164.52.205.108:8500/api/v1/chat/spiritual', {
+        const initResponse = await fetch(`${baseApiUrl}/api/v1/chat/spiritual`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
@@ -406,7 +407,7 @@ const ErosChatUI: React.FC = () => {
         }
       }
 
-      const response = await fetch('http://164.52.205.108:8500/api/v1/chat/spiritual', {
+      const response = await fetch(`${baseApiUrl}/api/v1/chat/spiritual`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({

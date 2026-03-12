@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, Download } from "lucide-react";
 import Stars from "@/components/ui/stars";
 import ChartImage from "@/components/charts/ChartImage";
+import { baseApiUrl } from "@/config/api";
 
 // Define proper types
 interface ChartImage {
@@ -66,7 +67,7 @@ const RasiChartPage: React.FC = () => {
       };
 
       const response = await fetch(
-        "http://164.52.205.108:8500/api/v1/vedastro/get_astrology_data",
+        `${baseApiUrl}/api/v1/vedastro/get_astrology_data`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

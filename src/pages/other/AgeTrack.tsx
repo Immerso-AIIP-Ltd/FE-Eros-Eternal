@@ -10,6 +10,7 @@ import sparkle from "@/assets/images/sparkle.png";
 import Stars from "@/components/ui/stars";
 import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
+import { baseApiUrl } from "@/config/api";
 
 interface Message {
     sender: "user" | "ai";
@@ -60,7 +61,6 @@ const AgeTrack: React.FC = () => {
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
 
-    const baseApiUrl = 'http://192.168.29.154:8002';
 
     const convertToMp3 = async (audioBlob: Blob): Promise<Blob> => {
         return new Promise((resolve, reject) => {

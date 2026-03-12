@@ -11,6 +11,7 @@ import Stars from "@/components/ui/stars";
 import { Calendar } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import Tarrot from "@/assets/images/lighttarrot.png";
+import { baseApiUrl } from "@/config/api";
 
 interface TarotReading {
   card_backcover: string;
@@ -28,8 +29,6 @@ const TarotFlow: React.FC = () => {
     dob: "",
   });
   const [cardData, setCardData] = useState<TarotReading | null>(null);
-  const API_URL = "http://164.52.205.108:8500";
-  // const API_URL = "http://192.168.18.5:7001";
   const userId = localStorage.getItem("user_id");
 
   const dateInputRef = useRef(null);
@@ -74,7 +73,7 @@ const TarotFlow: React.FC = () => {
       formDataSet.append("mode", "random");
 
       const response = await fetch(
-        `${API_URL}/api/v1/numerology/tarot_reading`,
+        `${baseApiUrl}/api/v1/numerology/tarot_reading`,
         {
           method: "POST",
           body: formDataSet, // don't set Content-Type, browser will set boundary

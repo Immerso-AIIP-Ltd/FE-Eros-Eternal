@@ -10,6 +10,7 @@ import sparkle from "@/assets/images/sparkle.png";
 import Stars from "@/components/ui/stars";
 import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
+import { baseApiUrl } from "@/config/api";
 
 interface Message {
   sender: "user" | "ai";
@@ -65,9 +66,6 @@ const HealingModal: React.FC = () => {
     recent_breakthroughs: [] as string[],
   });
 
-//   const baseApiUrl = import.meta.env.VITE_API_BASE_URL;
-const baseApiUrl = "http://192.168.29.154:8002";
-console.log("baseApiUrl", baseApiUrl);
   const convertToMp3 = async (audioBlob: Blob): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const audioContext = new (window.AudioContext ||

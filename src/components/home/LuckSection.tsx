@@ -10,6 +10,7 @@ import moment from "moment";
 import StartlightBg from "@/assets/images/horoscope.png";
 import SpiritualBg from "@/assets/images/personalMonth.png";
 import LuckyBg from "@/assets/images/luckyNumber.png";
+import { baseApiUrl } from "@/config/api";
 
 interface LuckyNumbers {
   destiny_number: number;
@@ -33,8 +34,6 @@ interface PersonalMonthResponse {
   target_date: string;
   status: number;
 }
-
-const API_URL = "http://164.52.205.108:8500";
 
 export const LuckSection: React.FC = () => {
   const [flippedIndexes, setFlippedIndexes] = useState<Set<number>>(new Set());
@@ -75,7 +74,7 @@ export const LuckSection: React.FC = () => {
         formData.append("user_id", userId);
         formData.append("user_name", username);
         if (dob) formData.append("dob", formatDob(dob));
-        const response = await fetch(`${API_URL}/api/v1/numerology/planetary_horoscope`, { method: "POST", body: formData });
+        const response = await fetch(`${baseApiUrl}/api/v1/numerology/planetary_horoscope`, { method: "POST", body: formData });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (data.success && data.data) setHoroscope(data.data);
@@ -99,7 +98,7 @@ export const LuckSection: React.FC = () => {
         formData.append("user_id", userId);
         formData.append("user_name", username);
         if (dob) formData.append("dob", formatDob(dob));
-        const response = await fetch(`${API_URL}/api/v1/numerology/personal_month`, { method: "POST", body: formData });
+        const response = await fetch(`${baseApiUrl}/api/v1/numerology/personal_month`, { method: "POST", body: formData });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (data.success && data.data) setPersonalMonth(data.data);
@@ -123,7 +122,7 @@ export const LuckSection: React.FC = () => {
         formData.append("user_id", userId);
         formData.append("user_name", username);
         if (dob) formData.append("dob", formatDob(dob));
-        const response = await fetch(`${API_URL}/api/v1/numerology/lucky_numbers`, { method: "POST", body: formData });
+        const response = await fetch(`${baseApiUrl}/api/v1/numerology/lucky_numbers`, { method: "POST", body: formData });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         if (result.success && result.data) setLuckyNumbers(result.data);

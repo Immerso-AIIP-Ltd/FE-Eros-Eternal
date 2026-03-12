@@ -21,11 +21,7 @@ import { useNavigate } from "react-router-dom";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import LogoEros from '@/assets/LogoEros.png';
-
-const API_URL =
-  "http://164.52.205.108:8500";
-// const API_URL =
-//   "http://192.168.18.5:7001";
+import { baseApiUrl } from "@/config/api";
 
 interface FormData {
   firstName: string;
@@ -400,7 +396,7 @@ const SoulProfilePage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/users/profile/`, {
+      const response = await fetch(`${baseApiUrl}/api/v1/users/profile/`, {
         method: "POST",
         // ⚠️ DO NOT set Content-Type — let the browser handle it
         // headers: { "Content-Type": "application/json" }, ← REMOVE THIS

@@ -10,6 +10,7 @@ import sparkle from "@/assets/images/sparkle.png";
 import Stars from "@/components/ui/stars";
 import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
+import { baseApiUrl } from "@/config/api";
 
 const DailyReport: React.FC = () => {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ const DailyReport: React.FC = () => {
     const fetchWelcome = async () => {
       try {
         const res = await fetch(
-          "http://192.168.29.154:8002/api/v1/welcome/welcome"
+          `${baseApiUrl}/api/v1/welcome/welcome`
         );
         const data = await res.json();
 
@@ -101,7 +102,7 @@ const DailyReport: React.FC = () => {
 
   const sendMessage = async (textArg?: string) => {
     const message = (textArg ?? inputValue ?? "").toString();
-    const BASE_URL = "http://192.168.29.154:8002";
+    const BASE_URL = baseApiUrl;
     if (!message.trim()) return;
 
     // Show user bubble
@@ -144,7 +145,7 @@ const DailyReport: React.FC = () => {
 
   const generateReport = async (finalAnswers?: string[]) => {
     try {
-      const BASE_URL = "http://192.168.29.154:8002";
+      const BASE_URL = baseApiUrl;
       const userId = localStorage.getItem("user_id") || "0";
 
       const body = {
@@ -460,7 +461,7 @@ const DailyReport: React.FC = () => {
   };
 
   const handleSuggestionClick = async (question: string) => {
-    const BASE_URL = "http://192.168.29.154:8002";
+    const BASE_URL = baseApiUrl;
 
     const reportTypes: Record<string, string> = {
       "What's my vibe right now?": "vibrational_frequency",

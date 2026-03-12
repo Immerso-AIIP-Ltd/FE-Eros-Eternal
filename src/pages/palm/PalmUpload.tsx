@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Card, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Stars from "@/components/ui/stars";
+import { baseApiUrl } from "@/config/api";
 import "./PalmUpload.css";
 
 type PageState = "upload" | "preview" | "loading";
@@ -134,7 +135,7 @@ const PalmUploadPage: React.FC = () => {
       formData.append("image_data", selectedFile);
 
       const response = await fetch(
-        "http://164.52.205.108:8500/api/v1/analysis/palm",
+        `${baseApiUrl}/api/v1/analysis/palm`,
         {
           method: "POST",
           body: formData,

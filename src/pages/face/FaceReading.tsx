@@ -9,6 +9,7 @@ import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "@/components/Tarot/TarotCardSelector";
 import Stars from "@/components/ui/stars";
 import Face from "@/assets/images/lightface.png";
+import { baseApiUrl } from "@/config/api";
 
 interface TarotReading {
   card_backcover: string;
@@ -26,8 +27,6 @@ const FaceReading: React.FC = () => {
     dob: "",
   });
   const [cardData, setCardData] = useState<TarotReading | null>(null);
-  const API_URL =
-    "http://164.52.205.108:8500";
   const userId = localStorage.getItem("user_id");
 
   // Handle input changes
@@ -63,7 +62,7 @@ const FaceReading: React.FC = () => {
       formDataSet.append("mode", "random");
 
       const response = await fetch(
-        `${API_URL}/api/v1/numerology/tarot_reading`,
+        `${baseApiUrl}/api/v1/numerology/tarot_reading`,
         {
           method: "POST",
           body: formDataSet, // don't set Content-Type, browser will set boundary

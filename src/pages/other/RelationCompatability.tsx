@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UsersRound } from "lucide-react";
 import { Card, Col, Row, Container } from "react-bootstrap";
-
-const API_URL = "http://164.52.205.108:8500";
+import { baseApiUrl } from "@/config/api";
 
 interface CompatibilityData {
   match_for: string;
@@ -73,7 +72,7 @@ const RelationshipCompatibility: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${API_URL}/api/v1/numerology/career_compatibility`,
+        `${baseApiUrl}/api/v1/numerology/career_compatibility`,
         {
           method: "POST",
           body: formData,

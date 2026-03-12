@@ -20,6 +20,7 @@ import flameScoreBg from "@/assets/reports/flame.png";
 import auraBg from "@/assets/reports/aura.png";
 import koshaBg from "@/assets/reports/kosha.png";
 import longevityBg from "@/assets/reports/longevity.png";
+import { baseApiUrl } from "@/config/api";
 
 const StatsCards = () => {
   const navigate = useNavigate();
@@ -27,8 +28,7 @@ const StatsCards = () => {
   const [loading, setLoading] = useState(true);
 
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
-  const baseApiUrl = "http://164.52.205.108:8500/api/v1/reports/individual_report/";
-  // const baseApiUrl = "http://192.168.18.5:7001/api/v1/reports/individual_report/";
+  const reportsApiUrl = `${baseApiUrl}/api/v1/reports/individual_report/`;
 
   const reportCards = [
     {
@@ -92,7 +92,7 @@ const StatsCards = () => {
         const promises = reportCards.map(async (card) => {
           try {
             const response = await fetch(
-              `${baseApiUrl}?user_id=${userId}&report_type=${card.reportType}`
+              `${reportsApiUrl}?user_id=${userId}&report_type=${card.reportType}`
             );
             const data = await response.json();
 

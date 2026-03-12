@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Card, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Stars from "@/components/ui/stars";
+import { baseApiUrl } from "@/config/api";
 
 type PageState = "upload" | "preview" | "loading";
 
@@ -130,7 +131,7 @@ const FaceUploadPage: React.FC = () => {
       formData.append("image", selectedFile);
 
       const response = await fetch(
-        "http://164.52.205.108:8500/api/v1/face_reading/analyze",
+        `${baseApiUrl}/api/v1/face_reading/analyze`,
         {
           method: "POST",
           body: formData,
@@ -200,7 +201,7 @@ const FaceUploadPage: React.FC = () => {
   //     formData.append("image_data", selectedFile);
 
   //     const response = await fetch(
-  //       "http://164.52.205.108:8500/api/v1/face_reading/analyze", // CHANGED TO FACE ENDPOINT
+  //       `${baseApiUrl}/api/v1/face_reading/analyze`, // CHANGED TO FACE ENDPOINT
   //       {
   //         method: "POST",
   //         body: formData,

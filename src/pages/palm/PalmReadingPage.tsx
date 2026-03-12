@@ -1,6 +1,7 @@
 // src/pages/PalmReadingPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
+import { baseApiUrl } from "@/config/api";
 
 interface PalmReadingDetail {
   hand_shape: string;
@@ -21,9 +22,6 @@ interface PalmReadingResponse {
   raw_analysis: string;
   reading_timestamp: string;
 }
-
-
-const API_URL='http://192.168.29.154:8002';
 
 const PalmReadingPage: React.FC = () => {
     const navigate = useNavigate();
@@ -75,7 +73,7 @@ const PalmReadingPage: React.FC = () => {
     formData.append('image_data', image);
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/analysis/palm/`, {
+      const response = await fetch(`${baseApiUrl}/api/v1/analysis/palm/`, {
         method: 'POST',
         body: formData,
       });

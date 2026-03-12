@@ -1,6 +1,7 @@
 // src/components/KoshaPieChart.tsx
 import React, { useState, useEffect } from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
+import { baseApiUrl } from "@/config/api";
  
 // Define Kosha types
 interface KoshaScore {
@@ -76,7 +77,7 @@ const KoshaPieChart: React.FC = () => {
  
       try {
         const response = await fetch(
-          `http://192.168.29.154:8002/api/v1/reports/individual_report/?report_type=kosha_map&user_id=${userId}`,
+          `${baseApiUrl}/api/v1/reports/individual_report/?report_type=kosha_map&user_id=${userId}`,
           {
             method: "GET",
             headers: {

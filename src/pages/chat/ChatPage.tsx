@@ -18,6 +18,7 @@ import Magic from "@/assets/webm/Magic Crystal Ball.webm";
 import Star from "@/assets/webm/Star.webm";
 
 import "@/components/layout/header.css";
+import { baseApiUrl } from "@/config/api";
 
 interface Message {
   sender: "user" | "ai";
@@ -163,11 +164,6 @@ const ChatPage: React.FC = () => {
 
   const sendMessage = async () => {
     const userId = localStorage.getItem("user_id");
-    const BASE_URL =
-      "http://164.52.205.108:8500";
-    // const BASE_URL =
-    //   "http://192.168.18.5:7001";
-
     const message = (inputValue ?? "").toString();
     const hasText = message.trim().length > 0;
     const hasFiles = attachedFiles.length > 0;
@@ -207,14 +203,14 @@ const ChatPage: React.FC = () => {
       const form = new FormData();
 
       if (chatMode === "spiritual") {
-        url = `${BASE_URL}/api/v1/chat/spiritual/${userId}`;
+        url = `${baseApiUrl}/api/v1/chat/spiritual/${userId}`;
         form.append("user_id", userId || "0");
         form.append("message", message);
         // if (spiritualSessionId) {
         //   form.append("session_id", spiritualSessionId);
         // }
       } else {
-        url = `${BASE_URL}/api/v1/chat/answer_question/${userId}`;
+        url = `${baseApiUrl}/api/v1/chat/answer_question/${userId}`;
         form.append("report_type", reportType || "vibrational_frequency");
         form.append("answer", message);
         if (hasFiles) {
@@ -507,7 +503,7 @@ const ChatPage: React.FC = () => {
 
     try {
       const res = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/select_soul_report/${userId}`,
+        `${baseApiUrl}/api/v1/chat/select_soul_report/${userId}`,
         { method: "POST", body: form }
       );
       const data = await res.json();
@@ -532,7 +528,7 @@ const ChatPage: React.FC = () => {
 
     try {
       const res = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/generate_soul_report/${userId}`,
+        `${baseApiUrl}/api/v1/chat/generate_soul_report/${userId}`,
         { method: "POST", body: form }
       );
       const data = await res.json();
@@ -653,7 +649,7 @@ const ChatPage: React.FC = () => {
       setReportGenerated(false);
       try {
         const res = await fetch(
-          `http://164.52.205.108:8500/api/v1/chat/spiritual/${userId}`,
+          `${baseApiUrl}/api/v1/chat/spiritual/${userId}`,
           {
             method: "POST",
             body: form,
@@ -722,7 +718,7 @@ const ChatPage: React.FC = () => {
       console.log("Sending converted audio file:", fileName);
       console.log("File size:", audioBlob.size, "bytes");
 
-      const voiceUrl = `http://164.52.205.108:8500/api/v1/chat/answer_question/${userId}`;
+      const voiceUrl = `${baseApiUrl}/api/v1/chat/answer_question/${userId}`;
       const response = await fetch(voiceUrl, {
         method: "POST",
         body: formData,

@@ -27,6 +27,7 @@ import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
 import { useNavigate, useLocation } from "react-router-dom";
 import eroslogo from "@/assets/eros-logo.png";
+import { baseApiUrl } from "@/config/api";
 import credits from "@/assets/credits.png";
 
 const sidebarMenuItems = [
@@ -317,7 +318,7 @@ const AuraProfile: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/select_soul_report/${userId}`,
+        `${baseApiUrl}/api/v1/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -419,7 +420,7 @@ const AuraProfile: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/answer_question/${userId}`,
+        `${baseApiUrl}/api/v1/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -489,7 +490,7 @@ const AuraProfile: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/generate_soul_report/${userId}`,
+        `${baseApiUrl}/api/v1/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -797,7 +798,7 @@ const AuraProfile: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
+        `${baseApiUrl}/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
       );
       return response.ok && response.status === 200;
     } catch (error) {
