@@ -133,8 +133,16 @@ const RelationshipCompatibility: React.FC = () => {
     const color = getColor(score);
 
     return (
-      <div className="d-flex flex-column align-items-center">
-        <svg width="200" height="200" style={{ transform: "rotate(-90deg)" }}>
+      <div className="d-flex flex-column align-items-center w-100" style={{ maxWidth: "200px", margin: "0 auto" }}>
+        <svg 
+          viewBox="0 0 200 200"
+          style={{ 
+            transform: "rotate(-90deg)",
+            width: "100%",
+            height: "auto",
+            maxWidth: "200px"
+          }}
+        >
           {/* Background circle */}
           <circle
             cx="100"
@@ -198,562 +206,215 @@ const RelationshipCompatibility: React.FC = () => {
     const { data } = compatibilityResult;
 
     return (
-      <Container className="py-4">
-        {/* Header Section */}
-        <div className="text-center mb-5">
-          <h2
-            className="mb-3"
-            style={{ fontSize: "2rem", fontWeight: 700, color: "#1f2937" }}
-          >
-            Relationship Compatibility
-          </h2>
-          <p className="mb-2" style={{ fontSize: "1.25rem", color: "#6b7280" }}>
-            <span
-              style={{ color: "#00B8F8", fontWeight: 600, fontSize: "1.5rem" }}
-            >
-              {yourName}
-            </span>{" "}
-            &{" "}
-            <span
-              style={{ color: "#00B8F8", fontWeight: 600, fontSize: "1.5rem" }}
-            >
-              {partnerName}
-            </span>
-          </p>
-          <p style={{ fontSize: "1rem", color: "#6b7280" }}>
-            {data.match_for}
-          </p>
-        </div>
-
-        {/* Compatibility Score - Circular Progress */}
-        <Row className="mb-5">
-          <Col md={12}>
-            <Card
-              className="shadow-sm"
-              style={{
-                backgroundColor: "#ffffff",
-                border: "1px solid #e5e7eb",
-                borderRadius: "16px",
-              }}
-            >
-              <Card.Body className="p-5 d-flex flex-column align-items-center">
-                <h3
-                  className="mb-4"
-                  style={{
-                    fontSize: "1.75rem",
-                    fontWeight: 700,
-                    color: "#1f2937",
-                  }}
-                >
-                  Compatibility Score
-                </h3>
-                <div style={{ position: "relative", marginBottom: "20px" }}>
-                  <CircularProgress score={data.compatibility_score} />
-                </div>
-                <p
-                  className="text-center mb-0"
-                  style={{
-                    color: "#6b7280",
-                    fontSize: "1rem",
-                    maxWidth: "500px",
-                  }}
-                >
-                  {data.compatibility_score >= 80
-                    ? "Excellent compatibility! You share a strong connection."
-                    : data.compatibility_score >= 60
-                      ? "Good compatibility with room for growth."
-                      : "Challenging compatibility that requires effort."}
-                </p>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Tiles Grid */}
-        <Row className="g-4">
-          {/* Match Summary */}
-          <Col md={12}>
-            <Card
-              className="h-100 shadow-sm"
-              style={{
-                backgroundColor: "#ffffff",
-                border: "1px solid #e5e7eb",
-                borderRadius: "16px",
-              }}
-            >
-              <Card.Body className="p-4">
-                <Card.Title
-                  className="mb-4 pb-3"
-                  style={{
-                    fontSize: "1.5rem",
-                    fontWeight: 700,
-                    color: "#1f2937",
-                    borderBottom: "2px solid #e5e7eb",
-                  }}
-                >
-                  Match Summary
-                </Card.Title>
-                <p style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}>
-                  {data.match_summary}
-                </p>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          {/* Overview */}
-          <Col md={12}>
-            <Card
-              className="h-100 shadow-sm"
-              style={{
-                backgroundColor: "#ffffff",
-                border: "1px solid #e5e7eb",
-                borderRadius: "16px",
-              }}
-            >
-              <Card.Body className="p-4">
-                <Card.Title
-                  className="mb-4 pb-3"
-                  style={{
-                    fontSize: "1.5rem",
-                    fontWeight: 700,
-                    color: "#1f2937",
-                    borderBottom: "2px solid #e5e7eb",
-                  }}
-                >
-                  Overview
-                </Card.Title>
-                <p style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}>
-                  {data.dynamic_summary}
-                </p>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          {/* Strengths */}
-          {data.strengths && data.strengths.length > 0 && (
-            <Col md={6}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Strengths
-                  </Card.Title>
-                  <ul className="list-unstyled mb-0">
-                    {formatArrayItems(data.strengths)}
-                  </ul>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-
-          {/* Challenges */}
-          {data.challenges && data.challenges.length > 0 && (
-            <Col md={6}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Challenges
-                  </Card.Title>
-                  <ul className="list-unstyled mb-0">
-                    {formatArrayItems(data.challenges)}
-                  </ul>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-
-          {/* Shared Values */}
-          {data.shared_values && data.shared_values.length > 0 && (
-            <Col md={6}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Shared Values
-                  </Card.Title>
-                  <ul className="list-unstyled mb-0">
-                    {formatArrayItems(data.shared_values)}
-                  </ul>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-
-          {/* Ideal Roles */}
-          {data.ideal_roles && data.ideal_roles.length > 0 && (
-            <Col md={6}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Ideal Roles
-                  </Card.Title>
-                  <ul className="list-unstyled mb-0">
-                    {formatArrayItems(data.ideal_roles)}
-                  </ul>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-
-          {/* Communication Style */}
-          {data.communication_style && (
-            <Col md={6}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Communication Style
-                  </Card.Title>
-                  <p
-                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
-                  >
-                    {data.communication_style}
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-
-          {/* Growth Opportunities */}
-          {data.growth_opportunities && (
-            <Col md={6}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Growth Opportunities
-                  </Card.Title>
-                  <p
-                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
-                  >
-                    {data.growth_opportunities}
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-
-          {/* Warning Signs */}
-          {data.warning_signs && data.warning_signs.length > 0 && (
-            <Col md={12}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Warning Signs
-                  </Card.Title>
-                  <ul className="list-unstyled mb-0">
-                    {formatArrayItems(data.warning_signs)}
-                  </ul>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-
-          {/* Advice for Main */}
-          {data.advice_for_main && (
-            <Col md={6}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Advice for {data.sign_main}
-                  </Card.Title>
-                  <p
-                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
-                  >
-                    {data.advice_for_main}
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-
-          {/* Advice for Partner */}
-          {data.advice_for_partner && (
-            <Col md={6}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Advice for {data.sign_partner}
-                  </Card.Title>
-                  <p
-                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
-                  >
-                    {data.advice_for_partner}
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-
-          {/* Element Interaction */}
-          {data.element_interaction && (
-            <Col md={6}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Element Interaction
-                  </Card.Title>
-                  <p
-                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
-                  >
-                    {data.element_interaction}
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-
-          {/* Modality Interaction */}
-          {data.modality_interaction && (
-            <Col md={6}>
-              <Card
-                className="h-100 shadow-sm"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "16px",
-                }}
-              >
-                <Card.Body className="p-4">
-                  <Card.Title
-                    className="mb-4 pb-3"
-                    style={{
-                      fontSize: "1.5rem",
-                      fontWeight: 700,
-                      color: "#1f2937",
-                      borderBottom: "2px solid #e5e7eb",
-                    }}
-                  >
-                    Modality Interaction
-                  </Card.Title>
-                  <p
-                    style={{ color: "#374151", lineHeight: "1.8", margin: 0 }}
-                  >
-                    {data.modality_interaction}
-                  </p>
-                </Card.Body>
-              </Card>
-            </Col>
-          )}
-        </Row>
-
+      <div 
+        className="results-scroll-container w-100"
+        style={{ 
+          height: 'calc(100vh - 100px)', 
+          overflowY: 'auto',
+          padding: '0.5rem 1rem',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}
+      >
         <style>{`
-          .card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+          .results-scroll-container::-webkit-scrollbar {
+            display: none;
           }
-          
-          .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+          .compatibility-card {
+            transition: transform 0.2s ease;
+          }
+          .compatibility-card:hover {
+            transform: translateY(-2px);
           }
         `}</style>
-      </Container>
+        <Container className="py-2">
+          {/* Header Section */}
+          <div className="text-center mb-4">
+            <h2
+              className="mb-2"
+              style={{ fontSize: "clamp(1.25rem, 5vw, 1.75rem)", fontWeight: 700, color: "#1f2937" }}
+            >
+              Relationship Compatibility
+            </h2>
+            <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
+              <span style={{ color: "#00B8F8", fontWeight: 700, fontSize: "1.1rem" }}>{yourName}</span>
+              <UsersRound size={16} className="text-muted" />
+              <span style={{ color: "#00B8F8", fontWeight: 700, fontSize: "1.1rem" }}>{partnerName}</span>
+            </div>
+            <p className="text-muted small mb-0">{data.match_for}</p>
+          </div>
+
+          {/* Compatibility Score - Circular Progress */}
+          <Row className="mb-4 justify-content-center">
+            <Col xs={12} md={8} lg={6}>
+              <Card
+                className="shadow-sm border-0 compatibility-card"
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderRadius: "16px",
+                }}
+              >
+                <Card.Body className="p-4 d-flex flex-column align-items-center">
+                  <h4
+                    className="mb-4 text-center"
+                    style={{
+                      fontSize: "1.25rem",
+                      fontWeight: 700,
+                      color: "#1f2937",
+                    }}
+                  >
+                    Cosmic Connection
+                  </h4>
+                  <div style={{ position: "relative", marginBottom: "1rem", width: '100%', maxWidth: '160px' }}>
+                    <CircularProgress score={data.compatibility_score} />
+                  </div>
+                  <p
+                    className="text-center mb-0 small"
+                    style={{
+                      color: "#6b7280",
+                      maxWidth: "400px",
+                    }}
+                  >
+                    {data.compatibility_score >= 80
+                      ? "Excellent compatibility! You share a strong connection."
+                      : data.compatibility_score >= 60
+                        ? "Good compatibility with room for growth."
+                        : "Challenging compatibility that requires effort."}
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Tiles Grid */}
+          <Row className="g-3">
+            {[
+              { title: "Match Summary", content: data.match_summary },
+              { title: "Overview", content: data.dynamic_summary },
+              { title: "Strengths", items: data.strengths },
+              { title: "Challenges", items: data.challenges },
+              { title: "Shared Values", items: data.shared_values },
+              { title: "Ideal Roles", items: data.ideal_roles },
+              { title: "Communication Style", content: data.communication_style },
+              { title: "Growth Opportunities", content: data.growth_opportunities },
+              { title: "Advice for " + data.sign_main, content: data.advice_for_main },
+              { title: "Advice for " + data.sign_partner, content: data.advice_for_partner },
+              { title: "Element Interaction", content: data.element_interaction },
+              { title: "Modality Interaction", content: data.modality_interaction }
+            ].map((section, idx) => (
+              (section.content || (section.items && section.items.length > 0)) && (
+                <Col xs={12} md={idx < 2 ? 12 : 6} key={idx}>
+                  <Card
+                    className="h-100 shadow-sm border-0 compatibility-card"
+                    style={{
+                      backgroundColor: "#ffffff",
+                      borderRadius: "16px",
+                    }}
+                  >
+                    <Card.Body className="p-3">
+                      <h6
+                        className="mb-3 pb-2"
+                        style={{
+                          fontSize: "1.1rem",
+                          fontWeight: 700,
+                          color: "#1f2937",
+                          borderBottom: "1px solid #f3f4f6",
+                        }}
+                      >
+                        {section.title}
+                      </h6>
+                      {section.content ? (
+                        <p className="small mb-0" style={{ color: "#4b5563", lineHeight: "1.6" }}>
+                          {section.content}
+                        </p>
+                      ) : (
+                        <ul className="list-unstyled mb-0">
+                          {formatArrayItems(section.items!)}
+                        </ul>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </Col>
+              )
+            ))}
+          </Row>
+
+          <div className="text-center mt-4 pb-5">
+            <button
+              className="btn btn-info text-white rounded-pill px-5 shadow-sm"
+              onClick={() => {
+                setCompatibilityResult(null);
+                setYourName("");
+                setYourDob("");
+                setPartnerName("");
+                setPartnerDob("");
+              }}
+              style={{ fontWeight: 600, background: 'linear-gradient(90deg, #00B8F8, #00D4FF)' }}
+            >
+              Analyze Another Connection
+            </button>
+          </div>
+        </Container>
+      </div>
     );
   };
 
   return (
     <div
-      className="vw-100 d-flex flex-column"
+      className="viewport-container"
       style={{
         position: "relative",
-        minHeight: "100vh",
+        width: "100%",
         color: "#000",
         background:
           "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
       }}
     >
-      <div
-        style={{
-          background:
-            "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
-          minHeight: "100vh",
-          color: "#000",
-        }}
-      >
-        {/* Header */}
-        <div className="d-flex justify-content-between align-items-center p-4">
-          <button
-            className="btn"
-            onClick={() => navigate("/result")}
-            style={{ fontSize: "1rem", position: "relative", zIndex: 1000 }}
-          >
-            ← Back
-          </button>
-        </div>
+      {/* Header - Stays at top */}
+      <div className="viewport-header d-flex justify-content-between align-items-center p-2">
+        <button
+          className="btn"
+          onClick={() => navigate("/result")}
+          style={{ fontSize: "1rem", position: "relative", zIndex: 1000 }}
+        >
+          ← Back
+        </button>
+      </div>
 
-        <div
-          className="flex-grow flex p-4"
-          style={{ position: "relative", zIndex: 10 }}
+      {/* Main Content Area - Centered */}
+      <div className="viewport-content" style={{ justifyContent: 'flex-start', paddingTop: '1rem' }}>
+        <div 
+          className="w-100 mx-auto d-flex flex-column align-items-center" 
+          style={{ 
+            maxWidth: "1000px",
+            position: "relative",
+            zIndex: 10
+          }}
         >
           {/* Show Form OR Results */}
           {!compatibilityResult ? (
             <div
-              className="w-full max-w-4xl mx-auto"
+              className="w-100 d-flex flex-column align-items-center"
               style={{ position: "relative", zIndex: 10 }}
             >
-              <div className="d-flex justify-content-center mb-4">
+              <div className="d-flex justify-content-center mb-1">
                 <div
-                  className="bg-info rounded-circle d-flex align-items-center justify-content-center"
-                  style={{ width: "48px", height: "48px" }}
+                  className="bg-info rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                  style={{ width: "40px", height: "40px" }}
                 >
-                  <UsersRound size={18} color="#fff" />
+                  <UsersRound size={16} color="#fff" />
                 </div>
               </div>
 
               {/* Intro */}
-              <div className="text-center mb-5">
+              <div className="text-center mb-3">
                 <h2
-                  className="mb-3"
+                  className="mb-1"
                   style={{
-                    fontSize: "2.5rem",
+                    fontSize: "clamp(1.5rem, 5vw, 2.2rem)",
                     fontWeight: 700,
                     color: "#00B8F8",
+                    lineHeight: 1.2
                   }}
                 >
                   Relationship Compatibility
@@ -762,9 +423,9 @@ const RelationshipCompatibility: React.FC = () => {
                   className="mx-auto"
                   style={{
                     color: "#6b7280",
-                    fontSize: "1.125rem",
-                    maxWidth: "600px",
-                    lineHeight: "1.6",
+                    fontSize: "0.85rem",
+                    maxWidth: "500px",
+                    lineHeight: "1.3",
                   }}
                 >
                   Discover your spiritual and emotional compatibility with your
@@ -772,24 +433,24 @@ const RelationshipCompatibility: React.FC = () => {
                 </p>
               </div>
 
-              {/* Form */}
-              <div className="mb-5">
-                <div className="row g-4 mb-4">
+              {/* Form Section */}
+              <Container fluid className="mb-2 px-0 px-md-3" style={{ maxWidth: '900px' }}>
+                <Row className="g-3 mb-3">
                   {/* Your Details */}
-                  <div className="col-lg-6">
+                  <Col xs={12} md={6}>
                     <div
-                      className="p-4 rounded-3"
+                      className="p-3 p-lg-4 rounded-3 h-100 shadow-sm"
                       style={{
                         backgroundColor: "#ffffff",
                         border: "1px solid #e5e7eb",
                       }}
                     >
-                      <h5
-                        className="mb-4"
+                      <h6
+                        className="mb-3"
                         style={{ color: "#00B8F8", fontWeight: 600 }}
                       >
                         Your Information
-                      </h5>
+                      </h6>
 
                       <div className="mb-3">
                         <label
@@ -838,23 +499,23 @@ const RelationshipCompatibility: React.FC = () => {
                         />
                       </div>
                     </div>
-                  </div>
+                  </Col>
 
                   {/* Partner Details */}
-                  <div className="col-lg-6">
+                  <Col xs={12} md={6}>
                     <div
-                      className="p-4 rounded-3"
+                      className="p-3 p-lg-4 rounded-3 h-100 shadow-sm"
                       style={{
                         backgroundColor: "#ffffff",
                         border: "1px solid #e5e7eb",
                       }}
                     >
-                      <h5
-                        className="mb-4"
-                        style={{ color: "#EC4899", fontWeight: 600 }}
+                      <h6
+                        className="mb-3"
+                        style={{ color: "#00B8F8", fontWeight: 600 }}
                       >
                         Partner Information
-                      </h5>
+                      </h6>
 
                       <div className="mb-3">
                         <label
@@ -902,48 +563,48 @@ const RelationshipCompatibility: React.FC = () => {
                         />
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </Col>
+                </Row>
 
                 {/* How It Works */}
                 <div
-                  className="p-4 mb-4 rounded-3"
+                  className="p-2 p-md-3 mb-2 rounded-3 shadow-sm"
                   style={{
                     backgroundColor: "#ffffff",
                     border: "1px solid #e5e7eb",
+                    width: "100%",
                   }}
                 >
-                  <h5
-                    className="mb-3"
-                    style={{ fontWeight: 600, color: "#1f2937" }}
+                  <h6
+                    className="mb-2 text-center"
+                    style={{ fontWeight: 600, color: "#1f2937", fontSize: '0.85rem' }}
                   >
                     What We'll Analyze
-                  </h5>
-                  <div className="d-flex flex-column gap-2">
+                  </h6>
+                  <div className="d-flex justify-content-center flex-wrap gap-x-4 gap-y-1">
                     {[
-                      "Provides personalized relationship insights",
-                      "Identifies relationship strengths",
-                      "Identifies relationship Challenges",
-                      "Suggest growth opportunities",
+                      "Personalized insights",
+                      "Strengths & challenges",
+                      "Growth opportunities",
                     ].map((item, index) => (
                       <div key={index} className="d-flex align-items-center">
                         <div
                           className="rounded-circle me-2"
                           style={{
-                            width: "8px",
-                            height: "8px",
+                            width: "6px",
+                            height: "6px",
                             backgroundColor: "#00B8F8",
                             flexShrink: 0,
                           }}
                         />
-                        <span style={{ color: "#374151" }}>{item}</span>
+                        <span style={{ color: "#374151", fontSize: '0.75rem' }}>{item}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Submit Button */}
-                <div className="text-center">
+                <div className="text-center mt-3 mb-3">
                   <button
                     onClick={handleSubmit}
                     disabled={
@@ -953,10 +614,14 @@ const RelationshipCompatibility: React.FC = () => {
                       !partnerDob ||
                       isLoading
                     }
-                    className="btn btn-info text-white px-5 py-3 rounded-pill"
+                    className="btn btn-info text-white px-5 py-2 rounded-pill shadow"
                     style={{
-                      fontSize: "1.125rem",
+                      fontSize: "1rem",
                       fontWeight: 600,
+                      width: "auto",
+                      minWidth: "240px",
+                      maxWidth: "100%",
+                      background: 'linear-gradient(90deg, #00B8F8, #00D4FF)'
                     }}
                   >
                     {isLoading ? (
@@ -966,45 +631,45 @@ const RelationshipCompatibility: React.FC = () => {
                           role="status"
                           aria-hidden="true"
                         />
-                        Generating Compatibility...
+                        Processing...
                       </span>
                     ) : (
                       "Analyze Compatibility"
                     )}
                   </button>
                 </div>
-              </div>
+              </Container>
             </div>
           ) : (
             renderResults()
           )}
-
-          {/* Global Error Message */}
-          {error && (
-            <div
-              className="position-fixed bottom-0 end-0 m-4 p-3 bg-danger text-white rounded-3 shadow"
-              style={{ zIndex: 1000, maxWidth: "400px" }}
-            >
-              <div className="d-flex align-items-center">
-                <svg
-                  className="me-2"
-                  width="20"
-                  height="20"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span style={{ fontSize: "0.875rem" }}>{error}</span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Global Error Message */}
+      {error && (
+        <div
+          className="position-fixed bottom-0 end-0 m-4 p-3 bg-danger text-white rounded-3 shadow"
+          style={{ zIndex: 1000, maxWidth: "400px" }}
+        >
+          <div className="d-flex align-items-center">
+            <svg
+              className="me-2"
+              width="20"
+              height="20"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span style={{ fontSize: "0.875rem" }}>{error}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
