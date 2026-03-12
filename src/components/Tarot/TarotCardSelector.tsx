@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
-import cardBg from "../../assets/cardbg.png";
-import card2 from "../../assets/image.png";
-import Stars from "../stars";
+import cardBg from "@/assets/cardbg.png";
+import card2 from "@/assets/image.png";
+import Stars from "@/components/ui/stars";
 import { useNavigate } from "react-router-dom";
 import "./TarotCardSelector.css";
 // import card2 from "../../assets/Tarot1.jpg";

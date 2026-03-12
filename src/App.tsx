@@ -1,54 +1,51 @@
 // src/App.tsx
 
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // ✅ Only import once
-import ErosChatUI from "./ErosChatUI";
-import SplashScreen from "./SplashScreen";
-import SoulProfilePage from "./SoulProfilePage";
-import EternalAIPage from "./EternalAIPage";
-import ResultPage from "./ResultPage";
-import RecordVoice from "./RecordVoice";
-import ChatPage from "./ChatPage";
-import HomePage from "./HomePage";
-import TarrotCard from "./TarrotCard";
-import HarmonyIndexPage from "./HarmonyIndexPage";
-import PalmReadingPage from "./PalmReadingPage";
-import VibrationTool from "./VibrationTool";
-import DailyReportsPage from "./DailyReportsPage";
-import HealingModal from "./HealingModal";
-import AiChat from "./AiChat";
-import AgeTrack from "./AgeTrack";
-import TarotFlow from "./TarrotFlow";
-import PalmFlow from "./PalmFlow";
-import FaceReading from "./FaceReading";
-import HarmonyIndex from "./HarmonyIndex";
-import RelationshipCompatibility from "./RelationCompatability";
-import PalmUploadPage from "./PalmUpload";
-import PalmReadingReportPage from "./PalmReport";
-import FaceUploadPage from "./FaceUpload";
-import FaceReadingReportPage from "./FaceReportPage";
-import ViewReport from "./ViewReport";
-
-import RasiChartPage from "./RasiChartPage";
-import StarMap from "./StarMap";
-import KoshaMap from "./KoshaMap";
-import AuraProfile from "./AuraProfile";
-import FlameScore from "./FlameScore";
-
-import LongevityTool from "./longevityTool";
-import FounderMsg from "./FounderMsg";
-import WellnessScreen from "./WelnessScreen";
-import ErosHome from "./ErosHome";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ErosChatUI from "./pages/chat/ErosChatUI";
+import SplashScreen from "./pages/home/SplashScreen";
+import SoulProfilePage from "./pages/profile/SoulProfilePage";
+import EternalAIPage from "./pages/home/EternalAIPage";
+import ResultPage from "./pages/reports/ResultPage";
+import RecordVoice from "./pages/chat/RecordVoice";
+import ChatPage from "./pages/chat/ChatPage";
+import HomePage from "./pages/home/HomePage";
+import TarrotCard from "./pages/tarot/TarrotCard";
+import HarmonyIndexPage from "./pages/harmony/HarmonyIndexPage";
+import PalmReadingPage from "./pages/palm/PalmReadingPage";
+import VibrationTool from "./pages/wellness/VibrationTool";
+import DailyReportsPage from "./pages/reports/DailyReportsPage";
+import HealingModal from "./pages/other/HealingModal";
+import AiChat from "./pages/chat/AiChat";
+import AgeTrack from "./pages/other/AgeTrack";
+import TarotFlow from "./pages/tarot/TarrotFlow";
+import PalmFlow from "./pages/palm/PalmFlow";
+import FaceReading from "./pages/face/FaceReading";
+import HarmonyIndex from "./pages/harmony/HarmonyIndex";
+import RelationshipCompatibility from "./pages/other/RelationCompatability";
+import PalmUploadPage from "./pages/palm/PalmUpload";
+import PalmReadingReportPage from "./pages/palm/PalmReport";
+import FaceUploadPage from "./pages/face/FaceUpload";
+import FaceReadingReportPage from "./pages/face/FaceReportPage";
+import ViewReport from "./pages/reports/ViewReport";
+import RasiChartPage from "./pages/wellness/RasiChartPage";
+import StarMap from "./pages/wellness/StarMap";
+import KoshaMap from "./pages/wellness/KoshaMap";
+import AuraProfile from "./pages/wellness/AuraProfile";
+import FlameScore from "./pages/wellness/FlameScore";
+import LongevityTool from "./pages/wellness/longevityTool";
+import FounderMsg from "./pages/other/FounderMsg";
+import WellnessScreen from "./pages/home/WelnessScreen";
+import ErosHome from "./pages/home/ErosHome";
 import FaceScanner from "./components/FaceScanner/FaceScanner";
-import VitaScanReport from "./VitaScanReport";
-import FaceAnalyseReport from "./FaceAnalyseReport";
+import VitaScanReport from "./pages/reports/VitaScanReport";
+import FaceAnalyseReport from "./pages/face/FaceAnalyseReport";
 
 const App: React.FC = () => {
   return (
     <Router>
       <div className="app overflow-fix">
         <Routes>
-          {/* <Route path="/" element={<SplashScreen />} /> */}
           <Route path="/" element={<WellnessScreen />} />
           <Route path="/chat" element={<ErosChatUI />} />
           <Route path="/profile" element={<SoulProfilePage />} />
@@ -56,25 +53,15 @@ const App: React.FC = () => {
           <Route path="/result" element={<ResultPage />} />
           <Route path="/record" element={<RecordVoice />} />
           <Route path="/eros-home" element={<ErosHome />} />
-          {/* <Route path="/" element={<WellnessScreen />}/> */}
-
           <Route path="/ques" element={<ChatPage />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/facescan" element={<FaceScanner />} />
-          {/* <Route path="/card" element={<TarrotCard />} /> */}
           <Route path="/card" element={<TarotFlow />} />
           <Route path="/palmcard" element={<PalmFlow />} />
           <Route path="/palm" element={<PalmReadingPage />} />
-
-
           <Route path="/vibrational-frequency" element={<VibrationTool />} />
           <Route path="/report" element={<DailyReportsPage />} />
-          <Route path='/vibrational-frequency' element={<VibrationTool />} />
           <Route path="/longevity-blueprint" element={<LongevityTool />} />
-
-          <Route path='/report' element={<DailyReportsPage />} />
-          <Route path="/card" element={<TarrotCard />} />
-          <Route path="/palm" element={<PalmReadingPage />} />
           <Route path="/facereading" element={<FaceReading />} />
           <Route path="/harmoneyi" element={<HarmonyIndex />} />
           <Route path="/relation" element={<RelationshipCompatibility />} />
@@ -90,25 +77,11 @@ const App: React.FC = () => {
           <Route path="/flame-score" element={<FlameScore />} />
           <Route path="/founder" element={<FounderMsg />} />
           <Route path="/vita-scan" element={<VitaScanReport />} />
-
           <Route path="/harmony" element={<HarmonyIndexPage />} />
-
-
-          <Route path='/vibrational-frequency' element={<VibrationTool />} />
-          <Route path='/Healing' element={<HealingModal />} />
-          <Route path='/ai-chat' element={<AiChat />} />
-          <Route path="/age-tracker" element={<AgeTrack />} />
-
-
-          <Route path="/harmony" element={<HarmonyIndexPage />} />
-          <Route path='/vibrational-frequency' element={<VibrationTool />} />
-          <Route path='/Healing' element={<HealingModal />} />
-          <Route path='/ai-chat' element={<AiChat />} />
+          <Route path="/Healing" element={<HealingModal />} />
+          <Route path="/ai-chat" element={<AiChat />} />
           <Route path="/age-tracker" element={<AgeTrack />} />
           <Route path="/view-report" element={<ViewReport />} />
-
-
-          <Route path="/harmony" element={<HarmonyIndexPage />} />
         </Routes>
       </div>
     </Router>

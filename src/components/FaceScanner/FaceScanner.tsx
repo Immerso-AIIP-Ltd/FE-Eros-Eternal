@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Stars from '../stars';
+import Stars from '../ui/stars';
 import type { CombinedReportData, HrHistoryPoint } from '../../types/rppg';
 import {
   KalmanFilter1D,

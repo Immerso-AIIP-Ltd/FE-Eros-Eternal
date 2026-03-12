@@ -1,9 +1,16 @@
 import { defineConfig } from 'vite'
+import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
 
 // https://vite.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+    dedupe: ['@mui/material', '@mui/icons-material'],
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -13,10 +20,6 @@ export default defineConfig({
   optimizeDeps: {
     include: ['@mui/icons-material/ArrowDropDown'],
   },
-  resolve: {
-    dedupe: ['@mui/material', '@mui/icons-material'],
-  },
-
   assetsInclude: ['**/*.tflite', '**/*.gz'],
   server: {
     host: true,
