@@ -89,6 +89,10 @@ const VibrationTool: React.FC = () => {
     Array<{ url: string; file: File; duration?: number }>
   >([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const elapsedTimeRef = useRef<number>(0);
+  const recordingStartTimeRef = useRef<number>(0);
+  const animFrameRef = useRef<number | null>(null);
   const [activeMenuItem, setActiveMenuItem] = useState("vibrational-frequency");
 
   // New states for API integration
@@ -148,7 +152,10 @@ const VibrationTool: React.FC = () => {
           setDuration(0);
         }
       };
-      const onEnded = () => setIsPlaying(false);
+      const onEnded = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      };
       audio.addEventListener("timeupdate", updateTime);
       audio.addEventListener("loadedmetadata", updateDuration);
       audio.addEventListener("ended", onEnded);
@@ -172,17 +179,11 @@ const VibrationTool: React.FC = () => {
     };
 
     const formatTime = (secs) => {
-      if (!secs || isNaN(secs) || secs === 0) return "0:00";
+      if (secs === undefined || secs === null || isNaN(secs)) return "0:00";
       let totalSeconds = Math.floor(secs);
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
-      if (minutes < 10) {
-        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-      } else {
-        return `${minutes.toString().padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`;
-      }
+      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     };
 
     return (
@@ -197,7 +198,7 @@ const VibrationTool: React.FC = () => {
         </button>
         <div className="flex-1 min-w-0">
           <div className="text-sm text-gray-800 font-medium truncate">
-            {voiceData.file.name}
+            Voice Recording
           </div>
           <div className="text-xs text-gray-600">
             {formatTime(currentTime)} / {formatTime(duration)}
@@ -388,6 +389,9 @@ const VibrationTool: React.FC = () => {
     setInputValue("");
 
     setIsLoading(true);
+    setAttachedImages([]);
+    setAttachedFiles([]);
+    setAttachedVoices([]);
 
     try {
       const userId = localStorage.getItem("user_id");
@@ -473,9 +477,6 @@ const VibrationTool: React.FC = () => {
       ]);
     }
 
-    setAttachedImages([]);
-    setAttachedFiles([]);
-    setAttachedVoices([]);
     setIsLoading(false);
   };
 
@@ -727,53 +728,128 @@ const VibrationTool: React.FC = () => {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      setMicStream(stream);
-      const recorder = new MediaRecorder(stream, {
-        mimeType: "audio/webm;codecs=opus",
-      });
+
+      const recorder = new MediaRecorder(stream);
       recordedChunksRef.current = [];
+
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          recordedChunksRef.current.push(e.data);
-        }
+        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
       };
-      recorder.start();
+
+      recorder.start(100);
       mediaRecorderRef.current = recorder;
-      setIsRecording(true);
+      elapsedTimeRef.current = 0;
+      recordingStartTimeRef.current = Date.now();
+
+      setMicStream(stream); // ← set this first
       setRecordingTime(0);
-      timerRef.current = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
+      setIsRecording(true);
+
+      // Delay so micStream useEffect cleanup doesn't kill the interval
+      setTimeout(() => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = setInterval(() => {
+          const elapsed = Math.floor(
+            (Date.now() - recordingStartTimeRef.current) / 1000,
+          );
+          elapsedTimeRef.current = elapsed;
+          setRecordingTime(elapsed);
+        }, 500);
+      }, 100);
     } catch (err) {
       console.error("Microphone error:", err);
     }
   };
 
+  const convertToWav = async (blob: Blob): Promise<Blob> => {
+    const audioContext = new AudioContext();
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const numSamples = audioBuffer.length;
+    const bufferLength = 44 + numSamples * numChannels * 2;
+    const buffer = new ArrayBuffer(bufferLength);
+    const view = new DataView(buffer);
+
+    const writeString = (offset: number, str: string) => {
+      for (let i = 0; i < str.length; i++)
+        view.setUint8(offset + i, str.charCodeAt(i));
+    };
+
+    writeString(0, "RIFF");
+    view.setUint32(4, bufferLength - 8, true);
+    writeString(8, "WAVE");
+    writeString(12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * numChannels * 2, true);
+    view.setUint16(32, numChannels * 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, "data");
+    view.setUint32(40, numSamples * numChannels * 2, true);
+
+    let offset = 44;
+    for (let i = 0; i < numSamples; i++) {
+      for (let ch = 0; ch < numChannels; ch++) {
+        const sample = Math.max(
+          -1,
+          Math.min(1, audioBuffer.getChannelData(ch)[i]),
+        );
+        view.setInt16(
+          offset,
+          sample < 0 ? sample * 0x8000 : sample * 0x7fff,
+          true,
+        );
+        offset += 2;
+      }
+    }
+
+    await audioContext.close();
+    return new Blob([buffer], { type: "audio/wav" });
+  };
+
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
-      const finalDuration = recordingTime;
+      const finalDuration = elapsedTimeRef.current;
+
       mediaRecorderRef.current.onstop = async () => {
-        const audioBlob = new Blob(recordedChunksRef.current, {
-          type: "audio/webm;codecs=opus",
+        const rawBlob = new Blob(recordedChunksRef.current, {
+          type: "audio/webm",
         });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const recordedFile = new File(
-          [audioBlob],
-          `recording_${Date.now()}.webm`,
-          { type: "audio/webm" },
-        );
-        setAttachedVoices((prev) => [
-          ...prev,
-          {
-            url: audioUrl,
-            file: recordedFile,
-            duration: finalDuration,
-          },
-        ]);
+        try {
+          const wavBlob = await convertToWav(rawBlob);
+          const audioUrl = URL.createObjectURL(wavBlob);
+          const recordedFile = new File(
+            [wavBlob],
+            `recording_${Date.now()}.wav`,
+            { type: "audio/wav" },
+          );
+          setAttachedVoices((prev) => [
+            ...prev,
+            { url: audioUrl, file: recordedFile, duration: finalDuration },
+          ]);
+        } catch (err) {
+          const audioUrl = URL.createObjectURL(rawBlob);
+          const recordedFile = new File(
+            [rawBlob],
+            `recording_${Date.now()}.webm`,
+            { type: "audio/webm" },
+          );
+          setAttachedVoices((prev) => [
+            ...prev,
+            { url: audioUrl, file: recordedFile, duration: finalDuration },
+          ]);
+        }
       };
+
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       if (timerRef.current) clearInterval(timerRef.current);
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (micStream) {
         micStream.getTracks().forEach((track) => track.stop());
         setMicStream(null);
@@ -786,26 +862,22 @@ const VibrationTool: React.FC = () => {
       mediaRecorderRef.current.stop();
     }
     if (timerRef.current) clearInterval(timerRef.current);
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     if (micStream) {
       micStream.getTracks().forEach((track) => track.stop());
       setMicStream(null);
     }
     setIsRecording(false);
+    elapsedTimeRef.current = 0;
     setRecordingTime(0);
   };
 
   const formatTime = (secs) => {
-    if (!secs || isNaN(secs) || secs === 0) return "0:00";
-    let totalSeconds = Math.floor(secs);
+    if (secs === undefined || secs === null || isNaN(secs)) return "0:00";
+    const totalSeconds = Math.max(0, Math.floor(secs));
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-    if (minutes < 10) {
-      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-    } else {
-      return `${minutes.toString().padStart(2, "0")}:${seconds
-        .toString()
-        .padStart(2, "0")}`;
-    }
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const removeAttachedImage = (index: number) => {
@@ -835,9 +907,8 @@ const VibrationTool: React.FC = () => {
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (micStream) {
         micStream.getTracks().forEach((track) => track.stop());
       }
@@ -863,6 +934,12 @@ const VibrationTool: React.FC = () => {
       }, 100);
     }
   }, [isGeneratingReport, isLoading]);
+
+  useEffect(() => {
+    if (!isLoading && !isGeneratingReport && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading, isGeneratingReport, messages]);
 
   return (
     <div
@@ -1327,6 +1404,7 @@ const VibrationTool: React.FC = () => {
                     <>
                       <div className="flex-1">
                         <input
+                          ref={inputRef}
                           type="text"
                           placeholder="Message to Wellness AI"
                           value={inputValue}
@@ -1413,25 +1491,74 @@ const VibrationTool: React.FC = () => {
                       </div>
                     </>
                   ) : (
-                    <div className="flex items-center bg-gray-200 rounded-xl px-4 py-2 flex-grow-1 w-full">
-                      <MicVisualizer stream={micStream} height={40} />
-                      <span className="ml-4 text-red-500 font-bold text-lg">
+                    <div
+                      className="flex items-center gap-3 w-full"
+                      style={{
+                        background: "#f1f5f9",
+                        borderRadius: "12px",
+                        padding: "10px 16px",
+                      }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <MicVisualizer stream={micStream} height={36} />
+                      </div>
+                      <span
+                        style={{
+                          color: "#ef4444",
+                          fontWeight: "700",
+                          fontSize: "16px",
+                          minWidth: "52px",
+                          textAlign: "center",
+                          flexShrink: 0,
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
                         {formatTime(recordingTime)}
                       </span>
-                      <div className="ml-auto flex items-center gap-2">
-                        <button
-                          className="bg-green-500 hover:bg-green-600 text-white rounded-full p-2 transition-colors"
-                          onClick={stopRecording}
-                        >
-                          <Check size={16} />
-                        </button>
-                        <button
-                          className="bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
-                          onClick={cancelRecording}
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        style={{
+                          backgroundColor: "#22c55e",
+                          border: "none",
+                          borderRadius: "50%",
+                          width: "20px",
+                          height: "20px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          flexShrink: 0,
+                          padding: 0,
+                          color: "white",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                        }}
+                        onClick={stopRecording}
+                      >
+                        ✓
+                      </button>
+                      <button
+                        type="button"
+                        style={{
+                          backgroundColor: "#ef4444",
+                          border: "none",
+                          borderRadius: "50%",
+                          width: "20px",
+                          height: "20px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          flexShrink: 0,
+                          padding: 0,
+                          color: "white",
+                          fontSize: "12px",
+                          fontWeight: "bold",
+                        }}
+                        onClick={cancelRecording}
+                      >
+                        ✕
+                      </button>
                     </div>
                   )}
                 </div>
