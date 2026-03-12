@@ -1,5 +1,6 @@
 // RasiChartPage.tsx
 import React, { useEffect, useState } from "react";
+import "./RasiChartPage.css";
 import {
   Container,
   Row,
@@ -12,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Eye, Download } from "lucide-react";
 import Stars from "./components/stars";
+import ChartImage from "./components/ChartImage";
 
 // Define proper types
 interface ChartImage {
@@ -356,11 +358,11 @@ const RasiChartPage: React.FC = () => {
 
   return (
     <div
-      className="vh-100 vw-100 p-4"
+      className="rasi-chart-page vh-100 vw-100 p-4"
       style={{ backgroundColor: "#FFFFFF", color: "#000" }}
     >
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="rasi-chart-header d-flex justify-content-between align-items-center mb-4">
         <button
           className="btn btn-link text-white"
           onClick={() => navigate(-1)}
@@ -371,61 +373,33 @@ const RasiChartPage: React.FC = () => {
         <div></div>
       </div>
 
-      <div className="d-flex align-items-center justify-content-center mb-3">
+      <div className="rasi-chart-user-info d-flex flex-column align-items-center justify-content-center mb-3">
         <h3>{username}</h3>
-      </div>
-
-      <div className="d-flex align-items-center justify-content-center mb-5">
         <p>
           {dob}, {tob}, {birthPlace}
         </p>
       </div>
 
-      <Container fluid>
+      <Container fluid className="rasi-chart-cards-wrapper flex-grow-1 d-flex flex-column" style={{ minHeight: 0 }}>
         <Row className="g-4">
           {/* Rasi Chart */}
-          <Col md={6}>
-            <Card
-              className="h-100"
-              style={{ backgroundColor: "#FFFFFF", color: "#000" }}
-            >
+          <Col md={6} className="rasi-chart-card">
+            <Card className="h-100"   style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
               <Card.Body className="d-flex flex-column">
                 <Card.Title className="text-center" style={{ color: "#000" }}>
                   Rasi Chart
                 </Card.Title>
-                <p className=" text-center" style={{ color: "#000" }}>
-                  Individual Chart
-                </p>
-                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
+                <p className=" text-center"  style={{color:"#000"}}>Individual Chart</p>
+                <div className="chart-iframe-wrapper flex-grow-1 d-flex align-items-center justify-content-center p-2">
                   {rasiChart?.inline ? (
                     <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
-                      {/* Render as iframe for URLs */}
-                      {/*  <iframe
-                        src={rasiChart.inline.trim()}
-                        title="Rasi Chart"
-                        width="100%"
-                        height="600"
-                        style={{
-                          borderRadius: "8px",
-                          overflow: "hidden",
-                          border: "none",
-                        }}
-                        onLoad={() =>
-                          console.log("✅ Rasi iframe loaded successfully")
-                        }
-                        onError={(e) =>
-                          console.error("❌ Rasi iframe error:", e)
-                        }
-                      />*/}
-                      <img
-                        src={rasiChart.inline.trim()}
+                      <ChartImage
+                        src={rasiChart.inline}
                         alt="Rasi Chart"
-                        style={{
-                          width: "100%",
-                          borderRadius: "8px",
-                          border: "none",
-                        }}
-                        onError={(e) => console.error("❌ Rasi img error:", e)}
+                        className="rasi-chart-img"
+                        onLoad={() =>
+                          console.log("✅ Rasi chart loaded successfully")
+                        }
                       />
                     </div>
                   ) : (
@@ -437,7 +411,7 @@ const RasiChartPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <div className="mt-3 d-flex justify-content-end">
+                <div className="btn-group-row mt-3 d-flex justify-content-end">
                   <Button
                     variant="outline-info"
                     size="sm"
@@ -466,45 +440,22 @@ const RasiChartPage: React.FC = () => {
           </Col>
 
           {/* Navamsha Chart */}
-          <Col md={6}>
-            <Card
-              className="h-100"
-              style={{ backgroundColor: "#FFFFFF", color: "#000" }}
-            >
+          <Col md={6} className="rasi-chart-card">
+            <Card className="h-100"   style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
               <Card.Body className="d-flex flex-column">
                 <Card.Title className=" text-center" style={{ color: "#000" }}>
                   Navamsha Chart
                 </Card.Title>
-                <p className=" text-center" style={{ color: "#000" }}>
-                  Life Partner Chart
-                </p>
-                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2">
+                <p className=" text-center"  style={{color:"#000"}}>Life Partner Chart</p>
+                <div className="chart-iframe-wrapper flex-grow-1 d-flex align-items-center justify-content-center p-2">
                   {navamshaChart?.inline ? (
                     <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
-                      {/* Render as iframe for URLs */}
-                      {/* <iframe
-                        src={navamshaChart.inline.trim()}
-                        title="Navamsha Chart"
-                        width="100%"
-                        height="600"
-                        style={{
-                          border: "none",
-                          backgroundColor: "white",
-                        }}
-                        sandbox="allow-scripts allow-same-origin"
-                        onLoad={() =>
-                          console.log("✅ Navamsha iframe loaded successfully")
-                        }
-                        onError={(e) =>
-                          console.error("❌ Navamsha iframe error:", e)
-                        }
-                      /> */}
-                      <img
-                        src={navamshaChart.inline.trim()}
+                      <ChartImage
+                        src={navamshaChart.inline}
                         alt="Navamsha Chart"
-                        style={{ width: "100%", border: "none" }}
-                        onError={(e) =>
-                          console.error("❌ Navamsha img error:", e)
+                        className="rasi-chart-img"
+                        onLoad={() =>
+                          console.log("✅ Navamsha chart loaded successfully")
                         }
                       />
                     </div>
@@ -517,7 +468,7 @@ const RasiChartPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <div className="mt-3 d-flex justify-content-end">
+                <div className="btn-group-row mt-3 d-flex justify-content-end">
                   <Button
                     variant="outline-info"
                     size="sm"

@@ -1,0 +1,153 @@
+/* RasiChartPage - Slightly reduced desktop sizes */
+
+/* Desktop: slightly smaller overall */
+.rasi-chart-page {
+  padding: 0.75rem 1rem !important;
+}
+
+.rasi-chart-page .rasi-chart-header {
+  margin-bottom: 0.75rem !important;
+}
+
+.rasi-chart-page .rasi-chart-user-info {
+  margin-bottom: 1rem !important;
+}
+
+.rasi-chart-page .rasi-chart-user-info h3 {
+  font-size: 1.35rem !important;
+}
+
+.rasi-chart-page .rasi-chart-user-info p {
+  font-size: 0.9rem !important;
+}
+
+.rasi-chart-page .rasi-chart-card .card-body {
+  padding: 0.75rem !important;
+}
+
+.rasi-chart-page .rasi-chart-card .card-title {
+  font-size: 1rem !important;
+}
+
+.rasi-chart-page .rasi-chart-card .card-body > p {
+  font-size: 0.8rem !important;
+}
+
+.rasi-chart-page .rasi-chart-card .rasi-chart-img,
+.rasi-chart-page .rasi-chart-card .chart-iframe-wrapper img {
+  max-height: 480px !important;
+  object-fit: contain !important;
+}
+
+.rasi-chart-page .row.g-4 {
+  --bs-gutter-y: 0.75rem;
+  --bs-gutter-x: 0.75rem;
+}
+
+/* Laptop viewport: typical 1366x768 or 1440x900 */
+@media (max-height: 900px) {
+  .rasi-chart-page {
+    height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0.5rem 1rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-header {
+    margin-bottom: 0.5rem !important;
+    flex-shrink: 0;
+  }
+
+  .rasi-chart-page .rasi-chart-user-info {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-user-info h3 {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-user-info p {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-cards-wrapper {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .rasi-chart-page .rasi-chart-cards-wrapper .row {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .card {
+    height: 100% !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .card-body {
+    padding: 0.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .card-title {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.1rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .card-body > p {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .chart-iframe-wrapper {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .rasi-chart-img,
+  .rasi-chart-page .rasi-chart-card .chart-iframe-wrapper img {
+    max-height: 280px !important;
+    object-fit: contain !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .btn-group-row {
+    margin-top: 0.35rem !important;
+    flex-shrink: 0;
+  }
+
+  .rasi-chart-page .row.g-4 {
+    --bs-gutter-y: 0.5rem !important;
+    --bs-gutter-x: 0.5rem !important;
+    height: 100% !important;
+  }
+
+  .rasi-chart-page .row.g-4 [class*="col-"] {
+    flex: 1 1 50%;
+    min-width: 0;
+    min-height: 0;
+  }
+}
+
+/* Extra constraint for shorter laptops (e.g. 768px height) */
+@media (max-height: 768px) {
+  .rasi-chart-page .rasi-chart-card .rasi-chart-img,
+  .rasi-chart-page .rasi-chart-card .chart-iframe-wrapper img {
+    max-height: 220px !important;
+  }
+
+  .rasi-chart-page .rasi-chart-user-info h3 {
+    font-size: 1.1rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-user-info p {
+    font-size: 0.75rem !important;
+  }
+}
