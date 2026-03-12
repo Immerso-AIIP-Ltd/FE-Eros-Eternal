@@ -15,6 +15,7 @@ export interface HealthData {
     sdnn: { value: number; unit: string; status: string };
     rmssd: { value: number; unit: string; status: string };
     pnn50: { value: number; unit: string; status: string };
+    pnn20: { value: number; unit: string; status: string };
   };
   stress: {
     level: string;
@@ -45,6 +46,7 @@ VITALS:
 HEART RATE VARIABILITY (HRV):
 - SDNN: ${data.hrv.sdnn.value} ${data.hrv.sdnn.unit} (${data.hrv.sdnn.status})
 - RMSSD: ${data.hrv.rmssd.value} ${data.hrv.rmssd.unit} (${data.hrv.rmssd.status})
+- pNN20: ${data.hrv.pnn20.value} ${data.hrv.pnn20.unit} (${data.hrv.pnn20.status})
 - pNN50: ${data.hrv.pnn50.value} ${data.hrv.pnn50.unit} (${data.hrv.pnn50.status})
 
 STRESS ANALYSIS:
@@ -118,6 +120,8 @@ export interface SectionInsightsInput {
   rmssdStatus: string;
   pnn50: number;
   pnn50Status: string;
+  pnn20: number;
+  pnn20Status: string;
   rrIntervalCount: number;
   recordingClass: string;
   // Frequency domain
@@ -148,6 +152,7 @@ TIME DOMAIN HRV:
 - Heart Rate: ${data.heartRate} BPM (${data.heartRateStatus})
 - SDNN: ${data.sdnn} ms (${data.sdnnStatus})
 - RMSSD: ${data.rmssd} ms (${data.rmssdStatus})
+- pNN20: ${data.pnn20}% (${data.pnn20Status})
 - pNN50: ${data.pnn50}% (${data.pnn50Status})
 - RR Intervals: ${data.rrIntervalCount} collected
 - Recording: ${data.recordingClass}
@@ -212,7 +217,7 @@ function generateFallbackSectionInsights(data: SectionInsightsInput): SectionIns
   const sdnnDesc = data.sdnn < 30 ? 'below normal, indicating limited overall variability' : data.sdnn < 100 ? 'within normal range' : 'high, indicating strong variability';
 
   return {
-    timeDomain: `Your SDNN of ${data.sdnn.toFixed(1)}ms is ${sdnnDesc}. RMSSD of ${data.rmssd.toFixed(1)}ms is ${rmssdDesc}. pNN50 of ${data.pnn50.toFixed(1)}% ${data.pnn50 < 3 ? 'confirms limited beat-to-beat variation' : 'shows normal successive interval differences'}.`,
+    timeDomain: `Your SDNN of ${data.sdnn.toFixed(1)}ms is ${sdnnDesc}. RMSSD of ${data.rmssd.toFixed(1)}ms is ${rmssdDesc}. pNN20 of ${data.pnn20.toFixed(1)}% ${data.pnn20 < 5 ? 'suggests limited beat-to-beat variation' : data.pnn20 > 60 ? 'shows high parasympathetic activity' : 'shows healthy successive interval differences'}${data.pnn50 > 0 ? `. pNN50 of ${data.pnn50.toFixed(1)}% ${data.pnn50 < 3 ? 'is typical for short rPPG recordings' : 'confirms normal variability'}` : ''}.`,
     frequencyDomain: data.tp && data.tp > 0
       ? `Total spectral power is ${data.tp.toFixed(2)}ms². LF/HF ratio of ${(data.lfHfRatio || 0).toFixed(2)} ${(data.lfHfRatio || 0) > 2 ? 'suggests sympathetic dominance' : (data.lfHfRatio || 0) < 0.5 ? 'suggests parasympathetic dominance' : 'indicates balanced autonomic tone'}.`
       : 'Frequency domain data was limited for this scan. A longer recording may yield more detailed spectral analysis.',

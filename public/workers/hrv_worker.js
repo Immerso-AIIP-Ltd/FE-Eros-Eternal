@@ -21,7 +21,7 @@ const defaultRespiratoryExtended = { breathingRateMean: 0, breathingRateSd: 0, b
 const defaultStressAnalysis = { sympathovagalBalance: null, stressLevel: 'unknown', stressIndex: 0, stressDescription: 'Insufficient HRV data' };
 
 let currentMetrics = {
-  sdnn: 0, rmssd: 0, pnn50: 0, sd1: 0, sd2: 0,
+  sdnn: 0, rmssd: 0, pnn50: 0, pnn20: 0, sd1: 0, sd2: 0,
   respiratoryRate: 0, stressLevel: 'unknown', stressIndex: 0,
   recordingClass: 'insufficient_data',
   frequencyDomain: Object.assign({}, defaultFrequencyDomain),
@@ -32,7 +32,7 @@ let currentMetrics = {
 
 function resetMetrics() {
   return {
-    sdnn: 0, rmssd: 0, pnn50: 0, sd1: 0, sd2: 0,
+    sdnn: 0, rmssd: 0, pnn50: 0, pnn20: 0, sd1: 0, sd2: 0,
     respiratoryRate: 0, stressLevel: 'unknown', stressIndex: 0,
     recordingClass: 'insufficient_data',
     frequencyDomain: Object.assign({}, defaultFrequencyDomain),
@@ -121,6 +121,7 @@ function calculateMetrics(isFinal) {
     currentMetrics.sdnn = calculateSDNN(validRR);
     currentMetrics.rmssd = calculateRMSSD(validRR);
     currentMetrics.pnn50 = calculatePNN50(validRR);
+    currentMetrics.pnn20 = calculatePNNx(validRR, 20);
 
     // Poincare
     var poincare = calculatePoincare(validRR);
@@ -187,6 +188,20 @@ function calculatePNN50(rr) {
   var count = 0, total = 0;
   for (var i = 1; i < rr.length; i++) {
     if (Math.abs(rr[i] - rr[i - 1]) > 50) count++;
+    total++;
+  }
+  return total > 0 ? (count / total) * 100 : 0;
+}
+
+/**
+ * Generalized pNNx: percentage of successive RR differences exceeding x ms.
+ * pNN20 is more suitable for rPPG-derived RR intervals.
+ */
+function calculatePNNx(rr, thresholdMs) {
+  if (rr.length < 2) return 0;
+  var count = 0, total = 0;
+  for (var i = 1; i < rr.length; i++) {
+    if (Math.abs(rr[i] - rr[i - 1]) > thresholdMs) count++;
     total++;
   }
   return total > 0 ? (count / total) * 100 : 0;

@@ -1,0 +1,50 @@
+/* TarrotFlow - Laptop view centering fixes */
+
+/* Step 1: Intro screen - center content on laptop */
+@media (max-height: 900px), (max-width: 1440px) {
+  .tarot-intro-screen {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding-top: 3rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .tarot-intro-image-section {
+    height: 50vh !important;
+    flex-shrink: 0;
+  }
+
+  .tarot-intro-content-section {
+    height: auto !important;
+    min-height: auto !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+    flex: 1;
+    justify-content: center !important;
+  }
+
+  .tarot-intro-title {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .tarot-intro-desc {
+    font-size: 0.85rem !important;
+    margin-bottom: 1rem !important;
+  }
+}
+
+/* Step 2: Form screen - ensure card is centered on laptop */
+@media (max-height: 900px), (max-width: 1440px) {
+  .tarot-form-screen {
+    padding-top: 4rem !important;
+    padding-bottom: 2rem !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .tarot-form-card {
+    margin: auto !important;
+  }
+}

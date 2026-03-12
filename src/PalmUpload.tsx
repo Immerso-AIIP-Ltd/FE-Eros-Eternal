@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Card, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Stars from "./components/stars";
+import "./PalmUpload.css";
 
 type PageState = "upload" | "preview" | "loading";
 
@@ -196,6 +197,7 @@ const PalmUploadPage: React.FC = () => {
       style={{
         background:
           "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
+
         color: "#000"
       }}
     >

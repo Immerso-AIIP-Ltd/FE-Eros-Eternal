@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from 'react-router-dom';
 import TarotCard from "./TarrotCard"; 
 import "./harmony.css";
+import "./HarmonyIndex.css";
 import { BsArrowLeft } from "react-icons/bs";
 import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "./components/Tarot/TarotCardSelector";
@@ -185,6 +186,7 @@ const HarmonyIndex: React.FC = () => {
       )} */}
 
       {step === 1 && (
+
   <div className="d-flex flex-column min-vh-100 min-vw-100 position-relative" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
     {/* Back button */}
     <div className="position-absolute top-0 start-0 w-100" style={{ zIndex: 10, padding: '15px 20px' }}>
@@ -223,6 +225,7 @@ const HarmonyIndex: React.FC = () => {
 
     {/* Content section - automatically adjusts height based on its content naturally */}
     <div 
+
       className="d-flex flex-column align-items-center justify-content-center flex-shrink-0 text-center px-4" 
       style={{ 
         backgroundColor: 'rgb(255, 255, 255)', 
@@ -231,6 +234,7 @@ const HarmonyIndex: React.FC = () => {
         zIndex: 5
       }}
     >
+
       <h3 className="fw-semibold mb-3 hero-title" style={{ fontSize: 'clamp(1.5rem, 4vw, 1.8rem)', color: '#000' }}>
         Unlock the Secrets of Your Relationship
       </h3>

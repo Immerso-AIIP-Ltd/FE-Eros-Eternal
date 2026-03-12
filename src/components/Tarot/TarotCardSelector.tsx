@@ -4,9 +4,22 @@ import cardBg from "../../assets/cardbg.png";
 import card2 from "../../assets/image.png";
 import Stars from "../stars";
 import { useNavigate } from "react-router-dom";
+import "./TarotCardSelector.css";
 // import card2 from "../../assets/Tarot1.jpg";
 
+const useViewportSize = () => {
+  const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  useEffect(() => {
+    const onResize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  return size;
+};
+
 const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
+  const { width, height } = useViewportSize();
+  const isLaptop = height <= 900 || width <= 1440;
   const [selectedCards, setSelectedCards] = useState([]);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [animationPhase, setAnimationPhase] = useState("initial");
@@ -87,8 +100,8 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
       transformStyle: "preserve-3d",
     },
     cardBack: {
-      width: "140px",
-      height: "200px",
+      width: isLaptop ? "100px" : "140px",
+      height: isLaptop ? "143px" : "200px",
       position: "relative",
       backfaceVisibility: "hidden",
     },
@@ -96,8 +109,8 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
       position: "absolute",
       top: 0,
       left: 0,
-      width: "140px",
-      height: "200px",
+      width: isLaptop ? "100px" : "140px",
+      height: isLaptop ? "143px" : "200px",
       backfaceVisibility: "hidden",
       transform: "rotateY(180deg)",
     },
@@ -215,9 +228,10 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
     const angleStep = totalAngle / (totalCards - 1);
     const finalAngle = startAngle + index * angleStep;
     const finalRadian = (finalAngle * Math.PI) / 180;
-    const radius = 1000;
+    const radius = isLaptop ? 550 : 1000;
+    const yOffset = isLaptop ? 0.92 : 0.9;
     const finalX = Math.sin(finalRadian) * radius;
-    const finalY = -Math.cos(finalRadian) * radius + radius * 0.9;
+    const finalY = -Math.cos(finalRadian) * radius + radius * yOffset;
     const finalRotation = finalAngle * 0.7; // Reduce rotation for better tilt
 
     if (tornadoPhase) {
@@ -325,7 +339,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
 
     if (readingPhase === "positioning" && isSelected) {
       const selectedIndex = selectedCards.indexOf(index);
-      const cardSpacing = 300;
+      const cardSpacing = isLaptop ? 220 : 300;
       const startX = (-(selectedCards.length - 1) * cardSpacing) / 2;
       const readingX = startX + selectedIndex * cardSpacing - 50; // 👈 shifted left
       const readingY = 0;
@@ -341,7 +355,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
     }
     if ((readingPhase === "reading" || showReading) && isSelected) {
       const selectedIndex = selectedCards.indexOf(index);
-      const cardSpacing = 300;
+      const cardSpacing = isLaptop ? 220 : 300;
       const startX = (-(selectedCards.length - 1) * cardSpacing) / 2;
       const readingX = startX + selectedIndex * cardSpacing;
       const readingY = 0;
@@ -493,7 +507,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
 
       {/* Header */}
       {readingPhase === "selecting" && (
-        <div style={styles.headerContainer}>
+        <div className="tarot-selector-header" style={styles.headerContainer}>
           <div className="text-center mb-4">
             <div style={styles.counterContainer}>
               <span
@@ -501,7 +515,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
               >
                 Selected:
               </span>
-              <div style={styles.counterBadge}>
+              <div className="tarot-counter-badge" style={styles.counterBadge}>
                 <span>{selectedCards.length}</span>
               </div>
               <span
@@ -515,7 +529,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
           {readingPhase === "selecting" && (
             <div className="text-center">
               <h2
-                className="fw-bolder mb-2"
+                className="fw-bolder mb-2 tarot-selector-title"
                 style={{
                   opacity: 1,
                   color: "#000",
@@ -525,7 +539,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
                 {/* Thinking about your life situation */}
                 Three-Card Spread
               </h2>
-              <div className="fw-light" style={{ fontSize: "0.875rem", color: "#000" }}>
+              <div className="fw-light tarot-selector-subtitle" style={{ fontSize: "0.875rem", color: "#000" }}>
                 {/* Select 3 cards for your mystical reading */}
                 Select 3 cards from the deck
               </div>
@@ -940,6 +954,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
       </Button>}
       {/* Cards container */}
       <div
+        className="tarot-selector-card-container"
         style={{
           ...styles.cardContainer,
           opacity: showDescriptions ? 0 : 1,

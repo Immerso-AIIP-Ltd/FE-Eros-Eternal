@@ -833,7 +833,8 @@ const FaceReportPage: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <HrvRow label="SDNN (Standard Deviation)" value={rppg.hrv.sdnn.value} unit="ms" status={rppg.hrv.sdnn.status} description="Normal range: 50–100 ms" />
               <HrvRow label="RMSSD (Root Mean Square)" value={rppg.hrv.rmssd.value} unit="ms" status={rppg.hrv.rmssd.status} description="Normal range: 20–50 ms · Parasympathetic indicator" />
-              <HrvRow label="pNN50 (Successive Differences)" value={rppg.hrv.pnn50.value} unit="%" status={rppg.hrv.pnn50.status} description="Normal range: 3–25%" />
+              <HrvRow label="pNN20 (Beat-to-Beat Variation)" value={rppg.hrv.pnn20.value} unit="%" status={rppg.hrv.pnn20.status} description="Normal range: 5–60% · % of successive RR differences > 20 ms" />
+              <HrvRow label="pNN50 (Successive Differences)" value={rppg.hrv.pnn50.value} unit="%" status={rppg.hrv.pnn50.status} description="Normal range: 3–25% · May show 0% in short rPPG recordings" />
 
               {/* RR Interval Count */}
               {rppg.hrv.rrIntervalCount !== undefined && rppg.hrv.rrIntervalCount > 0 && (
@@ -920,20 +921,36 @@ const FaceReportPage: React.FC = () => {
                 </h3>
               </div>
               <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: '0 0 0 30px', lineHeight: 1.4 }}>
-                Spectral analysis of heart rate oscillations. LF reflects sympathetic + parasympathetic activity; HF reflects parasympathetic (vagal) tone.
+                Spectral analysis of heart rate oscillations. Each band covers a frequency range (Hz); power (ms²) indicates the strength of oscillations in that band.
               </p>
             </div>
             {fd ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <HrvRow label="VLF (Very Low Frequency)" value={fd.vlf.toFixed(2)} unit="ms²" description="0.003 - 0.04 Hz" />
-                <HrvRow label="LF (Low Frequency)" value={fd.lf.toFixed(2)} unit="ms²" description="0.04 - 0.15 Hz · Sympathetic + Parasympathetic" />
-                <HrvRow label="HF (High Frequency)" value={fd.hf.toFixed(2)} unit="ms²" description="0.15 - 0.4 Hz · Parasympathetic activity" />
-                <HrvRow label="Total Power" value={fd.tp.toFixed(2)} unit="ms²" />
+                {/* Column headers for clarity */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '8px 20px',
+                    borderBottom: '1px solid #E5E7EB',
+                  }}
+                >
+                  <span style={{ color: '#9CA3AF', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Band (Frequency Range)
+                  </span>
+                  <span style={{ color: '#9CA3AF', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Power (ms²)
+                  </span>
+                </div>
+                <HrvRow label="VLF · 0.003–0.04 Hz" value={fd.vlf.toFixed(2)} unit="ms²" description="Very Low Frequency" />
+                <HrvRow label="LF · 0.04–0.15 Hz" value={fd.lf.toFixed(2)} unit="ms²" description="Low Frequency · Sympathetic + Parasympathetic" />
+                <HrvRow label="HF · 0.15–0.4 Hz" value={fd.hf.toFixed(2)} unit="ms²" description="High Frequency · Parasympathetic (vagal) tone" />
+                <HrvRow label="Total Power (all bands)" value={fd.tp.toFixed(2)} unit="ms²" />
                 <HrvRow
                   label="LF/HF Ratio"
                   value={fd.lfHfRatio.toFixed(2)}
                   status={fd.lfHfRatio < 1.0 ? 'NORMAL' : fd.lfHfRatio < 2.0 ? 'MODERATE' : 'HIGH'}
-                  description="Sympathovagal balance indicator"
+                  description="Sympathovagal balance indicator (unitless)"
                 />
 
                 {/* Visual bar breakdown */}
