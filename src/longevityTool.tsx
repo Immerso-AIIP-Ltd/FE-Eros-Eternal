@@ -41,7 +41,6 @@ const sidebarMenuItems = [
     icon: <User size={16} />,
     reportType: "aura_profile",
   },
-  // { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} />, reportType: 'star_map' },
   {
     id: "star-map",
     label: "Birth Chart",
@@ -90,9 +89,14 @@ const LongevityTool: React.FC = () => {
     Array<{ url: string; file: File; duration?: number }>
   >([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  // FIX: added inputRef for auto-focus
+  const inputRef = useRef<HTMLInputElement>(null);
+  // FIX: added refs for timer
+  const elapsedTimeRef = useRef<number>(0);
+  const recordingStartTimeRef = useRef<number>(0);
+  const animFrameRef = useRef<number | null>(null);
   const [activeMenuItem, setActiveMenuItem] = useState("vibrational-frequency");
 
-  // New states for API integration
   const [currentReportType, setCurrentReportType] = useState<string>(
     "vibrational_frequency",
   );
@@ -105,7 +109,6 @@ const LongevityTool: React.FC = () => {
   const [reportData, setReportData] = useState<any>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
-  const textInputRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -152,7 +155,11 @@ const LongevityTool: React.FC = () => {
           setDuration(0);
         }
       };
-      const onEnded = () => setIsPlaying(false);
+      // FIX: reset currentTime on ended
+      const onEnded = () => {
+        setIsPlaying(false);
+        setCurrentTime(0);
+      };
       audio.addEventListener("timeupdate", updateTime);
       audio.addEventListener("loadedmetadata", updateDuration);
       audio.addEventListener("ended", onEnded);
@@ -176,15 +183,11 @@ const LongevityTool: React.FC = () => {
     };
 
     const formatTime = (secs) => {
-      if (!secs || isNaN(secs) || secs === 0) return "0:00";
+      if (secs === undefined || secs === null || isNaN(secs)) return "0:00";
       let totalSeconds = Math.floor(secs);
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
-      if (minutes < 10) {
-        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-      } else {
-        return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-      }
+      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     };
 
     return (
@@ -198,8 +201,9 @@ const LongevityTool: React.FC = () => {
           {isPlaying ? <Pause size={16} /> : <Play size={16} />}
         </button>
         <div className="flex-1 min-w-0">
+          {/* FIX: show "Voice Recording" instead of filename */}
           <div className="text-sm text-gray-800 font-medium truncate">
-            {voiceData.file.name}
+            Voice Recording
           </div>
           <div className="text-xs text-gray-600">
             {formatTime(currentTime)} / {formatTime(duration)}
@@ -213,13 +217,13 @@ const LongevityTool: React.FC = () => {
             />
           </div>
         </div>
-        <button
+        <span
           onClick={onRemove}
           className="text-gray-500 hover:text-red-500 transition-colors flex-shrink-0 bg-transparent"
           role="button"
         >
           <X size={16} />
-        </button>
+        </span>
       </div>
     );
   };
@@ -328,7 +332,6 @@ const LongevityTool: React.FC = () => {
         setQuestionNumber(data.data.question_number || 0);
         setTotalQuestions(data.data.total_questions || 0);
 
-        // Add initial message from AI
         setMessages([
           {
             sender: "ai",
@@ -382,6 +385,10 @@ const LongevityTool: React.FC = () => {
     setInputValue("");
 
     setIsLoading(true);
+    // FIX: clear attachments immediately after send
+    setAttachedImages([]);
+    setAttachedFiles([]);
+    setAttachedVoices([]);
 
     try {
       const userId = localStorage.getItem("user_id");
@@ -397,14 +404,12 @@ const LongevityTool: React.FC = () => {
       const formData = new FormData();
       formData.append("report_type", currentReportType);
 
-      // Always send answer, even if empty
       if (currentInput.trim()) {
         formData.append("answer", currentInput);
       } else {
-        formData.append("answer", ""); // 👈 empty answer for image/audio
+        formData.append("answer", "");
       }
 
-      // Handle file uploads
       if (attachedImages.length > 0 && attachedFiles.length > 0) {
         formData.append("file", attachedFiles[0]);
       } else if (attachedVoices.length > 0) {
@@ -443,10 +448,6 @@ const LongevityTool: React.FC = () => {
 
           setMessages((prev) => [
             ...prev,
-            // {
-            //     sender: "ai",
-            //     text: data.message || "Thank you for your response.",
-            // },
             {
               sender: "ai",
               text: data.data.current_question,
@@ -456,7 +457,10 @@ const LongevityTool: React.FC = () => {
       } else {
         setMessages((prev) => [
           ...prev,
-          { sender: "ai", text: data.message || "Failed to process response." },
+          {
+            sender: "ai",
+            text: data?.data?.current_question || "Failed to process response.",
+          },
         ]);
       }
     } catch (error) {
@@ -470,15 +474,10 @@ const LongevityTool: React.FC = () => {
       ]);
     }
 
-    // Clean up attachments
-    setAttachedImages([]);
-    setAttachedFiles([]);
-    setAttachedVoices([]);
     setIsLoading(false);
 
     if (imageInputRef.current) imageInputRef.current.value = "";
     if (audioInputRef.current) audioInputRef.current.value = "";
-    setTimeout(() => textInputRef.current?.focus(), 50);
   };
 
   const generateSoulReport = async (userId: string) => {
@@ -502,7 +501,6 @@ const LongevityTool: React.FC = () => {
         setReportData(data.data);
         setAssessmentStatus("report_generated");
 
-        // Display the generated report
         const reportContent = formatReportContent(data.data);
         setMessages((prev) => [
           ...prev,
@@ -534,7 +532,6 @@ const LongevityTool: React.FC = () => {
     setIsGeneratingReport(false);
   };
 
-  // Recursive renderer for any JSON value
   const renderValue = (val: any): JSX.Element | string => {
     if (val === null || val === undefined) return "";
 
@@ -572,14 +569,10 @@ const LongevityTool: React.FC = () => {
     return String(val);
   };
 
-  // Format snake_case keys into nice labels
   const formatKey = (key: string) => {
-    return key
-      .replace(/_/g, " ") // replace underscores with spaces
-      .replace(/\b\w/g, (c) => c.toUpperCase()); // capitalize each word
+    return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
-  // Main Report renderer
   const renderReportDynamic = (report: any) => {
     if (!report) return null;
 
@@ -599,7 +592,6 @@ const LongevityTool: React.FC = () => {
     if (!reportData || !reportData.report)
       return "Report generated successfully!";
 
-    // Return the JSX component instead of plain text
     return renderReportDynamic(reportData.report);
   };
 
@@ -652,15 +644,33 @@ const LongevityTool: React.FC = () => {
 
   const openCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
       setShowCamera(true);
-    } catch (err) {
-      console.error("Camera error:", err);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false,
+      });
+
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
+      }, 200);
+    } catch (error: any) {
+      console.error("Camera error:", error);
+      alert("Unable to access camera.");
+      setShowCamera(false);
     }
+  };
+
+  const closeCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setShowCamera(false);
   };
 
   const capturePhoto = () => {
@@ -688,65 +698,134 @@ const LongevityTool: React.FC = () => {
     }
   };
 
-  const closeCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      (videoRef.current.srcObject as MediaStream)
-        .getTracks()
-        .forEach((t) => t.stop());
+  // FIX: WAV conversion function
+  const convertToWav = async (blob: Blob): Promise<Blob> => {
+    const audioContext = new AudioContext();
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const numSamples = audioBuffer.length;
+    const bufferLength = 44 + numSamples * numChannels * 2;
+    const buffer = new ArrayBuffer(bufferLength);
+    const view = new DataView(buffer);
+
+    const writeString = (offset: number, str: string) => {
+      for (let i = 0; i < str.length; i++)
+        view.setUint8(offset + i, str.charCodeAt(i));
+    };
+
+    writeString(0, "RIFF");
+    view.setUint32(4, bufferLength - 8, true);
+    writeString(8, "WAVE");
+    writeString(12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * numChannels * 2, true);
+    view.setUint16(32, numChannels * 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, "data");
+    view.setUint32(40, numSamples * numChannels * 2, true);
+
+    let offset = 44;
+    for (let i = 0; i < numSamples; i++) {
+      for (let ch = 0; ch < numChannels; ch++) {
+        const sample = Math.max(
+          -1,
+          Math.min(1, audioBuffer.getChannelData(ch)[i]),
+        );
+        view.setInt16(
+          offset,
+          sample < 0 ? sample * 0x8000 : sample * 0x7fff,
+          true,
+        );
+        offset += 2;
+      }
     }
-    setShowCamera(false);
+
+    await audioContext.close();
+    return new Blob([buffer], { type: "audio/wav" });
   };
 
+  // FIX: startRecording with working timer (setTimeout to avoid cleanup effect killing interval)
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      setMicStream(stream);
-      const recorder = new MediaRecorder(stream, {
-        mimeType: "audio/webm;codecs=opus",
-      });
+
+      const recorder = new MediaRecorder(stream);
       recordedChunksRef.current = [];
+
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          recordedChunksRef.current.push(e.data);
-        }
+        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
       };
-      recorder.start();
+
+      recorder.start(100);
       mediaRecorderRef.current = recorder;
-      setIsRecording(true);
+      elapsedTimeRef.current = 0;
+      recordingStartTimeRef.current = Date.now();
+
+      setMicStream(stream);
       setRecordingTime(0);
-      timerRef.current = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
+      setIsRecording(true);
+
+      // FIX: setTimeout so micStream useEffect cleanup doesn't kill the interval
+      setTimeout(() => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        timerRef.current = setInterval(() => {
+          const elapsed = Math.floor(
+            (Date.now() - recordingStartTimeRef.current) / 1000,
+          );
+          elapsedTimeRef.current = elapsed;
+          setRecordingTime(elapsed);
+        }, 500);
+      }, 100);
     } catch (err) {
       console.error("Microphone error:", err);
     }
   };
 
+  // FIX: stopRecording converts to WAV
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
-      const finalDuration = recordingTime;
+      const finalDuration = elapsedTimeRef.current;
+
       mediaRecorderRef.current.onstop = async () => {
-        const audioBlob = new Blob(recordedChunksRef.current, {
-          type: "audio/webm;codecs=opus",
+        const rawBlob = new Blob(recordedChunksRef.current, {
+          type: "audio/webm",
         });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const recordedFile = new File(
-          [audioBlob],
-          `recording_${Date.now()}.webm`,
-          { type: "audio/webm" },
-        );
-        setAttachedVoices((prev) => [
-          ...prev,
-          {
-            url: audioUrl,
-            file: recordedFile,
-            duration: finalDuration,
-          },
-        ]);
+        try {
+          const wavBlob = await convertToWav(rawBlob);
+          const audioUrl = URL.createObjectURL(wavBlob);
+          const recordedFile = new File(
+            [wavBlob],
+            `recording_${Date.now()}.wav`,
+            { type: "audio/wav" },
+          );
+          setAttachedVoices((prev) => [
+            ...prev,
+            { url: audioUrl, file: recordedFile, duration: finalDuration },
+          ]);
+        } catch (err) {
+          const audioUrl = URL.createObjectURL(rawBlob);
+          const recordedFile = new File(
+            [rawBlob],
+            `recording_${Date.now()}.webm`,
+            { type: "audio/webm" },
+          );
+          setAttachedVoices((prev) => [
+            ...prev,
+            { url: audioUrl, file: recordedFile, duration: finalDuration },
+          ]);
+        }
       };
+
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       if (timerRef.current) clearInterval(timerRef.current);
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (micStream) {
         micStream.getTracks().forEach((track) => track.stop());
         setMicStream(null);
@@ -759,24 +838,23 @@ const LongevityTool: React.FC = () => {
       mediaRecorderRef.current.stop();
     }
     if (timerRef.current) clearInterval(timerRef.current);
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     if (micStream) {
       micStream.getTracks().forEach((track) => track.stop());
       setMicStream(null);
     }
     setIsRecording(false);
+    elapsedTimeRef.current = 0;
     setRecordingTime(0);
   };
 
+  // FIX: formatTime handles 0 correctly
   const formatTime = (secs) => {
-    if (!secs || isNaN(secs) || secs === 0) return "0:00";
-    let totalSeconds = Math.floor(secs);
+    if (secs === undefined || secs === null || isNaN(secs)) return "0:00";
+    const totalSeconds = Math.max(0, Math.floor(secs));
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-    if (minutes < 10) {
-      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-    } else {
-      return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-    }
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const removeAttachedImage = (index: number) => {
@@ -803,11 +881,11 @@ const LongevityTool: React.FC = () => {
     }
   };
 
+  // FIX: cleanup useEffect with animFrameRef
   useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (micStream) {
         micStream.getTracks().forEach((track) => track.stop());
       }
@@ -834,6 +912,13 @@ const LongevityTool: React.FC = () => {
     }
   }, [isGeneratingReport, isLoading]);
 
+  // FIX: auto-focus input when not loading
+  useEffect(() => {
+    if (!isLoading && !isGeneratingReport && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading, isGeneratingReport, messages]);
+
   return (
     <div
       className="d-flex w-100 h-100 min-vh-100 min-vw-100 text-gray-800 overflow-hidden"
@@ -844,7 +929,7 @@ const LongevityTool: React.FC = () => {
       }}
     >
       <Stars />
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {stars.map((star, i) => (
           <div
             key={i}
@@ -852,50 +937,51 @@ const LongevityTool: React.FC = () => {
             style={{
               width: `${star.size}px`,
               height: `${star.size}px`,
-              opacity: star.opacity,
+              opacity: star.opacity * 0.4,
               top: `${star.y}%`,
               left: `${star.x}%`,
+              background: "#60A5FA",
               animationDelay: `${Math.random() * 3}s`,
               animationDuration: `${2 + Math.random() * 2}s`,
-              background: "#60A5FA",
             }}
           />
         ))}
       </div>
 
       {showCamera && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Take Photo
-              </h3>
-              <button
-                onClick={closeCamera}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <X size={24} />
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-[400px] max-w-[95%] p-4 relative">
+            <button
+              onClick={closeCamera}
+              className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-2"
+            >
+              <X size={18} />
+            </button>
+            <h3 className="text-center font-semibold mb-3 text-gray-800">
+              Capture Photo
+            </h3>
+            <div className="rounded-xl overflow-hidden bg-black">
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-[300px] object-cover"
+              />
             </div>
-            <video
-              ref={videoRef}
-              className="w-full rounded-lg mb-4"
-              autoPlay
-              muted
-            />
             <canvas ref={canvasRef} className="hidden" />
-            <div className="flex gap-4 justify-center">
+            <div className="flex justify-center gap-4 mt-4">
               <button
                 onClick={capturePhoto}
-                className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg transition-colors"
+                className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-full"
               >
                 Capture
               </button>
               <button
                 onClick={closeCamera}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg transition-colors"
+                className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-full"
               >
-                Cancel
+                Close
               </button>
             </div>
           </div>
@@ -909,93 +995,6 @@ const LongevityTool: React.FC = () => {
         />
       )}
 
-      {/* <div
-                className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative h-screen z-50 w-64 backdrop-blur-sm transition-transform duration-300 ease-in-out overflow-y-auto`}
-                style={{
-                    backgroundColor: '#1E2123',
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: '#4B5563 #1E2123'
-                }}
-                >
-                <style>{`
-                    div::-webkit-scrollbar {
-                        width: 6px;
-                    }
-                    div::-webkit-scrollbar-track {
-                        background: #1E2123;
-                    }
-                    div::-webkit-scrollbar-thumb {
-                        background: #4B5563;
-                        border-radius: 3px;
-                    }
-                    div::-webkit-scrollbar-thumb:hover {
-                        background: #6B7280;
-                    }
-                        .sidebar-btn:hover{
-                background-color: #71717A;
-                }
-                    `}</style>
-                <div className="p-4 border-b border-gray-700">
-                    <div className="flex items-center justify-between">
-                        <img
-                            src={eroslogo}
-                            alt="EROS Wellness Logo"
-                            style={{
-                                width: 'clamp(200px, 40vw, 500px)',
-                                height: 'auto',
-                                // maxWidth: '500px',
-                                margin: 0,
-                                objectFit: 'contain',
-                                filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
-                                transition: 'transform 0.3s ease',
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                        />
-
-                        <button
-                            className="md:hidden text-gray-400 hover:text-white bg-transparent"
-                            onClick={() => setSidebarOpen(false)}
-                        >
-                            <X size={20} />
-                        </button>
-                    </div>
-                </div>
-                <div className="p-3">
-                    <nav className="d-flex flex-column gap-2">
-                        {sidebarMenuItems.map((item) => (
-                            <button
-                                key={item.id}
-                                className={`btn d-flex align-items-center my-2 gap-2 w-100 text-start ${activeMenuItem === item.id
-                                    ? 'btn-info text-white'
-                                    : 'sidebar-btn text-white hover-bg-dark'
-                                    }`}
-                                onClick={async () => {
-                                    setActiveMenuItem(item.id);
-                                    const reportExists = await checkReportExists(item.reportType);
-
-                                    if (reportExists) {
-                                        navigate('/view-report', {
-                                            state: {
-                                                reportType: item.reportType,
-                                                userId: localStorage.getItem('user_id'),
-                                                title: item.label
-                                            }
-                                        });
-                                    } else {
-                                        navigate(`/${item.id}`);
-                                    }
-                                }}
-                                style={{ padding: '0.5rem 1rem', borderRadius: '8px' }}
-                            >
-                                {item.icon}
-                                <span>{item.label}</span>
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-            </div> */}
-
       <div className="flex-1 flex flex-col relative z-10 h-screen">
         <div className="flex items-center justify-between px-3 py-2 sm:p-4 bg-opacity-80 backdrop-blur-sm">
           <div className="flex items-center gap-3">
@@ -1005,9 +1004,6 @@ const LongevityTool: React.FC = () => {
             >
               <Menu size={20} />
             </button>
-            {/* <h3 className="text-xl font-semibold text-gray-800">
-                            EROS Wellness - {sidebarMenuItems.find(item => item.id === activeMenuItem)?.label || 'Assessment'}
-                        </h3> */}
           </div>
           <div className="flex items-center gap-4">
             <div
@@ -1032,24 +1028,7 @@ const LongevityTool: React.FC = () => {
           </div>
         </div>
 
-        {/* Progress indicator */}
-        {/* {assessmentStatus !== 'not_started' && assessmentStatus !== 'report_generated' && totalQuestions > 0 && (
-                    <div className="px-6 py-2 border-b border-gray-800">
-                        <div className="flex items-center justify-between text-sm text-gray-400 mb-2">
-                            <span>Progress: {questionNumber}/{totalQuestions}</span>
-                            <span>{Math.round((questionNumber / totalQuestions) * 100)}%</span>
-                        </div>
-                        <div className="w-full bg-gray-700 rounded-full h-2">
-                            <div
-                                className="bg-cyan-500 h-2 rounded-full transition-all duration-300"
-                                style={{ width: `${(questionNumber / totalQuestions) * 100}%` }}
-                            />
-                        </div>
-                    </div>
-                )} */}
-
         <div className="flex-1 flex flex-col h-full relative overflow-hidden">
-          {/* Chat Messages Area - Scrollable */}
           <div
             ref={chatContainerRef}
             className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar"
@@ -1057,35 +1036,12 @@ const LongevityTool: React.FC = () => {
               maxWidth: "min(65%, 90vw)",
               margin: "0 auto",
               width: "100%",
-              // scrollbarWidth: 'thin',
-              // scrollbarColor: '#4B5563 #1E2123'
             }}
           >
             <style>{`
-                        // .custom-scrollbar::-webkit-scrollbar {
-                        //     width: 6px;
-                        // }
-                        // .custom-scrollbar::-webkit-scrollbar-track {
-                        //     background: #1E2123;
-                        // }
-                        // .custom-scrollbar::-webkit-scrollbar-thumb {
-                        //     background: #4B5563;
-                        //     border-radius: 3px;
-                        // }
-                        // .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                        //     background: #6B7280;
-                        // }
-                         /* Hide scrollbar for Chrome, Safari and Opera */
-    .hide-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Hide scrollbar for Firefox */
-    .hide-scrollbar {
-      scrollbar-width: none; /* Firefox */
-      -ms-overflow-style: none; /* IE and Edge */
-    }
-                        `}</style>
+              .hide-scrollbar::-webkit-scrollbar { display: none; }
+              .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+            `}</style>
 
             {messages.length === 0 && assessmentStatus === "not_started" ? (
               <div className="flex-1 flex items-center justify-center h-full min-h-[60vh]">
@@ -1095,10 +1051,6 @@ const LongevityTool: React.FC = () => {
                       <i className="bi bi-stars" style={{ color: "#fff" }}></i>
                     </div>
                   </div>
-                  {/* <div className="text-white text-lg leading-relaxed">
-                                        <div className="text-xl font-semibold text-white">Hi, I'm Eternal AI</div>
-                                        <div className="text-sm text-gray-400 mt-1">Starting your {sidebarMenuItems.find(item => item.id === activeMenuItem)?.label} assessment...</div>
-                                    </div> */}
                   <div className="leading-relaxed">
                     <div className="text-xl font-semibold text-gray-800">
                       Hi, I'm EROS Wellness AI
@@ -1116,9 +1068,7 @@ const LongevityTool: React.FC = () => {
                     {message.sender === "user" ? (
                       <div className="flex flex-col items-end gap-2 mb-4">
                         <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                          <span className="text-xs font-semibold text-white">
-                            <User size={18} />
-                          </span>
+                          <User size={18} className="text-white" />
                         </div>
                         <div
                           className="text-dark rounded-2xl rounded-tr-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-md text-sm sm:text-md font-semibold"
@@ -1230,7 +1180,6 @@ const LongevityTool: React.FC = () => {
             </div>
           )}
 
-          {/* Fixed Input Area at Bottom */}
           {assessmentStatus !== "report_generated" && (
             <div className="sticky bottom-0 bg-transparent z-20 px-6 pb-4 pt-2">
               <div
@@ -1255,10 +1204,10 @@ const LongevityTool: React.FC = () => {
                             <img
                               src={img}
                               alt="preview"
-                              className="rounded object-cover w-full h-full"
+                              className="rounded object-cover w-full h-full border border-gray-300"
                             />
                             <button
-                              className="absolute -top-2 -right-2 bg-danger text-white flex items-center justify-center text-xs hover:bg-red-600 p-1 rounded-full rounded-circle"
+                              className="absolute -top-2 -right-2 bg-danger flex items-center justify-center text-xs hover:bg-red-600 p-1 rounded text-white"
                               onClick={() => removeAttachedImage(idx)}
                             >
                               <X size={12} />
@@ -1284,9 +1233,9 @@ const LongevityTool: React.FC = () => {
                   {!isRecording ? (
                     <>
                       <div className="flex-1">
+                        {/* FIX: added ref and removed autoFocus in favour of useEffect */}
                         <input
-                          ref={textInputRef}
-                          autoFocus
+                          ref={inputRef}
                           type="text"
                           placeholder="Message to Wellness AI"
                           value={inputValue}
@@ -1340,9 +1289,11 @@ const LongevityTool: React.FC = () => {
                           disabled={
                             isLoading ||
                             isGeneratingReport ||
-                            (!inputValue.trim() && attachedImages.length === 0 && attachedVoices.length === 0)
+                            (!inputValue.trim() &&
+                              attachedImages.length === 0 &&
+                              attachedVoices.length === 0)
                           }
-                          className="d-flex align-items-center justify-content-center border-0 rounded-pill px-3 py-2"
+                          className="d-flex align-items-center justify-content-center border-0 rounded-pill px-4 py-2"
                           style={{
                             backgroundColor:
                               isLoading ||
@@ -1356,7 +1307,7 @@ const LongevityTool: React.FC = () => {
                             fontSize: "14px",
                             fontWeight: "500",
                             gap: "6px",
-                            minWidth: "70px",
+                            minWidth: "80px",
                             cursor:
                               isLoading ||
                               isGeneratingReport ||
@@ -1373,26 +1324,75 @@ const LongevityTool: React.FC = () => {
                       </div>
                     </>
                   ) : (
-                    <div className="flex items-center bg-gray-700 rounded-xl px-4 py-2 flex-grow-1 w-full">
-                      <MicVisualizer stream={micStream} height={40} />
-                      <span className="ml-4 text-red-400 font-bold text-lg">
+                    // FIX: recording bar with working timer display and visible buttons
+                    <div
+                      className="flex items-center gap-3 w-full"
+                      style={{
+                        background: "#f1f5f9",
+                        borderRadius: "12px",
+                        padding: "10px 16px",
+                      }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <MicVisualizer stream={micStream} height={36} />
+                      </div>
+                      <span
+                        style={{
+                          color: "#ef4444",
+                          fontWeight: "700",
+                          fontSize: "16px",
+                          minWidth: "52px",
+                          textAlign: "center",
+                          flexShrink: 0,
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
                         {formatTime(recordingTime)}
                       </span>
-                      <div className="ml-auto flex items-center gap-2">
-                        <button
-                          className="bg-green-500 hover:bg-green-600 text-white rounded-full p-2 transition-colors bg-transparent"
-                          onClick={stopRecording}
-                        >
-                          <Check size={16} />
-                        </button>
-                        <button
-                          className="text-gray-500 hover:text-red-500 transition-colors flex-shrink-0 bg-transparent"
-                          role="button"
-                          onClick={cancelRecording}
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        style={{
+                          backgroundColor: "#22c55e",
+                          border: "none",
+                          borderRadius: "50%",
+                          width: "36px",
+                          height: "36px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          flexShrink: 0,
+                          padding: 0,
+                          color: "white",
+                          fontSize: "16px",
+                          fontWeight: "bold",
+                        }}
+                        onClick={stopRecording}
+                      >
+                        ✓
+                      </button>
+                      <button
+                        type="button"
+                        style={{
+                          backgroundColor: "#ef4444",
+                          border: "none",
+                          borderRadius: "50%",
+                          width: "36px",
+                          height: "36px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          flexShrink: 0,
+                          padding: 0,
+                          color: "white",
+                          fontSize: "16px",
+                          fontWeight: "bold",
+                        }}
+                        onClick={cancelRecording}
+                      >
+                        ✕
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1400,27 +1400,18 @@ const LongevityTool: React.FC = () => {
             </div>
           )}
 
-          {/* Footer - Fixed at very bottom */}
           <div className="sticky bottom-0 bg-transparent z-10 px-6 py-2">
             <div
               className="text-center text-xs text-gray-600"
               style={{ maxWidth: "65%", margin: "0 auto", width: "100%" }}
             >
-              <div className="flex items-center justify-center text-xs">
-                {/* <div>© 2025 EROS Universe. All Rights Reserved.</div> */}
-                {/* <div className="flex items-center gap-6">
-                                    <a href="#" className="hover:text-gray-300 transition-colors">FAQs</a>
-                                    <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
-                                    <a href="#" className="hover:text-gray-300 transition-colors">Terms & Conditions</a>
-                                    <a href="#" className="hover:text-gray-300 transition-colors">Refund Policy</a>
-                                </div> */}
-              </div>
+              <div className="flex items-center justify-center text-xs"></div>
             </div>
           </div>
         </div>
 
         {previewImage && (
-          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="relative max-w-4xl max-h-4xl p-4">
               <button
                 onClick={() => setPreviewImage(null)}
