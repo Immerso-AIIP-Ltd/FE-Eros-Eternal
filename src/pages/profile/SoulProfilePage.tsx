@@ -1,284 +1,57 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Select,
-  MenuItem,
-  FormControl,
-  TextField,
-  InputLabel,
-  ThemeProvider,
-  createTheme,
-  styled,
-  InputAdornment,
-} from "@mui/material";
-
-import type { SelectChangeEvent } from "@mui/material";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import backgroundImg from "@/assets/background.png";
-import Stars from "@/components/ui/stars";
-import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import LogoEros from '@/assets/LogoEros.png';
-import { baseApiUrl } from "@/config/api";
+import BackgroundImage from "../../assets/images/background.png"; // adjust path as needed
+
+const API_URL = "http://164.52.205.108:8500"; // or use your baseApiUrl
 
 interface FormData {
-  firstName: string;
   name: string;
   gender: string;
   placeOfBirth: string;
   currentLocation: string;
-  dateOfBirth: string; // YYYY-MM-DD
-  timeOfBirth: string; // HH:mm or HH:mm:ss
+  dateOfBirth: string;     // YYYY-MM-DD
+  timeOfBirth: string;     // HH:mm
 }
 
+/* ─── Tiny SVG icons ─── */
+const IcoLocation = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
 
-const indianStates = [
-  "Mumbai",
-  "Delhi",
-  "Bangalore",
-  "Hyderabad",
-  "Chennai",
-  "Kolkata",
-  "Ahmedabad",
-  "Pune",
-  "Jaipur",
-  "Surat",
-  "Lucknow",
-  "Kanpur",
-  "Nagpur",
-  "Indore",
-  "Thane",
-  "Bhopal",
-  "Visakhapatnam",
-  "Patna",
-  "Vadodara",
-  "Ghaziabad",
-  "Ludhiana",
-  "Agra",
-  "Nashik",
-  "Faridabad",
-  "Meerut",
-  "Rajkot",
-  "Varanasi",
-  "Srinagar",
-  "Aurangabad",
-  "Dhanbad",
-  "Amritsar",
-  "Navi Mumbai",
-  "Allahabad (Prayagraj)",
-  "Ranchi",
-  "Howrah",
-  "Coimbatore",
-  "Jabalpur",
-  "Gwalior",
-  "Vijayawada",
-  "Jodhpur",
-  "Madurai",
-  "Raipur",
-  "Kochi",
-  "Chandigarh",
-  "Guwahati",
-  "Bhubaneswar",
-  "Dehradun",
-  "Mysore",
-  "Tiruchirappalli",
-  "Salem",
-];
+const IcoCalendar = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
 
-// Custom styled Select with icon left side and blue border glow on focus/filled
-const StyledFormControl = styled(FormControl)(({ theme }) => ({
-  width: "100%",
-  marginBottom: "0",
-  ".MuiInputLabel-root": {
-    color: "#666",
-  },
-  ".MuiSelect-root": {
-    paddingLeft: "32px", // space for icon on left
-    color: "#000",
-  },
-  ".MuiOutlinedInput-notchedOutline": {
-    borderColor: "#d1d5db",
-    transition: "border-color 0.3s ease",
-  },
-  "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#d1d5db",
-  },
-  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#60a5fa",
-    boxShadow: "none",
-  },
-  position: "relative",
-}));
+const IcoClock = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
 
-// Icon wrapper for left icon inside Select input
-const IconLeftWrapper = styled("div")({
-  position: "absolute",
-  left: 8,
-  top: "50%",
-  transform: "translateY(-50%)",
-  pointerEvents: "none",
-  color: "#666",
-  zIndex: 1,
-});
-
-const lightTheme = createTheme({
-  palette: {
-    mode: "light",
-    background: {
-      default: "transparent",
-      paper: "#fff",
-    },
-    primary: {
-      main: "#60a5fa",
-    },
-    text: {
-      primary: "#000",
-    },
-  },
-  components: {
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "transparent",
-          height: "2.75rem",
-          marginBottom: "12px",
-          "& input": {
-            color: "#000",
-          },
-        },
-      },
-    },
-    MuiInputLabel: {
-      styleOverrides: {
-        root: {
-          color: "#666",
-          fontSize: "0.875rem",
-          "&.Mui-focused": {
-            color: "#60a5fa",
-          },
-        },
-      },
-    },
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-          color: "#000",
-          "&:hover": {
-            backgroundColor: "#f5f5f5",
-          },
-          "&.Mui-selected": {
-            backgroundColor: "#00B8F8",
-            color: "#fff",
-            "&:hover": {
-              backgroundColor: "#0099d4",
-            },
-          },
-        },
-      },
-    },
-    MuiPickersDay: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-          color: "#000",
-          "&:hover": {
-            backgroundColor: "#f5f5f5",
-          },
-          "&.Mui-selected": {
-            backgroundColor: "#00B8F8",
-            color: "#fff",
-            "&:hover": {
-              backgroundColor: "#0099d4",
-            },
-          },
-        },
-      },
-    },
-    MuiPickersCalendarHeader: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-          color: "#000",
-        },
-      },
-    },
-    MuiPickersLayout: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-        },
-      },
-    },
-    MuiClock: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-        },
-        pin: {
-          backgroundColor: "#00B8F8",
-        },
-      },
-    },
-    MuiClockPointer: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#00B8F8",
-        },
-        thumb: {
-          backgroundColor: "#00B8F8",
-          borderColor: "#00B8F8",
-        },
-      },
-    },
-    MuiClockNumber: {
-      styleOverrides: {
-        root: {
-          color: "#000",
-          "&.Mui-selected": {
-            backgroundColor: "#00B8F8",
-            color: "#fff",
-          },
-        },
-      },
-    },
-    MuiPickersYear: {
-      styleOverrides: {
-        yearButton: {
-          color: "#000",
-          "&.Mui-selected": {
-            backgroundColor: "#00B8F8",
-            color: "#fff",
-          },
-        },
-      },
-    },
-    MuiDialogActions: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-          color: "#000",
-        },
-      },
-    },
-  },
-});
+const IcoChevron = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
 
 const SoulProfilePage: React.FC = () => {
-
   const navigate = useNavigate();
+  const dobRef = useRef<HTMLInputElement>(null);
+  const timeRef = useRef<HTMLInputElement>(null);
+
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
-    firstName: "",
     name: "",
     gender: "",
     placeOfBirth: "",
@@ -287,833 +60,380 @@ const SoulProfilePage: React.FC = () => {
     timeOfBirth: "",
   });
 
-  // ✅ FIXED: Validate & sanitize data from localStorage
+  // Load from localStorage + validate formats
   useEffect(() => {
-    const savedData = localStorage.getItem("soulProfile");
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
+    const saved = localStorage.getItem("soulProfile");
+    if (!saved) return;
 
-        // Validate date format: YYYY-MM-DD
-        const isValidDate = (str: string): boolean => {
-          if (!str || typeof str !== "string") return false;
-          return (
-            /^\d{4}-\d{2}-\d{2}$/.test(str) && !isNaN(new Date(str).getTime())
-          );
-        };
+    try {
+      const parsed = JSON.parse(saved);
 
-        // Validate time format: HH:mm or HH:mm:ss
-        const isValidTime = (str: string): boolean => {
-          if (!str || typeof str !== "string") return false;
-          return /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/.test(str);
-        };
+      const isValidDate = (v: string) =>
+        !!v && /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(new Date(v).getTime());
 
-        // Normalize time to HH:mm (MUI prefers this)
-        const normalizeTime = (timeStr: string): string => {
-          if (!timeStr) return "";
-          if (timeStr.length >= 5) {
-            return timeStr.substring(0, 5); // "14:30:00" → "14:30"
-          }
-          return "";
-        };
+      const isValidTime = (v: string) =>
+        !!v && /^([01]?\d|2[0-3]):[0-5]\d$/.test(v);
 
-        setFormData({
-          firstName: parsed.firstName || "",
-          name: parsed.name || "",
-          gender: parsed.gender || "",
-          placeOfBirth: parsed.placeOfBirth || "",
-          currentLocation: parsed.currentLocation || "",
-          dateOfBirth: isValidDate(parsed.dateOfBirth)
-            ? parsed.dateOfBirth
-            : "",
-          timeOfBirth: isValidTime(parsed.timeOfBirth)
-            ? normalizeTime(parsed.timeOfBirth)
-            : "",
-        });
-      } catch (e) {
-        console.error("Failed to parse saved profile:", e);
-        localStorage.removeItem("soulProfile");
-      }
+      setFormData({
+        name: parsed.name || "",
+        gender: parsed.gender || "",
+        placeOfBirth: parsed.placeOfBirth || "",
+        currentLocation: parsed.currentLocation || "",
+        dateOfBirth: isValidDate(parsed.dateOfBirth) ? parsed.dateOfBirth : "",
+        timeOfBirth: isValidTime(parsed.timeOfBirth) ? parsed.timeOfBirth : "",
+      });
+    } catch {
+      localStorage.removeItem("soulProfile");
     }
   }, []);
 
-  const handleChange = (field: keyof FormData, value: string) => {
+  const updateField = (field: keyof FormData, value: string) => {
     setFormData((prev) => {
-      const updated = { ...prev, [field]: value };
-      localStorage.setItem("soulProfile", JSON.stringify(updated));
-      return updated;
+      const next = { ...prev, [field]: value };
+      localStorage.setItem("soulProfile", JSON.stringify(next));
+      return next;
     });
-  };
-
-  const [loading, setLoading] = useState(false); // ✅ fixed: was always true
-  const [error, setError] = useState<string | null>(null);
-  const dobInputRef = useRef<HTMLInputElement>(null);
-  const timeInputRef = useRef<HTMLInputElement>(null);
-
-  const handleIconClick = () => {
-    dobInputRef.current?.showPicker?.();
-    dobInputRef.current?.click();
-  };
-
-  const handleTimeIconClick = () => {
-    timeInputRef.current?.showPicker?.();
-    timeInputRef.current?.click();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
 
-    // if (!formData.firstName.trim()) {
-    //   alert("Please enter your first name.");
-    //   return;
-    // }
-    if (!formData.name.trim()) {
-      alert("Please enter your name.");
-      return;
-    }
-    if (!formData.dateOfBirth) {
-      alert("Please select a valid date of birth.");
-      return;
-    }
-    if (!formData.timeOfBirth) {
-      alert("Please select a valid time of birth.");
-      return;
-    }
+    if (!formData.name.trim()) return setErrorMsg("Please enter your name.");
+    if (!formData.dateOfBirth) return setErrorMsg("Please select date of birth.");
+    if (!formData.timeOfBirth) return setErrorMsg("Please select time of birth.");
 
-    const [year, month, day] = formData.dateOfBirth.split("-");
-    const formattedDate = `${day}-${month}-${year}`;
+    const [y, m, d] = formData.dateOfBirth.split("-");
+    const formattedDob = `${d}-${m}-${y}`;
 
-    // ✅ Create FormData instead of a plain object
-    const payload = new FormData();
-    payload.append("gender", formData.gender);
-    payload.append("username", formData.name);
-    payload.append("place_of_birth", formData.placeOfBirth);
-    payload.append("current_location", formData.currentLocation);
-    payload.append("date_of_birth", formattedDate);
-    payload.append("time_of_birth", formData.timeOfBirth);
+    const fd = new FormData();
+    fd.append("gender", formData.gender);
+    fd.append("username", formData.name.trim());
+    fd.append("place_of_birth", formData.placeOfBirth.trim());
+    fd.append("current_location", formData.currentLocation.trim());
+    fd.append("date_of_birth", formattedDob);
+    fd.append("time_of_birth", formData.timeOfBirth);
 
-    setError(null);
     setLoading(true);
 
     try {
-      const response = await fetch(`${baseApiUrl}/api/v1/users/profile/`, {
+      const res = await fetch(`${API_URL}/api/v1/users/profile/`, {
         method: "POST",
-        // ⚠️ DO NOT set Content-Type — let the browser handle it
-        // headers: { "Content-Type": "application/json" }, ← REMOVE THIS
-        body: payload, // ← FormData goes here
+        body: fd,
       });
 
-      if (!response.ok) {
-        // ⚠️ Important: When using FormData, the server might still return JSON errors
-        // So we try to parse as JSON, but be cautious
-        let errorResponse;
-        const text = await response.text();
-        try {
-          errorResponse = JSON.parse(text);
-        } catch {
-          errorResponse = text; // fallback to raw text
-        }
+      const text = await res.text();
+      let result: any;
 
-        let errorMessage = "Server error occurred";
-
-        if (Array.isArray(errorResponse)) {
-          errorMessage = errorResponse
-            .map(
-              (err) => err.msg || err.message || err.detail || "Unknown error"
-            )
-            .join("; ");
-        } else if (errorResponse && typeof errorResponse === "object") {
-          errorMessage =
-            errorResponse.message ||
-            errorResponse.error ||
-            JSON.stringify(errorResponse);
-        } else if (typeof errorResponse === "string") {
-          errorMessage = errorResponse;
-        }
-
-        throw new Error(errorMessage);
+      try {
+        result = JSON.parse(text);
+      } catch {
+        throw new Error(text || "Invalid server response");
       }
 
-      const result = await response.json();
+      if (!res.ok) {
+        throw new Error(result?.message || result?.error || "Server error");
+      }
 
       if (result.success) {
-        localStorage.setItem("user_id", result.data.user_id);
-        localStorage.setItem("username", result.data.username);
-        localStorage.setItem("date_of_birth", result.data.date_of_birth);
-        localStorage.setItem("gender", result.data.gender);
-        localStorage.setItem("place_of_birth", result.data.place_of_birth);
-        localStorage.setItem("current_location", result.data.current_location);
-        localStorage.setItem("time_of_birth", result.data.time_of_birth);
-        // alert(result.message);
+        ["user_id", "username", "date_of_birth", "gender", "place_of_birth", "current_location", "time_of_birth"].forEach((k) => {
+          localStorage.setItem(k, result.data[k] ?? "");
+        });
+        localStorage.removeItem("soulProfile"); // optional: clean temp data
         navigate("/eros-home");
       } else {
         throw new Error(result.message || "Profile creation failed");
       }
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "An unknown error occurred";
-      setError(errorMsg);
-      alert(`Error: ${errorMsg}`);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <ThemeProvider theme={lightTheme}>
-      <style>
-        {`
-  /* Mobile devices (320px - 480px) */
-  @media (max-width: 480px) {
-    .responsive-container {
-      flex-direction: column !important;
-      padding: 0.5rem !important;
-      gap: 0 !important;
-    }
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-    .left-side {
-      display: none !important;
-    }
+        *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+        html, body { height: 100%; }
 
-    .right-side {
-      flex: 1 1 100% !important;
-      padding: 0 !important;
-    }
+        .ep { display: flex; height: 100vh; width: 100vw; overflow: hidden; font-family: 'DM Sans', sans-serif; }
 
-    .soul-profile-form {
-      width: 100% !important;
-      padding: 1.25rem !important;
-      gap: 1rem !important;
-      max-width: 100% !important;
-      border-radius: 12px !important;
-    }
+        /* Left panel */
+        .ep-l {
+          flex: 0 0 42%;
+          background: linear-gradient(175deg, #6872d6 0%, #7b87e8 20%, #8f9cf0 45%, #a8aeef 70%, #bbbff0 100%);
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          padding-top: clamp(2rem, 7vh, 5rem);
+          overflow: hidden;
+        }
+        .ep-l::before {
+          content: ''; position: absolute; inset: 0;
+          background:
+            radial-gradient(ellipse 65% 50% at 50% 25%, rgba(255,255,255,0.09) 0%, transparent 65%),
+            radial-gradient(ellipse 90% 55% at 50% 105%, rgba(0,0,0,0.22) 0%, transparent 65%);
+          pointer-events: none;
+        }
 
-    .rotate-image-bg {
-      width: 300px !important;
-      height: 300px !important;
-    }
+        .ep-l-txt { position: relative; z-index: 2; text-align: center; padding: 0 1.75rem; }
+        .ep-title {
+          font-family: 'Montserrat', sans-serif; font-weight: 700; color: #fff;
+          line-height: 1.22; font-size: clamp(1.3rem, 2.4vw, 2rem);
+          letter-spacing: -0.015em; margin-bottom: .45rem;
+        }
+        .ep-sub {
+          font-family: 'DM Sans', sans-serif; font-weight: 300;
+          color: rgba(255,255,255,.7); font-size: clamp(.7rem,1.05vw,.88rem);
+          letter-spacing: .03em;
+        }
 
-    .logo-eros {
-      width: 180px !important;
-    }
+        .ep-wheel {
+          position: absolute; bottom: -38%; left: 50%;
+          transform: translateX(-50%);
+          width: clamp(260px, 85%, 420px); aspect-ratio: 1/1;
+          object-fit: contain; pointer-events: none; opacity: 0.9;
+        }
 
-    .bubble-1 {
-      width: 200px !important;
-      height: 200px !important;
-      filter: blur(40px) !important;
-    }
+        /* Right panel */
+        .ep-r {
+          flex: 1; background: #f5f7fb;
+          display: flex; align-items: center; justify-content: center;
+          padding: 2rem; overflow-y: auto;
+        }
 
-    .bubble-2 {
-      width: 180px !important;
-      height: 180px !important;
-      filter: blur(35px) !important;
-    }
+        .ep-card {
+          background: #fff; border-radius: 18px;
+          border: 1px solid #eaeef5; border-top: 3px solid #00B8F8;
+          box-shadow: 0 4px 28px rgba(99,102,241,.08), 0 1px 4px rgba(0,0,0,.04);
+          padding: clamp(1.6rem, 2.8vw, 2.4rem);
+          width: 100%; max-width: 430px;
+        }
 
-    .bubble-3 {
-      width: 150px !important;
-      height: 150px !important;
-      filter: blur(30px) !important;
-    }
+        .ep-h2 {
+          font-family: 'Montserrat', sans-serif; font-weight: 700; color: #0f172a;
+          font-size: clamp(1.15rem,1.9vw,1.45rem); letter-spacing: -.02em;
+          margin-bottom: 1.65rem; line-height: 1.2;
+        }
 
-    .bubble-4 {
-      width: 220px !important;
-      height: 220px !important;
-      filter: blur(45px) !important;
-    }
-  }
+        .ep-error { color: #ef4444; font-size: 0.875rem; margin-bottom: 1rem; text-align: center; }
 
-  /* Mobile landscape and small tablets (481px - 768px) */
-  @media (min-width: 481px) and (max-width: 768px) {
-    .responsive-container {
-      flex-direction: column !important;
-      padding: 1rem !important;
-      gap: 1rem !important;
-    }
+        .ep-fields { display: flex; flex-direction: column; gap: 1rem; }
 
-    .left-side {
-      display: none !important;
-    }
+        .ep-label {
+          display: block; font-size: .775rem; font-weight: 500; color: #64748b;
+          margin-bottom: 5px; letter-spacing: .005em;
+        }
 
-    .right-side {
-      flex: 1 1 100% !important;
-      padding: 0 !important;
-    }
+        .ep-wrap { position: relative; width: 100%; }
 
-    .soul-profile-form {
-      width: 100% !important;
-      padding: 1.75rem !important;
-      max-width: 600px !important;
-      overflow-y: visible !important;
-  max-height: none !important;
-    }
+        .ep-input, .ep-select {
+          width: 100%; height: 44px;
+          border: 1.5px solid #e2e8f0; border-radius: 10px;
+          padding: 0 12px 0 40px;
+          font-size: .875rem; font-family: 'DM Sans', sans-serif; color: #1e293b;
+          background: #fff; outline: none;
+          transition: border-color .18s, box-shadow .18s;
+        }
 
-    .rotate-image-bg {
-      width: 400px !important;
-      height: 400px !important;
-    }
+        .ep-input:focus, .ep-select:focus {
+          border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+        }
 
-    .logo-eros {
-      width: 220px !important;
-    }
+        .ep-input::placeholder { color: #b0bac9; }
 
-    .bubble-1 {
-      width: 280px !important;
-      height: 280px !important;
-      filter: blur(55px) !important;
-    }
+        .ep-select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 36px; }
+        .ep-select option[value=""] { color: #94a3b8; }
 
-    .bubble-2 {
-      width: 250px !important;
-      height: 250px !important;
-      filter: blur(50px) !important;
-    }
+        .ep-ico {
+          position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+          color: #94a3b8; display: flex; align-items: center; pointer-events: none; z-index: 1;
+        }
+        .ep-ico-btn { cursor: pointer; pointer-events: all; }
 
-    .bubble-3 {
-      width: 220px !important;
-      height: 220px !important;
-      filter: blur(45px) !important;
-    }
+        .ep-arr {
+          position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+          color: #94a3b8; display: flex; pointer-events: none;
+        }
 
-    .bubble-4 {
-      width: 320px !important;
-      height: 320px !important;
-      filter: blur(60px) !important;
-    }
-  }
+        /* Hide native date/time picker icons */
+        .ep-input[type=date]::-webkit-calendar-picker-indicator,
+        .ep-input[type=time]::-webkit-calendar-picker-indicator,
+        .ep-input[type=date]::-webkit-inner-spin-button,
+        .ep-input[type=time]::-webkit-inner-spin-button {
+          opacity: 0; position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer;
+        }
 
-  /* Tablets (769px - 1024px) */
-  @media (min-width: 769px) and (max-width: 1024px) {
-    .responsive-container {
-      gap: 1.5rem !important;
-      padding: 1.5rem !important;
-    }
+        .ep-btn {
+          width: 100%; height: 48px;
+          background: #00B8F8; color: #fff; border: none; border-radius: 10px;
+          font-family: 'DM Sans', sans-serif; font-size: .92rem; font-weight: 600;
+          cursor: pointer; letter-spacing: .01em; margin-top: .3rem;
+          box-shadow: 0 4px 16px rgba(0,184,248,.3);
+          transition: background .18s, transform .12s, box-shadow .18s;
+        }
 
-    .left-side {
-      flex: 1 1 40% !important;
-    }
+        .ep-btn:hover:not(:disabled) {
+          background: #00a3de; transform: translateY(-1px);
+          box-shadow: 0 6px 22px rgba(0,184,248,.4);
+        }
 
-    .right-side {
-      flex: 1 1 60% !important;
-      padding: 0 !important;
-    }
+        .ep-btn:active:not(:disabled) { transform: translateY(0); }
+        .ep-btn:disabled { opacity: .62; cursor: not-allowed; }
 
-    .soul-profile-form {
-      width: 100% !important;
-      max-width: 550px !important;
-      padding: 2rem !important;
-    }
+        /* Responsive */
+        @media (max-width:860px) {
+          .ep { flex-direction: column; height: auto; min-height: 100vh; overflow-y: auto; }
+          .ep-l { flex: 0 0 auto; min-height: 195px; padding: 1.8rem 1.5rem 5.5rem; }
+          .ep-wheel { width: clamp(180px,55%,260px); bottom: -35%; }
+          .ep-r { padding: 1.5rem 1.25rem 2.5rem; }
+          .ep-card { max-width: 100%; padding: 1.5rem; }
+        }
+        @media (max-width:480px) {
+          .ep-l { min-height: 170px; padding-bottom: 5rem; }
+          .ep-title { font-size: 1.25rem; }
+          .ep-wheel { width: 200px; bottom: -33%; }
+          .ep-card { border-radius: 14px; padding: 1.2rem; }
+          .ep-h2 { font-size: 1.12rem; margin-bottom: 1.2rem; }
+          .ep-fields { gap: .875rem; }
+        }
+      `}</style>
 
-    .rotate-image-bg {
-      width: 500px !important;
-      height: 500px !important;
-    }
+      <div className="ep">
 
-    .logo-eros {
-      width: 240px !important;
-    }
-  }
-
-  /* Small laptops (1025px - 1366px) */
-  @media (min-width: 1025px) and (max-width: 1366px) {
-    .responsive-container {
-      gap: 2rem !important;
-    }
-
-    .left-side {
-      flex: 1 1 45% !important;
-    }
-
-    .right-side {
-      flex: 1 1 55% !important;
-      padding: 0 !important;
-    }
-
-    .soul-profile-form {
-      max-width: 600px !important;
-      padding: 2.5rem !important;
-      gap: 0.75rem !important;
-    }
-
-    .rotate-image-bg {
-      width: 600px !important;
-      height: 600px !important;
-    }
-
-    .logo-eros {
-      width: 260px !important;
-    }
-    .soul-profile-form h1 {
-      font-size: 1.35rem !important;
-    }
-  }
-
-  /* Standard laptops and desktops (1367px - 1920px) */
-  @media (min-width: 1367px) and (max-width: 1920px) {
-    .soul-profile-form {
-      max-width: 650px !important;
-    }
-
-    .rotate-image-bg {
-      width: 700px !important;
-      height: 700px !important;
-    }
-
-    .logo-eros {
-      width: 280px !important;
-    }
-  }
-
-  /* Large desktops (1921px+) */
-  @media (min-width: 1921px) {
-    .responsive-container {
-      gap: 3rem !important;
-    }
-
-    .soul-profile-form {
-      max-width: 750px !important;
-      padding: 3rem !important;
-    }
-
-    .rotate-image-bg {
-      width: 900px !important;
-      height: 900px !important;
-    }
-
-    .logo-eros {
-      width: 320px !important;
-    }
-  }
-`}
-      </style>
-      <div
-        style={{
-          height: "100vh",
-          width: "100vw",
-          background: "rgb(255, 255, 255)",
-          color: "#000",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Blurred bubbles background */}
-        <div style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          overflow: "hidden",
-          zIndex: 0,
-        }}>
-          <div className="bubble-1" style={{
-            position: "absolute",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(0, 184, 248, 0.15), rgba(135, 206, 250, 0.1))",
-            filter: "blur(80px)",
-            top: "10%",
-            left: "10%",
-          }} />
-          <div className="bubble-2" style={{
-            position: "absolute",
-            width: "350px",
-            height: "350px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(197, 245, 245, 0.2), rgba(176, 224, 230, 0.15))",
-            filter: "blur(70px)",
-            top: "60%",
-            right: "15%",
-          }} />
-          <div className="bubble-3" style={{
-            position: "absolute",
-            width: "300px",
-            height: "300px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(135, 206, 250, 0.12), rgba(173, 216, 230, 0.08))",
-            filter: "blur(60px)",
-            bottom: "15%",
-            left: "20%",
-          }} />
-          <div className="bubble-4" style={{
-            position: "absolute",
-            width: "450px",
-            height: "450px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(0, 184, 248, 0.1), rgba(135, 206, 250, 0.08))",
-            filter: "blur(90px)",
-            top: "30%",
-            right: "5%",
-          }} />
-        </div>
-        <Stars />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "100vh",
-            padding: "1rem",
-            gap: "2rem",
-            position: "relative",
-            zIndex: 1,
-          }}
-          className="responsive-container"
-        >
-          {/* Left Side - Background and Logo */}
-          <div
-            style={{
-              flex: "1 1 50%",
-              position: "relative",
-              textAlign: "center",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            className="left-side"
-          >
-            <img
-              src={backgroundImg}
-              alt="Rotating Cosmic Background"
-              className="rotate-image-bg position-absolute"
-              style={{
-                zIndex: 0,
-                // opacity: 0.3,
-                pointerEvents: "none",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%) rotate(0deg)",
-                width: "800px",
-                height: "800px",
-                // filter:"brightness(1) saturate(50%) contrast(100%)",
-                aspectRatio: "1 / 1", // ✅ Ensures the image stays perfectly square
-                objectFit: "contain", // ✅ Prevents stretching/distortion
-              }}
-            />
-            <img
-              src={LogoEros}
-              alt="EROS Wellness Logo"
-              className="logo-eros"
-              style={{
-                width: "300px",
-                height: "auto",
-                objectFit: "contain",
-                zIndex: 1,
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-              }}
-            />
+        {/* Left decorative panel */}
+        <div className="ep-l">
+          <div className="ep-l-txt">
+            <h1 className="ep-title">Welcome to EROS Wellness</h1>
+            <p className="ep-sub">Your AI-driven holistic growth</p>
           </div>
+          <img src={BackgroundImage} alt="Zodiac Wheel" className="ep-wheel" />
+        </div>
 
-          {/* Right Side - Form */}
-          <div
-            style={{
-              flex: "1 1 50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0", // Added padding to the container
-            }}
-            className="right-side"
-          >
-            <form
-              onSubmit={handleSubmit}
-              style={{
-                width: "100%",
-                maxWidth: "700px", // Better than percentage for readability
-                backgroundColor: "#fff",
-                padding: "2.5rem", // Increased padding
-                borderRadius: "16px",
-                border: "1px solid #e0e0e0",
-                borderTop: "3px solid rgb(0, 184, 248)",
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06)",
-                display: "flex",
-                flexDirection: "column",
-                gap: "1.5rem", // Increased gap between fields
-                fontFamily: "Inter,sans-serif",
-                boxSizing: "border-box",
-                overflowY: "auto",
-                maxHeight: "95vh",
-                scrollbarWidth: "thin",          // Firefox
-                scrollbarColor: "#fafafaff transparent",
-              }}
-              className="soul-profile-form"
-            >
-              <h1
-                style={{
-                  margin: "0", // Remove all margins for even spacing
-                  fontFamily: "Montserrat,sans-serif",
-                  fontWeight: "700",
-                  fontSize: "1.75rem",
-                  lineHeight: "1.2",
-                  color: "#000",
-                }}
-              >
-                Create Your Soul Profile
-              </h1>
+        {/* Right form panel */}
+        <div className="ep-r">
+          <div className="ep-card">
+            <h2 className="ep-h2">Create Your Soul Profile</h2>
 
-              {/* Name Field */}
-              <TextField
-                label="Name"
-                variant="outlined"
-                value={formData.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                required
-                InputLabelProps={{ style: { color: "#666" } }}
-                inputProps={{ style: { color: "#000" } }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#60a5fa",
-                      boxShadow: "none",
-                    },
-                  },
-                }}
-              />
+            {errorMsg && <div className="ep-error">{errorMsg}</div>}
 
-              {/* Gender */}
-              <StyledFormControl variant="outlined">
-                <InputLabel id="gender-label" shrink>Gender</InputLabel>
-                <IconLeftWrapper>
-                  <ArrowDropDownIcon />
-                </IconLeftWrapper>
-                <Select
-                  labelId="gender-label"
-                  value={formData.gender}
-                  onChange={(e: SelectChangeEvent) =>
-                    handleChange("gender", e.target.value)
-                  }
-                  displayEmpty
-                  IconComponent={() => null}
-                  label="Gender"
-                >
-                  <MenuItem value="" disabled style={{ opacity: "1" }}>
-                    Select Gender
-                  </MenuItem>
-                  <MenuItem value="Male">Male</MenuItem>
-                  <MenuItem value="Female">Female</MenuItem>
-                  <MenuItem value="Other">Other</MenuItem>
-                </Select>
-              </StyledFormControl>
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="ep-fields">
 
-              {/* Place of Birth */}
-              <StyledFormControl variant="outlined">
-                <TextField
-                  label="Place of Birth"
-                  value={formData.placeOfBirth}
-                  onChange={(e) => handleChange("placeOfBirth", e.target.value)}
-                  placeholder="Enter Place of Birth"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationOnIcon sx={{ color: "#666" }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  InputLabelProps={{ style: { color: "#666" } }}
-                  inputProps={{ style: { color: "#000" } }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "#d1d5db",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#d1d5db",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#60a5fa",
-                        boxShadow: "none",
-                      },
-                    },
-                  }}
-                />
-              </StyledFormControl>
-
-              {/* Current Location */}
-              <StyledFormControl variant="outlined">
-                <TextField
-                  label="Current Location"
-                  value={formData.currentLocation}
-                  onChange={(e) =>
-                    handleChange("currentLocation", e.target.value)
-                  }
-                  placeholder="Enter Current Location"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationOnIcon sx={{ color: "#666" }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  InputLabelProps={{ style: { color: "#666" } }}
-                  inputProps={{ style: { color: "#000" } }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "#d1d5db",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#d1d5db",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#60a5fa",
-                        boxShadow: "none",
-                      },
-                    },
-                  }}
-                />
-              </StyledFormControl>
-
-              {/* Date of Birth */}
-              <TextField
-                label="Date of Birth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => handleChange("dateOfBirth", e.target.value)}
-                required
-                inputRef={dobInputRef}
-                InputLabelProps={{ shrink: true, style: { color: "#666" } }}
-                inputProps={{
-                  style: { color: "#000" },
-                  sx: {
-                    "&::-webkit-calendar-picker-indicator": {
-                      opacity: 0,
-                      pointerEvents: "none",
-                    },
-                    "&::-webkit-inner-spin-button": {
-                      display: "none",
-                    },
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment
-                      position="start"
-                      onClick={handleIconClick}
-                      sx={{ cursor: "pointer" }}
+                {/* Gender */}
+                <div>
+                  <label className="ep-label">Gender</label>
+                  <div className="ep-wrap">
+                    <span className="ep-ico"><IcoChevron /></span>
+                    <select
+                      className="ep-select"
+                      value={formData.gender}
+                      onChange={(e) => updateField("gender", e.target.value)}
                     >
-                      <CalendarTodayIcon sx={{ color: "#666" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    cursor: "pointer",
-                    "& fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#60a5fa",
-                      boxShadow: "none",
-                    },
-                  },
-                  "& .MuiInputBase-input": {
-                    cursor: "pointer",
-                    paddingLeft: "8px",
-                  },
-                }}
-              />
+                      <option value="">-- Select --</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <span className="ep-arr"><IcoChevron /></span>
+                  </div>
+                </div>
 
-              {/* Time of Birth */}
-              <TextField
-                label="Time of Birth"
-                type="time"
-                value={formData.timeOfBirth}
-                onChange={(e) => handleChange("timeOfBirth", e.target.value)}
-                required
-                inputRef={timeInputRef}
-                InputLabelProps={{ shrink: true, style: { color: "#666" } }}
-                inputProps={{
-                  style: { color: "#000" },
-                  sx: {
-                    "&::-webkit-calendar-picker-indicator": {
-                      opacity: 0,
-                      pointerEvents: "none",
-                    },
-                    "&::-webkit-inner-spin-button": {
-                      display: "none",
-                    },
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment
-                      position="start"
-                      onClick={handleTimeIconClick}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      <AccessTimeIcon sx={{ color: "#666" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    cursor: "pointer",
-                    "& fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#60a5fa",
-                      boxShadow: "none",
-                    },
-                  },
-                  "& .MuiInputBase-input": {
-                    cursor: "pointer",
-                    paddingLeft: "8px",
-                  },
-                }}
-              />
+                {/* Name */}
+                <div>
+                  <label className="ep-label">Name</label>
+                  <div className="ep-wrap">
+                    <input
+                      className="ep-input"
+                      type="text"
+                      placeholder="Your full name"
+                      value={formData.name}
+                      onChange={(e) => updateField("name", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                style={{
-                  backgroundColor: "#00B8F8",
-                  color: "#fff",
-                  border: "none",
-                  padding: "1rem 1.5rem",
-                  fontSize: "1.1rem",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  marginTop: "0.5rem", // Reduced from 1rem since gap already provides spacing
-                  fontFamily: "Inter,sans-serif",
-                  borderRadius: "8px",
-                  transition: "background-color 0.2s ease",
-                }}
-                disabled={loading}
-                onMouseEnter={(e) => {
-                  if (!loading) e.currentTarget.style.backgroundColor = "#0099d6";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#00B8F8";
-                }}
-              >
-                {loading ? "Creating..." : "Create your soul profile"}
-              </button>
+                {/* Place of Birth */}
+                <div>
+                  <label className="ep-label">Place of birth</label>
+                  <div className="ep-wrap">
+                    <span className="ep-ico"><IcoLocation /></span>
+                    <input
+                      className="ep-input"
+                      type="text"
+                      placeholder="Place of Birth"
+                      value={formData.placeOfBirth}
+                      onChange={(e) => updateField("placeOfBirth", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Current Location (optional) */}
+                <div>
+                  <label className="ep-label">Current location</label>
+                  <div className="ep-wrap">
+                    <span className="ep-ico"><IcoLocation /></span>
+                    <input
+                      className="ep-input"
+                      type="text"
+                      placeholder="Current Location (optional)"
+                      value={formData.currentLocation}
+                      onChange={(e) => updateField("currentLocation", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Date of Birth */}
+                <div>
+                  <label className="ep-label">Date of birth</label>
+                  <div className="ep-wrap">
+                    <span className="ep-ico ep-ico-btn" onClick={() => dobRef.current?.showPicker?.()}>
+                      <IcoCalendar />
+                    </span>
+                    <input
+                      ref={dobRef}
+                      className="ep-input"
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={(e) => updateField("dateOfBirth", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Time of Birth */}
+                <div>
+                  <label className="ep-label">Time of birth</label>
+                  <div className="ep-wrap">
+                    <span className="ep-ico ep-ico-btn" onClick={() => timeRef.current?.showPicker?.()}>
+                      <IcoClock />
+                    </span>
+                    <input
+                      ref={timeRef}
+                      className="ep-input"
+                      type="time"
+                      value={formData.timeOfBirth}
+                      onChange={(e) => updateField("timeOfBirth", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" className="ep-btn" disabled={loading}>
+                  {loading ? "Creating…" : "Create your soul profile"}
+                </button>
+              </div>
             </form>
           </div>
         </div>
       </div>
-    </ThemeProvider >
+    </>
   );
 };
 
