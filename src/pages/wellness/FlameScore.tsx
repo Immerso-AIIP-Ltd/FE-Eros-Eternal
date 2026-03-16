@@ -82,6 +82,7 @@ const FlameScore: React.FC = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -825,6 +826,12 @@ const FlameScore: React.FC = () => {
     }
   }, [isGeneratingReport, isLoading]);
 
+  useEffect(() => {
+    if (!isLoading && !isGeneratingReport && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading, isGeneratingReport, messages]);
+
   return (
     <div
       className="d-flex w-100 h-100 min-vh-100 min-vw-100 text-gray-800 overflow-hidden"
@@ -1275,6 +1282,7 @@ const FlameScore: React.FC = () => {
                     <>
                       <div className="flex-1">
                         <input
+                          ref={inputRef}
                           type="text"
                           placeholder="Message to Wellness AI"
                           value={inputValue}

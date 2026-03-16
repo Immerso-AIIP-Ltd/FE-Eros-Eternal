@@ -622,23 +622,35 @@ const LongevityTool: React.FC = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const file = files[0];
-    const audioUrl = URL.createObjectURL(file);
-    const tempAudio = new Audio(audioUrl);
-    tempAudio.onloadedmetadata = () => {
-      const duration = tempAudio.duration;
-      setAttachedVoices((prev) => [
-        ...prev,
-        {
-          url: audioUrl,
-          file,
-          duration:
-            duration && !isNaN(duration) ? Math.floor(duration) : undefined,
-        },
-      ]);
-    };
-    tempAudio.onerror = () => {
-      setAttachedVoices((prev) => [...prev, { url: audioUrl, file }]);
-    };
+
+    if (file.type.startsWith("image/")) {
+      const imageUrl = URL.createObjectURL(file);
+      setAttachedFiles((prev) => [...prev, file]);
+      setAttachedImages((prev) => [...prev, imageUrl]);
+    } else if (file.type === "application/pdf") {
+      setAttachedFiles((prev) => [...prev, file]);
+      setAttachedImages((prev) => [...prev, "pdf"]); // placeholder to track pdf
+    } else {
+      // audio
+      const audioUrl = URL.createObjectURL(file);
+      const tempAudio = new Audio(audioUrl);
+      tempAudio.onloadedmetadata = () => {
+        const duration = tempAudio.duration;
+        setAttachedVoices((prev) => [
+          ...prev,
+          {
+            url: audioUrl,
+            file,
+            duration:
+              duration && !isNaN(duration) ? Math.floor(duration) : undefined,
+          },
+        ]);
+      };
+      tempAudio.onerror = () => {
+        setAttachedVoices((prev) => [...prev, { url: audioUrl, file }]);
+      };
+    }
+
     e.target.value = "";
   };
 
@@ -1195,7 +1207,7 @@ const LongevityTool: React.FC = () => {
                   <div className="flex flex-col gap-3 mb-3">
                     {attachedImages.length > 0 && (
                       <div className="flex flex-wrap gap-2">
-                        {attachedImages.map((img, idx) => (
+                        {/* {attachedImages.map((img, idx) => (
                           <div
                             key={idx}
                             className="relative"
@@ -1208,6 +1220,32 @@ const LongevityTool: React.FC = () => {
                             />
                             <button
                               className="absolute -top-2 -right-2 bg-danger flex items-center justify-center text-xs hover:bg-red-600 p-1 rounded text-white"
+                              onClick={() => removeAttachedImage(idx)}
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))} */}
+                        {attachedImages.map((img, idx) => (
+                          <div
+                            key={idx}
+                            className="relative"
+                            style={{ width: "80px", height: "80px" }}
+                          >
+                            {img === "pdf" ? (
+                              <div className="w-full h-full rounded border border-gray-300 bg-gray-100 flex flex-col items-center justify-center text-xs text-gray-600">
+                                <span style={{ fontSize: "24px" }}>📄</span>
+                                <span>PDF</span>
+                              </div>
+                            ) : (
+                              <img
+                                src={img}
+                                alt="preview"
+                                className="rounded object-cover w-full h-full"
+                              />
+                            )}
+                            <button
+                              className="absolute -top-2 -right-2 bg-danger text-white flex items-center justify-center text-xs hover:bg-red-600 p-1 rounded-full rounded-circle"
                               onClick={() => removeAttachedImage(idx)}
                             >
                               <X size={12} />
@@ -1273,7 +1311,8 @@ const LongevityTool: React.FC = () => {
                           <input
                             ref={audioInputRef}
                             type="file"
-                            accept="audio/*,.mp3,.wav,.m4a"
+                            // accept="audio/*,.mp3,.wav,.m4a"
+                            accept="audio/*,.mp3,.wav,.m4a,image/*,.jpg,.jpeg,.png,.gif,.webp,application/pdf,.pdf"
                             hidden
                             onChange={handleAudioUpload}
                           />
