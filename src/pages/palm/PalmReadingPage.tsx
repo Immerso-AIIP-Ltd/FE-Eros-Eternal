@@ -24,7 +24,7 @@ interface PalmReadingResponse {
 }
 
 const PalmReadingPage: React.FC = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const userId = localStorage.getItem('user_id');
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -102,7 +102,7 @@ const PalmReadingPage: React.FC = () => {
     <div
       style={{
         minHeight: '100vh',
-        minWidth:"100vw",
+        minWidth: "100vw",
         background: 'linear-gradient(135deg, #000000, #0c0f1d)',
         color: '#e0e6ed',
         fontFamily: "'Playfair Display', serif",
@@ -110,7 +110,7 @@ const PalmReadingPage: React.FC = () => {
       }}
     >
 
-            <div className="position-absolute w-100 h-100 pointer-events-none">
+      <div className="position-absolute w-100 h-100 pointer-events-none">
         {Array.from({ length: 50 }).map((_, i) => (
           <div
             key={i}
@@ -129,35 +129,35 @@ const PalmReadingPage: React.FC = () => {
         ))}
       </div>
       {/* Header */}
-<div className="position-relative w-100 mb-5" style={{ height: '100px' }}>
-  {/* Go Back Button - pinned to left, vertically centered */}
-  <button 
-    className="btn position-absolute start-0 top-50 translate-middle-y ms-3"
-    style={{ 
-      backgroundColor: 'skyblue', 
-      color: 'white', 
-      fontWeight: 'bold',
-      border: 'none',
-      padding: '8px 20px',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      zIndex: 2
-    }}
-    onClick={() => navigate("/result")}
-  >
-    ← Go Back
-  </button>
+      <div className="position-relative w-100 mb-5" style={{ height: '100px' }}>
+        {/* Go Back Button - pinned to left, vertically centered */}
+        <button
+          className="btn position-absolute start-0 top-50 translate-middle-y ms-3"
+          style={{
+            backgroundColor: 'skyblue',
+            color: 'white',
+            fontWeight: 'bold',
+            border: 'none',
+            padding: '8px 20px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            zIndex: 2
+          }}
+          onClick={() => navigate("/result")}
+        >
+          ← Go Back
+        </button>
 
-  {/* Centered Content (Title + Subtitle) — your original design, untouched */}
-  <div className="text-center" style={{ zIndex: 1 }}>
-    <h1 className="display-5 fw-bold" style={{ color: '#00B8F8', textShadow: '2px 2px 8px rgba(0,184,248,0.3)' }}>
-      ✋ Palm Reading
-    </h1>
-    <p className="text-white opacity-75">
-      Upload your palm image for a mystical AI-powered reading
-    </p>
-  </div>
-</div>
+        {/* Centered Content (Title + Subtitle) — your original design, untouched */}
+        <div className="text-center" style={{ zIndex: 1 }}>
+          <h1 className="display-5 fw-bold" style={{ color: '#00B8F8', textShadow: '2px 2px 8px rgba(0,184,248,0.3)' }}>
+            ✋ Palm Reading
+          </h1>
+          <p className="text-white opacity-75">
+            Upload your palm image for a mystical AI-powered reading
+          </p>
+        </div>
+      </div>
 
       {/* Upload Section */}
       {!data ? (
@@ -252,18 +252,18 @@ const PalmReadingPage: React.FC = () => {
           <div className="text-center mb-5">
             <h3 className="text-info fw-bold">Your Palm</h3>
             <div className='d-flex justify-content-center align-item-center'>
-            <img
-              src={data.image_url}
-              alt="Analyzed Palm"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '300px',
-                borderRadius: '12px',
-                border: '3px solid #00B8F8',
-                boxShadow: '0 10px 30px rgba(0,184,248,0.2)',
-              }}
-            />
-            {/* <p className="text-muted mt-2">
+              <img
+                src={data.image_url}
+                alt="Analyzed Palm"
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '300px',
+                  borderRadius: '12px',
+                  border: '3px solid #00B8F8',
+                  boxShadow: '0 10px 30px rgba(0,184,248,0.2)',
+                }}
+              />
+              {/* <p className="text-muted mt-2">
               Analyzed on {new Date(data.reading_timestamp).toLocaleString()}
             </p> */}
             </div>

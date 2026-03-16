@@ -1298,10 +1298,10 @@ const LongevityTool: React.FC = () => {
                           style={{
                             backgroundColor:
                               isLoading ||
-                              isGeneratingReport ||
-                              (!inputValue.trim() &&
-                                attachedImages.length === 0 &&
-                                attachedVoices.length === 0)
+                                isGeneratingReport ||
+                                (!inputValue.trim() &&
+                                  attachedImages.length === 0 &&
+                                  attachedVoices.length === 0)
                                 ? "#E5E7EB"
                                 : "#06B6D4",
                             color: "white",
@@ -1311,10 +1311,10 @@ const LongevityTool: React.FC = () => {
                             minWidth: "80px",
                             cursor:
                               isLoading ||
-                              isGeneratingReport ||
-                              (!inputValue.trim() &&
-                                attachedImages.length === 0 &&
-                                attachedVoices.length === 0)
+                                isGeneratingReport ||
+                                (!inputValue.trim() &&
+                                  attachedImages.length === 0 &&
+                                  attachedVoices.length === 0)
                                 ? "not-allowed"
                                 : "pointer",
                           }}

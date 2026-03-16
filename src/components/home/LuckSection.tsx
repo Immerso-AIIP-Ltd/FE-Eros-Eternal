@@ -1,12 +1,6 @@
 // src/components/LuckSection.tsx
 import React, { useState, useEffect } from "react";
 import moment from "moment";
-// import StartlightBg from "../assets/discover/planetary.png";
-// import SpiritualBg from "../assets/discover/personalMonth.jpg";
-// import LuckyBg from "../assets/discover/luckyNumber.jpg";
-// import StartlightBg from "../images/lightphase.png";
-// import SpiritualBg from "../images/lightjournal.png";
-// import LuckyBg from "../images/lightnumber.png"
 import StartlightBg from "@/assets/images/horoscope.png";
 import SpiritualBg from "@/assets/images/personalMonth.png";
 import LuckyBg from "@/assets/images/luckyNumber.png";
@@ -149,7 +143,7 @@ export const LuckSection: React.FC = () => {
   ];
 
   const renderHoroscopeBack = () => (
-    <div style={backContainerStyle} className="back-scroll">
+    <div style={backContainerStyle} className="luck-back-scroll">
       <h4 style={backTitleStyle}>Horoscope: {horoscope?.zodiac_sign}</h4>
       {loading[0] ? <p style={loadingStyle}>Loading horoscope...</p> : error[0] ? <p style={errorStyle}>{error[0]}</p> : (
         <>
@@ -161,7 +155,7 @@ export const LuckSection: React.FC = () => {
   );
 
   const renderPersonalMonthBack = () => (
-    <div style={backContainerStyle} className="back-scroll">
+    <div style={backContainerStyle} className="luck-back-scroll">
       <h4 style={backTitleStyle}>Personal Month: <strong>{personalMonth?.personal_month_number || "?"}</strong></h4>
       {loading[1] ? <p style={loadingStyle}>Calculating your energy...</p> : error[1] ? <p style={errorStyle}>{error[1]}</p> : personalMonth ? (
         <p style={backQuote}>"{personalMonth.detailed_meaning}"</p>
@@ -170,7 +164,7 @@ export const LuckSection: React.FC = () => {
   );
 
   const renderLuckyNumbersBack = () => (
-    <div style={backContainerStyle} className="back-scroll">
+    <div style={backContainerStyle} className="luck-back-scroll">
       <h4 style={backTitleStyle}>Your Numerology Numbers</h4>
       {loading[2] ? <p style={loadingStyle}>Loading numbers...</p> : error[2] ? <p style={errorStyle}>{error[2]}</p> : luckyNumbers ? (
         <>
@@ -188,10 +182,10 @@ export const LuckSection: React.FC = () => {
     display: "flex", flexDirection: "column", gap: "8px",
     textAlign: "center", color: "#6b6380", fontSize: "14px",
     fontWeight: 500, lineHeight: 1.6, padding: "10px 14px",
-    overflowY: "auto", maxHeight: "100%", width: "100%", boxSizing: "border-box"
+    overflowY: "auto", maxHeight: "100%", width: "100%", boxSizing: "border-box",
   };
   const backTitleStyle: React.CSSProperties = {
-    margin: "0 0 10px 0", color: "#2a2040", fontSize: "17px", fontWeight: "700",
+    margin: "0 0 10px 0", color: "#2a2040", fontSize: "17px", fontWeight: 700,
   };
   const backText: React.CSSProperties = { margin: 0, color: "#3a3550", fontSize: "15px" };
   const backQuote: React.CSSProperties = {
@@ -203,227 +197,214 @@ export const LuckSection: React.FC = () => {
   return (
     <div
       style={{
-        padding: "40px 0",
-        backgroundColor: "#f8f8fa",
+        padding: "56px 24px 64px",
+        backgroundColor: "#ffffff",
+        fontFamily: "'Poppins', sans-serif",
       }}
     >
-      {/* Header */}
-      <div style={{ marginBottom: "24px", paddingLeft: "40px", paddingRight: "40px" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+        .luck-back-scroll::-webkit-scrollbar { display: none; }
+        .luck-back-scroll { scrollbar-width: none; }
+
+        .luck-cards-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+          max-width: 1000px;
+          margin: 0 auto;
+        }
+
+        .luck-flip-card {
+          width: 100%;
+          height: 320px;
+          border-radius: 22px;
+          position: relative;
+          cursor: pointer;
+          overflow: hidden;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .luck-flip-card:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 12px 36px rgba(0, 0, 0, 0.14);
+        }
+
+        .luck-flip-inner {
+          width: 100%;
+          height: 100%;
+          position: relative;
+          transform-style: preserve-3d;
+          transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .luck-flip-inner.flipped {
+          transform: rotateY(180deg);
+        }
+
+        .luck-card-front,
+        .luck-card-back {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          border-radius: 22px;
+        }
+
+        .luck-card-back {
+          transform: rotateY(180deg);
+          background: linear-gradient(135deg, rgba(240,230,246,0.92) 0%, rgba(224,236,248,0.92) 50%, rgba(216,240,232,0.92) 100%);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 28px 20px;
+          box-sizing: border-box;
+          border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        @media (max-width: 900px) {
+          .luck-cards-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+
+        @media (max-width: 580px) {
+          .luck-cards-grid {
+            grid-template-columns: 1fr !important;
+            max-width: 360px;
+          }
+          .luck-flip-card {
+            height: 280px;
+          }
+        }
+      `}</style>
+
+      {/* Header — centered */}
+      <div
+        style={{
+          textAlign: "center",
+          marginBottom: "44px",
+          maxWidth: "600px",
+          margin: "0 auto 44px",
+        }}
+      >
         <h1
           style={{
-            fontSize: "24px",
-            fontWeight: "700",
-            color: "#2a2040",
-            margin: 0,
+            fontSize: "clamp(28px, 4vw, 42px)",
+            fontWeight: 600,
+            color: "#0d1020",
+            margin: "0 0 14px",
             letterSpacing: "-0.02em",
-            fontFamily: "Poppins, sans-serif",
+            fontFamily: "'Inter', sans-serif",
+            lineHeight: 1.15,
           }}
         >
           Discover your luck
         </h1>
+        <p
+          style={{
+            fontSize: "14.5px",
+            color: "#8a8aa0",
+            margin: 0,
+            lineHeight: 1.65,
+            fontFamily: "'Poppins', sans-serif",
+            fontWeight: 400,
+          }}
+        >
+          Lorem ipsum dolor sit amet consectetur. Pulvinar vestibulum cras
+          aliquam tempus nullam arcu sed.
+        </p>
       </div>
 
-      {/* Cards Container */}
-      <div
-        className="luck-cards-container"
-        style={{
-          display: "flex",
-          gap: "20px",
-          overflowX: "auto",
-          padding: "0 40px 20px",
-          scrollbarWidth: "none",
-          margin: "0 auto",
-        }}
-      >
+      {/* Cards Grid */}
+      <div className="luck-cards-grid">
         {luckItems.map((item, index) => (
           <div
             key={index}
-            className="flip-card"
+            className="luck-flip-card"
             onClick={() => toggleFlip(index)}
             onMouseEnter={() => setHoveredCard(index)}
             onMouseLeave={() => setHoveredCard(null)}
-            style={{
-              minWidth: "300px",
-              width: "300px",
-              height: "380px",
-              borderRadius: "20px",
-              border: hoveredCard === index 
-                ? "1px solid rgba(255,255,255,0.4)" 
-                : "1px solid #e8e5ec",
-              backgroundColor: hoveredCard === index 
-                ? "rgba(255,255,255,0.2)" 
-                : "#fff",
-              position: "relative",
-              cursor: "pointer",
-              overflow: "hidden",
-              boxShadow: hoveredCard === index
-                ? "0 8px 32px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255,255,255,0.3)"
-                : "0 4px 20px rgba(0, 0, 0, 0.06)",
-              transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-              backdropFilter: hoveredCard === index ? "blur(10px)" : "none",
-              WebkitBackdropFilter: hoveredCard === index ? "blur(10px)" : "none",
-              transform: hoveredCard === index ? "translateY(-8px)" : "translateY(0)",
-            }}
           >
-            {/* Glitter Effect Overlay */}
-            {hoveredCard === index && (
-              <div
-                className="card-glitter"
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  pointerEvents: "none",
-                  zIndex: 1,
-                }}
-              />
-            )}
+            <div className={`luck-flip-inner${flippedIndexes.has(index) ? " flipped" : ""}`}>
 
-            {/* Flip Inner */}
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                position: "relative",
-                transformStyle: "preserve-3d",
-                transition: "transform 0.6s ease",
-                transform: flippedIndexes.has(index) ? "rotateY(180deg)" : "none",
-              }}
-            >
-              {/* Front */}
+              {/* Front Face */}
               <div
+                className="luck-card-front"
                 style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  backfaceVisibility: "hidden",
                   backgroundImage: `url('${item.bg}')`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
-                  borderRadius: "20px",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "flex-end",
                 }}
               >
-                {/* Gradient overlay at bottom */}
+                {/* Dark gradient overlay at bottom */}
                 <div
                   style={{
                     position: "absolute",
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    height: "50%",
-                    background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)",
-                    borderRadius: "0 0 20px 20px",
+                    height: "55%",
+                    background: "linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.1) 70%, transparent 100%)",
+                    borderRadius: "0 0 22px 22px",
+                    pointerEvents: "none",
                   }}
                 />
-                <div style={{
-                  position: "relative",
-                  zIndex: 1,
-                  padding: "20px 24px",
-                }}>
-                  <h3 style={{
-                    fontSize: "20px",
-                    fontWeight: "600",
-                    color: "#fff",
-                    margin: 0,
-                    fontFamily: "'Poppins', sans-serif",
-                  }}>
+
+                {/* Text at bottom-left */}
+                <div
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    padding: "20px 22px 22px",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: 600,
+                      color: "#ffffff",
+                      margin: 0,
+                      fontFamily: "'Poppins', sans-serif",
+                      letterSpacing: "-0.01em",
+                      lineHeight: 1.25,
+                    }}
+                  >
                     {item.title}
                   </h3>
-                  <p style={{
-                    fontSize: "14px",
-                    margin: "6px 0 0",
-                    fontWeight: "400",
-                    color: "rgba(255,255,255,0.85)",
-                  }}>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      margin: "5px 0 0",
+                      fontWeight: 400,
+                      color: "rgba(255,255,255,0.78)",
+                      fontFamily: "'Poppins', sans-serif",
+                    }}
+                  >
                     {item.subtitle}
                   </p>
                 </div>
               </div>
 
-              {/* Back */}
-              <div
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "100%",
-                  backfaceVisibility: "hidden",
-                  transform: "rotateY(180deg)",
-                  background: "linear-gradient(135deg, rgba(240,230,246,0.8) 0%, rgba(224,236,248,0.8) 50%, rgba(216,240,232,0.8) 100%)",
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
-                  borderRadius: "20px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "28px 20px",
-                  boxSizing: "border-box",
-                  border: "1px solid rgba(255,255,255,0.3)",
-                }}
-              >
+              {/* Back Face */}
+              <div className="luck-card-back">
                 {index === 0 && renderHoroscopeBack()}
                 {index === 1 && renderPersonalMonthBack()}
                 {index === 2 && renderLuckyNumbersBack()}
               </div>
+
             </div>
           </div>
         ))}
       </div>
-
-      <style>{`
-        .luck-cards-container::-webkit-scrollbar, .back-scroll::-webkit-scrollbar { display: none; }
-        .luck-cards-container, .back-scroll { scrollbar-width: none; }
-
-        .card-glitter {
-          background: linear-gradient(45deg, 
-            transparent 0%, 
-            rgba(255,255,255,0.4) 25%, 
-            rgba(255,255,255,0.2) 50%, 
-            transparent 75%
-          );
-          animation: cardGlitter 0.8s ease-in-out infinite;
-        }
-
-        @keyframes cardGlitter {
-          0% {
-            transform: translateX(-100%) translateY(-100%) rotate(-45deg);
-            opacity: 0;
-          }
-          50% {
-            opacity: 0.8;
-          }
-          100% {
-            transform: translateX(100%) translateY(100%) rotate(-45deg);
-            opacity: 0;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .luck-cards-container {
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 20px !important;
-            padding: 0 40px !important;
-            overflow: visible !important;
-          }
-          .flip-card {
-            min-width: unset !important;
-            width: 100% !important;
-          }
-        }
-
-        @media (max-width: 767.98px) {
-          .flip-card {
-            min-width: 280px !important;
-            width: 280px !important;
-            height: 340px !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import BackgroundImage from "../../assets/images/background.png";
 
-const API_URL = "http://164.52.205.108:8500";
+const baseApiUrl = "http://164.52.205.108:8500";
 
 interface FormData {
   name: string;
@@ -16,22 +16,22 @@ interface FormData {
 /* ─── Icons ─── */
 const IcoLocation = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
   </svg>
 );
 const IcoCalendar = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
   </svg>
 );
 const IcoClock = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
   </svg>
 );
 const IcoChevronDown = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6 9 12 15 18 9"/>
+    <polyline points="6 9 12 15 18 9" />
   </svg>
 );
 
@@ -88,13 +88,13 @@ const SoulProfilePage: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/v1/users/profile/`, { method: "POST", body: fd });
+      const res = await fetch(`${baseApiUrl}/api/v1/users/profile/`, { method: "POST", body: fd });
       const text = await res.text();
       let result: any;
       try { result = JSON.parse(text); } catch { throw new Error(text || "Invalid response"); }
       if (!res.ok) throw new Error(result?.message || result?.error || "Server error");
       if (result.success) {
-        ["user_id","username","date_of_birth","gender","place_of_birth","current_location","time_of_birth"]
+        ["user_id", "username", "date_of_birth", "gender", "place_of_birth", "current_location", "time_of_birth"]
           .forEach(k => localStorage.setItem(k, result.data[k] ?? ""));
         localStorage.removeItem("soulProfile");
         navigate("/eros-home");
@@ -128,7 +128,7 @@ const SoulProfilePage: React.FC = () => {
           width: 100vw;
           overflow: hidden;
           font-family: 'DM Sans', sans-serif;
-          background: #eef0f7;
+          background: #FFFFFF;
           padding: 32px;
           gap: 0;
         }
@@ -138,18 +138,19 @@ const SoulProfilePage: React.FC = () => {
         .sp-left {
           /* width auto-derives from height via aspect-ratio */
           height: 100%;
-          aspect-ratio: 676 / 960;
+          aspect-ratio: 960 / 960;
           max-width: 50%;          /* never wider than half the screen */
           min-width: 200px;
           border-radius: 20px;
-          background: linear-gradient(175deg,
-            #8b9bf8 0%,
-            #6e7ef4 18%,
-            #5264ef 38%,
-            #6070ec 58%,
-            #7a8bf0 78%,
-            #9aaaf6 100%
-          );
+        background: linear-gradient(180deg,
+  rgba(70, 95, 241, 0.37) 0%,      /* Transparent start */
+  #8b9bf8 18%,
+  #6e7ef4 38%,
+  #5264ef 58%,
+  #6070ec 78%,
+  #9aaaf6 100%                      /* Solid blue end */
+);
+
           position: relative;
           display: flex;
           flex-direction: column;
@@ -188,6 +189,7 @@ const SoulProfilePage: React.FC = () => {
           font-size: clamp(0.95rem, 1.8vw, 1.85rem);
           letter-spacing: -0.01em;
           margin-bottom: 0.35rem;
+          margin-top: clamp(40px, 8vw, 108px);
         }
 
         .sp-sub {
@@ -202,7 +204,7 @@ const SoulProfilePage: React.FC = () => {
         .sp-wheel-wrap {
           position: absolute;
           /* center exactly in the panel */
-          top: 50%;
+          top: 80%;
           left: 50%;
           transform: translate(-50%, -50%);
           /* large enough to fill/bleed at edges */
@@ -244,8 +246,8 @@ const SoulProfilePage: React.FC = () => {
         .sp-card {
           background: #ffffff;
           border-radius: 20px;
-          border: 1px solid #e8edf5;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.05);
+          // border: 1px solid #e8edf5;
+          // box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.05);
           /* Scale padding with viewport so card always fits */
           padding: clamp(1.1rem, 2.2vh, 2rem) clamp(1.1rem, 2vw, 2rem);
           width: 100%;
@@ -273,7 +275,7 @@ const SoulProfilePage: React.FC = () => {
           display: block;
           font-size: 0.78rem;
           font-weight: 500;
-          color: #64748b;
+          color: #050505;
           margin-bottom: 4px;
           font-family: 'DM Sans', sans-serif;
         }

@@ -819,13 +819,13 @@ const StarMap: React.FC = () => {
 
   useEffect(() => {
     if (isGeneratingReport || isLoading) {
-        setTimeout(() => {
-            if (chatContainerRef.current) {
-                chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-            }
-        }, 100);
+      setTimeout(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      }, 100);
     }
-}, [isGeneratingReport, isLoading]);
+  }, [isGeneratingReport, isLoading]);
 
   return (
     <div
@@ -1171,7 +1171,7 @@ const StarMap: React.FC = () => {
                     <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                       <i className="bi bi-stars" style={{ color: "#fff" }}></i>
                     </div>
-                    <div className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3" style={{"border" : "1px solid #E6E6E6"}}>
+                    <div className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3" style={{ "border": "1px solid #E6E6E6" }}>
                       <div className="flex items-center gap-2">
                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-cyan-500 border-t-transparent"></div>
                         <span className="text-sm">

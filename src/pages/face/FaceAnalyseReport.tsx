@@ -148,11 +148,11 @@ const FaceAnalyseReport: React.FC = () => {
                                 border: '3px solid #e5e7eb'
                             }}
                         />
-                        {username && (
+                        {/* {username && (
                             <h2 className="mt-3 fw-bold" style={{ color: '#1f2937' }}>
                                 {username}
                             </h2>
-                        )}
+                        )} */}
                         <h6 className="mt-2" style={{ color: '#6b7280', fontWeight: 500 }}>
                             Face Analysis
                         </h6>

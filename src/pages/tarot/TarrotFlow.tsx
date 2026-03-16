@@ -104,10 +104,10 @@ const TarotFlow: React.FC = () => {
           <button
             onClick={() => navigate("/result")}
             className="position-absolute top-0 start-0 btn btn-link"
-            style={{ 
-              fontSize: '1.2rem', 
-              zIndex: 10, 
-              textDecoration: 'none', 
+            style={{
+              fontSize: '1.2rem',
+              zIndex: 10,
+              textDecoration: 'none',
               // color: '#000',
               color: 'black',
               background: 'none',
@@ -131,20 +131,20 @@ const TarotFlow: React.FC = () => {
               style={{ objectFit: 'cover', objectPosition: 'center' }}
             />
             {/* Gradient overlay at bottom of image */}
-            <div 
-              className="position-absolute bottom-0 w-100" 
-              style={{ 
-                height: '150px', 
-                background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))' 
+            <div
+              className="position-absolute bottom-0 w-100"
+              style={{
+                height: '150px',
+                background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))'
               }}
             ></div>
           </div>
 
           {/* Content section - bottom 25% */}
-          <div 
-            className="tarot-intro-content-section d-flex flex-column align-items-center justify-content-center text-center px-4" 
-            style={{ 
-              backgroundColor: 'rgb(255, 255, 255)', 
+          <div
+            className="tarot-intro-content-section d-flex flex-column align-items-center justify-content-center text-center px-4"
+            style={{
+              backgroundColor: 'rgb(255, 255, 255)',
               height: '25vh',
               paddingTop: '1rem',
               paddingBottom: '2rem'
@@ -158,8 +158,8 @@ const TarotFlow: React.FC = () => {
             </p>
             <button
               className="btn btn-primary rounded-pill px-5 py-3"
-              style={{ 
-                backgroundColor: '#00B8F8', 
+              style={{
+                backgroundColor: '#00B8F8',
                 border: 'none',
                 fontSize: '1rem',
                 fontWeight: '500',
@@ -176,7 +176,7 @@ const TarotFlow: React.FC = () => {
       {step === 2 && (
         <div
           className="tarot-form-screen d-flex justify-content-center align-items-center flex-grow-1 w-100 position-relative"
-          style={{ 
+          style={{
             background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
             minHeight: "100vh"
           }}
@@ -276,8 +276,8 @@ const TarotFlow: React.FC = () => {
               <button
                 type="submit"
                 className="btn btn-primary w-100 mt-4 p-3"
-                style={{ 
-                  backgroundColor: "#7DD3FC", 
+                style={{
+                  backgroundColor: "#7DD3FC",
                   border: "none",
                   borderRadius: "8px",
                   fontSize: "1rem",

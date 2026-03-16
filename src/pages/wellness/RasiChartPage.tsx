@@ -385,12 +385,12 @@ const RasiChartPage: React.FC = () => {
         <Row className="g-4">
           {/* Rasi Chart */}
           <Col md={6} className="rasi-chart-card">
-            <Card className="h-100"   style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
+            <Card className="h-100" style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
               <Card.Body className="d-flex flex-column">
                 <Card.Title className="text-center" style={{ color: "#000" }}>
                   Rasi Chart
                 </Card.Title>
-                <p className=" text-center"  style={{color:"#000"}}>Individual Chart</p>
+                <p className=" text-center" style={{ color: "#000" }}>Individual Chart</p>
                 <div className="chart-iframe-wrapper flex-grow-1 d-flex align-items-center justify-content-center p-2">
                   {rasiChart?.inline ? (
                     <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
@@ -442,12 +442,12 @@ const RasiChartPage: React.FC = () => {
 
           {/* Navamsha Chart */}
           <Col md={6} className="rasi-chart-card">
-            <Card className="h-100"   style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
+            <Card className="h-100" style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
               <Card.Body className="d-flex flex-column">
                 <Card.Title className=" text-center" style={{ color: "#000" }}>
                   Navamsha Chart
                 </Card.Title>
-                <p className=" text-center"  style={{color:"#000"}}>Life Partner Chart</p>
+                <p className=" text-center" style={{ color: "#000" }}>Life Partner Chart</p>
                 <div className="chart-iframe-wrapper flex-grow-1 d-flex align-items-center justify-content-center p-2">
                   {navamshaChart?.inline ? (
                     <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">

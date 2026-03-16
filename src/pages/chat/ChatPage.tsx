@@ -176,7 +176,7 @@ const ChatPage: React.FC = () => {
         sender: "user",
         text: message || undefined,
         imageList: attachedImages.length ? [...attachedImages] : undefined,
-        fileList: attachedFiles.length 
+        fileList: attachedFiles.length
           ? attachedFiles.map(f => ({ name: f.name, size: f.size, type: f.type }))
           : undefined,
         userAvatar: true,
@@ -816,7 +816,7 @@ const ChatPage: React.FC = () => {
                 "linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))",
             }}
           >
-   
+
             EROS Wellness
           </h2>
 
@@ -1144,7 +1144,7 @@ const ChatPage: React.FC = () => {
                   <i className="bi bi-stars"></i>
                 </Button>
               </OverlayTrigger>
-              
+
               <div
                 className="bg-dark bg-opacity-75 rounded-4 p-2 shadow-sm"
                 style={{ width: "100%", maxWidth: "1000px" }}
@@ -1322,8 +1322,8 @@ const ChatPage: React.FC = () => {
                           variant="info"
                           className="rounded-pill px-3 py-2 ms-2"
                           disabled={
-                            !inputValue.trim() && 
-                            attachedImages.length === 0 && 
+                            !inputValue.trim() &&
+                            attachedImages.length === 0 &&
                             attachedFiles.length === 0
                           }
                           style={{
