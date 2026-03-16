@@ -1092,7 +1092,7 @@ const FaceScanner: React.FC = () => {
 
       const userId = localStorage.getItem('user_id');
       const response = await fetch(
-        `${baseApiUrl}/api/v1/health/bp-predict`,
+        `${baseApiUrl}/health/bp-predict`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1216,7 +1216,7 @@ const FaceScanner: React.FC = () => {
       // Send data to API
       const userId = localStorage.getItem('user_id');
       const response = await fetch(
-        `${baseApiUrl}/api/v1/health/scan/${userId}`,
+        `${baseApiUrl}/health/scan/${userId}`,
         {
           method: 'PUT',
           headers: {

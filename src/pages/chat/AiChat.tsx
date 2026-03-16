@@ -245,7 +245,7 @@ const AiChat: React.FC = () => {
         if (!userId) return;
 
         try {
-            const response = await fetch(`${baseApiUrl}/api/v1/chat/sessions/?user_id=${userId}`);
+            const response = await fetch(`${baseApiUrl}/chat/sessions/?user_id=${userId}`);
             const data = await response.json();
             if (data.success && data.data && data.data.sessions && Array.isArray(data.data.sessions)) {
                 setSessions(data.data.sessions);
@@ -263,7 +263,7 @@ const AiChat: React.FC = () => {
         if (!userId) return;
 
         try {
-            const response = await fetch(`${baseApiUrl}/api/v1/chat/conversation/${sessionId}`);
+            const response = await fetch(`${baseApiUrl}/chat/conversation/${sessionId}`);
             const data = await response.json();
             if (data.success && data.data && data.data.conversation_history && Array.isArray(data.data.conversation_history)) {
                 const formattedMessages = data.data.conversation_history.map((msg: any) => ({
@@ -473,7 +473,7 @@ const AiChat: React.FC = () => {
                     initParams.report_type = reportType;
                 }
 
-                const initResponse = await fetch(`${baseApiUrl}/api/v1/chat/spiritual/${userId}`, {
+                const initResponse = await fetch(`${baseApiUrl}/chat/spiritual/${userId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams(initParams)
@@ -500,7 +500,7 @@ const AiChat: React.FC = () => {
                 messageParams.report_type = reportType;
             }
 
-            const response = await fetch(`${baseApiUrl}/api/v1/chat/spiritual/${userId}`, {
+            const response = await fetch(`${baseApiUrl}/chat/spiritual/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', },
                 body: new URLSearchParams(messageParams)

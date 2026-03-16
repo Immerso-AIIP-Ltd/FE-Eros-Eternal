@@ -64,7 +64,7 @@ const PalmFlow: React.FC = () => {
       formDataSet.append("mode", "random");
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/numerology/tarot_reading`,
+        `${baseApiUrl}/numerology/tarot_reading`,
         {
           method: "POST",
           body: formDataSet, // don't set Content-Type, browser will set boundary

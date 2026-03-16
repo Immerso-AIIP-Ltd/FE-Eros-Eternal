@@ -67,7 +67,7 @@ const RasiChartPage: React.FC = () => {
       };
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/vedastro/get_astrology_data`,
+        `${baseApiUrl}/vedastro/get_astrology_data`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

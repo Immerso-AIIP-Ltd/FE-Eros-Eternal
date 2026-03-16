@@ -251,7 +251,7 @@ const AgeTrack: React.FC = () => {
                 console.log(key, typeof value === 'string' ? value : 'Non-string value');
             }
 
-            const reportUrl = `${baseApiUrl}/api/v1/bio/holistic-analyze`;
+            const reportUrl = `${baseApiUrl}/bio/holistic-analyze`;
             const response = await fetch(reportUrl, {
                 method: 'POST',
                 body: formData,

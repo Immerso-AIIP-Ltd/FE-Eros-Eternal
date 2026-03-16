@@ -251,11 +251,11 @@ const VibrationTool: React.FC = () => {
   };
 
   const [stars] = useState(() =>
-    Array.from({ length: 50 }, () => ({
+    Array.from({ length: 80 }, () => ({
       x: Math.random() * 100,
       y: Math.random() * 100,
-      opacity: 0.3 + Math.random() * 0.7,
-      size: Math.random() * 2 + 1,
+      opacity: 0.15 + Math.random() * 0.25,
+      size: Math.random() * 1.5 + 0.5,
     })),
   );
 
@@ -319,7 +319,7 @@ const VibrationTool: React.FC = () => {
       }
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/select_soul_report/${userId}`,
+        `${baseApiUrl}/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -421,7 +421,7 @@ const VibrationTool: React.FC = () => {
       }
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/answer_question/${userId}`,
+        `${baseApiUrl}/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -486,7 +486,7 @@ const VibrationTool: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/generate_soul_report/${userId}`,
+        `${baseApiUrl}/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -896,7 +896,7 @@ const VibrationTool: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${baseApiUrl}/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
+        `${baseApiUrl}/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
       );
 
       return response.ok && response.status === 200;
@@ -951,7 +951,7 @@ const VibrationTool: React.FC = () => {
           "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 20%, #FFFFFF 40%)",
       }}
     >
-      <Stars />
+      {/* <Stars /> */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {stars.map((star, i) => (
           <div
@@ -1465,10 +1465,10 @@ const VibrationTool: React.FC = () => {
                           style={{
                             backgroundColor:
                               isLoading ||
-                                isGeneratingReport ||
-                                (!inputValue.trim() &&
-                                  attachedImages.length === 0 &&
-                                  attachedVoices.length === 0)
+                              isGeneratingReport ||
+                              (!inputValue.trim() &&
+                                attachedImages.length === 0 &&
+                                attachedVoices.length === 0)
                                 ? "#E5E7EB"
                                 : "#06B6D4",
                             color: "white",
@@ -1478,10 +1478,10 @@ const VibrationTool: React.FC = () => {
                             minWidth: "80px",
                             cursor:
                               isLoading ||
-                                isGeneratingReport ||
-                                (!inputValue.trim() &&
-                                  attachedImages.length === 0 &&
-                                  attachedVoices.length === 0)
+                              isGeneratingReport ||
+                              (!inputValue.trim() &&
+                                attachedImages.length === 0 &&
+                                attachedVoices.length === 0)
                                 ? "not-allowed"
                                 : "pointer",
                           }}

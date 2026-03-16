@@ -73,7 +73,7 @@ const PalmReadingPage: React.FC = () => {
     formData.append('image_data', image);
 
     try {
-      const response = await fetch(`${baseApiUrl}/api/v1/analysis/palm/`, {
+      const response = await fetch(`${baseApiUrl}/analysis/palm/`, {
         method: 'POST',
         body: formData,
       });

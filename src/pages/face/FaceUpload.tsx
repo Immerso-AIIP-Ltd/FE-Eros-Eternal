@@ -131,7 +131,7 @@ const FaceUploadPage: React.FC = () => {
       formData.append("image", selectedFile);
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/face_reading/analyze`,
+        `${baseApiUrl}/face_reading/analyze`,
         {
           method: "POST",
           body: formData,
@@ -201,7 +201,7 @@ const FaceUploadPage: React.FC = () => {
   //     formData.append("image_data", selectedFile);
 
   //     const response = await fetch(
-  //       `${baseApiUrl}/api/v1/face_reading/analyze`, // CHANGED TO FACE ENDPOINT
+  //       `${baseApiUrl}/face_reading/analyze`, // CHANGED TO FACE ENDPOINT
   //       {
   //         method: "POST",
   //         body: formData,

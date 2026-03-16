@@ -38,7 +38,7 @@ const HarmonyIndexPage: React.FC = () => {
     setData(null);
 
     try {
-      const response = await fetch(`${baseApiUrl}/api/v1/numerology/career_compatibility`, {
+      const response = await fetch(`${baseApiUrl}/numerology/career_compatibility`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

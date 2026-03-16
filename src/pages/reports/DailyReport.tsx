@@ -61,7 +61,7 @@ const DailyReport: React.FC = () => {
     const fetchWelcome = async () => {
       try {
         const res = await fetch(
-          `${baseApiUrl}/api/v1/welcome/welcome`
+          `${baseApiUrl}/welcome/welcome`
         );
         const data = await res.json();
 
@@ -117,7 +117,7 @@ const DailyReport: React.FC = () => {
         const form = new FormData();
         form.append("user_message", message);
 
-        const res = await fetch(`${baseApiUrl}/api/v1/welcome/process_message`, {
+        const res = await fetch(`${baseApiUrl}/welcome/process_message`, {
           method: "POST",
           body: form,
         });
@@ -154,7 +154,7 @@ const DailyReport: React.FC = () => {
         process_message_report: finalAnswers ?? answers,
       };
 
-      const res = await fetch(`${baseApiUrl}/api/v1/welcome/generate_report`, {
+      const res = await fetch(`${baseApiUrl}/welcome/generate_report`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -482,7 +482,7 @@ const DailyReport: React.FC = () => {
       const form = new FormData();
       form.append("user_message", question);
 
-      const res = await fetch(`${baseApiUrl}/api/v1/welcome/process_message`, {
+      const res = await fetch(`${baseApiUrl}/welcome/process_message`, {
         method: "POST",
         body: form, // ✅ Browser sets Content-Type automatically
       });

@@ -92,7 +92,7 @@ const ViewReport = () => {
   const location = useLocation();
   const recommendationsRef = useRef(null);
 
-  const reportsApiUrl = `${baseApiUrl}/api/v1/reports/individual_report/`;
+  const reportsApiUrl = `${baseApiUrl}/reports/individual_report/`;
 
   useEffect(() => {
     const fetchReportData = async () => {

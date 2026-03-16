@@ -310,7 +310,7 @@ const HealingModal: React.FC = () => {
 
       console.log("Final prescription payload:", finalPayload);
 
-      const healingUrl = `${baseApiUrl}/api/v1/healing/generate_healing_prescription`;
+      const healingUrl = `${baseApiUrl}/healing/generate_healing_prescription`;
       const response = await fetch(healingUrl, {
         method: "POST",
         headers: {
@@ -396,7 +396,7 @@ const HealingModal: React.FC = () => {
       formData.append("image_data", attachedFiles[0], "image.png");
       formData.append("user_id", userId || "123");
 
-      const faceUrl = `${baseApiUrl}/api/v1/analysis/face`;
+      const faceUrl = `${baseApiUrl}/analysis/face`;
       const faceResponse = await fetch(faceUrl, {
         method: "POST",
         body: formData,
@@ -456,7 +456,7 @@ const HealingModal: React.FC = () => {
         timezone: getTimezoneOffset(),
       };
 
-      const astrologyUrl = `${baseApiUrl}/api/v1/vedastro/get_astrology_data`;
+      const astrologyUrl = `${baseApiUrl}/vedastro/get_astrology_data`;
       const response = await fetch(astrologyUrl, {
         method: "POST",
         headers: {
@@ -606,7 +606,7 @@ const HealingModal: React.FC = () => {
       console.log("Sending converted audio file:", fileName);
       console.log("File size:", audioBlob.size, "bytes");
 
-      const voiceUrl = `${baseApiUrl}/api/v1/analysis/voice`;
+      const voiceUrl = `${baseApiUrl}/analysis/voice`;
       const response = await fetch(voiceUrl, {
         method: "POST",
         body: formData,
@@ -678,7 +678,7 @@ const HealingModal: React.FC = () => {
       formData.append("audio_url", audioUrl); // Send URL as string
       formData.append("user_id", userId || "123");
 
-      const voiceUrl = `${baseApiUrl}/api/v1/analysis/voice`;
+      const voiceUrl = `${baseApiUrl}/analysis/voice`;
       const response = await fetch(voiceUrl, {
         method: "POST",
         body: formData,
