@@ -14,12 +14,13 @@ import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
 
 import { useNavigate } from "react-router-dom";
+import { baseApiUrl } from "@/config/api";
 
 const sidebarMenuItems = [
   { id: 'vibrational-frequency', label: 'Vibrational Frequency', icon: <ImagePlus size={16} /> },
   { id: 'aura-profile', label: 'Aura Profile', icon: <User size={16} /> },
   // { id: 'star-map', label: 'Star Map', icon: <SquarePlus size={16} /> },
-   { id: 'star-map', label: 'Birth Chart', icon: <SquarePlus size={16} />, reportType: 'star_map' },
+  { id: 'star-map', label: 'Birth Chart', icon: <SquarePlus size={16} />, reportType: 'star_map' },
   { id: 'kosha-map', label: 'Kosha Map', icon: <Camera size={16} /> },
   { id: 'flame-score', label: 'Flame Score', icon: <Upload size={16} /> },
   { id: 'longevity-blueprint', label: 'Longevity Blueprint', icon: <Mic size={16} /> },
@@ -387,7 +388,7 @@ const ErosChatUI: React.FC = () => {
       let currentSessionId = sessionId;
 
       if (!currentSessionId) {
-        const initResponse = await fetch('http://164.52.205.108:8500/api/v1/chat/spiritual', {
+        const initResponse = await fetch(`${baseApiUrl}/api/v1/chat/spiritual`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
@@ -406,7 +407,7 @@ const ErosChatUI: React.FC = () => {
         }
       }
 
-      const response = await fetch('http://164.52.205.108:8500/api/v1/chat/spiritual', {
+      const response = await fetch(`${baseApiUrl}/api/v1/chat/spiritual`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
@@ -490,7 +491,7 @@ const ErosChatUI: React.FC = () => {
   //     ...prev,
   //     { sender: "user", audio: audioUrl, audioBlob: file, duration: 0, userAvatar: true },
   //   ]);
-   
+
   // };
 
   // Cleanup on unmount
@@ -633,7 +634,7 @@ const ErosChatUI: React.FC = () => {
               <Menu size={20} />
             </button>
 
-            <h3 className="text-xl font-semibold" style={{color:"#00B8F8"}}>Wellness Chat Bot</h3>
+            <h3 className="text-xl font-semibold" style={{ color: "#00B8F8" }}>Wellness Chat Bot</h3>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center text-sm font-semibold">

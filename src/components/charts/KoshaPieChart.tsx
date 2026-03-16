@@ -1,13 +1,14 @@
 // src/components/KoshaPieChart.tsx
 import React, { useState, useEffect } from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
- 
+import { baseApiUrl } from "@/config/api";
+
 // Define Kosha types
 interface KoshaScore {
   score: string; // e.g., "70/100"
   [key: string]: any;
 }
- 
+
 interface KoshaAssessment {
   annamaya: KoshaScore;
   pranamaya: KoshaScore;
@@ -15,14 +16,14 @@ interface KoshaAssessment {
   vijnanamaya: KoshaScore;
   anandamaya: KoshaScore;
 }
- 
+
 interface InterKoshaDynamics {
   strongest_kosha: string;
   weakest_kosha: string;
   interactions: string;
   balance_score: string;
 }
- 
+
 interface ReportData {
   report_title: string;
   timestamp: string;
@@ -33,7 +34,7 @@ interface ReportData {
     [key: string]: string[];
   };
 }
- 
+
 interface ApiResponse {
   success: boolean;
   message: string;
@@ -45,13 +46,13 @@ interface ApiResponse {
     report_data: ReportData;
   };
 }
- 
+
 // Format label: "annamaya" → "Annamaya"
 const formatLabel = (key: string): string =>
   key
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (str) => str.toUpperCase());
- 
+
 const KoshaPieChart: React.FC = () => {
   const [values, setValues] = useState<
     { id: number; value: number; label: string; color: string }[]
@@ -59,10 +60,10 @@ const KoshaPieChart: React.FC = () => {
   const [avgScore, setAvgScore] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
- 
+
   // Get user ID from localStorage or use fallback
   const userId = localStorage.getItem("user_id") || "990199";
- 
+
   useEffect(() => {
     const fetchKoshaMap = async () => {
       if (!userId) {
@@ -70,13 +71,13 @@ const KoshaPieChart: React.FC = () => {
         setLoading(false);
         return;
       }
- 
+
       setLoading(true);
       setError(null);
- 
+
       try {
         const response = await fetch(
-          `http://192.168.29.154:8002/api/v1/reports/individual_report/?report_type=kosha_map&user_id=${userId}`,
+          `${baseApiUrl}/api/v1/reports/individual_report/?report_type=kosha_map&user_id=${userId}`,
           {
             method: "GET",
             headers: {
@@ -84,25 +85,25 @@ const KoshaPieChart: React.FC = () => {
             },
           }
         );
- 
+
         if (!response.ok) {
           throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
         }
- 
+
         const data: ApiResponse = await response.json();
- 
+
         if (data.success && data.data?.report_data?.kosha_assessment) {
           const assessment = data.data.report_data.kosha_assessment;
- 
+
           // Define colors for each kosha
           const colors = ["#2196F3", "#FFC107", "#E91E63", "#4CAF50", "#9C27B0"];
- 
+
           // Function to parse score from "70/100" format
           const parseScore = (scoreStr: string): number => {
             const match = scoreStr.match(/(\d+)\/100/);
             return match ? parseInt(match[1], 10) : 0;
           };
- 
+
           // Create chart data from assessment
           const newValues = (Object.keys(assessment) as Array<keyof KoshaAssessment>).map(
             (kosha, i) => ({
@@ -112,9 +113,9 @@ const KoshaPieChart: React.FC = () => {
               color: colors[i % colors.length], // Ensure we don't go out of bounds
             })
           );
- 
+
           setValues(newValues);
- 
+
           // Calculate average score
           const total = newValues.reduce((acc, v) => acc + v.value, 0);
           const average = newValues.length > 0 ? Math.round(total / newValues.length) : 0;
@@ -129,10 +130,10 @@ const KoshaPieChart: React.FC = () => {
         setLoading(false);
       }
     };
- 
+
     fetchKoshaMap();
   }, [userId]);
- 
+
   // Loading state
   if (loading) {
     return (
@@ -166,7 +167,7 @@ const KoshaPieChart: React.FC = () => {
       </div>
     );
   }
- 
+
   // Error state
   if (error) {
     return (
@@ -183,7 +184,7 @@ const KoshaPieChart: React.FC = () => {
       </div>
     );
   }
- 
+
   // No data state
   if (values.length === 0) {
     return (
@@ -197,7 +198,7 @@ const KoshaPieChart: React.FC = () => {
       </div>
     );
   }
- 
+
   // Main render
   return (
     <div
@@ -243,7 +244,7 @@ const KoshaPieChart: React.FC = () => {
           height={220}
           slotProps={{ legend: { hidden: true } }}
         />
- 
+
         {/* Center Text - Average Score */}
         <div
           style={{
@@ -276,7 +277,7 @@ const KoshaPieChart: React.FC = () => {
           </div>
         </div>
       </div>
- 
+
       {/* Legend/Content - Right Side */}
       <div style={{
         flex: 1,
@@ -332,7 +333,7 @@ const KoshaPieChart: React.FC = () => {
             </span>
           </div>
         ))}
-       
+
         {/* Overall Balance Score */}
         <div style={{
           marginTop: "12px",
@@ -361,5 +362,5 @@ const KoshaPieChart: React.FC = () => {
     </div>
   );
 };
- 
+
 export default KoshaPieChart;

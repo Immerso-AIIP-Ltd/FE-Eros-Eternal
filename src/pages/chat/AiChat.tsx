@@ -13,6 +13,7 @@ import MicVisualizer from "@/MicVisualizer";
 import eroslogo from "@/assets/eros-logo.png";
 import credits from "@/assets/credits.png";
 import { useNavigate, useLocation } from "react-router-dom";
+import { baseApiUrl } from "@/config/api";
 
 const AiChat: React.FC = () => {
     const [inputValue, setInputValue] = useState("");
@@ -244,7 +245,7 @@ const AiChat: React.FC = () => {
         if (!userId) return;
 
         try {
-            const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/sessions/?user_id=${userId}`);
+            const response = await fetch(`${baseApiUrl}/api/v1/chat/sessions/?user_id=${userId}`);
             const data = await response.json();
             if (data.success && data.data && data.data.sessions && Array.isArray(data.data.sessions)) {
                 setSessions(data.data.sessions);
@@ -262,7 +263,7 @@ const AiChat: React.FC = () => {
         if (!userId) return;
 
         try {
-            const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/conversation/${sessionId}`);
+            const response = await fetch(`${baseApiUrl}/api/v1/chat/conversation/${sessionId}`);
             const data = await response.json();
             if (data.success && data.data && data.data.conversation_history && Array.isArray(data.data.conversation_history)) {
                 const formattedMessages = data.data.conversation_history.map((msg: any) => ({
@@ -472,7 +473,7 @@ const AiChat: React.FC = () => {
                     initParams.report_type = reportType;
                 }
 
-                const initResponse = await fetch(`http://164.52.205.108:8500/api/v1/chat/spiritual/${userId}`, {
+                const initResponse = await fetch(`${baseApiUrl}/api/v1/chat/spiritual/${userId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams(initParams)
@@ -499,7 +500,7 @@ const AiChat: React.FC = () => {
                 messageParams.report_type = reportType;
             }
 
-            const response = await fetch(`http://164.52.205.108:8500/api/v1/chat/spiritual/${userId}`, {
+            const response = await fetch(`${baseApiUrl}/api/v1/chat/spiritual/${userId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', },
                 body: new URLSearchParams(messageParams)

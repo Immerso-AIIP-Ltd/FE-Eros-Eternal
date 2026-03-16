@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UsersRound } from "lucide-react";
 import { Card, Col, Row, Container } from "react-bootstrap";
-
-const API_URL = "http://164.52.205.108:8500";
+import { baseApiUrl } from "@/config/api";
 
 interface CompatibilityData {
   match_for: string;
@@ -73,7 +72,7 @@ const RelationshipCompatibility: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${API_URL}/api/v1/numerology/career_compatibility`,
+        `${baseApiUrl}/api/v1/numerology/career_compatibility`,
         {
           method: "POST",
           body: formData,
@@ -134,9 +133,9 @@ const RelationshipCompatibility: React.FC = () => {
 
     return (
       <div className="d-flex flex-column align-items-center w-100" style={{ maxWidth: "200px", margin: "0 auto" }}>
-        <svg 
+        <svg
           viewBox="0 0 200 200"
-          style={{ 
+          style={{
             transform: "rotate(-90deg)",
             width: "100%",
             height: "auto",
@@ -206,10 +205,10 @@ const RelationshipCompatibility: React.FC = () => {
     const { data } = compatibilityResult;
 
     return (
-      <div 
+      <div
         className="results-scroll-container w-100"
-        style={{ 
-          height: 'calc(100vh - 100px)', 
+        style={{
+          height: 'calc(100vh - 100px)',
           overflowY: 'auto',
           padding: '0.5rem 1rem',
           scrollbarWidth: 'none',
@@ -383,9 +382,9 @@ const RelationshipCompatibility: React.FC = () => {
 
       {/* Main Content Area - Centered */}
       <div className="viewport-content" style={{ justifyContent: 'flex-start', paddingTop: '1rem' }}>
-        <div 
-          className="w-100 mx-auto d-flex flex-column align-items-center" 
-          style={{ 
+        <div
+          className="w-100 mx-auto d-flex flex-column align-items-center"
+          style={{
             maxWidth: "1000px",
             position: "relative",
             zIndex: 10

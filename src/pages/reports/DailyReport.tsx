@@ -10,6 +10,7 @@ import sparkle from "@/assets/images/sparkle.png";
 import Stars from "@/components/ui/stars";
 import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
+import { baseApiUrl } from "@/config/api";
 
 const DailyReport: React.FC = () => {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ const DailyReport: React.FC = () => {
     const fetchWelcome = async () => {
       try {
         const res = await fetch(
-          "http://192.168.29.154:8002/api/v1/welcome/welcome"
+          `${baseApiUrl}/api/v1/welcome/welcome`
         );
         const data = await res.json();
 
@@ -101,7 +102,7 @@ const DailyReport: React.FC = () => {
 
   const sendMessage = async (textArg?: string) => {
     const message = (textArg ?? inputValue ?? "").toString();
-    const BASE_URL = "http://192.168.29.154:8002";
+    const BASE_URL = baseApiUrl;
     if (!message.trim()) return;
 
     // Show user bubble
@@ -116,7 +117,7 @@ const DailyReport: React.FC = () => {
         const form = new FormData();
         form.append("user_message", message);
 
-        const res = await fetch(`${BASE_URL}/api/v1/welcome/process_message`, {
+        const res = await fetch(`${baseApiUrl}/api/v1/welcome/process_message`, {
           method: "POST",
           body: form,
         });
@@ -144,7 +145,7 @@ const DailyReport: React.FC = () => {
 
   const generateReport = async (finalAnswers?: string[]) => {
     try {
-      const BASE_URL = "http://192.168.29.154:8002";
+      const BASE_URL = baseApiUrl;
       const userId = localStorage.getItem("user_id") || "0";
 
       const body = {
@@ -153,7 +154,7 @@ const DailyReport: React.FC = () => {
         process_message_report: finalAnswers ?? answers,
       };
 
-      const res = await fetch(`${BASE_URL}/api/v1/welcome/generate_report`, {
+      const res = await fetch(`${baseApiUrl}/api/v1/welcome/generate_report`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -460,7 +461,7 @@ const DailyReport: React.FC = () => {
   };
 
   const handleSuggestionClick = async (question: string) => {
-    const BASE_URL = "http://192.168.29.154:8002";
+    const BASE_URL = baseApiUrl;
 
     const reportTypes: Record<string, string> = {
       "What's my vibe right now?": "vibrational_frequency",
@@ -481,7 +482,7 @@ const DailyReport: React.FC = () => {
       const form = new FormData();
       form.append("user_message", question);
 
-      const res = await fetch(`${BASE_URL}/api/v1/welcome/process_message`, {
+      const res = await fetch(`${baseApiUrl}/api/v1/welcome/process_message`, {
         method: "POST",
         body: form, // ✅ Browser sets Content-Type automatically
       });
@@ -583,7 +584,7 @@ const DailyReport: React.FC = () => {
 
         {/* Header */}
         <div className="position-relative z-10 d-flex justify-content-between align-items-center p-4">
-        <h2 className="h4 fw-bold" style={{color: "#00A2FF",}}> Eternal AI</h2>
+          <h2 className="h4 fw-bold" style={{ color: "#00A2FF", }}> Eternal AI</h2>
         </div>
 
         {/* Main Content Area */}
@@ -694,9 +695,8 @@ const DailyReport: React.FC = () => {
                   return (
                     <div
                       key={i}
-                      className={`d-flex mb-2 ${
-                        isUser ? "justify-content-end" : "justify-content-start"
-                      }`}
+                      className={`d-flex mb-2 ${isUser ? "justify-content-end" : "justify-content-start"
+                        }`}
                     >
                       <div
                         className={`px-3 py-2 rounded-3`}
@@ -706,13 +706,13 @@ const DailyReport: React.FC = () => {
                           background: isUser
                             ? "#00b8f8"
                             : isSuggestion
-                            ? "#e9ecef"
-                            : "#6c757d",
+                              ? "#e9ecef"
+                              : "#6c757d",
                           color: isUser
                             ? "white"
                             : isSuggestion
-                            ? "black"
-                            : "white",
+                              ? "black"
+                              : "white",
                           cursor: isSuggestion ? "pointer" : "default",
                           userSelect: "none", // prevent text selection blocking click
                         }}

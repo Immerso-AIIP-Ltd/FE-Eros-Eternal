@@ -11,7 +11,8 @@ import {
   Chip,
 } from "@mui/material";
 import { FaFire, FaInfoCircle, FaTimes } from "react-icons/fa";
- 
+import { baseApiUrl } from "@/config/api";
+
 // Define interfaces for the API response
 interface CurrentAssessment {
   vf_score: string; // e.g., "700/1000"
@@ -20,26 +21,26 @@ interface CurrentAssessment {
   sleep_impact: string;
   environmental_factors: string;
 }
- 
+
 interface PredictiveAnalysis {
   next_3_days: string[];
   optimal_timing: string;
   warning_signs: string;
 }
- 
+
 interface SpiritualInsights {
   soul_lessons: string;
   past_life_connections: string;
   growth_opportunities: string;
 }
- 
+
 interface Recommendations {
   immediate_actions: string[];
   mantras: string[];
   energy_practices: string[];
   avoidance_list: string[];
 }
- 
+
 interface ReportData {
   report_title: string;
   timestamp: string;
@@ -49,7 +50,7 @@ interface ReportData {
   detailed_analysis: string;
   recommendations: Recommendations;
 }
- 
+
 interface ApiResponse {
   success: boolean;
   message: string;
@@ -61,16 +62,16 @@ interface ApiResponse {
     report_data: ReportData; // Fixed: corrected property name
   };
 }
- 
+
 const VibrationalFrequencyGauge: React.FC = () => {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showFullReport, setShowFullReport] = useState<boolean>(false);
- 
+
   // Get user ID from localStorage or use default for testing
   const userId = localStorage.getItem("user_id") || "11";
- 
+
   useEffect(() => {
     const fetchVibrationalFrequency = async () => {
       if (!userId) {
@@ -78,13 +79,13 @@ const VibrationalFrequencyGauge: React.FC = () => {
         setLoading(false);
         return;
       }
- 
+
       setLoading(true);
       setError(null);
- 
+
       try {
         const response = await fetch(
-          `http://192.168.29.154:8002/api/v1/reports/individual_report/?report_type=vibrational_frequency&user_id=${userId}`,
+          `${baseApiUrl}/api/v1/reports/individual_report/?report_type=vibrational_frequency&user_id=${userId}`,
           {
             method: "GET",
             headers: {
@@ -92,14 +93,14 @@ const VibrationalFrequencyGauge: React.FC = () => {
             },
           }
         );
- 
+
         if (!response.ok) {
           throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
         }
- 
+
         // Fixed: Proper variable declaration
         const data: ApiResponse = await response.json();
- 
+
         if (data.success && data.data?.report_data) {
           setReportData(data.data.report_data);
         } else {
@@ -114,21 +115,21 @@ const VibrationalFrequencyGauge: React.FC = () => {
         setLoading(false);
       }
     };
- 
+
     fetchVibrationalFrequency();
   }, [userId]);
- 
+
   // Helper functions
   const parseVfScore = (scoreStr: string): number => {
     const match = scoreStr.match(/(\d+)\/1000/);
     return match ? parseInt(match[1], 10) : 0;
   };
- 
+
   const parseHzFrequency = (hzStr: string): number => {
     const match = hzStr.match(/(\d+)\s*Hz/);
     return match ? parseInt(match[1], 10) : 0;
   };
- 
+
   const getEnergyLevelColor = (level: string): string => {
     switch (level.toLowerCase()) {
       case "high":
@@ -141,7 +142,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
         return "#00B8F8";
     }
   };
- 
+
   const getEnergyLevelIcon = (level: string): string => {
     switch (level.toLowerCase()) {
       case "high":
@@ -154,7 +155,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
         return "✨";
     }
   };
- 
+
   // Loading state
   if (loading) {
     return (
@@ -170,7 +171,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
       </Box>
     );
   }
- 
+
   // Error state
   if (error) {
     return (
@@ -179,7 +180,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
       </Box>
     );
   }
- 
+
   if (!reportData) {
     return (
       <Box textAlign="center" p={3}>
@@ -187,12 +188,12 @@ const VibrationalFrequencyGauge: React.FC = () => {
       </Box>
     );
   }
- 
+
   const vfScore = parseVfScore(reportData.current_assessment.vf_score);
   const hzFrequency = parseHzFrequency(reportData.current_assessment.hz_frequency);
   const energyLevel = reportData.current_assessment.energy_level;
   const gaugeValue = (vfScore / 1000) * 100; // Convert to percentage for gauge
- 
+
   return (
     <>
       {/* Main Gauge Display */}
@@ -211,7 +212,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
               "& .MuiGauge-valueArc": { fill: getEnergyLevelColor(energyLevel) },
             }}
           />
- 
+
           {/* Custom Overlay Text */}
           <Box
             position="absolute"
@@ -238,7 +239,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
             <Typography variant="body2">Vibrational Frequency</Typography>
           </Box>
         </Box>
- 
+
         {/* Score and Energy Level Chips */}
         <Box display="flex" alignItems="center" gap={2}>
           <Chip
@@ -255,7 +256,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
             size="medium"
           />
         </Box>
- 
+
         {/* View Full Report Button */}
         <Button
           variant="contained"
@@ -272,7 +273,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
           View Full Report
         </Button>
       </Box>
- 
+
       {/* Full Report Modal */}
       <Modal
         open={showFullReport}
@@ -319,7 +320,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
               <FaTimes />
             </Button>
           </Box>
- 
+
           {/* Report Content */}
           <Grid container spacing={3}>
             {/* Current Assessment Section */}
@@ -348,7 +349,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
                 </Typography>
               </Paper>
             </Grid>
- 
+
             {/* Predictive Analysis Section */}
             <Grid item xs={12} md={6}>
               <Paper elevation={2} sx={{ p: 3, height: "100%" }}>
@@ -371,7 +372,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
                 </Typography>
               </Paper>
             </Grid>
- 
+
             {/* Spiritual Insights Section */}
             <Grid item xs={12}>
               <Paper elevation={2} sx={{ p: 3 }}>
@@ -391,7 +392,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
                 </Typography>
               </Paper>
             </Grid>
- 
+
             {/* Detailed Analysis Section */}
             <Grid item xs={12}>
               <Paper elevation={2} sx={{ p: 3 }}>
@@ -403,7 +404,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
                 </Typography>
               </Paper>
             </Grid>
- 
+
             {/* Recommendations Section */}
             <Grid item xs={12}>
               <Paper elevation={2} sx={{ p: 3 }}>
@@ -432,7 +433,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
               </Paper>
             </Grid>
           </Grid>
- 
+
           {/* Modal Footer */}
           <Box mt={3} display="flex" justifyContent="center">
             <Button
@@ -453,6 +454,5 @@ const VibrationalFrequencyGauge: React.FC = () => {
     </>
   );
 };
- 
+
 export default VibrationalFrequencyGauge;
- 

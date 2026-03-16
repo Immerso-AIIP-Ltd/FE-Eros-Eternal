@@ -1,5 +1,6 @@
 // src/pages/HarmonyIndexPage.tsx
 import React, { useState } from 'react';
+import { baseApiUrl } from "@/config/api";
 
 interface CompatibilityData {
   match_for: string;
@@ -7,8 +8,6 @@ interface CompatibilityData {
   sign_main: string;
   sign_partner: string;
 }
-
-const API_URL = 'http://192.168.29.154:8002';
 
 const HarmonyIndexPage: React.FC = () => {
   // Read from localStorage
@@ -39,7 +38,7 @@ const HarmonyIndexPage: React.FC = () => {
     setData(null);
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/numerology/career_compatibility`, {
+      const response = await fetch(`${baseApiUrl}/api/v1/numerology/career_compatibility`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

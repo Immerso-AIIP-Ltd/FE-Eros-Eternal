@@ -2,12 +2,10 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Import images
 import tarot from "@/assets/images/lighttarrot.png";
 import palm from "@/assets/images/lightpalm.png";
 import harmonyindex from "@/assets/images/lightharmony.png";
 import facescan from "@/assets/images/lightface.png";
-import angel from "@/assets/images/vintage.png";
 
 interface ExploreItem {
   title: string;
@@ -37,49 +35,40 @@ export const ExploreSection: React.FC = () => {
     e.preventDefault();
     const x = e.pageX - (scrollContainerRef.current?.offsetLeft || 0);
     const walk = (x - startX) * 2;
-
-    if (Math.abs(walk) > 5) {
-      setHasMoved(true);
-    }
-
+    if (Math.abs(walk) > 5) setHasMoved(true);
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollLeft = scrollLeft - walk;
     }
   };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseLeave = () => {
-    setIsDragging(false);
-  };
+  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseLeave = () => setIsDragging(false);
 
   const items: ExploreItem[] = [
     {
       title: "Tarot Reading",
-      subtitle: "Love tarot reading for singles and couples",
+      subtitle: "Lorem ipsum dolor sit amet consectetur. Enim ornare faucibus urna blandit facilisi eu nulla.",
       image: tarot,
       onClick: () => navigate('/card'),
       locked: false,
     },
     {
-      title: "Palm Reading",
-      subtitle: "Unlock insights and energy balance through the wisdom of your palms",
+      title: "Palmistry",
+      subtitle: "Lorem ipsum dolor sit amet consectetur. Enim ornare faucibus urna blandit facilisi eu nulla.",
       image: palm,
       onClick: () => navigate('/palmcard'),
       locked: false,
     },
     {
       title: "Harmony Index",
-      subtitle: "Discover your true biological age and vitality",
+      subtitle: "Lorem ipsum dolor sit amet consectetur. Enim ornare faucibus urna blandit facilisi eu nulla.",
       image: harmonyindex,
       onClick: () => navigate('/harmoneyi'),
       locked: false,
     },
     {
-      title: "Face Scan",
-      subtitle: "Face Scan for your spiritual journey",
+      title: "Face Reading",
+      subtitle: "Lorem ipsum dolor sit amet consectetur. Enim ornare faucibus urna blandit facilisi eu nulla.",
       image: facescan,
       onClick: () => navigate('/facereading'),
       locked: false,
@@ -87,308 +76,232 @@ export const ExploreSection: React.FC = () => {
   ];
 
   return (
-    <div style={{
-      paddingBottom: '2rem',
-      width: '100%',
-      paddingLeft: '40px',
-      paddingRight: '40px'
-    }}>
-      {/* Header */}
-      <div className="header" style={{
-        marginBottom: '1.5rem',
-        paddingLeft: '0',
-        paddingRight: '0',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <h1 style={{
-          fontSize: '1.75rem',
-          fontWeight: 600,
-          fontFamily: "Poppins, sans-serif",
-          margin: 0,
-          letterSpacing: '-0.02em',
-        }}>
-          Explore More
-        </h1>
+    <div
+      style={{
+        padding: "56px 24px 64px",
+        backgroundColor: "#ffffff",
+        fontFamily: "'Poppins', sans-serif",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
 
-        {/* Swipe Button */}
-        <button
-          onClick={() => {
-            if (scrollContainerRef.current) {
-              const scrollAmount = scrollContainerRef.current.offsetWidth / 3 + 24;
-              scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-            }
-          }}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "#00B8F8",
-            fontSize: "14px",
-            fontWeight: "600",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            fontFamily: "Poppins, sans-serif",
-            padding: 0,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "#33C3FF";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "#00B8F8";
-          }}
-        >
-          Swipe
-          <span style={{ fontSize: "18px" }}>›</span>
-        </button>
-      </div>
+        .explore-cards-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+          max-width: 1100px;
+          margin: 0 auto;
+          cursor: default;
+        }
 
-      {/* Scrollable Container */}
+        .explore-card {
+          background: #ffffff;
+          border: 1px solid #ebebeb;
+          border-radius: 16px;
+          overflow: hidden;
+          cursor: pointer;
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+          position: relative;
+        }
+
+        .explore-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 28px rgba(0,0,0,0.11);
+        }
+
+        .explore-card-img {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          display: block;
+          background: #f4f4f4;
+          user-select: none;
+          pointer-events: none;
+        }
+
+        .explore-card-body {
+          padding: 18px 18px 22px;
+        }
+
+        .explore-card-title {
+          font-size: 17px;
+          font-weight: 500;
+          color: #0d1020;
+          margin: 0 0 8px;
+          font-family: 'Poppins', sans-serif;
+          line-height: 1.3;
+          letter-spacing: -0.01em;
+        }
+
+        .explore-card-subtitle {
+          font-size: 13px;
+          color: #6b7280;
+          margin: 0;
+          line-height: 1.6;
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 400;
+        }
+
+        /* Scrollable on mobile */
+        .explore-scroll-wrapper {
+          display: none;
+        }
+
+        /* Lock overlay */
+        .explore-lock-overlay {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.75);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          z-index: 10;
+          text-align: center;
+        }
+
+        @media (max-width: 1024px) {
+          .explore-cards-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .explore-cards-grid {
+            display: none !important;
+          }
+          .explore-scroll-wrapper {
+            display: flex !important;
+            gap: 14px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 8px;
+            cursor: grab;
+          }
+          .explore-scroll-wrapper::-webkit-scrollbar { display: none; }
+          .explore-scroll-wrapper .explore-card {
+            flex: 0 0 80vw;
+            min-width: 80vw;
+            scroll-snap-align: start;
+          }
+          .explore-card-img {
+            height: 160px !important;
+          }
+        }
+      `}</style>
+
+      {/* Centered Header */}
       <div
-        ref={scrollContainerRef}
-        className="card-container"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
         style={{
-          display: 'flex',
-          gap: '24px',
-          overflowX: 'auto',
-          overflowY: 'hidden',
-          scrollBehavior: isDragging ? 'auto' : 'smooth',
-          cursor: isDragging ? 'grabbing' : 'grab',
-          paddingBottom: '2rem',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          width: '100%',
-          padding: '0 0 40px 0',
-          margin: '0',
+          textAlign: "center",
+          marginBottom: "44px",
+          maxWidth: "600px",
+          margin: "0 auto 44px",
         }}
       >
+        <h1
+          style={{
+            fontSize: "clamp(28px, 4vw, 42px)",
+            fontWeight: 600,
+            color: "#0d1020",
+            margin: "0 0 14px",
+            letterSpacing: "-0.025em",
+            fontFamily: "'Inter', sans-serif",
+            lineHeight: 1.15,
+          }}
+        >
+          Explore More
+        </h1>
+        <p
+          style={{
+            fontSize: "14.5px",
+            color: "#8a8aa0",
+            margin: 0,
+            lineHeight: 1.65,
+            fontFamily: "'Poppins', sans-serif",
+            fontWeight: 400,
+          }}
+        >
+          Lorem ipsum dolor sit amet consectetur. Pulvinar vestibulum cras
+          aliquam tempus nullam arcu sed.
+        </p>
+      </div>
+
+      {/* Desktop Grid — 4 cards */}
+      <div className="explore-cards-grid">
         {items.map((item, index) => (
           <div
             key={index}
-            className="card-item"
-            onClick={(e) => {
-              if (!hasMoved && item.onClick) {
-                item.onClick();
-              }
-            }}
+            className="explore-card"
+            onClick={() => { if (item.onClick) item.onClick(); }}
             role="button"
             tabIndex={item.onClick ? 0 : -1}
             aria-label={item.locked ? `${item.title} - Coming Soon` : item.title}
-            style={{
-              flex: '0 0 calc(33.333% - 16px)',
-              minWidth: 'calc(33.333% - 16px)',
-              height: '420px',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb',
-              backgroundColor: '#ffffff',
-              overflow: 'hidden',
-              position: 'relative',
-              cursor: item.onClick && !isDragging ? 'pointer' : isDragging ? 'grabbing' : 'grab',
-              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              fontFamily: "DM Sans, sans-serif",
-              fontSize: "16px",
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            }}
-            onMouseEnter={(e) => {
-              if (item.onClick && !isDragging) {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
-            }}
           >
-            {/* Image Container */}
-            <div style={{
-              width: '100%',
-              height: '60%',
-              overflow: 'hidden',
-              backgroundColor: '#f9fafb',
-            }}>
-              <img
-                src={item.image}
-                alt={item.title}
-                draggable={false}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  userSelect: 'none',
-                  pointerEvents: 'none',
-                }}
-              />
+            <img
+              src={item.image}
+              alt={item.title}
+              className="explore-card-img"
+              draggable={false}
+            />
+            <div className="explore-card-body">
+              <h3 className="explore-card-title">{item.title}</h3>
+              <p className="explore-card-subtitle">{item.subtitle}</p>
             </div>
-
-            {/* Text Content */}
-            <div
-              className="text-content"
-              style={{
-                position: "relative",
-                padding: "1.5rem",
-                backgroundColor: '#ffffff',
-                height: '40%',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                zIndex: 5,
-                pointerEvents: 'none',
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: '1.25rem',
-                  fontWeight: 600,
-                  color: '#1f2937',
-                  marginBottom: '0.5rem',
-                  fontFamily: "Poppins, sans-serif",
-                  lineHeight: 1.3,
-                }}
-              >
-                {item.title}
-              </h3>
-              <p
-                style={{
-                  fontSize: '0.9rem',
-                  color: '#6b7280',
-                  margin: 0,
-                  lineHeight: 1.5,
-                  fontFamily: "DM Sans, sans-serif",
-                }}
-              >
-                {item.subtitle}
-              </p>
-            </div>
-
-            {/* Lock Overlay */}
             {item.locked && (
-              <div
-                className="lock-overlay"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'rgba(0, 0, 0, 0.75)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  color: 'white',
-                  zIndex: 10,
-                }}
-              >
-                <i
-                  className="bi bi-lock-fill"
-                  style={{ fontSize: '2.5rem', color: '#ccc', marginBottom: '12px' }}
-                ></i>
-                <p
-                  style={{
-                    fontSize: '1rem',
-                    fontWeight: 500,
-                    margin: 0,
-                    lineHeight: 1.4,
-                  }}
-                >
-                  Coming Soon
-                </p>
+              <div className="explore-lock-overlay">
+                <i className="bi bi-lock-fill" style={{ fontSize: "2.5rem", color: "#ccc", marginBottom: "12px" }} />
+                <p style={{ fontSize: "1rem", fontWeight: 500, margin: 0 }}>Coming Soon</p>
               </div>
             )}
           </div>
         ))}
       </div>
-      
-      <style>{`
-        .card-container::-webkit-scrollbar {
-          display: none;
-        }
-        .card-container {
-          -webkit-overflow-scrolling: touch;
-          scroll-behavior: smooth;
-        }
 
-        .card-item {
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                      box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @media (min-width: 1024px) {
-          .card-container {
-            display: flex;
-            gap: 24px;
-            padding: 0 0 40px 0;
-          }
-          
-          .card-item {
-            flex: 0 0 calc(33.333% - 16px) !important;
-            min-width: calc(33.333% - 16px) !important;
-            height: 420px;
-          }
-        }
-
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .card-container {
-            display: flex;
-            gap: 16px;
-            padding: 0 0 40px 0;
-          }
-          
-          .card-item {
-            flex: 0 0 calc(50% - 8px) !important;
-            min-width: calc(50% - 8px) !important;
-            height: 360px;
-          }
-          
-          .text-content {
-            padding: 1.25rem;
-          }
-          
-          h3 {
-            font-size: 1.125rem;
-          }
-          
-          p {
-            font-size: 0.85rem;
-          }
-        }
-
-        @media (max-width: 767.98px) {
-          .card-container {
-            display: flex;
-            gap: 12px;
-            padding: 0 0 40px 0;
-          }
-          
-          .card-item {
-            flex: 0 0 calc(100% - 12px) !important;
-            min-width: calc(100% - 12px) !important;
-            height: 380px;
-          }
-          
-          .text-content {
-            padding: 1.1rem;
-          }
-          
-          h3 {
-            font-size: 1.05rem;
-          }
-          
-          p {
-            font-size: 0.8rem;
-          }
-        }
-      `}</style>
+      {/* Mobile horizontal scroll */}
+      <div
+        className="explore-scroll-wrapper"
+        ref={scrollContainerRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        style={{ cursor: isDragging ? "grabbing" : "grab" }}
+      >
+        {items.map((item, index) => (
+          <div
+            key={index}
+            className="explore-card"
+            onClick={() => { if (!hasMoved && item.onClick) item.onClick(); }}
+          >
+            <img
+              src={item.image}
+              alt={item.title}
+              className="explore-card-img"
+              draggable={false}
+            />
+            <div className="explore-card-body">
+              <h3 className="explore-card-title">{item.title}</h3>
+              <p className="explore-card-subtitle">{item.subtitle}</p>
+            </div>
+            {item.locked && (
+              <div className="explore-lock-overlay">
+                <i className="bi bi-lock-fill" style={{ fontSize: "2.5rem", color: "#ccc", marginBottom: "12px" }} />
+                <p style={{ fontSize: "1rem", fontWeight: 500, margin: 0 }}>Coming Soon</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

@@ -23,6 +23,13 @@ export default defineConfig({
   assetsInclude: ['**/*.tflite', '**/*.gz'],
   server: {
     host: true,
+      allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      '*.ngrok-free.dev',  // Allow all ngrok free domains
+      'microtonal-jacquetta-unepigrammatically.ngrok-free.dev',
+      'shakticloud.ai'  // Your specific ngrok
+    ]
   },
   worker: {
     format: 'es',

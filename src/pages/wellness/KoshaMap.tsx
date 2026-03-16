@@ -27,6 +27,7 @@ import MicVisualizer from "@/MicVisualizer";
 import { useNavigate, useLocation } from "react-router-dom";
 import eroslogo from "@/assets/eros-logo.png";
 import credits from "@/assets/credits.png";
+import { baseApiUrl } from "@/config/api";
 
 const sidebarMenuItems = [
   {
@@ -307,7 +308,7 @@ const KoshaMap: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/select_soul_report/${userId}`,
+        `${baseApiUrl}/api/v1/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -409,7 +410,7 @@ const KoshaMap: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/answer_question/${userId}`,
+        `${baseApiUrl}/api/v1/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -479,7 +480,7 @@ const KoshaMap: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/generate_soul_report/${userId}`,
+        `${baseApiUrl}/api/v1/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -787,7 +788,7 @@ const KoshaMap: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
+        `${baseApiUrl}/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
       );
       return response.ok && response.status === 200;
     } catch (error) {
@@ -1345,10 +1346,10 @@ const KoshaMap: React.FC = () => {
                           style={{
                             backgroundColor:
                               isLoading ||
-                              isGeneratingReport ||
-                              (!inputValue.trim() &&
-                                attachedImages.length === 0 &&
-                                attachedVoices.length === 0)
+                                isGeneratingReport ||
+                                (!inputValue.trim() &&
+                                  attachedImages.length === 0 &&
+                                  attachedVoices.length === 0)
                                 ? "#E5E7EB"
                                 : "#06B6D4",
                             color: "white",
@@ -1358,10 +1359,10 @@ const KoshaMap: React.FC = () => {
                             minWidth: "70px",
                             cursor:
                               isLoading ||
-                              isGeneratingReport ||
-                              (!inputValue.trim() &&
-                                attachedImages.length === 0 &&
-                                attachedVoices.length === 0)
+                                isGeneratingReport ||
+                                (!inputValue.trim() &&
+                                  attachedImages.length === 0 &&
+                                  attachedVoices.length === 0)
                                 ? "not-allowed"
                                 : "pointer",
                           }}

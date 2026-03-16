@@ -5,6 +5,7 @@ import { Gauge } from "@mui/x-charts/Gauge";
 import { Box, Typography } from "@mui/material";
 import fire from "@/assets/fire.png";
 import { ArrowLeft } from "lucide-react";
+import { baseApiUrl } from "@/config/api";
 
 interface ReportData {
   timestamp: string;
@@ -91,7 +92,7 @@ const ViewReport = () => {
   const location = useLocation();
   const recommendationsRef = useRef(null);
 
-  const baseApiUrl = "http://164.52.205.108:8500/api/v1/reports/individual_report/";
+  const reportsApiUrl = `${baseApiUrl}/api/v1/reports/individual_report/`;
 
   useEffect(() => {
     const fetchReportData = async () => {
@@ -104,7 +105,7 @@ const ViewReport = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          `${baseApiUrl}?user_id=${location.state.userId}&report_type=${location.state.reportType}`
+          `${reportsApiUrl}?user_id=${location.state.userId}&report_type=${location.state.reportType}`
         );
 
         if (!response.ok) {

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Stars from '../ui/stars';
+import { baseApiUrl } from '@/config/api';
 import type { CombinedReportData, HrHistoryPoint } from '../../types/rppg';
 import {
   KalmanFilter1D,
@@ -1091,7 +1092,7 @@ const FaceScanner: React.FC = () => {
 
       const userId = localStorage.getItem('user_id');
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/health/bp-predict`,
+        `${baseApiUrl}/api/v1/health/bp-predict`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1215,7 +1216,7 @@ const FaceScanner: React.FC = () => {
       // Send data to API
       const userId = localStorage.getItem('user_id');
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/health/scan/${userId}`,
+        `${baseApiUrl}/api/v1/health/scan/${userId}`,
         {
           method: 'PUT',
           headers: {

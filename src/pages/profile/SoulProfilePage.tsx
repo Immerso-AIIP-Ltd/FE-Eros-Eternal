@@ -1,1123 +1,562 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Select,
-  MenuItem,
-  FormControl,
-  TextField,
-  InputLabel,
-  ThemeProvider,
-  createTheme,
-  styled,
-  InputAdornment,
-} from "@mui/material";
-
-import type { SelectChangeEvent } from "@mui/material";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import backgroundImg from "@/assets/background.png";
-import Stars from "@/components/ui/stars";
-import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import LogoEros from '@/assets/LogoEros.png';
+import BackgroundImage from "../../assets/images/background.png";
 
-const API_URL =
-  "http://164.52.205.108:8500";
-// const API_URL =
-//   "http://192.168.18.5:7001";
+const baseApiUrl = "http://164.52.205.108:8500";
 
 interface FormData {
-  firstName: string;
   name: string;
   gender: string;
   placeOfBirth: string;
   currentLocation: string;
-  dateOfBirth: string; // YYYY-MM-DD
-  timeOfBirth: string; // HH:mm or HH:mm:ss
+  dateOfBirth: string;
+  timeOfBirth: string;
 }
 
-
-const indianStates = [
-  "Mumbai",
-  "Delhi",
-  "Bangalore",
-  "Hyderabad",
-  "Chennai",
-  "Kolkata",
-  "Ahmedabad",
-  "Pune",
-  "Jaipur",
-  "Surat",
-  "Lucknow",
-  "Kanpur",
-  "Nagpur",
-  "Indore",
-  "Thane",
-  "Bhopal",
-  "Visakhapatnam",
-  "Patna",
-  "Vadodara",
-  "Ghaziabad",
-  "Ludhiana",
-  "Agra",
-  "Nashik",
-  "Faridabad",
-  "Meerut",
-  "Rajkot",
-  "Varanasi",
-  "Srinagar",
-  "Aurangabad",
-  "Dhanbad",
-  "Amritsar",
-  "Navi Mumbai",
-  "Allahabad (Prayagraj)",
-  "Ranchi",
-  "Howrah",
-  "Coimbatore",
-  "Jabalpur",
-  "Gwalior",
-  "Vijayawada",
-  "Jodhpur",
-  "Madurai",
-  "Raipur",
-  "Kochi",
-  "Chandigarh",
-  "Guwahati",
-  "Bhubaneswar",
-  "Dehradun",
-  "Mysore",
-  "Tiruchirappalli",
-  "Salem",
-];
-
-// Custom styled Select with icon left side and blue border glow on focus/filled
-const StyledFormControl = styled(FormControl)(({ theme }) => ({
-  width: "100%",
-  marginBottom: "0",
-  ".MuiInputLabel-root": {
-    color: "#666",
-  },
-  ".MuiSelect-root": {
-    paddingLeft: "32px", // space for icon on left
-    color: "#000",
-  },
-  ".MuiOutlinedInput-notchedOutline": {
-    borderColor: "#d1d5db",
-    transition: "border-color 0.3s ease",
-  },
-  "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#d1d5db",
-  },
-  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#60a5fa",
-    boxShadow: "none",
-  },
-  position: "relative",
-}));
-
-// Icon wrapper for left icon inside Select input
-const IconLeftWrapper = styled("div")({
-  position: "absolute",
-  left: 8,
-  top: "50%",
-  transform: "translateY(-50%)",
-  pointerEvents: "none",
-  color: "#666",
-  zIndex: 1,
-});
-
-const lightTheme = createTheme({
-  palette: {
-    mode: "light",
-    background: {
-      default: "transparent",
-      paper: "#fff",
-    },
-    primary: {
-      main: "#60a5fa",
-    },
-    text: {
-      primary: "#000",
-    },
-  },
-  components: {
-    MuiOutlinedInput: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "transparent",
-          height: "2.75rem",
-          marginBottom: "12px",
-          "& input": {
-            color: "#000",
-          },
-        },
-      },
-    },
-    MuiInputLabel: {
-      styleOverrides: {
-        root: {
-          color: "#666",
-          fontSize: "0.875rem",
-          "&.Mui-focused": {
-            color: "#60a5fa",
-          },
-        },
-      },
-    },
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-          color: "#000",
-          "&:hover": {
-            backgroundColor: "#f5f5f5",
-          },
-          "&.Mui-selected": {
-            backgroundColor: "#00B8F8",
-            color: "#fff",
-            "&:hover": {
-              backgroundColor: "#0099d4",
-            },
-          },
-        },
-      },
-    },
-    MuiPickersDay: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-          color: "#000",
-          "&:hover": {
-            backgroundColor: "#f5f5f5",
-          },
-          "&.Mui-selected": {
-            backgroundColor: "#00B8F8",
-            color: "#fff",
-            "&:hover": {
-              backgroundColor: "#0099d4",
-            },
-          },
-        },
-      },
-    },
-    MuiPickersCalendarHeader: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-          color: "#000",
-        },
-      },
-    },
-    MuiPickersLayout: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-        },
-      },
-    },
-    MuiClock: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-        },
-        pin: {
-          backgroundColor: "#00B8F8",
-        },
-      },
-    },
-    MuiClockPointer: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#00B8F8",
-        },
-        thumb: {
-          backgroundColor: "#00B8F8",
-          borderColor: "#00B8F8",
-        },
-      },
-    },
-    MuiClockNumber: {
-      styleOverrides: {
-        root: {
-          color: "#000",
-          "&.Mui-selected": {
-            backgroundColor: "#00B8F8",
-            color: "#fff",
-          },
-        },
-      },
-    },
-    MuiPickersYear: {
-      styleOverrides: {
-        yearButton: {
-          color: "#000",
-          "&.Mui-selected": {
-            backgroundColor: "#00B8F8",
-            color: "#fff",
-          },
-        },
-      },
-    },
-    MuiDialogActions: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#fff",
-          color: "#000",
-        },
-      },
-    },
-  },
-});
+/* ─── Icons ─── */
+const IcoLocation = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+  </svg>
+);
+const IcoCalendar = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+const IcoClock = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+const IcoChevronDown = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
 
 const SoulProfilePage: React.FC = () => {
-
   const navigate = useNavigate();
-
+  const dobRef = useRef<HTMLInputElement>(null);
+  const timeRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    name: "",
-    gender: "",
-    placeOfBirth: "",
-    currentLocation: "",
-    dateOfBirth: "",
-    timeOfBirth: "",
+    name: "", gender: "", placeOfBirth: "",
+    currentLocation: "", dateOfBirth: "", timeOfBirth: "",
   });
 
-  // ✅ FIXED: Validate & sanitize data from localStorage
   useEffect(() => {
-    const savedData = localStorage.getItem("soulProfile");
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-
-        // Validate date format: YYYY-MM-DD
-        const isValidDate = (str: string): boolean => {
-          if (!str || typeof str !== "string") return false;
-          return (
-            /^\d{4}-\d{2}-\d{2}$/.test(str) && !isNaN(new Date(str).getTime())
-          );
-        };
-
-        // Validate time format: HH:mm or HH:mm:ss
-        const isValidTime = (str: string): boolean => {
-          if (!str || typeof str !== "string") return false;
-          return /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/.test(str);
-        };
-
-        // Normalize time to HH:mm (MUI prefers this)
-        const normalizeTime = (timeStr: string): string => {
-          if (!timeStr) return "";
-          if (timeStr.length >= 5) {
-            return timeStr.substring(0, 5); // "14:30:00" → "14:30"
-          }
-          return "";
-        };
-
-        setFormData({
-          firstName: parsed.firstName || "",
-          name: parsed.name || "",
-          gender: parsed.gender || "",
-          placeOfBirth: parsed.placeOfBirth || "",
-          currentLocation: parsed.currentLocation || "",
-          dateOfBirth: isValidDate(parsed.dateOfBirth)
-            ? parsed.dateOfBirth
-            : "",
-          timeOfBirth: isValidTime(parsed.timeOfBirth)
-            ? normalizeTime(parsed.timeOfBirth)
-            : "",
-        });
-      } catch (e) {
-        console.error("Failed to parse saved profile:", e);
-        localStorage.removeItem("soulProfile");
-      }
-    }
+    const saved = localStorage.getItem("soulProfile");
+    if (!saved) return;
+    try {
+      const p = JSON.parse(saved);
+      const isDate = (v: string) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(+new Date(v));
+      const isTime = (v: string) => !!v && /^([01]?\d|2[0-3]):[0-5]\d/.test(v);
+      setFormData({
+        name: p.name || "", gender: p.gender || "",
+        placeOfBirth: p.placeOfBirth || "", currentLocation: p.currentLocation || "",
+        dateOfBirth: isDate(p.dateOfBirth) ? p.dateOfBirth : "",
+        timeOfBirth: isTime(p.timeOfBirth) ? p.timeOfBirth.slice(0, 5) : "",
+      });
+    } catch { localStorage.removeItem("soulProfile"); }
   }, []);
 
-  const handleChange = (field: keyof FormData, value: string) => {
-    setFormData((prev) => {
-      const updated = { ...prev, [field]: value };
-      localStorage.setItem("soulProfile", JSON.stringify(updated));
-      return updated;
+  const set = (field: keyof FormData, value: string) => {
+    setFormData(prev => {
+      const next = { ...prev, [field]: value };
+      localStorage.setItem("soulProfile", JSON.stringify(next));
+      return next;
     });
-  };
-
-  const [loading, setLoading] = useState(false); // ✅ fixed: was always true
-  const [error, setError] = useState<string | null>(null);
-  const dobInputRef = useRef<HTMLInputElement>(null);
-  const timeInputRef = useRef<HTMLInputElement>(null);
-
-  const handleIconClick = () => {
-    dobInputRef.current?.showPicker?.();
-    dobInputRef.current?.click();
-  };
-
-  const handleTimeIconClick = () => {
-    timeInputRef.current?.showPicker?.();
-    timeInputRef.current?.click();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
+    if (!formData.name.trim()) return setErrorMsg("Please enter your name.");
+    if (!formData.dateOfBirth) return setErrorMsg("Please select date of birth.");
+    if (!formData.timeOfBirth) return setErrorMsg("Please select time of birth.");
 
-    // if (!formData.firstName.trim()) {
-    //   alert("Please enter your first name.");
-    //   return;
-    // }
-    if (!formData.name.trim()) {
-      alert("Please enter your name.");
-      return;
-    }
-    if (!formData.dateOfBirth) {
-      alert("Please select a valid date of birth.");
-      return;
-    }
-    if (!formData.timeOfBirth) {
-      alert("Please select a valid time of birth.");
-      return;
-    }
+    const [y, m, d] = formData.dateOfBirth.split("-");
+    const fd = new FormData();
+    fd.append("gender", formData.gender);
+    fd.append("username", formData.name.trim());
+    fd.append("place_of_birth", formData.placeOfBirth.trim());
+    fd.append("current_location", formData.currentLocation.trim());
+    fd.append("date_of_birth", `${d}-${m}-${y}`);
+    fd.append("time_of_birth", formData.timeOfBirth);
 
-    const [year, month, day] = formData.dateOfBirth.split("-");
-    const formattedDate = `${day}-${month}-${year}`;
-
-    // ✅ Create FormData instead of a plain object
-    const payload = new FormData();
-    payload.append("gender", formData.gender);
-    payload.append("username", formData.name);
-    payload.append("place_of_birth", formData.placeOfBirth);
-    payload.append("current_location", formData.currentLocation);
-    payload.append("date_of_birth", formattedDate);
-    payload.append("time_of_birth", formData.timeOfBirth);
-
-    setError(null);
     setLoading(true);
-
     try {
-      const response = await fetch(`${API_URL}/api/v1/users/profile/`, {
-        method: "POST",
-        // ⚠️ DO NOT set Content-Type — let the browser handle it
-        // headers: { "Content-Type": "application/json" }, ← REMOVE THIS
-        body: payload, // ← FormData goes here
-      });
-
-      if (!response.ok) {
-        // ⚠️ Important: When using FormData, the server might still return JSON errors
-        // So we try to parse as JSON, but be cautious
-        let errorResponse;
-        const text = await response.text();
-        try {
-          errorResponse = JSON.parse(text);
-        } catch {
-          errorResponse = text; // fallback to raw text
-        }
-
-        let errorMessage = "Server error occurred";
-
-        if (Array.isArray(errorResponse)) {
-          errorMessage = errorResponse
-            .map(
-              (err) => err.msg || err.message || err.detail || "Unknown error"
-            )
-            .join("; ");
-        } else if (errorResponse && typeof errorResponse === "object") {
-          errorMessage =
-            errorResponse.message ||
-            errorResponse.error ||
-            JSON.stringify(errorResponse);
-        } else if (typeof errorResponse === "string") {
-          errorMessage = errorResponse;
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
-
+      const res = await fetch(`${baseApiUrl}/api/v1/users/profile/`, { method: "POST", body: fd });
+      const text = await res.text();
+      let result: any;
+      try { result = JSON.parse(text); } catch { throw new Error(text || "Invalid response"); }
+      if (!res.ok) throw new Error(result?.message || result?.error || "Server error");
       if (result.success) {
-        localStorage.setItem("user_id", result.data.user_id);
-        localStorage.setItem("username", result.data.username);
-        localStorage.setItem("date_of_birth", result.data.date_of_birth);
-        localStorage.setItem("gender", result.data.gender);
-        localStorage.setItem("place_of_birth", result.data.place_of_birth);
-        localStorage.setItem("current_location", result.data.current_location);
-        localStorage.setItem("time_of_birth", result.data.time_of_birth);
-        // alert(result.message);
+        ["user_id", "username", "date_of_birth", "gender", "place_of_birth", "current_location", "time_of_birth"]
+          .forEach(k => localStorage.setItem(k, result.data[k] ?? ""));
+        localStorage.removeItem("soulProfile");
         navigate("/eros-home");
-      } else {
-        throw new Error(result.message || "Profile creation failed");
-      }
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "An unknown error occurred";
-      setError(errorMsg);
-      alert(`Error: ${errorMsg}`);
-    } finally {
-      setLoading(false);
-    }
+      } else throw new Error(result.message || "Profile creation failed");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Something went wrong.");
+    } finally { setLoading(false); }
   };
 
   return (
-    <ThemeProvider theme={lightTheme}>
-      <style>
-        {`
-  /* Mobile devices (320px - 480px) */
-  @media (max-width: 480px) {
-    .responsive-container {
-      flex-direction: column !important;
-      padding: 0.5rem !important;
-      gap: 0 !important;
-    }
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-    .left-side {
-      display: none !important;
-    }
+        /* ── Reset & lock viewport ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .right-side {
-      flex: 1 1 100% !important;
-      padding: 0 !important;
-    }
+        html, body {
+          height: 100%;
+          width: 100%;
+          overflow: hidden;        /* no page scroll ever */
+          scrollbar-width: none;   /* Firefox */
+        }
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar { display: none; }  /* Chrome/Safari */
 
-    .soul-profile-form {
-      width: 100% !important;
-      padding: 1.25rem !important;
-      gap: 1rem !important;
-      max-width: 100% !important;
-      border-radius: 12px !important;
-    }
+        /* ══════════ ROOT — full viewport, no overflow ══════════ */
+        .sp-root {
+          display: flex;
+          height: 100vh;
+          width: 100vw;
+          overflow: hidden;
+          font-family: 'DM Sans', sans-serif;
+          background: #FFFFFF;
+          padding: 32px;
+          gap: 0;
+        }
 
-    .rotate-image-bg {
-      width: 300px !important;
-      height: 300px !important;
-    }
+        /* ══════════ LEFT PANEL ══════════ */
+        /* Fixed Figma ratio 676:960, fills available height within padding */
+        .sp-left {
+          /* width auto-derives from height via aspect-ratio */
+          height: 100%;
+          aspect-ratio: 960 / 960;
+          max-width: 50%;          /* never wider than half the screen */
+          min-width: 200px;
+          border-radius: 20px;
+        background: linear-gradient(180deg,
+  rgba(70, 95, 241, 0.37) 0%,      /* Transparent start */
+  #8b9bf8 18%,
+  #6e7ef4 38%,
+  #5264ef 58%,
+  #6070ec 78%,
+  #9aaaf6 100%                      /* Solid blue end */
+);
 
-    .logo-eros {
-      width: 180px !important;
-    }
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
 
-    .bubble-1 {
-      width: 200px !important;
-      height: 200px !important;
-      filter: blur(40px) !important;
-    }
+        /* top glow + bottom depth */
+        .sp-left::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 20px;
+          background:
+            radial-gradient(ellipse 75% 40% at 50% 0%, rgba(255,255,255,0.18) 0%, transparent 60%),
+            radial-gradient(ellipse 90% 40% at 50% 110%, rgba(30,50,190,0.25) 0%, transparent 65%);
+          pointer-events: none;
+          z-index: 0;
+        }
 
-    .bubble-2 {
-      width: 180px !important;
-      height: 180px !important;
-      filter: blur(35px) !important;
-    }
+        .sp-left-text {
+          position: relative;
+          z-index: 2;
+          text-align: center;
+          padding: 0 1.75rem;
+          margin-top: clamp(1.5rem, 7%, 4.5rem);
+        }
 
-    .bubble-3 {
-      width: 150px !important;
-      height: 150px !important;
-      filter: blur(30px) !important;
-    }
+        .sp-title {
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 700;
+          color: #fff;
+          line-height: 1.22;
+          font-size: clamp(0.95rem, 1.8vw, 1.85rem);
+          letter-spacing: -0.01em;
+          margin-bottom: 0.35rem;
+          margin-top: clamp(40px, 8vw, 108px);
+        }
 
-    .bubble-4 {
-      width: 220px !important;
-      height: 220px !important;
-      filter: blur(45px) !important;
-    }
-  }
+        .sp-sub {
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 400;
+          color: rgba(255,255,255,0.82);
+          font-size: clamp(0.65rem, 0.9vw, 0.85rem);
+          letter-spacing: 0.015em;
+        }
 
-  /* Mobile landscape and small tablets (481px - 768px) */
-  @media (min-width: 481px) and (max-width: 768px) {
-    .responsive-container {
-      flex-direction: column !important;
-      padding: 1rem !important;
-      gap: 1rem !important;
-    }
+        /* ── Zodiac wheel: centered on left panel, rotates forever ── */
+        .sp-wheel-wrap {
+          position: absolute;
+          /* center exactly in the panel */
+          top: 80%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          /* large enough to fill/bleed at edges */
+          width: 110%;
+          aspect-ratio: 1 / 1;
+          z-index: 1;
+          pointer-events: none;
+          /* push it toward the bottom so top half is cropped */
+          margin-top: 35%;
+        }
 
-    .left-side {
-      display: none !important;
-    }
+        .sp-wheel {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          filter: brightness(0) invert(1) opacity(0.78);
+          animation: spinWheel 60s linear infinite;
+          transform-origin: center center;
+        }
 
-    .right-side {
-      flex: 1 1 100% !important;
-      padding: 0 !important;
-    }
+        @keyframes spinWheel {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
 
-    .soul-profile-form {
-      width: 100% !important;
-      padding: 1.75rem !important;
-      max-width: 600px !important;
-      overflow-y: visible !important;
-  max-height: none !important;
-    }
+        /* ══════════ RIGHT PANEL ══════════ */
+        .sp-right {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding-left: 32px;
+          overflow: hidden;        /* no scroll on right either */
+          scrollbar-width: none;
+        }
+        .sp-right::-webkit-scrollbar { display: none; }
 
-    .rotate-image-bg {
-      width: 400px !important;
-      height: 400px !important;
-    }
+        /* ══════════ CARD ══════════ */
+        .sp-card {
+          background: #ffffff;
+          border-radius: 20px;
+          // border: 1px solid #e8edf5;
+          // box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.05);
+          /* Scale padding with viewport so card always fits */
+          padding: clamp(1.1rem, 2.2vh, 2rem) clamp(1.1rem, 2vw, 2rem);
+          width: 100%;
+          max-width: 430px;
+        }
 
-    .logo-eros {
-      width: 220px !important;
-    }
+        .sp-card-title {
+          font-family: 'Montserrat', sans-serif;
+          font-weight: 700;
+          font-size: clamp(1rem, 1.5vw, 1.4rem);
+          color: #0f172a;
+          letter-spacing: -0.02em;
+          margin-bottom: clamp(0.9rem, 1.8vh, 1.5rem);
+          line-height: 1.2;
+        }
 
-    .bubble-1 {
-      width: 280px !important;
-      height: 280px !important;
-      filter: blur(55px) !important;
-    }
+        /* ══════════ FORM ══════════ */
+        .sp-fields {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(8px, 1.2vh, 14px);
+        }
 
-    .bubble-2 {
-      width: 250px !important;
-      height: 250px !important;
-      filter: blur(50px) !important;
-    }
+        .sp-field-label {
+          display: block;
+          font-size: 0.78rem;
+          font-weight: 500;
+          color: #050505;
+          margin-bottom: 4px;
+          font-family: 'DM Sans', sans-serif;
+        }
 
-    .bubble-3 {
-      width: 220px !important;
-      height: 220px !important;
-      filter: blur(45px) !important;
-    }
+        .sp-wrap { position: relative; width: 100%; }
 
-    .bubble-4 {
-      width: 320px !important;
-      height: 320px !important;
-      filter: blur(60px) !important;
-    }
-  }
+        .sp-input,
+        .sp-select {
+          width: 100%;
+          height: clamp(38px, 4.5vh, 46px);
+          border: 1.5px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 0 14px 0 40px;
+          font-size: clamp(0.8rem, 1vw, 0.875rem);
+          font-family: 'DM Sans', sans-serif;
+          color: #1e293b;
+          background: #fff;
+          outline: none;
+          transition: border-color 0.18s, box-shadow 0.18s;
+          appearance: none;
+          -webkit-appearance: none;
+        }
 
-  /* Tablets (769px - 1024px) */
-  @media (min-width: 769px) and (max-width: 1024px) {
-    .responsive-container {
-      gap: 1.5rem !important;
-      padding: 1.5rem !important;
-    }
+        .sp-input.no-icon { padding-left: 14px; }
 
-    .left-side {
-      flex: 1 1 40% !important;
-    }
+        .sp-input:focus,
+        .sp-select:focus {
+          border-color: #00b8f8;
+          box-shadow: 0 0 0 3px rgba(0,184,248,0.1);
+        }
 
-    .right-side {
-      flex: 1 1 60% !important;
-      padding: 0 !important;
-    }
+        .sp-input::placeholder { color: #b8c0cc; }
+        .sp-select { cursor: pointer; padding-right: 36px; }
+        .sp-select option[value=""] { color: #94a3b8; }
 
-    .soul-profile-form {
-      width: 100% !important;
-      max-width: 550px !important;
-      padding: 2rem !important;
-    }
+        .sp-ico {
+          position: absolute;
+          left: 13px; top: 50%;
+          transform: translateY(-50%);
+          color: #94a3b8;
+          display: flex; align-items: center;
+          pointer-events: none; z-index: 1;
+        }
+        .sp-ico-btn { cursor: pointer; pointer-events: all; }
 
-    .rotate-image-bg {
-      width: 500px !important;
-      height: 500px !important;
-    }
+        .sp-arr {
+          position: absolute;
+          right: 12px; top: 50%;
+          transform: translateY(-50%);
+          color: #94a3b8;
+          display: flex; pointer-events: none;
+        }
 
-    .logo-eros {
-      width: 240px !important;
-    }
-  }
+        /* Hide native picker icons */
+        .sp-input[type=date]::-webkit-calendar-picker-indicator,
+        .sp-input[type=time]::-webkit-calendar-picker-indicator {
+          opacity: 0; position: absolute;
+          inset: 0; width: 100%; height: 100%; cursor: pointer;
+        }
 
-  /* Small laptops (1025px - 1366px) */
-  @media (min-width: 1025px) and (max-width: 1366px) {
-    .responsive-container {
-      gap: 2rem !important;
-    }
+        /* Error */
+        .sp-error {
+          font-size: 0.78rem; color: #ef4444;
+          padding: 7px 11px;
+          background: #fef2f2; border: 1px solid #fecaca;
+          border-radius: 8px; margin-bottom: 4px;
+        }
 
-    .left-side {
-      flex: 1 1 45% !important;
-    }
+        /* Button */
+        .sp-btn {
+          width: 100%;
+          height: clamp(40px, 4.8vh, 48px);
+          background: #00b8f8;
+          color: #fff; border: none; border-radius: 10px;
+          font-family: 'DM Sans', sans-serif;
+          font-size: clamp(0.82rem, 1vw, 0.95rem);
+          font-weight: 600; cursor: pointer;
+          letter-spacing: 0.01em; margin-top: 4px;
+          box-shadow: 0 4px 14px rgba(0,184,248,0.28);
+          transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+        }
+        .sp-btn:hover:not(:disabled) {
+          background: #00a4de; transform: translateY(-1px);
+          box-shadow: 0 6px 20px rgba(0,184,248,0.38);
+        }
+        .sp-btn:active:not(:disabled) { transform: translateY(0); }
+        .sp-btn:disabled { opacity: 0.65; cursor: not-allowed; }
 
-    .right-side {
-      flex: 1 1 55% !important;
-      padding: 0 !important;
-    }
+        /* ══════════ RESPONSIVE ══════════ */
 
-    .soul-profile-form {
-      max-width: 600px !important;
-      padding: 2.5rem !important;
-      gap: 0.75rem !important;
-    }
+        /* Tablet landscape 769–1024 */
+        @media (max-width: 1024px) and (min-width: 769px) {
+          .sp-root { padding: 24px; }
+          .sp-right { padding-left: 24px; }
+          .sp-left { max-width: 44%; }
+          .sp-card { max-width: 360px; }
+        }
 
-    .rotate-image-bg {
-      width: 600px !important;
-      height: 600px !important;
-    }
+        /* Tablet portrait + mobile ≤768 — stack */
+        @media (max-width: 768px) {
+          html, body { overflow-y: auto; }
 
-    .logo-eros {
-      width: 260px !important;
-    }
-    .soul-profile-form h1 {
-      font-size: 1.35rem !important;
-    }
-  }
+          .sp-root {
+            flex-direction: column;
+            height: auto;
+            min-height: 100vh;
+            padding: 20px;
+            gap: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+          }
+          .sp-root::-webkit-scrollbar { display: none; }
 
-  /* Standard laptops and desktops (1367px - 1920px) */
-  @media (min-width: 1367px) and (max-width: 1920px) {
-    .soul-profile-form {
-      max-width: 650px !important;
-    }
+          .sp-left {
+            width: 100%;
+            height: auto;
+            min-height: 240px;
+            aspect-ratio: unset;
+            max-width: 100%;
+            border-radius: 16px;
+          }
 
-    .rotate-image-bg {
-      width: 700px !important;
-      height: 700px !important;
-    }
+          .sp-wheel-wrap {
+            width: 85%;
+            margin-top: 25%;
+          }
 
-    .logo-eros {
-      width: 280px !important;
-    }
-  }
+          .sp-right {
+            padding-left: 0;
+            overflow-y: visible;
+          }
 
-  /* Large desktops (1921px+) */
-  @media (min-width: 1921px) {
-    .responsive-container {
-      gap: 3rem !important;
-    }
+          .sp-card { max-width: 100%; }
+        }
 
-    .soul-profile-form {
-      max-width: 750px !important;
-      padding: 3rem !important;
-    }
+        /* Mobile ≤480 */
+        @media (max-width: 480px) {
+          .sp-root { padding: 16px; gap: 16px; }
+          .sp-left { min-height: 210px; border-radius: 14px; }
+          .sp-title { font-size: 1.15rem; }
+          .sp-sub { font-size: 0.72rem; }
+          .sp-wheel-wrap { width: 90%; margin-top: 22%; }
+          .sp-card { border-radius: 14px; }
+          .sp-card-title { font-size: 1rem; }
+        }
 
-    .rotate-image-bg {
-      width: 900px !important;
-      height: 900px !important;
-    }
+        /* Small mobile ≤360 */
+        @media (max-width: 360px) {
+          .sp-left { min-height: 185px; }
+          .sp-card-title { font-size: 0.95rem; }
+        }
 
-    .logo-eros {
-      width: 320px !important;
-    }
-  }
-`}
-      </style>
-      <div
-        style={{
-          height: "100vh",
-          width: "100vw",
-          background: "rgb(255, 255, 255)",
-          color: "#000",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Blurred bubbles background */}
-        <div style={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          overflow: "hidden",
-          zIndex: 0,
-        }}>
-          <div className="bubble-1" style={{
-            position: "absolute",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(0, 184, 248, 0.15), rgba(135, 206, 250, 0.1))",
-            filter: "blur(80px)",
-            top: "10%",
-            left: "10%",
-          }} />
-          <div className="bubble-2" style={{
-            position: "absolute",
-            width: "350px",
-            height: "350px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(197, 245, 245, 0.2), rgba(176, 224, 230, 0.15))",
-            filter: "blur(70px)",
-            top: "60%",
-            right: "15%",
-          }} />
-          <div className="bubble-3" style={{
-            position: "absolute",
-            width: "300px",
-            height: "300px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(135, 206, 250, 0.12), rgba(173, 216, 230, 0.08))",
-            filter: "blur(60px)",
-            bottom: "15%",
-            left: "20%",
-          }} />
-          <div className="bubble-4" style={{
-            position: "absolute",
-            width: "450px",
-            height: "450px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(0, 184, 248, 0.1), rgba(135, 206, 250, 0.08))",
-            filter: "blur(90px)",
-            top: "30%",
-            right: "5%",
-          }} />
-        </div>
-        <Stars />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "100vh",
-            padding: "1rem",
-            gap: "2rem",
-            position: "relative",
-            zIndex: 1,
-          }}
-          className="responsive-container"
-        >
-          {/* Left Side - Background and Logo */}
-          <div
-            style={{
-              flex: "1 1 50%",
-              position: "relative",
-              textAlign: "center",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            className="left-side"
-          >
-            <img
-              src={backgroundImg}
-              alt="Rotating Cosmic Background"
-              className="rotate-image-bg position-absolute"
-              style={{
-                zIndex: 0,
-                // opacity: 0.3,
-                pointerEvents: "none",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%) rotate(0deg)",
-                width: "800px",
-                height: "800px",
-                // filter:"brightness(1) saturate(50%) contrast(100%)",
-                aspectRatio: "1 / 1", // ✅ Ensures the image stays perfectly square
-                objectFit: "contain", // ✅ Prevents stretching/distortion
-              }}
-            />
-            <img
-              src={LogoEros}
-              alt="EROS Wellness Logo"
-              className="logo-eros"
-              style={{
-                width: "300px",
-                height: "auto",
-                objectFit: "contain",
-                zIndex: 1,
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-              }}
-            />
+        /* Large desktop 1440+ */
+        @media (min-width: 1440px) {
+          .sp-left { max-width: 46%; }
+          .sp-card { max-width: 480px; }
+        }
+
+        /* XL 1920+ */
+        @media (min-width: 1920px) {
+          .sp-root { padding: 40px; }
+          .sp-right { padding-left: 40px; }
+          .sp-left { max-width: 42%; }
+          .sp-card { max-width: 540px; }
+          .sp-card-title { font-size: 1.55rem; }
+        }
+      `}</style>
+
+      <div className="sp-root">
+
+        {/* ══════════ LEFT ══════════ */}
+        <div className="sp-left">
+          <div className="sp-left-text">
+            <h1 className="sp-title">Welcome to EROS Wellness</h1>
+            <p className="sp-sub">Your AI-driven holistic growth</p>
           </div>
 
-          {/* Right Side - Form */}
-          <div
-            style={{
-              flex: "1 1 50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "0", // Added padding to the container
-            }}
-            className="right-side"
-          >
-            <form
-              onSubmit={handleSubmit}
-              style={{
-                width: "100%",
-                maxWidth: "700px", // Better than percentage for readability
-                backgroundColor: "#fff",
-                padding: "2.5rem", // Increased padding
-                borderRadius: "16px",
-                border: "1px solid #e0e0e0",
-                borderTop: "3px solid rgb(0, 184, 248)",
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06)",
-                display: "flex",
-                flexDirection: "column",
-                gap: "1.5rem", // Increased gap between fields
-                fontFamily: "Inter,sans-serif",
-                boxSizing: "border-box",
-                overflowY: "auto",
-                maxHeight: "95vh",
-                scrollbarWidth: "thin",          // Firefox
-                scrollbarColor: "#fafafaff transparent",
-              }}
-              className="soul-profile-form"
-            >
-              <h1
-                style={{
-                  margin: "0", // Remove all margins for even spacing
-                  fontFamily: "Montserrat,sans-serif",
-                  fontWeight: "700",
-                  fontSize: "1.75rem",
-                  lineHeight: "1.2",
-                  color: "#000",
-                }}
-              >
-                Create Your Soul Profile
-              </h1>
+          {/* Centered + rotating zodiac wheel */}
+          <div className="sp-wheel-wrap">
+            <img src={BackgroundImage} alt="Zodiac Wheel" className="sp-wheel" />
+          </div>
+        </div>
 
-              {/* Name Field */}
-              <TextField
-                label="Name"
-                variant="outlined"
-                value={formData.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                required
-                InputLabelProps={{ style: { color: "#666" } }}
-                inputProps={{ style: { color: "#000" } }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#60a5fa",
-                      boxShadow: "none",
-                    },
-                  },
-                }}
-              />
+        {/* ══════════ RIGHT ══════════ */}
+        <div className="sp-right">
+          <div className="sp-card">
+            <h2 className="sp-card-title">Create Your Soul Profile</h2>
 
-              {/* Gender */}
-              <StyledFormControl variant="outlined">
-                <InputLabel id="gender-label" shrink>Gender</InputLabel>
-                <IconLeftWrapper>
-                  <ArrowDropDownIcon />
-                </IconLeftWrapper>
-                <Select
-                  labelId="gender-label"
-                  value={formData.gender}
-                  onChange={(e: SelectChangeEvent) =>
-                    handleChange("gender", e.target.value)
-                  }
-                  displayEmpty
-                  IconComponent={() => null}
-                  label="Gender"
-                >
-                  <MenuItem value="" disabled style={{ opacity: "1" }}>
-                    Select Gender
-                  </MenuItem>
-                  <MenuItem value="Male">Male</MenuItem>
-                  <MenuItem value="Female">Female</MenuItem>
-                  <MenuItem value="Other">Other</MenuItem>
-                </Select>
-              </StyledFormControl>
+            {errorMsg && <div className="sp-error">{errorMsg}</div>}
 
-              {/* Place of Birth */}
-              <StyledFormControl variant="outlined">
-                <TextField
-                  label="Place of Birth"
-                  value={formData.placeOfBirth}
-                  onChange={(e) => handleChange("placeOfBirth", e.target.value)}
-                  placeholder="Enter Place of Birth"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationOnIcon sx={{ color: "#666" }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  InputLabelProps={{ style: { color: "#666" } }}
-                  inputProps={{ style: { color: "#000" } }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "#d1d5db",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#d1d5db",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#60a5fa",
-                        boxShadow: "none",
-                      },
-                    },
-                  }}
-                />
-              </StyledFormControl>
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="sp-fields">
 
-              {/* Current Location */}
-              <StyledFormControl variant="outlined">
-                <TextField
-                  label="Current Location"
-                  value={formData.currentLocation}
-                  onChange={(e) =>
-                    handleChange("currentLocation", e.target.value)
-                  }
-                  placeholder="Enter Current Location"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LocationOnIcon sx={{ color: "#666" }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  InputLabelProps={{ style: { color: "#666" } }}
-                  inputProps={{ style: { color: "#000" } }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "#d1d5db",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#d1d5db",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#60a5fa",
-                        boxShadow: "none",
-                      },
-                    },
-                  }}
-                />
-              </StyledFormControl>
+                {/* Gender */}
+                <div>
+                  <label className="sp-field-label">Gender</label>
+                  <div className="sp-wrap">
+                    <span className="sp-ico"><IcoChevronDown /></span>
+                    <select className="sp-select" value={formData.gender}
+                      onChange={e => set("gender", e.target.value)}>
+                      <option value="">--</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <span className="sp-arr"><IcoChevronDown /></span>
+                  </div>
+                </div>
 
-              {/* Date of Birth */}
-              <TextField
-                label="Date of Birth"
-                type="date"
-                value={formData.dateOfBirth}
-                onChange={(e) => handleChange("dateOfBirth", e.target.value)}
-                required
-                inputRef={dobInputRef}
-                InputLabelProps={{ shrink: true, style: { color: "#666" } }}
-                inputProps={{
-                  style: { color: "#000" },
-                  sx: {
-                    "&::-webkit-calendar-picker-indicator": {
-                      opacity: 0,
-                      pointerEvents: "none",
-                    },
-                    "&::-webkit-inner-spin-button": {
-                      display: "none",
-                    },
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment
-                      position="start"
-                      onClick={handleIconClick}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      <CalendarTodayIcon sx={{ color: "#666" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    cursor: "pointer",
-                    "& fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#60a5fa",
-                      boxShadow: "none",
-                    },
-                  },
-                  "& .MuiInputBase-input": {
-                    cursor: "pointer",
-                    paddingLeft: "8px",
-                  },
-                }}
-              />
+                {/* Name */}
+                <div>
+                  <label className="sp-field-label">Name</label>
+                  <div className="sp-wrap">
+                    <input className="sp-input no-icon" type="text"
+                      placeholder="Your full name" value={formData.name}
+                      onChange={e => set("name", e.target.value)} required />
+                  </div>
+                </div>
 
-              {/* Time of Birth */}
-              <TextField
-                label="Time of Birth"
-                type="time"
-                value={formData.timeOfBirth}
-                onChange={(e) => handleChange("timeOfBirth", e.target.value)}
-                required
-                inputRef={timeInputRef}
-                InputLabelProps={{ shrink: true, style: { color: "#666" } }}
-                inputProps={{
-                  style: { color: "#000" },
-                  sx: {
-                    "&::-webkit-calendar-picker-indicator": {
-                      opacity: 0,
-                      pointerEvents: "none",
-                    },
-                    "&::-webkit-inner-spin-button": {
-                      display: "none",
-                    },
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment
-                      position="start"
-                      onClick={handleTimeIconClick}
-                      sx={{ cursor: "pointer" }}
-                    >
-                      <AccessTimeIcon sx={{ color: "#666" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    cursor: "pointer",
-                    "& fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#d1d5db",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#60a5fa",
-                      boxShadow: "none",
-                    },
-                  },
-                  "& .MuiInputBase-input": {
-                    cursor: "pointer",
-                    paddingLeft: "8px",
-                  },
-                }}
-              />
+                {/* Place of Birth */}
+                <div>
+                  <label className="sp-field-label">Place of birth</label>
+                  <div className="sp-wrap">
+                    <span className="sp-ico"><IcoLocation /></span>
+                    <input className="sp-input" type="text" placeholder="Place of Birth"
+                      value={formData.placeOfBirth}
+                      onChange={e => set("placeOfBirth", e.target.value)} />
+                  </div>
+                </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                style={{
-                  backgroundColor: "#00B8F8",
-                  color: "#fff",
-                  border: "none",
-                  padding: "1rem 1.5rem",
-                  fontSize: "1.1rem",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  marginTop: "0.5rem", // Reduced from 1rem since gap already provides spacing
-                  fontFamily: "Inter,sans-serif",
-                  borderRadius: "8px",
-                  transition: "background-color 0.2s ease",
-                }}
-                disabled={loading}
-                onMouseEnter={(e) => {
-                  if (!loading) e.currentTarget.style.backgroundColor = "#0099d6";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#00B8F8";
-                }}
-              >
-                {loading ? "Creating..." : "Create your soul profile"}
-              </button>
+                {/* Current Location */}
+                <div>
+                  <label className="sp-field-label">Current location</label>
+                  <div className="sp-wrap">
+                    <span className="sp-ico"><IcoLocation /></span>
+                    <input className="sp-input" type="text" placeholder="Current Location (optional)"
+                      value={formData.currentLocation}
+                      onChange={e => set("currentLocation", e.target.value)} />
+                  </div>
+                </div>
+
+                {/* Date of Birth */}
+                <div>
+                  <label className="sp-field-label">Date of birth</label>
+                  <div className="sp-wrap">
+                    <span className="sp-ico sp-ico-btn"
+                      onClick={() => dobRef.current?.showPicker?.()}>
+                      <IcoCalendar />
+                    </span>
+                    <input ref={dobRef} className="sp-input" type="date"
+                      value={formData.dateOfBirth}
+                      onChange={e => set("dateOfBirth", e.target.value)} required />
+                  </div>
+                </div>
+
+                {/* Time of Birth */}
+                <div>
+                  <label className="sp-field-label">Time of birth</label>
+                  <div className="sp-wrap">
+                    <span className="sp-ico sp-ico-btn"
+                      onClick={() => timeRef.current?.showPicker?.()}>
+                      <IcoClock />
+                    </span>
+                    <input ref={timeRef} className="sp-input" type="time"
+                      value={formData.timeOfBirth}
+                      onChange={e => set("timeOfBirth", e.target.value)} required />
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <button type="submit" className="sp-btn" disabled={loading}>
+                  {loading ? "Creating…" : "Create your soul profile"}
+                </button>
+
+              </div>
             </form>
           </div>
         </div>
+
       </div>
-    </ThemeProvider >
+    </>
   );
 };
 

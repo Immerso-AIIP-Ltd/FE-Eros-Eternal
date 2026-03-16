@@ -2,15 +2,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Row, Col, Button, Form } from "react-bootstrap";
-import starone from "@/assets/images/star1.png";
-import startwo from "@/assets/images/star2.png";
-import starthree from "@/assets/images/star3.png";
-import starfour from "@/assets/images/star4.png";
-import sparkle from "@/assets/images/sparkle.png";
-import Stars from "@/components/ui/stars";
-import VoiceMessage from "@/VoiceMessage";
-import MicVisualizer from "@/MicVisualizer";
-import { baseApiUrl } from "@/config/api";
+import starone from "./star1.png";
+import startwo from "./star2.png";
+import starthree from "./star3.png";
+import starfour from "./star4.png";
+import sparkle from "./sparkle.png";
+import Stars from "./components/stars";
+import VoiceMessage from "./VoiceMessage";
+import MicVisualizer from "./MicVisualizer";
 
 interface Message {
     sender: "user" | "ai";
@@ -61,6 +60,7 @@ const AgeTrack: React.FC = () => {
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
 
+    const baseApiUrl = 'http://192.168.29.154:8002';
 
     const convertToMp3 = async (audioBlob: Blob): Promise<Blob> => {
         return new Promise((resolve, reject) => {

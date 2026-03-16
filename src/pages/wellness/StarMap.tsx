@@ -26,6 +26,7 @@ import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
 import { useNavigate, useLocation } from "react-router-dom";
 import eroslogo from "@/assets/eros-logo.png";
+import { baseApiUrl } from "@/config/api";
 import credits from "@/assets/credits.png";
 
 const sidebarMenuItems = [
@@ -309,7 +310,7 @@ const StarMap: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/select_soul_report/${userId}`,
+        `${baseApiUrl}/api/v1/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -411,7 +412,7 @@ const StarMap: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/answer_question/${userId}`,
+        `${baseApiUrl}/api/v1/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -481,7 +482,7 @@ const StarMap: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/chat/generate_soul_report/${userId}`,
+        `${baseApiUrl}/api/v1/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -791,7 +792,7 @@ const StarMap: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
+        `${baseApiUrl}/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
       );
       return response.ok && response.status === 200;
     } catch (error) {
@@ -824,6 +825,7 @@ const StarMap: React.FC = () => {
     if (isGeneratingReport || isLoading) {
       setTimeout(() => {
         if (chatContainerRef.current) {
+
           chatContainerRef.current.scrollTop =
             chatContainerRef.current.scrollHeight;
         }
@@ -1208,6 +1210,7 @@ const StarMap: React.FC = () => {
                     <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                       <i className="bi bi-stars" style={{ color: "#fff" }}></i>
                     </div>
+
                     <div
                       className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3"
                       style={{ border: "1px solid #E6E6E6" }}

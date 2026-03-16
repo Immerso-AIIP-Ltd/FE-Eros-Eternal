@@ -1,6 +1,7 @@
 // src/pages/TarotCard.tsx
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { baseApiUrl } from "@/config/api";
 
 interface TarotCard {
   card: string;
@@ -17,8 +18,6 @@ interface TarotReading {
   name: string;
   reading: TarotCard[];
 }
-
-const API_URL = "http://164.52.205.108:8500";
 
 const TarotCard: React.FC = () => {
   const [data, setData] = useState<TarotReading | null>(null);
@@ -48,7 +47,7 @@ const TarotCard: React.FC = () => {
 
       try {
         const response = await fetch(
-          `${API_URL}/api/v1/numerology/tarot_reading`,
+          `${baseApiUrl}/api/v1/numerology/tarot_reading`,
           {
             method: "POST",
             headers: {

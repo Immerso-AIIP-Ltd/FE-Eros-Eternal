@@ -5,6 +5,8 @@ import React from 'react';
 import Header from "@/components/layout/Header";
 import LuckSection from "@/components/home/LuckSection";
 import ExploreSection from "@/components/home/ExploreSection";
+import ErosWellnessReports from "@/components/home/ErosWellnessReports";
+import VitaScanBanner from '@/components/home/VitaScanBanner';
 
 const ResultPage: React.FC = () => {
   return (
@@ -37,6 +39,8 @@ const ResultPage: React.FC = () => {
           }}
         >
           <Header />
+          <VitaScanBanner onGetStarted={() => {}} />
+          <ErosWellnessReports />
           <LuckSection />
           <ExploreSection />
         </div>

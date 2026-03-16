@@ -37,8 +37,7 @@ const formatKey = (key: string): string => {
     .replace("Hz", "Hz");
 };
 
-// const API_URL = import.meta.env.VITE_API_BASE_URL;
-const API_URL = "http://192.168.29.154:8002";
+import { baseApiUrl } from "@/config/api";
 
 const DailyReportsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -58,7 +57,7 @@ const DailyReportsPage: React.FC = () => {
 
       try {
         const response = await fetch(
-          `${API_URL}/api/v1/reports/user_reports/${userId}`,
+          `${baseApiUrl}/api/v1/reports/user_reports/${userId}`,
           {
             method: "GET",
             headers: {
