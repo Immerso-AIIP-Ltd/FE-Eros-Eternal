@@ -83,6 +83,7 @@ const StarMap: React.FC = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -95,7 +96,7 @@ const StarMap: React.FC = () => {
 
   // New states for API integration
   const [currentReportType, setCurrentReportType] = useState<string>(
-    "vibrational_frequency"
+    "vibrational_frequency",
   );
   const [assessmentStatus, setAssessmentStatus] =
     useState<string>("not_started");
@@ -254,32 +255,35 @@ const StarMap: React.FC = () => {
       y: Math.random() * 100,
       opacity: 0.3 + Math.random() * 0.7,
       size: Math.random() * 2 + 1,
-    }))
+    })),
   );
 
   useEffect(() => {
     const initializeAssessment = async () => {
       const pathname = location.pathname;
-      let reportType = 'vibrational_frequency';
+      let reportType = "vibrational_frequency";
 
-      if (pathname.includes('aura-profile')) reportType = 'aura_profile';
-      else if (pathname.includes('star-map')) reportType = 'star_map';
-      else if (pathname.includes('kosha-map')) reportType = 'kosha_map';
-      else if (pathname.includes('flame-score')) reportType = 'flame_score';
-      else if (pathname.includes('longevity-blueprint')) reportType = 'longevity_blueprint';
+      if (pathname.includes("aura-profile")) reportType = "aura_profile";
+      else if (pathname.includes("star-map")) reportType = "star_map";
+      else if (pathname.includes("kosha-map")) reportType = "kosha_map";
+      else if (pathname.includes("flame-score")) reportType = "flame_score";
+      else if (pathname.includes("longevity-blueprint"))
+        reportType = "longevity_blueprint";
 
       setCurrentReportType(reportType);
-      setActiveMenuItem(reportType.replace('_', '-'));
+      setActiveMenuItem(reportType.replace("_", "-"));
 
       const reportExists = await checkReportExists(reportType);
 
       if (reportExists) {
-        navigate('/view-report', {
+        navigate("/view-report", {
           state: {
             reportType: reportType,
-            userId: localStorage.getItem('user_id'),
-            title: sidebarMenuItems.find(item => item.reportType === reportType)?.label
-          }
+            userId: localStorage.getItem("user_id"),
+            title: sidebarMenuItems.find(
+              (item) => item.reportType === reportType,
+            )?.label,
+          },
         });
       } else {
         await startSoulReportAssessment(reportType);
@@ -312,7 +316,7 @@ const StarMap: React.FC = () => {
           body: new URLSearchParams({
             report_type: reportType,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -411,7 +415,7 @@ const StarMap: React.FC = () => {
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
 
       const data = await response.json();
@@ -484,7 +488,7 @@ const StarMap: React.FC = () => {
           body: new URLSearchParams({
             report_type: currentReportType,
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -724,7 +728,7 @@ const StarMap: React.FC = () => {
         const recordedFile = new File(
           [audioBlob],
           `recording_${Date.now()}.webm`,
-          { type: "audio/webm" }
+          { type: "audio/webm" },
         );
         setAttachedVoices((prev) => [
           ...prev,
@@ -782,16 +786,16 @@ const StarMap: React.FC = () => {
   };
 
   const checkReportExists = async (reportType: string) => {
-    const userId = localStorage.getItem('user_id');
+    const userId = localStorage.getItem("user_id");
     if (!userId) return false;
 
     try {
       const response = await fetch(
-        `http://164.52.205.108:8500/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`
+        `http://164.52.205.108:8500/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
       );
       return response.ok && response.status === 200;
     } catch (error) {
-      console.error('Error checking report:', error);
+      console.error("Error checking report:", error);
       return false;
     }
   };
@@ -818,20 +822,28 @@ const StarMap: React.FC = () => {
 
   useEffect(() => {
     if (isGeneratingReport || isLoading) {
-        setTimeout(() => {
-            if (chatContainerRef.current) {
-                chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-            }
-        }, 100);
+      setTimeout(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop =
+            chatContainerRef.current.scrollHeight;
+        }
+      }, 100);
     }
-}, [isGeneratingReport, isLoading]);
+  }, [isGeneratingReport, isLoading]);
+
+  useEffect(() => {
+    if (!isLoading && !isGeneratingReport && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading, isGeneratingReport, messages]);
 
   return (
     <div
       className="d-flex w-100 h-100 min-vh-100 min-vw-100 text-gray-800 overflow-hidden"
       style={{
         backgroundColor: "red",
-        backgroundImage: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 20%, #FFFFFF 40%)"
+        backgroundImage:
+          "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 20%, #FFFFFF 40%)",
       }}
     >
       <Stars />
@@ -848,7 +860,7 @@ const StarMap: React.FC = () => {
               left: `${star.x}%`,
               animationDelay: `${Math.random() * 3}s`,
               animationDuration: `${2 + Math.random() * 2}s`,
-              background: '#60A5FA',
+              background: "#60A5FA",
             }}
           />
         ))}
@@ -858,8 +870,13 @@ const StarMap: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">Take Photo</h3>
-              <button onClick={closeCamera} className="text-gray-600 hover:text-gray-800">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Take Photo
+              </h3>
+              <button
+                onClick={closeCamera}
+                className="text-gray-600 hover:text-gray-800"
+              >
                 <X size={24} />
               </button>
             </div>
@@ -987,7 +1004,10 @@ const StarMap: React.FC = () => {
       <div className="flex-1 flex flex-col relative z-10 h-screen">
         <div className="flex items-center justify-between px-3 py-2 sm:p-4 bg-opacity-80 backdrop-blur-sm">
           <div className="flex items-center gap-3">
-            <button className="md:hidden text-gray-600 hover:text-gray-800" onClick={() => setSidebarOpen(true)}>
+            <button
+              className="md:hidden text-gray-600 hover:text-gray-800"
+              onClick={() => setSidebarOpen(true)}
+            >
               <Menu size={20} />
             </button>
             {/* <h3 className="text-xl font-semibold text-gray-800">
@@ -1008,7 +1028,12 @@ const StarMap: React.FC = () => {
               <img
                 src={credits}
                 alt="Credits"
-                style={{ height: "clamp(22px, 3.5vw, 34px)", width: "auto", marginLeft: "-6px", objectFit: "contain" }}
+                style={{
+                  height: "clamp(22px, 3.5vw, 34px)",
+                  width: "auto",
+                  marginLeft: "-6px",
+                  objectFit: "contain",
+                }}
               />
             </div>
           </div>
@@ -1074,7 +1099,7 @@ const StarMap: React.FC = () => {
                 <div className="text-center">
                   <div className="mb-4">
                     <div className="w-16 h-16 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <i className="bi bi-stars" style={{ "color": "#fff" }}></i>
+                      <i className="bi bi-stars" style={{ color: "#fff" }}></i>
                     </div>
                   </div>
                   {/* <div className="text-white text-lg leading-relaxed">
@@ -1092,8 +1117,12 @@ const StarMap: React.FC = () => {
                     </div>
                   </div> */}
                   <div className="leading-relaxed">
-                    <div className="text-xl font-semibold text-gray-800">Hi, I'm EROS Wellness AI</div>
-                    <div className="text-sm text-gray-600 mt-1">How can I help you today?</div>
+                    <div className="text-xl font-semibold text-gray-800">
+                      Hi, I'm EROS Wellness AI
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      How can I help you today?
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1108,8 +1137,13 @@ const StarMap: React.FC = () => {
                             <User size={18} />
                           </span>
                         </div>
-                        <div className="text-dark rounded-2xl rounded-tr-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-md text-sm sm:text-md font-semibold"
-                          style={{ backgroundColor: "#188BEF1F", border: "1px solid #188BEF1F" }}>
+                        <div
+                          className="text-dark rounded-2xl rounded-tr-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-md text-sm sm:text-md font-semibold"
+                          style={{
+                            backgroundColor: "#188BEF1F",
+                            border: "1px solid #188BEF1F",
+                          }}
+                        >
                           {message.imageList &&
                             message.imageList.length > 0 && (
                               <div className="mb-2">
@@ -1145,11 +1179,15 @@ const StarMap: React.FC = () => {
                     ) : (
                       <div className="flex flex-col items-start gap-2 mb-4">
                         <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                          <i className="bi bi-stars" style={{ color: "#fff" }}></i>
+                          <i
+                            className="bi bi-stars"
+                            style={{ color: "#fff" }}
+                          ></i>
                         </div>
-                        <div className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-2xl text-sm sm:text-md"
-                          style={{ border: "1px solid rgba(0, 0, 0, 0.1)" }}>
-
+                        <div
+                          className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-2xl text-sm sm:text-md"
+                          style={{ border: "1px solid rgba(0, 0, 0, 0.1)" }}
+                        >
                           <div className="text-md leading-relaxed whitespace-pre-wrap break-words">
                             {message.isThinking ? (
                               <div className="flex items-center gap-2">
@@ -1170,7 +1208,10 @@ const StarMap: React.FC = () => {
                     <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                       <i className="bi bi-stars" style={{ color: "#fff" }}></i>
                     </div>
-                    <div className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3" style={{"border" : "1px solid #E6E6E6"}}>
+                    <div
+                      className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3"
+                      style={{ border: "1px solid #E6E6E6" }}
+                    >
                       <div className="flex items-center gap-2">
                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-cyan-500 border-t-transparent"></div>
                         <span className="text-sm">
@@ -1209,8 +1250,15 @@ const StarMap: React.FC = () => {
           {/* Fixed Input Area at Bottom */}
           {assessmentStatus !== "report_generated" && (
             <div className="sticky bottom-0 bg-transparent z-20 px-6 pb-4 pt-2">
-              <div className="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
-                style={{ maxWidth: "min(65%, 92vw)", margin: "0 auto", width: "100%", border: "1px solid rgba(0, 0, 0, 0.1)" }}>
+              <div
+                className="bg-white bg-opacity-90 backdrop-blur-sm rounded-2xl p-4 shadow-lg"
+                style={{
+                  maxWidth: "min(65%, 92vw)",
+                  margin: "0 auto",
+                  width: "100%",
+                  border: "1px solid rgba(0, 0, 0, 0.1)",
+                }}
+              >
                 {(attachedImages.length > 0 || attachedVoices.length > 0) && (
                   <div className="flex flex-col gap-3 mb-3">
                     {attachedImages.length > 0 && (
@@ -1254,6 +1302,7 @@ const StarMap: React.FC = () => {
                     <>
                       <div className="flex-1">
                         <input
+                          ref={inputRef}
                           type="text"
                           placeholder="Message to Wellness AI"
                           value={inputValue}
@@ -1312,15 +1361,27 @@ const StarMap: React.FC = () => {
                             }
                             className="d-flex align-items-center justify-content-center border-0 rounded-pill px-3 py-2"
                             style={{
-                              backgroundColor: isLoading || isGeneratingReport || (!inputValue.trim() && attachedImages.length === 0 && attachedVoices.length === 0)
-                                ? "#E5E7EB" : "#06B6D4",
+                              backgroundColor:
+                                isLoading ||
+                                isGeneratingReport ||
+                                (!inputValue.trim() &&
+                                  attachedImages.length === 0 &&
+                                  attachedVoices.length === 0)
+                                  ? "#E5E7EB"
+                                  : "#06B6D4",
                               color: "white",
                               fontSize: "14px",
                               fontWeight: "500",
                               gap: "6px",
                               minWidth: "70px",
-                              cursor: isLoading || isGeneratingReport || (!inputValue.trim() && attachedImages.length === 0 && attachedVoices.length === 0)
-                                ? "not-allowed" : "pointer"
+                              cursor:
+                                isLoading ||
+                                isGeneratingReport ||
+                                (!inputValue.trim() &&
+                                  attachedImages.length === 0 &&
+                                  attachedVoices.length === 0)
+                                  ? "not-allowed"
+                                  : "pointer",
                             }}
                           >
                             Send
@@ -1358,8 +1419,10 @@ const StarMap: React.FC = () => {
 
           {/* Footer - Fixed at very bottom */}
           <div className="sticky bottom-0 bg-transparent z-10 px-6 py-2">
-            <div className="text-center text-xs text-gray-600" style={{ maxWidth: "65%", margin: "0 auto", width: "100%" }}>
-
+            <div
+              className="text-center text-xs text-gray-600"
+              style={{ maxWidth: "65%", margin: "0 auto", width: "100%" }}
+            >
               <div className="flex items-center justify-center text-xs">
                 {/* <div>© 2025 EROS Universe. All Rights Reserved.</div> */}
                 {/* <div className="flex items-center gap-6">
