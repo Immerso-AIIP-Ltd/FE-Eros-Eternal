@@ -88,7 +88,7 @@ const SoulProfilePage: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${baseApiUrl}/api/v1/users/profile/`, { method: "POST", body: fd });
+      const res = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/users/profile/`, { method: "POST", body: fd });
       const text = await res.text();
       let result: any;
       try { result = JSON.parse(text); } catch { throw new Error(text || "Invalid response"); }

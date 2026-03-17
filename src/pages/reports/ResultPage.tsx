@@ -7,18 +7,32 @@ import LuckSection from "@/components/home/LuckSection";
 import ExploreSection from "@/components/home/ExploreSection";
 import ErosWellnessReports from "@/components/home/ErosWellnessReports";
 import VitaScanBanner from '@/components/home/VitaScanBanner';
+import FooterPage from "@/components/home/FooterPage"
 
 const ResultPage: React.FC = () => {
   return (
     <div
-      className="d-flex flex-column vh-100 vw-100 mainParent"
       style={{
         backgroundColor: '#f8f8fa',
         color: '#1a1a2e',
+        width: '100%',
+        minHeight: '100vh',
+        // overflow:'hidden,
         overflowX: 'hidden',
-        overflowY: 'auto',
+        // overflowY:'scroll'
       }}
     >
+      <style>{`
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        ::-webkit-scrollbar {
+          display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        * {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+      `}</style>
       {/* Main Content Area */}
       <main
         className="flex-grow-1 d-flex flex-column"
@@ -26,6 +40,7 @@ const ResultPage: React.FC = () => {
           minWidth: 0,
           position: 'relative',
           zIndex: 1,
+          
         }}
       >
         {/* Content Container */}
@@ -38,11 +53,24 @@ const ResultPage: React.FC = () => {
             zIndex: 1,
           }}
         >
-          <Header />
-          <VitaScanBanner onGetStarted={() => {}} />
-          <ErosWellnessReports />
-          <LuckSection />
-          <ExploreSection />
+          <div id="header">
+            <Header />
+          </div>
+          <div id="vita-scan">
+            <VitaScanBanner onGetStarted={() => {}} />
+          </div>
+          <div id="reports">
+            <ErosWellnessReports />
+          </div>
+          <div id="lucky">
+            <LuckSection />
+          </div>
+          <div id="explore">
+            <ExploreSection />
+          </div>
+          <div id="footer">
+            <FooterPage />
+          </div>
         </div>
       </main>
     </div>

@@ -315,7 +315,7 @@ const LongevityTool: React.FC = () => {
       }
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/select_soul_report/${userId}`,
+        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -418,7 +418,7 @@ const LongevityTool: React.FC = () => {
       }
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/answer_question/${userId}`,
+        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -486,7 +486,7 @@ const LongevityTool: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/generate_soul_report/${userId}`,
+        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -873,7 +873,7 @@ const LongevityTool: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${baseApiUrl}/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
+        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
       );
       return response.ok && response.status === 200;
     } catch (error) {
