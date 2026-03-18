@@ -14,22 +14,63 @@ interface FormData {
 
 /* ─── Icons ─── */
 const IcoLocation = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
   </svg>
 );
 const IcoCalendar = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
   </svg>
 );
 const IcoClock = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
   </svg>
 );
 const IcoChevronDown = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <polyline points="6 9 12 15 18 9" />
   </svg>
 );
@@ -55,32 +96,36 @@ const SoulProfilePage: React.FC = () => {
   // Date picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [pickerMonth, setPickerMonth] = useState<number>(new Date().getMonth());
-  const [pickerYear, setPickerYear] = useState<number>(new Date().getFullYear());
+  const [pickerYear, setPickerYear] = useState<number>(
+    new Date().getFullYear(),
+  );
   const [pickerSelected, setPickerSelected] = useState<Date | null>(null);
 
   // Time picker state (12‑hour UI, stored as 24‑hour HH:MM)
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [tpHour, setTpHour] = useState(12);      // 1‑12
-  const [tpMinute, setTpMinute] = useState(0);   // 0‑59
+  const [tpHour, setTpHour] = useState(12); // 1‑12
+  const [tpMinute, setTpMinute] = useState(0); // 0‑59
   const [tpPeriod, setTpPeriod] = useState<"AM" | "PM">("AM");
-  const [tpActive, setTpActive] = useState<"hour" | "minute" | "period">("hour");
+  const [tpActive, setTpActive] = useState<"hour" | "minute" | "period">(
+    "hour",
+  );
 
   const stepHour = (delta: number) => {
-    setTpHour(prev => {
-      const base = ((prev - 1 + delta) % 12 + 12) % 12; // 0-11
+    setTpHour((prev) => {
+      const base = (((prev - 1 + delta) % 12) + 12) % 12; // 0-11
       return base + 1; // 1-12
     });
   };
 
   const stepMinute = (delta: number) => {
-    setTpMinute(prev => {
-      const v = ((prev + delta) % 60 + 60) % 60;
+    setTpMinute((prev) => {
+      const v = (((prev + delta) % 60) + 60) % 60;
       return v;
     });
   };
 
   const stepPeriod = () => {
-    setTpPeriod(prev => (prev === "AM" ? "PM" : "AM"));
+    setTpPeriod((prev) => (prev === "AM" ? "PM" : "AM"));
   };
 
   const formatTimeDisplay = (value: string) => {
@@ -138,7 +183,14 @@ const SoulProfilePage: React.FC = () => {
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [showTimePicker, tpHour, tpMinute, tpPeriod, showDatePicker, pickerSelected]);
+  }, [
+    showTimePicker,
+    tpHour,
+    tpMinute,
+    tpPeriod,
+    showDatePicker,
+    pickerSelected,
+  ]);
 
   // When timepicker opens, always start with hour active and focused
   useEffect(() => {
@@ -155,19 +207,24 @@ const SoulProfilePage: React.FC = () => {
     if (!saved) return;
     try {
       const p = JSON.parse(saved);
-      const isDate = (v: string) => !!v && /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(+new Date(v));
+      const isDate = (v: string) =>
+        !!v && /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(+new Date(v));
       const isTime = (v: string) => !!v && /^([01]?\d|2[0-3]):[0-5]\d/.test(v);
       setFormData({
-        name: p.name || "", gender: p.gender || "",
-        placeOfBirth: p.placeOfBirth || "", currentLocation: p.currentLocation || "",
+        name: p.name || "",
+        gender: p.gender || "",
+        placeOfBirth: p.placeOfBirth || "",
+        currentLocation: p.currentLocation || "",
         dateOfBirth: isDate(p.dateOfBirth) ? p.dateOfBirth : "",
         timeOfBirth: isTime(p.timeOfBirth) ? p.timeOfBirth.slice(0, 5) : "",
       });
-    } catch { localStorage.removeItem("soulProfile"); }
+    } catch {
+      localStorage.removeItem("soulProfile");
+    }
   }, []);
 
   const set = (field: keyof FormData, value: string) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const next = { ...prev, [field]: value };
       localStorage.setItem("soulProfile", JSON.stringify(next));
       return next;
@@ -178,8 +235,10 @@ const SoulProfilePage: React.FC = () => {
     e.preventDefault();
     setErrorMsg(null);
     if (!formData.name.trim()) return setErrorMsg("Please enter your name.");
-    if (!formData.dateOfBirth) return setErrorMsg("Please select date of birth.");
-    if (!formData.timeOfBirth) return setErrorMsg("Please select time of birth.");
+    if (!formData.dateOfBirth)
+      return setErrorMsg("Please select date of birth.");
+    if (!formData.timeOfBirth)
+      return setErrorMsg("Please select time of birth.");
 
     const [y, m, d] = formData.dateOfBirth.split("-");
     const fd = new FormData();
@@ -192,20 +251,37 @@ const SoulProfilePage: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${baseApiUrl}/aitools/wellness/v2/users/profile`, { method: "POST", body: fd });
+      const res = await fetch(
+        `${baseApiUrl}/aitools/wellness/v2/users/profile`,
+        { method: "POST", body: fd },
+      );
       const text = await res.text();
       let result: any;
-      try { result = JSON.parse(text); } catch { throw new Error(text || "Invalid response"); }
-      if (!res.ok) throw new Error(result?.message || result?.error || "Server error");
+      try {
+        result = JSON.parse(text);
+      } catch {
+        throw new Error(text || "Invalid response");
+      }
+      if (!res.ok)
+        throw new Error(result?.message || result?.error || "Server error");
       if (result.success) {
-        ["user_id", "username", "date_of_birth", "gender", "place_of_birth", "current_location", "time_of_birth"]
-          .forEach(k => localStorage.setItem(k, result.data[k] ?? ""));
+        [
+          "user_id",
+          "username",
+          "date_of_birth",
+          "gender",
+          "place_of_birth",
+          "current_location",
+          "time_of_birth",
+        ].forEach((k) => localStorage.setItem(k, result.data[k] ?? ""));
         localStorage.removeItem("soulProfile");
         navigate("/eros-home");
       } else throw new Error(result.message || "Profile creation failed");
     } catch (err: any) {
       setErrorMsg(err.message || "Something went wrong.");
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -247,13 +323,7 @@ const SoulProfilePage: React.FC = () => {
           min-width: 0;
           border-radius: 20px;
           padding: 24px 0;        /* top & bottom breathing room */
-          background: linear-gradient(180deg,
-  rgba(70, 95, 241, 0.37) 0%,      /* Transparent start */
-  #8b9bf8 18%,
-  #6e7ef4 38%,
-  #5264ef 58%,
-  #6070ec 78%,
-  #9aaaf6 100%                      /* Solid blue end */
+          background: linear-gradient(180deg, #00a4de 0%, #6ec0de 50%, #a4ccdb 100%);           /* Solid blue end */
 );
 
           position: relative;
@@ -272,12 +342,22 @@ const SoulProfilePage: React.FC = () => {
           inset: 0;
           border-radius: 20px;
           background:
-            radial-gradient(ellipse 75% 40% at 50% 0%, rgba(255,255,255,0.18) 0%, transparent 60%),
-            radial-gradient(ellipse 90% 40% at 50% 110%, rgba(30,50,190,0.25) 0%, transparent 65%);
+          radial-gradient(ellipse 75% 40% at 50% 0%, rgba(255,255,255,0.18) 0%, transparent 60%);
           pointer-events: none;
           z-index: 0;
         }
-
+        .sp-left::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 30%;
+          background: linear-gradient(to top, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+          pointer-events: none;
+          z-index: 2;
+          border-radius: 0 0 20px 20px;
+        }
         .sp-left-text {
           position: relative;
           z-index: 2;
@@ -325,7 +405,7 @@ const SoulProfilePage: React.FC = () => {
           width: 100%;
           height: 100%;
           object-fit: contain;
-          filter: brightness(0) invert(1) opacity(0.78);
+          filter: brightness(0) invert(1) opacity(1);
           animation: spinWheel 60s linear infinite;
           transform-origin: center center;
         }
@@ -856,7 +936,6 @@ const SoulProfilePage: React.FC = () => {
       `}</style>
 
       <div className="sp-root">
-
         {/* ══════════ LEFT ══════════ */}
         <div className="sp-left">
           <div className="sp-left-text">
@@ -866,7 +945,11 @@ const SoulProfilePage: React.FC = () => {
 
           {/* Centered + rotating zodiac wheel */}
           <div className="sp-wheel-wrap">
-            <img src={BackgroundImage} alt="Zodiac Wheel" className="sp-wheel" />
+            <img
+              src={BackgroundImage}
+              alt="Zodiac Wheel"
+              className="sp-wheel"
+            />
           </div>
         </div>
 
@@ -879,20 +962,26 @@ const SoulProfilePage: React.FC = () => {
 
             <form onSubmit={handleSubmit} noValidate>
               <div className="sp-fields">
-
                 {/* Gender */}
                 <div>
                   <label className="sp-field-label">Gender</label>
                   <div className="sp-wrap">
-                    <span className="sp-ico"><IcoChevronDown /></span>
-                    <select className="sp-select" value={formData.gender}
-                      onChange={e => set("gender", e.target.value)}>
+                    <span className="sp-ico">
+                      <IcoChevronDown />
+                    </span>
+                    <select
+                      className="sp-select"
+                      value={formData.gender}
+                      onChange={(e) => set("gender", e.target.value)}
+                    >
                       <option value="">--</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                       <option value="Other">Other</option>
                     </select>
-                    <span className="sp-arr"><IcoChevronDown /></span>
+                    <span className="sp-arr">
+                      <IcoChevronDown />
+                    </span>
                   </div>
                 </div>
 
@@ -900,9 +989,14 @@ const SoulProfilePage: React.FC = () => {
                 <div>
                   <label className="sp-field-label">Name</label>
                   <div className="sp-wrap">
-                    <input className="sp-input no-icon" type="text"
-                      placeholder="Your full name" value={formData.name}
-                      onChange={e => set("name", e.target.value)} required />
+                    <input
+                      className="sp-input no-icon"
+                      type="text"
+                      placeholder="Your full name"
+                      value={formData.name}
+                      onChange={(e) => set("name", e.target.value)}
+                      required
+                    />
                   </div>
                 </div>
 
@@ -910,10 +1004,16 @@ const SoulProfilePage: React.FC = () => {
                 <div>
                   <label className="sp-field-label">Place of birth</label>
                   <div className="sp-wrap">
-                    <span className="sp-ico"><IcoLocation /></span>
-                    <input className="sp-input" type="text" placeholder="Place of Birth"
+                    <span className="sp-ico">
+                      <IcoLocation />
+                    </span>
+                    <input
+                      className="sp-input"
+                      type="text"
+                      placeholder="Place of Birth"
                       value={formData.placeOfBirth}
-                      onChange={e => set("placeOfBirth", e.target.value)} />
+                      onChange={(e) => set("placeOfBirth", e.target.value)}
+                    />
                   </div>
                 </div>
 
@@ -921,10 +1021,16 @@ const SoulProfilePage: React.FC = () => {
                 <div>
                   <label className="sp-field-label">Current location</label>
                   <div className="sp-wrap">
-                    <span className="sp-ico"><IcoLocation /></span>
-                    <input className="sp-input" type="text" placeholder="Current Location (optional)"
+                    <span className="sp-ico">
+                      <IcoLocation />
+                    </span>
+                    <input
+                      className="sp-input"
+                      type="text"
+                      placeholder="Current Location (optional)"
                       value={formData.currentLocation}
-                      onChange={e => set("currentLocation", e.target.value)} />
+                      onChange={(e) => set("currentLocation", e.target.value)}
+                    />
                   </div>
                 </div>
 
@@ -932,7 +1038,8 @@ const SoulProfilePage: React.FC = () => {
                 <div>
                   <label className="sp-field-label">Date of birth</label>
                   <div className="sp-wrap">
-                    <span className="sp-ico sp-ico-btn"
+                    <span
+                      className="sp-ico sp-ico-btn"
                       onClick={() => {
                         const existing = formData.dateOfBirth;
                         if (existing) {
@@ -948,7 +1055,8 @@ const SoulProfilePage: React.FC = () => {
                           setPickerYear(today.getFullYear());
                         }
                         setShowDatePicker(true);
-                      }}>
+                      }}
+                    >
                       <IcoCalendar />
                     </span>
                     <input
@@ -957,9 +1065,11 @@ const SoulProfilePage: React.FC = () => {
                       type="text"
                       readOnly
                       placeholder="dd-mm-yyyy"
-                      value={formData.dateOfBirth
-                        ? formData.dateOfBirth.split("-").reverse().join("-")
-                        : ""}
+                      value={
+                        formData.dateOfBirth
+                          ? formData.dateOfBirth.split("-").reverse().join("-")
+                          : ""
+                      }
                       onClick={() => {
                         const existing = formData.dateOfBirth;
                         if (existing) {
@@ -985,7 +1095,8 @@ const SoulProfilePage: React.FC = () => {
                 <div>
                   <label className="sp-field-label">Time of birth</label>
                   <div className="sp-wrap">
-                    <span className="sp-ico sp-ico-btn"
+                    <span
+                      className="sp-ico sp-ico-btn"
                       onClick={() => {
                         const t = formData.timeOfBirth || "12:00";
                         const [hhStr, mmStr] = t.split(":");
@@ -999,7 +1110,8 @@ const SoulProfilePage: React.FC = () => {
                         setTpPeriod(period as "AM" | "PM");
                         setTpActive("hour");
                         setShowTimePicker(true);
-                      }}>
+                      }}
+                    >
                       <IcoClock />
                     </span>
                     <input
@@ -1032,12 +1144,10 @@ const SoulProfilePage: React.FC = () => {
                 <button type="submit" className="sp-btn" disabled={loading}>
                   {loading ? "Creating…" : "Create your soul profile"}
                 </button>
-
               </div>
             </form>
           </div>
         </div>
-
       </div>
 
       {showDatePicker && (
@@ -1184,12 +1294,12 @@ const SoulProfilePage: React.FC = () => {
                   const firstDay = new Date(
                     pickerYear,
                     pickerMonth,
-                    1
+                    1,
                   ).getDay();
                   const daysInMonth = new Date(
                     pickerYear,
                     pickerMonth + 1,
-                    0
+                    0,
                   ).getDate();
                   const cells = [];
                   for (let i = 0; i < firstDay; i++) {
@@ -1198,15 +1308,14 @@ const SoulProfilePage: React.FC = () => {
                         key={`empty-${i}`}
                         className="sp-datepicker-day sp-outside"
                         disabled
-                      />
+                      />,
                     );
                   }
                   for (let day = 1; day <= daysInMonth; day++) {
                     const current = new Date(pickerYear, pickerMonth, day);
                     const isSelected =
                       pickerSelected &&
-                      current.toDateString() ===
-                        pickerSelected.toDateString();
+                      current.toDateString() === pickerSelected.toDateString();
                     cells.push(
                       <button
                         key={day}
@@ -1220,7 +1329,7 @@ const SoulProfilePage: React.FC = () => {
                         }}
                       >
                         {day}
-                      </button>
+                      </button>,
                     );
                   }
                   return cells;
@@ -1248,7 +1357,7 @@ const SoulProfilePage: React.FC = () => {
                   const y = pickerSelected.getFullYear();
                   const m = String(pickerSelected.getMonth() + 1).padStart(
                     2,
-                    "0"
+                    "0",
                   );
                   const d = String(pickerSelected.getDate()).padStart(2, "0");
                   set("dateOfBirth", `${y}-${m}-${d}`);
@@ -1305,9 +1414,7 @@ const SoulProfilePage: React.FC = () => {
                     <div className="sp-timepicker-column">
                       <div
                         className="sp-timepicker-faded sp-timepicker-tap"
-                        onClick={() =>
-                          setTpHour(((tpHour + 10) % 12) + 1)
-                        }
+                        onClick={() => setTpHour(((tpHour + 10) % 12) + 1)}
                       >
                         {pad(prevHour)}
                       </div>
@@ -1458,8 +1565,7 @@ const SoulProfilePage: React.FC = () => {
                 type="button"
                 className="sp-datepicker-btn sp-ok sp-enabled"
                 onClick={() => {
-                  const hour24 =
-                    (tpHour % 12) + (tpPeriod === "PM" ? 12 : 0);
+                  const hour24 = (tpHour % 12) + (tpPeriod === "PM" ? 12 : 0);
                   const pad = (n: number) => n.toString().padStart(2, "0");
                   const val = `${pad(hour24)}:${pad(tpMinute)}`;
                   set("timeOfBirth", val);
