@@ -77,7 +77,7 @@ const KoshaPieChart: React.FC = () => {
 
       try {
         const response = await fetch(
-          `http://192.168.1.171:6001/aitools/wellness/v2/reports/individual_report/?report_type=kosha_map&user_id=${userId}`,
+          `${baseApiUrl}/aitools/wellness/v2/reports/individual_report/?report_type=kosha_map&user_id=${userId}`,
           {
             method: "GET",
             headers: {

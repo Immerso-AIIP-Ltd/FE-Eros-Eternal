@@ -319,7 +319,7 @@ const AuraProfile: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://192.168.1.171:6001/aitools/wellness/v2/chat/select_soul_report/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -421,7 +421,7 @@ const AuraProfile: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://192.168.1.171:6001/aitools/wellness/v2/chat/answer_question/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -491,7 +491,7 @@ const AuraProfile: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://192.168.1.171:6001/aitools/wellness/v2/chat/generate_soul_report/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -799,7 +799,7 @@ const AuraProfile: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://192.168.1.171:6001/aitools/wellness/v2/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
+        `${baseApiUrl}/aitools/wellness/v2/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
       );
       return response.ok && response.status === 200;
     } catch (error) {

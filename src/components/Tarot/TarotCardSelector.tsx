@@ -28,7 +28,7 @@ const TarotCardSelector = ({ cardData, onStepChange, onShuffle }) => {
   const [readingPhase, setReadingPhase] = useState("selecting");
   const [tornadoPhase, setTornadoPhase] = useState(false);
   const [showDescriptions, setShowDescriptions] = useState(false);
-  // const API_URL = "http://192.168.1.171:6001/aitools/wellness/v2/aitools/wellness/v2";
+  // const API_URL = "${baseApiUrl}/aitools/wellness/v2/aitools/wellness/v2";
   // Read from localStorage
   // const userId = localStorage.getItem("user_id");
   // const username = localStorage.getItem("username");
