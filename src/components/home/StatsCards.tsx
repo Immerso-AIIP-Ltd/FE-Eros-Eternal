@@ -28,7 +28,7 @@ const StatsCards = () => {
   const [loading, setLoading] = useState(true);
 
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
-  const reportsApiUrl = `${baseApiUrl}/api/v1/reports/individual_report/`;
+  const reportsApiUrl = `${baseApiUrl}/aitools/wellness/v2/reports/individual_report/`;
 
   const reportCards = [
     {

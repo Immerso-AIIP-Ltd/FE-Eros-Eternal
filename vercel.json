@@ -2,7 +2,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "http://164.52.205.108:8500/$1"
+      "dest": "${baseApiUrl}/aitools/wellness/v2/aitools/wellness/v2/$1"
     }
   ]
 }

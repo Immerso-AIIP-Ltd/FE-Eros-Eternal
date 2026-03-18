@@ -251,11 +251,11 @@ const VibrationTool: React.FC = () => {
   };
 
   const [stars] = useState(() =>
-    Array.from({ length: 50 }, () => ({
+    Array.from({ length: 80 }, () => ({
       x: Math.random() * 100,
       y: Math.random() * 100,
-      opacity: 0.3 + Math.random() * 0.7,
-      size: Math.random() * 2 + 1,
+      opacity: 0.15 + Math.random() * 0.25,
+      size: Math.random() * 1.5 + 0.5,
     })),
   );
 
@@ -319,7 +319,7 @@ const VibrationTool: React.FC = () => {
       }
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/select_soul_report/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -421,7 +421,7 @@ const VibrationTool: React.FC = () => {
       }
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/answer_question/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -486,7 +486,7 @@ const VibrationTool: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/generate_soul_report/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -896,7 +896,7 @@ const VibrationTool: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${baseApiUrl}/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
+        `${baseApiUrl}/aitools/wellness/v2/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
       );
 
       return response.ok && response.status === 200;
@@ -951,7 +951,7 @@ const VibrationTool: React.FC = () => {
           "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 20%, #FFFFFF 40%)",
       }}
     >
-      <Stars />
+      {/* <Stars /> */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {stars.map((star, i) => (
           <div
@@ -1150,7 +1150,13 @@ const VibrationTool: React.FC = () => {
       </div> */}
 
       <div className="flex-1 flex flex-col relative z-10 h-screen">
-        <div className="flex items-center justify-between px-3 py-2 sm:p-4 bg-opacity-80 backdrop-blur-sm">
+        <div
+          className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-3 py-2 sm:p-4 backdrop-blur-sm"
+          style={{
+            marginLeft: sidebarOpen ? "200px" : "0px",
+            transition: "margin-left 0.3s ease-in-out",
+          }}
+        >
           <div className="flex items-center gap-3">
             <button
               className="md:hidden text-gray-600 hover:text-gray-800"
@@ -1193,7 +1199,7 @@ const VibrationTool: React.FC = () => {
         <div className="flex-1 flex flex-col h-full relative overflow-hidden">
           <div
             ref={chatContainerRef}
-            className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar"
+            className="flex-1 overflow-y-auto px-6 py-4 space-y-4 hide-scrollbar z-20"
             style={{
               maxWidth: "min(65%, 90vw)",
               margin: "0 auto",
@@ -1214,8 +1220,21 @@ const VibrationTool: React.FC = () => {
               <div className="flex-1 flex items-center justify-center h-full min-h-[60vh]">
                 <div className="text-center">
                   <div className="mb-4">
-                    <div className="w-16 h-16 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <i className="bi bi-stars" style={{ color: "#fff" }}></i>
+                    <div
+                      className="w-16 h-16 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #0061FF 0%, #60EFFF 100%)",
+                      }}
+                    >
+                      <i
+                        className="bi bi-stars"
+                        style={{
+                          color: "#fff",
+                          fontSize: "24px",
+                          textShadow: "0 0 12px rgba(173, 162, 162, 0.8)",
+                        }}
+                      ></i>
                     </div>
                   </div>
                   <div className="leading-relaxed">
@@ -1234,13 +1253,21 @@ const VibrationTool: React.FC = () => {
                   <div key={index} className="w-full">
                     {message.sender === "user" ? (
                       <div className="flex flex-col items-end gap-2 mb-4">
-                        <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                          <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                            <User size={18} className="text-white" />
-                          </div>
+                        <div
+                          className="w-7 h-7 bg-white rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                          style={{
+                            border: "1px solid rgba(169, 174, 179, 0.35)",
+                          }}
+                        >
+                          <User
+                            size={18}
+                            style={{ color: "#0061FF" }}
+                            stroke="none"
+                            fill="currentColor"
+                          />
                         </div>
                         <div
-                          className="text-dark rounded-2xl rounded-tr-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-md text-sm sm:text-md font-semibold"
+                          className="text-dark rounded-2xl rounded-tr-md px-3 py-2 sm:px-4 sm:py-3 max-w-[85vw] sm:max-w-xs lg:max-w-md text-sm sm:text-md"
                           style={{
                             backgroundColor: "#188BEF1F",
                             border: "1px solid #188BEF1F",
@@ -1280,10 +1307,20 @@ const VibrationTool: React.FC = () => {
                       </div>
                     ) : (
                       <div className="flex flex-col items-start gap-2 mb-4">
-                        <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <div
+                          className="w-7 h-7 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #0061FF 0%, #60EFFF 100%)",
+                          }}
+                        >
                           <i
                             className="bi bi-stars"
-                            style={{ color: "#fff" }}
+                            style={{
+                              color: "#fff",
+                              fontSize: "16px",
+                              textShadow: "0 0 12px rgba(173, 162, 162, 0.8)",
+                            }}
                           ></i>
                         </div>
                         <div
@@ -1309,11 +1346,24 @@ const VibrationTool: React.FC = () => {
                 ))}
                 {(isLoading || isGeneratingReport) && (
                   <div className="flex flex-col items-start gap-2 mb-4">
-                    <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                      <i className="bi bi-stars" style={{ color: "#fff" }}></i>
+                    <div
+                      className="w-7 h-7 bg-cyan-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #0061FF 0%, #60EFFF 100%)",
+                      }}
+                    >
+                      <i
+                        className="bi bi-stars"
+                        style={{
+                          color: "#fff",
+                          fontSize: "16px",
+                          textShadow: "0 0 12px rgba(173, 162, 162, 0.8)",
+                        }}
+                      ></i>
                     </div>
                     <div
-                      className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-3"
+                      className="bg-white text-gray-800 rounded-2xl rounded-tl-md px-4 py-2"
                       style={{ border: "1px solid #E6E6E6" }}
                     >
                       <div className="flex items-center gap-2">
@@ -1465,12 +1515,12 @@ const VibrationTool: React.FC = () => {
                           style={{
                             backgroundColor:
                               isLoading ||
-                                isGeneratingReport ||
-                                (!inputValue.trim() &&
-                                  attachedImages.length === 0 &&
-                                  attachedVoices.length === 0)
+                              isGeneratingReport ||
+                              (!inputValue.trim() &&
+                                attachedImages.length === 0 &&
+                                attachedVoices.length === 0)
                                 ? "#E5E7EB"
-                                : "#06B6D4",
+                                : "#00B8F8",
                             color: "white",
                             fontSize: "14px",
                             fontWeight: "500",
@@ -1478,10 +1528,10 @@ const VibrationTool: React.FC = () => {
                             minWidth: "80px",
                             cursor:
                               isLoading ||
-                                isGeneratingReport ||
-                                (!inputValue.trim() &&
-                                  attachedImages.length === 0 &&
-                                  attachedVoices.length === 0)
+                              isGeneratingReport ||
+                              (!inputValue.trim() &&
+                                attachedImages.length === 0 &&
+                                attachedVoices.length === 0)
                                 ? "not-allowed"
                                 : "pointer",
                           }}
