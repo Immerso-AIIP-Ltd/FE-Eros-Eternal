@@ -93,6 +93,7 @@ const AuraProfile: React.FC = () => {
   >([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [activeMenuItem, setActiveMenuItem] = useState("vibrational-frequency");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // New states for API integration
   const [currentReportType, setCurrentReportType] = useState<string>(
@@ -827,6 +828,12 @@ const AuraProfile: React.FC = () => {
     }
   }, [messages, isLoading, isGeneratingReport]);
 
+  useEffect(() => {
+    if (!isLoading && !isGeneratingReport && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading, isGeneratingReport, messages]);
+
   return (
     <div
       className="d-flex w-100 h-100 min-vh-100 min-vw-100 text-gray-800 overflow-hidden"
@@ -1280,6 +1287,7 @@ const AuraProfile: React.FC = () => {
                     <>
                       <div className="flex-1">
                         <input
+                          ref={inputRef}
                           type="text"
                           placeholder="Message to Wellness AI"
                           value={inputValue}

@@ -68,9 +68,9 @@ const ResultPage: React.FC = () => {
           <div id="explore">
             <ExploreSection />
           </div>
-          <div id="footer">
+          {/* <div id="footer">
             <FooterPage />
-          </div>
+          </div> */}
         </div>
       </main>
     </div>
