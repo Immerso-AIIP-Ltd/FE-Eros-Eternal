@@ -274,7 +274,7 @@ export default function ErosWellnessReports({ embedded = false }: { embedded?: b
       try {
         await Promise.all(cardsData.map(async (card) => {
           const res = await fetch(
-            `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/reports/individual_report/?user_id=${userId}&report_type=${card.reportType}`
+            `${baseApiUrl}/aitools/wellness/v2/reports/individual_report/?user_id=${userId}&report_type=${card.reportType}`
           );
           const data = (await res.json()) as IndividualReportApiResponse;
           const hasReport = Boolean(data.success && data.data?.report_data);

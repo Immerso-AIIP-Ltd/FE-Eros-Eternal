@@ -72,7 +72,7 @@ const RelationshipCompatibility: React.FC = () => {
 
     try {
       const response = await fetch(
-        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/numerology/career_compatibility`,
+        `${baseApiUrl}/aitools/wellness/v2/numerology/career_compatibility`,
         {
           method: "POST",
           body: formData,

@@ -388,7 +388,7 @@ const ErosChatUI: React.FC = () => {
       let currentSessionId = sessionId;
 
       if (!currentSessionId) {
-        const initResponse = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/chat/spiritual`, {
+        const initResponse = await fetch(`${baseApiUrl}/aitools/wellness/v2/chat/spiritual`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
@@ -407,7 +407,7 @@ const ErosChatUI: React.FC = () => {
         }
       }
 
-      const response = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/chat/spiritual`, {
+      const response = await fetch(`${baseApiUrl}/aitools/wellness/v2/chat/spiritual`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({

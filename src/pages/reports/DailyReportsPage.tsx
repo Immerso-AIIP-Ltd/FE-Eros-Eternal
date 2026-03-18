@@ -57,7 +57,7 @@ const DailyReportsPage: React.FC = () => {
 
       try {
         const response = await fetch(
-          `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/reports/user_reports/${userId}`,
+          `${baseApiUrl}/aitools/wellness/v2/reports/user_reports/${userId}`,
           {
             method: "GET",
             headers: {

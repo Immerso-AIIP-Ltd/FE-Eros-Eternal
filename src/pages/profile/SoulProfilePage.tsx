@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import BackgroundImage from "../../assets/images/background.png";
 
-const baseApiUrl = "http://164.52.205.108:8500";
+const baseApiUrl = "http://192.168.1.171:6001";
 
 interface FormData {
   name: string;
@@ -193,7 +193,7 @@ const SoulProfilePage: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/users/profile/`, { method: "POST", body: fd });
+      const res = await fetch(`${baseApiUrl}/aitools/wellness/v2/users/profile/`, { method: "POST", body: fd });
       const text = await res.text();
       let result: any;
       try { result = JSON.parse(text); } catch { throw new Error(text || "Invalid response"); }

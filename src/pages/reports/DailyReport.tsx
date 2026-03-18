@@ -61,7 +61,7 @@ const DailyReport: React.FC = () => {
     const fetchWelcome = async () => {
       try {
         const res = await fetch(
-          `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/welcome/welcome`
+          `${baseApiUrl}/aitools/wellness/v2/welcome/welcome`
         );
         const data = await res.json();
 
@@ -117,7 +117,7 @@ const DailyReport: React.FC = () => {
         const form = new FormData();
         form.append("user_message", message);
 
-        const res = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/welcome/process_message`, {
+        const res = await fetch(`${baseApiUrl}/aitools/wellness/v2/welcome/process_message`, {
           method: "POST",
           body: form,
         });
@@ -154,7 +154,7 @@ const DailyReport: React.FC = () => {
         process_message_report: finalAnswers ?? answers,
       };
 
-      const res = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/welcome/generate_report`, {
+      const res = await fetch(`${baseApiUrl}/aitools/wellness/v2/welcome/generate_report`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -482,7 +482,7 @@ const DailyReport: React.FC = () => {
       const form = new FormData();
       form.append("user_message", question);
 
-      const res = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/welcome/process_message`, {
+      const res = await fetch(`${baseApiUrl}/aitools/wellness/v2/welcome/process_message`, {
         method: "POST",
         body: form, // ✅ Browser sets Content-Type automatically
       });

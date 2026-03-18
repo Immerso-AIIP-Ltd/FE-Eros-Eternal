@@ -28,7 +28,7 @@ const StatsCards = () => {
   const [loading, setLoading] = useState(true);
 
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
-  const reportsApiUrl = `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/reports/individual_report/`;
+  const reportsApiUrl = `${baseApiUrl}/aitools/wellness/v2/reports/individual_report/`;
 
   const reportCards = [
     {
