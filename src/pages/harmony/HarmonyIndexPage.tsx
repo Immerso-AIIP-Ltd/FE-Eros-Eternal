@@ -38,7 +38,7 @@ const HarmonyIndexPage: React.FC = () => {
     setData(null);
 
     try {
-      const response = await fetch(`${baseApiUrl}/numerology/career_compatibility`, {
+      const response = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/numerology/career_compatibility`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

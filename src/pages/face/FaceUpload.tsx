@@ -131,7 +131,7 @@ const FaceUploadPage: React.FC = () => {
       formData.append("image", selectedFile);
 
       const response = await fetch(
-        `${baseApiUrl}/face_reading/analyze`,
+        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/face_reading/analyze`,
         {
           method: "POST",
           body: formData,
@@ -201,7 +201,7 @@ const FaceUploadPage: React.FC = () => {
   //     formData.append("image_data", selectedFile);
 
   //     const response = await fetch(
-  //       `${baseApiUrl}/face_reading/analyze`, // CHANGED TO FACE ENDPOINT
+  //       `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/face_reading/analyze`, // CHANGED TO FACE ENDPOINT
   //       {
   //         method: "POST",
   //         body: formData,

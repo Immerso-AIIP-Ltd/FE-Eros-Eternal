@@ -67,7 +67,7 @@ const RasiChartPage: React.FC = () => {
       };
 
       const response = await fetch(
-        `${baseApiUrl}/vedastro/get_astrology_data`,
+        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/vedastro/get_astrology_data`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

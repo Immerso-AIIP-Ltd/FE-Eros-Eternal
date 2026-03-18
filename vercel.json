@@ -2,7 +2,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/$1"
+      "dest": "https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/aitools/wellness/v2/$1"
     }
   ]
 }

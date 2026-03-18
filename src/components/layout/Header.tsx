@@ -44,7 +44,7 @@ export const Header: React.FC = () => {
 
   const userId =
     localStorage.getItem("userId") || localStorage.getItem("user_id");
-  const reportsApiUrl = `${baseApiUrl}/reports/individual_report/`;
+  const reportsApiUrl = `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/reports/individual_report/`;
 
   const cardsData: CardData[] = [
     {
@@ -347,7 +347,8 @@ export const Header: React.FC = () => {
           alignItems: "center",
           justifyContent: "space-between",
           // padding: "48px",
-          padding: "clamp(16px, 3vw, 32px) clamp(12px, 3vw, 48px) clamp(24px, 4vw, 48px)",
+          padding:
+            "clamp(16px, 3vw, 32px) clamp(12px, 3vw, 48px) clamp(24px, 4vw, 48px)",
           boxSizing: "border-box",
           position: "relative",
           // maskImage: "linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 70%, rgba(0,0,0,0) 100%)",
@@ -419,16 +420,24 @@ export const Header: React.FC = () => {
               lineHeight: 1.2,
               maxWidth: "800px",
               fontFamily: '"Geist", sans-serif',
-              background: "linear-gradient(90deg, rgb(146 152 198) 0%, rgb(121 156 196) 30%, rgb(229 156 176) 60%) text",
+              background:
+                "linear-gradient(90deg, rgb(146 152 198) 0%, rgb(121 156 196) 30%, rgb(229 156 176) 60%) text",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
               color: "transparent",
             }}
           >
-            EROS Wellness <span style={{ WebkitTextFillColor: "#1a1a2e", fontFamily: '"Geist", sans-serif' }}>– AI Driven Holistic Growth</span>
+            EROS Wellness{" "}
+            <span
+              style={{
+                WebkitTextFillColor: "#1a1a2e",
+                fontFamily: '"Geist", sans-serif',
+              }}
+            >
+              – AI Driven Holistic Growth
+            </span>
           </h1>
-
 
           {/* Main Heading - Black, center-aligned, 2 lines */}
           <h2
@@ -445,10 +454,12 @@ export const Header: React.FC = () => {
               color: "#838c99ff",
               maxWidth: "800px",
               fontFamily: '"Poppins", sans-serif',
-              marginTop: "20px"
+              marginTop: "20px",
             }}
           >
-            Your personal AI spiritual companion — illuminating your path through astrology, energy readings, and ancient wisdom tailored uniquely for you.
+            Your personal AI spiritual companion — illuminating your path
+            through astrology, energy readings, and ancient wisdom tailored
+            uniquely for you.
           </h2>
 
           {/* Description */}
@@ -599,17 +610,20 @@ export const Header: React.FC = () => {
                   <button
                     className="card-button"
                     style={{
-                      background: "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
+                      background:
+                        "linear-gradient(135deg, rgb(137 219 255) 0%, rgb(74 164 227) 100%)",
                       border: "none",
                       borderRadius: "16px",
                       fontWeight: 600,
                       color: "white",
                       cursor: "pointer",
                       transition: "all 0.3s ease",
-                      transform: hoveredCard === card.id ? "scale(1.05)" : "scale(1)",
-                      boxShadow: hoveredCard === card.id
-                        ? "0 8px 16px rgba(115, 172, 212, 0.4)"
-                        : "0 4px 12px rgba(115, 172, 212, 0.2)",
+                      transform:
+                        hoveredCard === card.id ? "scale(1.05)" : "scale(1)",
+                      boxShadow:
+                        hoveredCard === card.id
+                          ? "0 8px 16px rgba(115, 172, 212, 0.4)"
+                          : "0 4px 12px rgba(115, 172, 212, 0.2)",
                       width: "100%",
                       display: "flex",
                       alignItems: "center",
@@ -735,9 +749,8 @@ export const Header: React.FC = () => {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    navigate("/ai-chat", {
-                      state: { initialMessage: chatInput },
-                    });
+                    sessionStorage.setItem("initialMessage", chatInput);
+                    navigate("/ai-chat");
                     setChatInput("");
                   }
                 }}
@@ -768,9 +781,8 @@ export const Header: React.FC = () => {
               >
                 <button
                   onClick={() => {
-                    navigate("/ai-chat", {
-                      state: { initialMessage: chatInput },
-                    });
+                    sessionStorage.setItem("initialMessage", chatInput);
+                    navigate("/ai-chat");
                     setChatInput("");
                   }}
                   className="send-btn"
