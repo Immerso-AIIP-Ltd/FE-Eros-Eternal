@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Vibration from "../../assets/result-images/add_reaction.png";
 import Aura from "../../assets/result-images/background_replace.png";
 import StarMap from "../../assets/result-images/brightness_5.png";
@@ -28,8 +28,49 @@ const cardsData = [
   { id: 7, icon: Longevity, title: "Longevity Blueprint", description: "Actionable insights for a longer, healthier, conscious life.", reportType: "longevity_blueprint", route: "/longevity-blueprint" },
 ];
 
-const WellnessCard = ({ icon, title, description, hasReport, loading, onCardClick }: any) => {
-  const displayButtonText = loading ? "..." : hasReport ? "View report" : "Generate";
+type ReportType = (typeof cardsData)[number]["reportType"];
+
+type GeneratedReportStatus = {
+  hasReport: boolean;
+  metricText?: string;
+  metricUnitText?: string;
+};
+
+type WellnessCardProps = {
+  icon: string;
+  title: string;
+  description: string;
+  hasReport: boolean;
+  loading: boolean;
+  metricText?: string;
+  metricUnitText?: string;
+  onCardClick: () => void;
+};
+
+const CheckBadgeIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M20 6L9 17l-5-5"
+      stroke="#0EA5B7"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const WellnessCard = ({
+  icon,
+  title,
+  description,
+  hasReport,
+  loading,
+  metricText,
+  metricUnitText,
+  onCardClick,
+}: WellnessCardProps) => {
+  const displayButtonText = loading ? "..." : hasReport ? "View Report" : "Generate";
+  const shouldShowMetric = Boolean(hasReport && metricText && !loading);
 
   return (
     <div
@@ -48,14 +89,53 @@ const WellnessCard = ({ icon, title, description, hasReport, loading, onCardClic
         height: "100%",
         transition: "all 0.2s ease",
         fontFamily: "'Poppins', sans-serif",
+        position: "relative",
       }}
     >
+      {hasReport && !loading && (
+        <div
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "5px 9px",
+            borderRadius: "999px",
+            background: "rgba(14, 165, 183, 0.12)",
+            border: "1px solid rgba(14, 165, 183, 0.25)",
+            color: "#0EA5B7",
+            fontSize: "10.5px",
+            fontWeight: 700,
+            letterSpacing: "0.2px",
+            userSelect: "none",
+          }}
+        >
+          <CheckBadgeIcon />
+          Generated
+        </div>
+      )}
+
       <div style={{ width: 34, height: 34, borderRadius: "10px", background: "#9DCAE6", display: "flex", alignItems: "center", justifyContent: "center", padding: "6px" }}>
         <img src={icon} alt={title} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
       </div>
       <div>
         <h3 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700, color: "#1a2a3a" }}>{title}</h3>
-        <p style={{ margin: 0, fontSize: "11.5px", color: "#6b8aa0", lineHeight: 1.45 }}>{description}</p>
+        {shouldShowMetric ? (
+          <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+            <div style={{ fontSize: "30px", fontWeight: 800, color: "#0d1f2d", letterSpacing: "-0.5px", lineHeight: 1.1 }}>
+              {metricText}
+            </div>
+            {metricUnitText ? (
+              <div style={{ fontSize: "11px", fontWeight: 700, color: "#6b8aa0" }}>
+                {metricUnitText}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <p style={{ margin: 0, fontSize: "11.5px", color: "#6b8aa0", lineHeight: 1.45 }}>{description}</p>
+        )}
       </div>
       <div style={{ marginTop: "auto" }}>
         <button
@@ -76,33 +156,143 @@ const WellnessCard = ({ icon, title, description, hasReport, loading, onCardClic
   );
 };
 
+type IndividualReportApiResponse = {
+  success?: boolean;
+  data?: {
+    report_data?: {
+      assessment?: {
+        calculated_vibrational_frequency?: number;
+        current_energy_assessment?: {
+          vibrational_frequency?: number;
+        };
+        vibrational_frequency?: number;
+        current_vibrational_frequency?: number;
+        current_flame_score?: number;
+        flame_score?: string;
+        aura_intensity?: string;
+        kosha_alignment?: string;
+        star_magnitude?: string;
+        longevity_score?: string;
+      };
+      flame_vitality_assessment?: {
+        current_score?: number;
+      };
+    };
+  };
+};
+
+function formatMetricValue(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  if (typeof value === "number") {
+    if (Number.isNaN(value)) return undefined;
+    if (!Number.isFinite(value)) return undefined;
+    return Math.round(value).toString();
+  }
+
+  if (typeof value === "string") {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return undefined;
+
+    const numericMatch = trimmedValue.match(/-?\d+(\.\d+)?/);
+    if (!numericMatch) return trimmedValue;
+
+    const parsed = Number(numericMatch[0]);
+    if (!Number.isFinite(parsed)) return trimmedValue;
+    return Math.round(parsed).toString();
+  }
+
+  return undefined;
+}
+
+function extractMetricFromReportResponse(
+  reportType: ReportType,
+  responseData: IndividualReportApiResponse
+): Pick<GeneratedReportStatus, "metricText" | "metricUnitText"> {
+  const assessment = responseData.data?.report_data?.assessment;
+  const flameVitalityAssessment = responseData.data?.report_data?.flame_vitality_assessment;
+
+  if (!assessment) return {};
+
+  if (reportType === "vibrational_frequency") {
+    const metricText =
+      formatMetricValue(assessment.calculated_vibrational_frequency) ??
+      formatMetricValue(assessment.current_energy_assessment?.vibrational_frequency) ??
+      formatMetricValue(assessment.vibrational_frequency) ??
+      formatMetricValue(assessment.current_vibrational_frequency);
+
+    return metricText ? { metricText, metricUnitText: "Hz" } : {};
+  }
+
+  if (reportType === "flame_score") {
+    const metricText =
+      formatMetricValue(assessment.current_flame_score) ??
+      formatMetricValue(assessment.flame_score) ??
+      formatMetricValue(flameVitalityAssessment?.current_score);
+
+    return metricText ? { metricText, metricUnitText: "%" } : {};
+  }
+
+  if (reportType === "aura_profile") {
+    const metricText = formatMetricValue(assessment.aura_intensity);
+    return metricText ? { metricText, metricUnitText: "%" } : {};
+  }
+
+  if (reportType === "longevity_blueprint") {
+    const metricText = formatMetricValue(assessment.longevity_score);
+    return metricText ? { metricText, metricUnitText: "%" } : {};
+  }
+
+  if (reportType === "star_map") {
+    const metricText = formatMetricValue(assessment.star_magnitude);
+    return metricText ? { metricText } : {};
+  }
+
+  if (reportType === "kosha_map") {
+    const metricText = formatMetricValue(assessment.kosha_alignment);
+    return metricText ? { metricText } : {};
+  }
+
+  return {};
+}
+
 export default function ErosWellnessReports() {
   const navigate = useNavigate();
-  const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>({});
+  const location = useLocation();
+
+  const [reportStatuses, setReportStatuses] = useState<Record<ReportType, GeneratedReportStatus>>(
+    {} as Record<ReportType, GeneratedReportStatus>
+  );
   const [loadingStatuses, setLoadingStatuses] = useState(true);
   const userId = localStorage.getItem("userId") || localStorage.getItem("user_id");
+  const reportStatusQueryKey = useMemo(() => `${userId ?? "no-user"}:${location.pathname}`, [location.pathname, userId]);
 
   useEffect(() => {
     const fetchStatuses = async () => {
       if (!userId) { setLoadingStatuses(false); return; }
-      const statuses: Record<string, boolean> = {};
+      const statuses: Record<ReportType, GeneratedReportStatus> = {} as Record<ReportType, GeneratedReportStatus>;
       try {
         await Promise.all(cardsData.map(async (card) => {
-          const res = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/reports/individual_report/?user_id=${userId}&report_type=${card.reportType}`);
-          const data = await res.json();
-          statuses[card.reportType] = !!(data.success && data.data?.report_data);
+          const res = await fetch(
+            `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/reports/individual_report/?user_id=${userId}&report_type=${card.reportType}`
+          );
+          const data = (await res.json()) as IndividualReportApiResponse;
+          const hasReport = Boolean(data.success && data.data?.report_data);
+          statuses[card.reportType] = {
+            hasReport,
+            ...(hasReport ? extractMetricFromReportResponse(card.reportType, data) : {}),
+          };
         }));
         setReportStatuses(statuses);
       } finally { setLoadingStatuses(false); }
     };
     fetchStatuses();
-  }, [userId]);
+  }, [reportStatusQueryKey, userId]);
 
   return (
     <div style={{
       height: "100vh",
       width: "100vw",
-      background: "#FFFFFFF",
+      background: "#FFFFFF",
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
@@ -135,12 +325,18 @@ export default function ErosWellnessReports() {
           <WellnessCard
             key={card.id}
             {...card}
-            hasReport={reportStatuses[card.reportType]}
+            hasReport={Boolean(reportStatuses[card.reportType]?.hasReport)}
             loading={loadingStatuses}
+            metricText={reportStatuses[card.reportType]?.metricText}
+            metricUnitText={reportStatuses[card.reportType]?.metricUnitText}
             onCardClick={() => {
-                if (reportStatuses[card.reportType]) {
-                    navigate("/view-report", { state: { reportType: card.reportType, userId, title: card.title } });
-                } else { navigate(card.route); }
+              const hasReport = reportStatuses[card.reportType]?.hasReport;
+              if (hasReport) {
+                navigate("/view-report", { state: { reportType: card.reportType, userId, title: card.title } });
+                return;
+              }
+
+              navigate(card.route);
             }}
           />
         ))}
