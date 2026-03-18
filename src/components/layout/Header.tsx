@@ -1,58 +1,14 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import ErosLogo from "../../assets/LogoEros.png";
 import { useNavigate } from 'react-router-dom';
-// import VibrationIcon from "../../assets/result-images/add_reaction.png"
+import Vibration from "../../assets/result-images/add_reaction.png";
+import Aura from "../../assets/result-images/background_replace.png";
+import StarMap from "../../assets/result-images/brightness_5.png";
+import Flame from "../../assets/result-images/mode_heat.png";
+import Kosha from "../../assets/result-images/clinical_notes.png";
+import Longevity from "../../assets/result-images/ecg_heart.png";
 
-// ── SVG Icon Components (replacing broken image imports) ──────────────────────
-
-const VitaScanIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9dcae6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-    <path d="M8 12h8M12 8v8"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-);
-
-const VibrationIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9dcae6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 12h1M21 12h1M5.6 5.6l.7.7M17.7 5.6l-.7.7M5.6 18.4l.7-.7M17.7 18.4l-.7-.7"/>
-    <circle cx="12" cy="12" r="4"/>
-    <path d="M12 8v1M12 15v1M8 12H9M15 12h1"/>
-  </svg>
-);
-
-const AuraIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9dcae6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="3"/>
-    <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-    <path d="M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
-  </svg>
-);
-
-const StarMapIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9dcae6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-  </svg>
-);
-
-const FlameIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9dcae6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-7-7c0-1.045.135-2.06.5-3z"/>
-  </svg>
-);
-
-const KoshaIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9dcae6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 12l2 2 4-4M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9"/>
-    <path d="M14.5 4.5A8.96 8.96 0 0121 12"/>
-  </svg>
-);
-
-const LongevityIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9dcae6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-  </svg>
-);
+// ── SVG Icon Components (chat tabs etc.) ───────────────────────────────────────
 
 const ReportsIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -103,7 +59,7 @@ const VoiceIcon = () => (
 );
 
 const SendIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24"  fill="none " stroke="#555" strokeWidth="1.8"  strokeLinecap="round" strokeLinejoin="round">
+  <svg width="12" height="12" viewBox="0 0 24 24"  fill="none " stroke="#FFFFFF" strokeWidth="1.8"  strokeLinecap="round" strokeLinejoin="round">
     <line x1="22" y1="2" x2="11" y2="13"/>
     <polygon points="22 2 15 22 11 13 2 9 22 2"/>
   </svg>
@@ -132,13 +88,13 @@ const TimerIcon = () => (
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 const cardsData = [
-  // { id: 1, Icon: VitaScanIcon,    title: "Vita Scan",             reportType: "vita_scan",            hasReport: true  },
-  { id: 2, Icon: VibrationIcon,   title: "Vibrational\nfrequency",reportType: "vibrational_frequency",hasReport: false },
-  { id: 3, Icon: AuraIcon,        title: "Aura Profile",          reportType: "aura_profile",         hasReport: false },
-  { id: 4, Icon: StarMapIcon,     title: "Star Map",              reportType: "star_map",             hasReport: false },
-  { id: 5, Icon: FlameIcon,       title: "Flame Score",           reportType: "flame_score",          hasReport: false },
-  { id: 6, Icon: KoshaIcon,       title: "Kosha Map",             reportType: "kosha_map",            hasReport: false },
-  { id: 7, Icon: LongevityIcon,   title: "Longevity\nBlueprint",  reportType: "longevity_blueprint",  hasReport: false },
+  // { id: 1, icon: ..., title: "Vita Scan", reportType: "vita_scan", route: "/vita-scan" },
+  { id: 2, icon: Vibration,   title: "Vibrational\nfrequency", reportType: "vibrational_frequency", route: "/vibrational-frequency" },
+  { id: 3, icon: Aura,        title: "Aura Profile",          reportType: "aura_profile",         route: "/aura-profile" },
+  { id: 4, icon: StarMap,     title: "Star Map",              reportType: "star_map",             route: "/star-map" },
+  { id: 5, icon: Flame,       title: "Flame Score",           reportType: "flame_score",          route: "/flame-score" },
+  { id: 6, icon: Kosha,       title: "Kosha Map",             reportType: "kosha_map",            route: "/kosha-map" },
+  { id: 7, icon: Longevity,   title: "Longevity\nBlueprint",  reportType: "longevity_blueprint",   route: "/longevity-blueprint" },
 ];
 
 const chatTabs = [
@@ -151,10 +107,50 @@ const chatTabs = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+const REPORT_STATUS_API = "https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/reports/individual_report/";
+
 export const Header = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [chatInput, setChatInput] = useState("");
   const [activeTab, setActiveTab] = useState("Reports");
+  const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>({});
+  const [loadingStatuses, setLoadingStatuses] = useState(true);
+  const userId = localStorage.getItem("userId") || localStorage.getItem("user_id");
+
+  useEffect(() => {
+    const fetchStatuses = async () => {
+      if (!userId) { setLoadingStatuses(false); return; }
+      const statuses: Record<string, boolean> = {};
+      try {
+        await Promise.all(cardsData.map(async (card) => {
+          const res = await fetch(`${REPORT_STATUS_API}?user_id=${userId}&report_type=${card.reportType}`);
+          const data = await res.json();
+          statuses[card.reportType] = !!(data.success && data.data?.report_data);
+        }));
+        setReportStatuses(statuses);
+      } finally {
+        setLoadingStatuses(false);
+      }
+    };
+    fetchStatuses();
+  }, [userId]);
+
+  const handleCardAction = (card: (typeof cardsData)[number]) => {
+    const hasReport = reportStatuses[card.reportType];
+    if (hasReport) {
+      navigate("/view-report", { state: { reportType: card.reportType, userId, title: card.title.replace(/\n/g, " ") } });
+    } else {
+      navigate(card.route);
+    }
+  };
+  const handleSend = () => {
+    // Add your message sending logic here
+    console.log("Message sent!");
+    
+    // Navigate to the chat page
+    navigate('/ai-chat');
+  };
+  
 
   return (
     <>
@@ -167,14 +163,11 @@ export const Header = () => {
           width: 100%;
           // height: 100vh;
           background: #f0f8ff;
-          
           font-family: 'Poppins', sans-serif;
           overflow-x: hidden;
           position: relative;
           box-sizing: border-box;
         }
-
-
 
         /* ── NAVBAR ── */
         .eros-nav {
@@ -232,7 +225,7 @@ export const Header = () => {
         .eros-rasi-btn:hover { opacity: 0.88; transform: translateY(-1px); }
         .eros-rasi-btn svg { flex-shrink: 0; }
 
-        /* ── BODY ── */
+        /* ── BODY ─ */
         .eros-body {
           position: relative;
           z-index: 1;
@@ -577,24 +570,60 @@ export const Header = () => {
           white-space: nowrap;
         }
         .eros-action-btn:hover { background: rgba(157,202,230,0.1); }
+        // .eros-send-btn {
+        //     display: flex;
+        //   align-items: center;
+        //   gap: 6px;
+        //   padding: 6px 14px;
+        //   border: 1px solid rgba(0,0,0,0.1);
+        //   border-radius: 24px;
+        //   background: transparent;
+        //   cursor: pointer;
+        //   font-family: 'Poppins', sans-serif;
+        //   font-size: 12.5px;
+        //   font-weight: 400;
+        //   color: #555;
+        //   transition: background 0.15s;
+        //   height: 30px;
+        //   white-space: nowrap;
+        //   background:"#9dcae6"
+        // }
+
         .eros-send-btn {
-            display: flex;
-          align-items: center;
-          gap: 6px;
-          padding: 6px 14px;
-          border: 1px solid rgba(0,0,0,0.1);
-          border-radius: 24px;
-          background: transparent;
-          cursor: pointer;
-          font-family: 'Poppins', sans-serif;
-          font-size: 12.5px;
-          font-weight: 400;
-          color: #555;
-          transition: background 0.15s;
-          height: 30px;
-          white-space: nowrap;
-          background:"#9dcae6"
-        }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px; /* Increased horizontal padding for the pill shape */
+  
+  /* Background and Border */
+  background-color: #9dcae6; 
+  border: none;
+  border-radius: 100px; /* Ensures a perfect pill shape */
+  
+  /* Text and Icon Styling */
+  color: #ffffff; 
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  
+  /* Sizing */
+  height: 38px;
+  min-width: 100px;
+  cursor: pointer;
+  white-space: nowrap;
+  
+  /* Smooth interaction */
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.eros-send-btn:hover {
+  opacity: 0.9;
+}
+
+.eros-send-btn:active {
+  transform: scale(0.98);
+}
         .eros-send-btn:hover { transform: scale(1.08); opacity: 0.92; }
 
         /* ── RESPONSIVE ── */
@@ -688,19 +717,49 @@ export const Header = () => {
 
             {/* ── CARDS ── */}
             <div className="eros-cards-row">
-              {cardsData.map((card) => (
-                <div key={card.id} className="eros-card-col">
-                  <div className="eros-card-box">
-                    <div className="eros-card-icon-wrap">
-                      <card.Icon />
+              {cardsData.map((card) => {
+                const hasReport = reportStatuses[card.reportType];
+                const buttonLabel = loadingStatuses ? "..." : hasReport ? "View report" : "Generate";
+                return (
+                  <div key={card.id} className="eros-card-col">
+                    <div
+                      className="eros-card-box"
+                      onClick={() => handleCardAction(card)}
+                      onKeyDown={(e) => e.key === "Enter" && handleCardAction(card)}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <div className="eros-card-icon-wrap">
+                        <div
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            maskImage: `url(${card.icon})`,
+                            maskSize: "contain",
+                            maskRepeat: "no-repeat",
+                            maskPosition: "center",
+                            WebkitMaskImage: `url(${card.icon})`,
+                            WebkitMaskSize: "contain",
+                            WebkitMaskRepeat: "no-repeat",
+                            WebkitMaskPosition: "center",
+                            backgroundColor: "#A097C7",
+                          }}
+                          title={card.title.replace(/\n/g, " ")}
+                          aria-hidden
+                        />
+                      </div>
+                      <div className="eros-card-title">{card.title}</div>
                     </div>
-                    <div className="eros-card-title">{card.title}</div>
+                    <button
+                      type="button"
+                      className={`eros-card-btn${hasReport ? " view" : ""}`}
+                      onClick={(e) => { e.stopPropagation(); handleCardAction(card); }}
+                    >
+                      {buttonLabel}
+                    </button>
                   </div>
-                  <button className={`eros-card-btn${card.hasReport ? " view" : ""}`}>
-                    {card.hasReport ? "View report" : "Generate"}
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* ── CHAT SECTION ── */}
@@ -752,7 +811,7 @@ export const Header = () => {
                         <button className="eros-action-btn">
                           <VoiceIcon /> Voice
                         </button>
-                        <button className="eros-send-btn" aria-label="Send">
+                        <button className="eros-send-btn" aria-label="Send" onClick={handleSend}>
                           <SendIcon />Send
                         </button>
                       </div>

@@ -58,12 +58,16 @@ const WellnessCard = ({ icon, title, description, hasReport, loading, onCardClic
         <p style={{ margin: 0, fontSize: "11.5px", color: "#6b8aa0", lineHeight: 1.45 }}>{description}</p>
       </div>
       <div style={{ marginTop: "auto" }}>
-        <button style={{ 
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onCardClick(); }}
+          style={{ 
             display: "inline-flex", alignItems: "center", gap: "6px", background: "#9dcae6", 
             border: "none", borderRadius: "20px", padding: "7px 15px", color: "#fff", 
             fontSize: "11.5px", fontWeight: 600, cursor: "pointer",
             boxShadow: "0 4px 10px rgba(74, 164, 227, 0.2)"
-        }}>
+          }}
+        >
           {displayButtonText}
           <ArrowIcon />
         </button>
