@@ -1092,7 +1092,7 @@ const FaceScanner: React.FC = () => {
 
       const userId = localStorage.getItem('user_id');
       const response = await fetch(
-        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/health/bp-predict`,
+        `http://192.168.1.171:6001/aitools/wellness/v2/health/bp-predict`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1216,7 +1216,7 @@ const FaceScanner: React.FC = () => {
       // Send data to API
       const userId = localStorage.getItem('user_id');
       const response = await fetch(
-        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/health/scan/${userId}`,
+        `http://192.168.1.171:6001/aitools/wellness/v2/health/scan/${userId}`,
         {
           method: 'PUT',
           headers: {

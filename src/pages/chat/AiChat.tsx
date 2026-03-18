@@ -292,7 +292,7 @@ const AiChat: React.FC = () => {
 
   //   try {
   //     const response = await fetch(
-  //       `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/chat/sessions/?user_id=${userId}`,
+  //       `http://192.168.1.171:6001/aitools/wellness/v2/chat/sessions/?user_id=${userId}`,
   //     );
   //     const data = await response.json();
   //     if (
@@ -318,7 +318,7 @@ const AiChat: React.FC = () => {
     setSessionsLoading(true);
     try {
       const response = await fetch(
-        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/chat/sessions/?user_id=${userId}`,
+        `http://192.168.1.171:6001/aitools/wellness/v2/chat/sessions/?user_id=${userId}`,
       );
       const data = await response.json();
       if (
@@ -345,7 +345,7 @@ const AiChat: React.FC = () => {
 
     try {
       const response = await fetch(
-        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/chat/conversation/${sessionId}`,
+        `http://192.168.1.171:6001/aitools/wellness/v2/chat/conversation/${sessionId}`,
       );
       const data = await response.json();
       if (
@@ -592,7 +592,7 @@ const AiChat: React.FC = () => {
         }
 
         const initResponse = await fetch(
-          `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/chat/spiritual/${userId}`,
+          `http://192.168.1.171:6001/aitools/wellness/v2/chat/spiritual/${userId}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -625,7 +625,7 @@ const AiChat: React.FC = () => {
       }
 
       const response = await fetch(
-        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/chat/spiritual/${userId}`,
+        `http://192.168.1.171:6001/aitools/wellness/v2/chat/spiritual/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },

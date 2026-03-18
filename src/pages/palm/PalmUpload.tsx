@@ -135,7 +135,7 @@ const PalmUploadPage: React.FC = () => {
       formData.append("image_data", selectedFile);
 
       const response = await fetch(
-        `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/analysis/palm`,
+        `http://192.168.1.171:6001/aitools/wellness/v2/analysis/palm`,
         {
           method: "POST",
           body: formData,

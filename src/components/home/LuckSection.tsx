@@ -68,7 +68,7 @@ export const LuckSection: React.FC = () => {
         formData.append("user_id", userId);
         formData.append("user_name", username);
         if (dob) formData.append("dob", formatDob(dob));
-        const response = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/numerology/planetary_horoscope`, { method: "POST", body: formData });
+        const response = await fetch(`http://192.168.1.171:6001/aitools/wellness/v2/numerology/planetary_horoscope`, { method: "POST", body: formData });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (data.success && data.data) setHoroscope(data.data);
@@ -92,7 +92,7 @@ export const LuckSection: React.FC = () => {
         formData.append("user_id", userId);
         formData.append("user_name", username);
         if (dob) formData.append("dob", formatDob(dob));
-        const response = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/numerology/personal_month`, { method: "POST", body: formData });
+        const response = await fetch(`http://192.168.1.171:6001/aitools/wellness/v2/numerology/personal_month`, { method: "POST", body: formData });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (data.success && data.data) setPersonalMonth(data.data);
@@ -116,7 +116,7 @@ export const LuckSection: React.FC = () => {
         formData.append("user_id", userId);
         formData.append("user_name", username);
         if (dob) formData.append("dob", formatDob(dob));
-        const response = await fetch(`https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/numerology/lucky_numbers`, { method: "POST", body: formData });
+        const response = await fetch(`http://192.168.1.171:6001/aitools/wellness/v2/numerology/lucky_numbers`, { method: "POST", body: formData });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         if (result.success && result.data) setLuckyNumbers(result.data);

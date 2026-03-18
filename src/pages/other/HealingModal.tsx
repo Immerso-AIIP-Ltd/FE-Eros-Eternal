@@ -310,7 +310,7 @@ const HealingModal: React.FC = () => {
 
       console.log("Final prescription payload:", finalPayload);
 
-      const healingUrl = `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/healing/generate_healing_prescription`;
+      const healingUrl = `http://192.168.1.171:6001/aitools/wellness/v2/healing/generate_healing_prescription`;
       const response = await fetch(healingUrl, {
         method: "POST",
         headers: {
@@ -396,7 +396,7 @@ const HealingModal: React.FC = () => {
       formData.append("image_data", attachedFiles[0], "image.png");
       formData.append("user_id", userId || "123");
 
-      const faceUrl = `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/analysis/face`;
+      const faceUrl = `http://192.168.1.171:6001/aitools/wellness/v2/analysis/face`;
       const faceResponse = await fetch(faceUrl, {
         method: "POST",
         body: formData,
@@ -456,7 +456,7 @@ const HealingModal: React.FC = () => {
         timezone: getTimezoneOffset(),
       };
 
-      const astrologyUrl = `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/vedastro/get_astrology_data`;
+      const astrologyUrl = `http://192.168.1.171:6001/aitools/wellness/v2/vedastro/get_astrology_data`;
       const response = await fetch(astrologyUrl, {
         method: "POST",
         headers: {
@@ -606,7 +606,7 @@ const HealingModal: React.FC = () => {
       console.log("Sending converted audio file:", fileName);
       console.log("File size:", audioBlob.size, "bytes");
 
-      const voiceUrl = `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/analysis/voice`;
+      const voiceUrl = `http://192.168.1.171:6001/aitools/wellness/v2/analysis/voice`;
       const response = await fetch(voiceUrl, {
         method: "POST",
         body: formData,
@@ -678,7 +678,7 @@ const HealingModal: React.FC = () => {
       formData.append("audio_url", audioUrl); // Send URL as string
       formData.append("user_id", userId || "123");
 
-      const voiceUrl = `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/analysis/voice`;
+      const voiceUrl = `http://192.168.1.171:6001/aitools/wellness/v2/analysis/voice`;
       const response = await fetch(voiceUrl, {
         method: "POST",
         body: formData,

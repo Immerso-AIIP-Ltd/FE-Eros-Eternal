@@ -92,7 +92,7 @@ const ViewReport = () => {
   const location = useLocation();
   const recommendationsRef = useRef(null);
 
-  const reportsApiUrl = `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/reports/individual_report/`;
+  const reportsApiUrl = `http://192.168.1.171:6001/aitools/wellness/v2/reports/individual_report/`;
 
   useEffect(() => {
     const fetchReportData = async () => {

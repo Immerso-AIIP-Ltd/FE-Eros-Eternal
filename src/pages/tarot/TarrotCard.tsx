@@ -47,7 +47,7 @@ const TarotCard: React.FC = () => {
 
       try {
         const response = await fetch(
-          `https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/numerology/tarot_reading`,
+          `http://192.168.1.171:6001/aitools/wellness/v2/numerology/tarot_reading`,
           {
             method: "POST",
             headers: {
