@@ -1,14 +1,6 @@
-import { useState } from "react";
 import ErosLogo from "../../assets/LogoEros.png";
-import PhoneBackground from "../../assets/result-images/footer.png"
 
 /* ─── ICONS ──────────────────────────────────────────────────── */
-const AppleIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-  </svg>
-);
-
 const TwitterIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -365,6 +357,7 @@ const GithubIcon = () => (
 // };
 
 /* ─── HERO SECTION ────────────────────────────────────────────── */
+/*
 const HeroSection = () => (
   <section
     style={{
@@ -374,7 +367,7 @@ const HeroSection = () => (
       overflow: "hidden",
     }}
   >
-    {/* Top label */}
+ 
     <div
       style={{
         textAlign: "center",
@@ -388,7 +381,7 @@ const HeroSection = () => (
       EROS Wellness App
     </div>
 
-    {/* Headline row */}
+
     <div
       style={{
         display: "flex",
@@ -399,7 +392,7 @@ const HeroSection = () => (
         marginBottom: "24px",
       }}
     >
-      {/* John avatar chip */}
+    
       <div
         style={{
           display: "flex",
@@ -435,7 +428,7 @@ const HeroSection = () => (
         John
       </div>
 
-      {/* Main heading */}
+ 
       <div style={{ textAlign: "center" }}>
         <h1
           style={{
@@ -463,7 +456,7 @@ const HeroSection = () => (
         </h1>
       </div>
 
-      {/* Katie avatar chip */}
+  
       <div
         style={{
           display: "flex",
@@ -500,7 +493,7 @@ const HeroSection = () => (
       </div>
     </div>
 
-    {/* Subtitle */}
+ 
     <p
       style={{
         textAlign: "center",
@@ -514,7 +507,7 @@ const HeroSection = () => (
       Lorem ipsum dolor sit amet consectetur. Ac quis praesent ullamcorper congue altricia scelerisque.
     </p>
 
-    {/* CTA Button */}
+
     <div style={{ display: "flex", justifyContent: "center", marginBottom: "56px" }}>
       <button
         style={{
@@ -547,8 +540,7 @@ const HeroSection = () => (
       </button>
     </div>
 
-    {/* Phone mockup */}
-    {/* <PhoneMockup /> */}
+ 
 <div
   style={{
     display: "flex",
@@ -571,7 +563,7 @@ const HeroSection = () => (
   </section>
 );
 
-/* ─── NAVBAR ──────────────────────────────────────────────────── */
+// ─── NAVBAR ────────────────────────────────────────────────────
 const Navbar = () => (
   <nav
     style={{
@@ -588,7 +580,7 @@ const Navbar = () => (
       height: "64px",
     }}
   >
-    <ErosLogo size="sm" />
+    <img src={ErosLogo} alt="Eros Wellness Logo" style={{ height: 28, width: "auto" }} />
     <div style={{ display: "flex", gap: "32px" }}>
       {["Home", "Features", "Pricing", "About"].map((item) => (
         <a
@@ -622,6 +614,7 @@ const Navbar = () => (
     </button>
   </nav>
 );
+*/
 
 /* ─── FOOTER ──────────────────────────────────────────────────── */
 const Footer = () => {
@@ -798,7 +791,7 @@ export default function ErosWellnessPage() {
       style={{
         fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
         background: "#fff",
-        minHeight: "100vh",
+        minHeight: "auto",
       }}
     >
       <style>{`
@@ -808,7 +801,7 @@ export default function ErosWellnessPage() {
         button:active { transform: scale(0.97) !important; }
       `}</style>
       {/* <Navbar /> */}
-      <HeroSection />
+      {/* <HeroSection /> */}
       <Footer />
     </div>
   );

@@ -7,13 +7,15 @@ const imgScanOverlay  = "https://www.figma.com/api/mcp/asset/231c2ba0-d19d-4d46-
 
 interface VitaScanBannerProps {
   onGetStarted?: () => void;
+  embedded?: boolean;
 }
 
-export default function VitaScanBanner({ onGetStarted }: VitaScanBannerProps) {
+export default function VitaScanBanner({ onGetStarted, embedded = false }: VitaScanBannerProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
-   navigate("/facescan");
+    onGetStarted?.();
+    navigate("/facescan");
   };
 
   return (
@@ -26,6 +28,9 @@ export default function VitaScanBanner({ onGetStarted }: VitaScanBannerProps) {
         .vsb-wrap {
           width: 100%;
           padding: 32px 110px 64px;
+        }
+        .vsb-wrap.vsb-embedded {
+          padding: 0;
         }
 
         /* ── the card itself ── */
@@ -42,6 +47,7 @@ export default function VitaScanBanner({ onGetStarted }: VitaScanBannerProps) {
           display: flex;
           align-items: center;
           gap: 36px;
+          justify-content: space-between;
           padding: 54px 64px 38px 64px;
           position: relative;
         }
@@ -139,10 +145,19 @@ export default function VitaScanBanner({ onGetStarted }: VitaScanBannerProps) {
         /* ── RIGHT IMAGE ── */
         .vsb-right {
           /* Figma: w-322.723 h-345.375, flex-shrink-0 */
-          flex: 0 0 clamp(220px, 26vw, 323px);
-          height: clamp(230px, 28vw, 345px);
+          flex: 0 0 clamp(200px, 26vw, 323px);
+          width: clamp(200px, 26vw, 323px);
+          aspect-ratio: 323 / 345;
+          height: auto;
           position: relative;
-          overflow: visible;
+          overflow: hidden;
+          border-radius: 24px;
+          margin-left: auto;
+        }
+
+        /* When embedded in /result (full-width sections), let text flex more */
+        .vsb-wrap.vsb-embedded .vsb-left {
+          max-width: none;
         }
 
         /* Base person photo */
@@ -159,25 +174,28 @@ export default function VitaScanBanner({ onGetStarted }: VitaScanBannerProps) {
         /* White frosted panel at bottom (Figma: bg-white/30, rounded-bl-36 rounded-br-35) */
         .vsb-frost {
           position: absolute;
-          left: -12.78px;
+          left: 0;
           bottom: 0;
-          width: calc(100% + 14px);
+          width: 100%;
           height: 54.6%; /* 188.46 / 345.38 */
           background: rgba(255, 255, 255, 0.3);
           border-radius: 0 0 35px 36px;
           pointer-events: none;
+          transform: scaleX(1.05);
+          transform-origin: center;
         }
 
         /* Scan overlay on top (Group 5) — positioned -14px left, full 350×350 */
         .vsb-overlay {
           position: absolute;
-          left: -14px;
-          top: 0;
-          width: calc(100% + 26px);
-          height: calc(100% + 4px);
+          inset: 0;
+          width: 100%;
+          height: 100%;
           object-fit: cover;
           pointer-events: none;
           display: block;
+          transform: scale(1.05);
+          transform-origin: center;
         }
 
         /* ── RESPONSIVE ── */
@@ -185,7 +203,7 @@ export default function VitaScanBanner({ onGetStarted }: VitaScanBannerProps) {
           .vsb-wrap { padding: 24px 32px 40px; }
           .vsb-card  { padding: 40px 36px 32px; gap: 24px; flex-direction: column; }
           .vsb-left  { max-width: 100%; }
-          .vsb-right { flex: 0 0 220px; height: 220px; align-self: center; }
+          .vsb-right { flex: 0 0 220px; width: 220px; align-self: center; }
           .vsb-heading { font-size: clamp(24px, 4vw, 36px); }
         }
         @media (max-width: 600px) {
@@ -193,11 +211,11 @@ export default function VitaScanBanner({ onGetStarted }: VitaScanBannerProps) {
           .vsb-card  { padding: 28px 20px 24px; border-radius: 16px; }
           .vsb-heading { font-size: 24px; }
           .vsb-desc  { font-size: 14px; }
-          .vsb-right { flex: 0 0 180px; height: 180px; }
+          .vsb-right { flex: 0 0 180px; width: 180px; }
         }
       `}</style>
 
-      <div className="vsb-wrap">
+      <div className={`vsb-wrap${embedded ? " vsb-embedded" : ""}`}>
         <div className="vsb-card">
 
           {/* ── LEFT ── */}

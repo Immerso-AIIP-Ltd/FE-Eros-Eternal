@@ -1,12 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ErosLogo from "../../assets/LogoEros.png";
 import { useNavigate } from 'react-router-dom';
-import Vibration from "../../assets/result-images/add_reaction.png";
-import Aura from "../../assets/result-images/background_replace.png";
-import StarMap from "../../assets/result-images/brightness_5.png";
-import Flame from "../../assets/result-images/mode_heat.png";
-import Kosha from "../../assets/result-images/clinical_notes.png";
-import Longevity from "../../assets/result-images/ecg_heart.png";
 
 // ── SVG Icon Components (chat tabs etc.) ───────────────────────────────────────
 
@@ -87,16 +81,6 @@ const TimerIcon = () => (
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
-const cardsData = [
-  // { id: 1, icon: ..., title: "Vita Scan", reportType: "vita_scan", route: "/vita-scan" },
-  { id: 2, icon: Vibration,   title: "Vibrational\nfrequency", reportType: "vibrational_frequency", route: "/vibrational-frequency" },
-  { id: 3, icon: Aura,        title: "Aura Profile",          reportType: "aura_profile",         route: "/aura-profile" },
-  { id: 4, icon: StarMap,     title: "Star Map",              reportType: "star_map",             route: "/star-map" },
-  { id: 5, icon: Flame,       title: "Flame Score",           reportType: "flame_score",          route: "/flame-score" },
-  { id: 6, icon: Kosha,       title: "Kosha Map",             reportType: "kosha_map",            route: "/kosha-map" },
-  { id: 7, icon: Longevity,   title: "Longevity\nBlueprint",  reportType: "longevity_blueprint",   route: "/longevity-blueprint" },
-];
-
 const chatTabs = [
   { label: "Reports",   Icon: ReportsIcon   },
   { label: "Health",    Icon: HealthIcon    },
@@ -107,42 +91,12 @@ const chatTabs = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const REPORT_STATUS_API = "https://unrefrangible-eddy-magnanimously.ngrok-free.dev/aitools/wellness/v2/reports/individual_report/";
-
 export const Header = () => {
   const navigate = useNavigate();
   const [chatInput, setChatInput] = useState("");
   const [activeTab, setActiveTab] = useState("Reports");
-  const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>({});
-  const [loadingStatuses, setLoadingStatuses] = useState(true);
-  const userId = localStorage.getItem("userId") || localStorage.getItem("user_id");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchStatuses = async () => {
-      if (!userId) { setLoadingStatuses(false); return; }
-      const statuses: Record<string, boolean> = {};
-      try {
-        await Promise.all(cardsData.map(async (card) => {
-          const res = await fetch(`${REPORT_STATUS_API}?user_id=${userId}&report_type=${card.reportType}`);
-          const data = await res.json();
-          statuses[card.reportType] = !!(data.success && data.data?.report_data);
-        }));
-        setReportStatuses(statuses);
-      } finally {
-        setLoadingStatuses(false);
-      }
-    };
-    fetchStatuses();
-  }, [userId]);
-
-  const handleCardAction = (card: (typeof cardsData)[number]) => {
-    const hasReport = reportStatuses[card.reportType];
-    if (hasReport) {
-      navigate("/view-report", { state: { reportType: card.reportType, userId, title: card.title.replace(/\n/g, " ") } });
-    } else {
-      navigate(card.route);
-    }
-  };
   const handleSend = () => {
     // Add your message sending logic here
     console.log("Message sent!");
@@ -151,6 +105,19 @@ export const Header = () => {
     navigate('/ai-chat');
   };
   
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (!element) return;
+
+    const nav = document.querySelector(".eros-nav") as HTMLElement | null;
+    const navHeight = nav?.getBoundingClientRect().height ?? 0;
+    const computedStyle = window.getComputedStyle(element);
+    const paddingTop = Number.parseFloat(computedStyle.paddingTop || "0") || 0;
+    const y = element.getBoundingClientRect().top + window.scrollY - navHeight - 0 + paddingTop;
+    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    setMobileNavOpen(false);
+  };
+
 
   return (
     <>
@@ -161,33 +128,38 @@ export const Header = () => {
 
         .eros-root {
           width: 100%;
-          // height: 100vh;
           background: #f0f8ff;
           font-family: 'Poppins', sans-serif;
           overflow-x: hidden;
           position: relative;
           box-sizing: border-box;
+          min-height: 100vh;
+        }
+
+        /* Desktop only: relaxed root height so content flows naturally */
+        @media (min-width: 1024px) {
+          .eros-root { min-height: auto; }
         }
 
         /* ── NAVBAR ── */
         .eros-nav {
           width: 100%;
-          height: 70px;
+          height: var(--eros-nav-h, 70px);
           background: #ffffff;
-          position: relative;
+          position: sticky;
+          top: 0;
           z-index: 1000;
           box-shadow: 0 4px 25px 0 rgba(0,0,0,0.07);
           box-sizing: border-box;
         }
         .eros-nav-container {
-          max-width: 1400px;
           width: 100%;
           height: 100%;
           margin: 0 auto;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 80px;
+          padding: 0 clamp(16px, 5vw, 80px);
           box-sizing: border-box;
         }
         .eros-nav-links {
@@ -205,6 +177,45 @@ export const Header = () => {
         }
         .eros-nav-link:hover { color: #0a0a0a; }
         .eros-nav-right { display: flex; align-items: center; gap: 16px; }
+        .eros-nav-toggle {
+          display: none;
+          width: 42px;
+          height: 42px;
+          border-radius: 10px;
+          border: 1px solid rgba(0,0,0,0.08);
+          background: rgba(255,255,255,0.9);
+          cursor: pointer;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .eros-mobile-panel {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: rgba(255,255,255,0.98);
+          border-bottom: 1px solid rgba(0,0,0,0.06);
+          box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+          padding: 12px 0;
+        }
+        .eros-mobile-panel.open { display: block; }
+        .eros-mobile-links {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          padding: 0 clamp(16px, 5vw, 80px);
+        }
+        .eros-mobile-link {
+          padding: 10px 10px;
+          border-radius: 10px;
+          font-size: 14px;
+          color: #1f2937;
+          cursor: pointer;
+          user-select: none;
+        }
+        .eros-mobile-link:hover { background: rgba(157,202,230,0.22); }
         .eros-rasi-btn {
           background: #9dcae6;
           border: none;
@@ -230,18 +241,31 @@ export const Header = () => {
           position: relative;
           z-index: 1;
           width: 100%;
-          padding: 0 80px 80px;
+          padding: 0 80px;
           box-sizing: border-box;
-          flex: 1
+          flex: 1;
+          min-height: calc(100vh - var(--eros-nav-h, 70px));
+          display: flex;
+          height: calc(100vh - var(--eros-nav-h, 70px));
+        }
+        @media (min-width: 1024px) {
+          .eros-body {
+            min-height: auto;
+            height: auto;
+          }
         }
         .eros-inner {
           width: 100%;
-          max-width: 1400px;
           margin: 0 auto;
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding-top: 40px;
+          justify-content: center;
+          padding-top: clamp(16px, 3vh, 32px);
+          padding-bottom: clamp(16px, 3vh, 32px);
+          gap: clamp(14px, 2.2vh, 28px);
+          max-height: calc(100vh - var(--eros-nav-h, 70px));
+          min-height: 100%;
         }
 
         /* ── AI ICON CIRCLE ── */
@@ -265,17 +289,23 @@ export const Header = () => {
           align-items: center;
           gap: 16px;
           // padding-top: 14px;
-          margin-bottom: 48px;
+          margin-bottom: 0;
         }
         .eros-title {
           font-family: 'Geist', 'Poppins', sans-serif;
           font-weight: 600;
-          font-size: 40px;
+          font-size: clamp(28px, 3.2vw, 40px);
           letter-spacing: -1.5px;
           line-height: 1.2;
           text-align: center;
           max-width: 600px;
           margin: 0;
+        }
+        .eros-title-line {
+          display: block;
+        }
+        .eros-title-line1 {
+          white-space: nowrap;
         }
         .eros-title-grad {
           background: linear-gradient(135deg, #9dcae6 0%, #e0b7c0 40%, #d29cb9 65%, #a097c7 100%);
@@ -288,7 +318,7 @@ export const Header = () => {
           -webkit-text-fill-color: #0a0a0a;
         }
         .eros-subtitle {
-          font-size: 15px;
+          font-size: clamp(13px, 1.15vw, 15px);
           font-weight: 400;
           color: #475569;
           opacity: 0.7;
@@ -298,108 +328,34 @@ export const Header = () => {
           margin: 0;
         }
 
-        /* ── CARDS ROW ── */
-        .eros-cards-row {
-          display: flex;
-          gap: 14px;
-          align-items: flex-start;
-          width: 100%;
-          margin-bottom: 56px;
-          justify-content: center;
-        }
-        .eros-card-col {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          align-items: center;
-          flex: 1;
-          min-width: 0;
-          max-width: 160px;
-        }
-
-        /* ── CARD BOX ── */
-        .eros-card-box {
-          width: 100%;
-          border: 1.5px solid rgba(255,255,255,0.9);
-          border-radius: 22px;
-          background:
-            linear-gradient(145deg, rgba(157,202,230,0.55) 0%, rgba(255,255,255,0.1) 75%),
-            rgba(255,255,255,0.85);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          box-shadow: 0 4px 20px rgba(157,202,230,0.2), 0 1px 4px rgba(0,0,0,0.04);
-          padding: 22px 14px 18px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 12px;
-          cursor: pointer;
-          transition: transform 0.22s ease, box-shadow 0.22s ease;
-        }
-        .eros-card-box:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 10px 30px rgba(157,202,230,0.35), 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .eros-card-icon-wrap {
-          width: 32px;
-          height: 32px;
-          background: rgba(255,255,255,0.9);
-          border-radius: 8px;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        }
-        .eros-card-title {
-          font-size: 12.5px;
-          font-weight: 500;
-          color: #0a0a0a;
-          text-align: center;
-          line-height: 1.55;
-          white-space: pre-line;
-          min-height: 38px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        /* ── CARD BUTTON ── */
-        .eros-card-btn {
-          background: #9dcae6;
-          border: none;
-          border-radius: 27px;
-          padding: 5px 18px;
-          min-width: 110px;
-          color: #ffffff;
-          font-size: 13px;
-          font-weight: 500;
-          font-family: 'Poppins', sans-serif;
-          cursor: pointer;
-          box-shadow: 0 4px 14px rgba(157,202,230,0.4);
-          transition: opacity 0.18s, transform 0.18s, box-shadow 0.18s;
-          white-space: nowrap;
-          text-align: center;
-          line-height: 1.7;
-        }
-        .eros-card-btn.view {
-          background: linear-gradient(135deg, #9dcae6, #a097c7);
-        }
-        .eros-card-btn:hover {
-          opacity: 0.9;
-          transform: translateY(-1px);
-          box-shadow: 0 6px 18px rgba(157,202,230,0.5);
-        }
-
         /* ── CHAT SECTION ── */
         .eros-chat-section {
           width: 100%;
-          max-width: 820px;
+          max-width: min(640px, 100%);
           display: flex;
           flex-direction: column;
           gap: 14px;
           align-items: flex-start;
+          margin-top: clamp(36px, 6vh, 88px);
+        }
+
+        /* Laptop/tablet: equal top/bottom spacing in viewport */
+        @media (min-width: 768px) and (max-width: 1439px) {
+          .eros-body {
+            min-height: calc(100vh - var(--eros-nav-h, 70px));
+            height: calc(100vh - var(--eros-nav-h, 70px));
+            align-items: center;
+          }
+          .eros-inner {
+            max-height: calc(100vh - var(--eros-nav-h, 70px));
+            min-height: 100%;
+            justify-content: center;
+            padding-top: clamp(22px, 4vh, 44px);
+            padding-bottom: clamp(22px, 4vh, 44px);
+          }
+          .eros-chat-section {
+            margin-top: 100px;
+          }
         }
 
         /* ── TABS ── */
@@ -422,7 +378,9 @@ export const Header = () => {
           align-items: center;
           gap: 6px;
           height: 38px;
-          padding: 7px 18px 7px 14px;
+          padding: 7px 18px;
+          width: 124px;
+          justify-content: center;
           border: 1px solid rgba(0,0,0,0.1);
           border-radius: 100px;
           background: rgba(255,255,255,0.6);
@@ -461,13 +419,13 @@ export const Header = () => {
         .eros-chat-outer {
           width: 100%;
           border-radius: 22px;
-          background: rgba(255,255,255,0.75);
-          border: 1.5px solid rgba(255,255,255,0.9);
-          backdrop-filter: blur(24px);
+          background: rgba(157,202,230,0.72);
+          border: 1px solid rgba(157,202,230,0.55);
+          backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(24px);
           box-shadow:
             inset 0 0 0 1px rgba(255,255,255,0.6),
-            0 8px 32px rgba(157,202,230,0.22),
+            0 8px 32px rgba(157,202,230,0.28),
             0 2px 8px rgba(0,0,0,0.04);
           overflow: hidden;
           position: relative;
@@ -476,7 +434,7 @@ export const Header = () => {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(135deg, rgba(157,202,230,0.12) 0%, rgba(255,255,255,0) 60%);
+          background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 62%);
           pointer-events: none;
           z-index: 0;
           border-radius: 22px;
@@ -484,8 +442,8 @@ export const Header = () => {
         .eros-chat-inner-wrap {
           position: relative;
           z-index: 1;
-          padding: 14px 10px 0;
-          background:#9dcae6;
+          padding: 12px 12px 12px;
+          background: transparent;
         }
 
         /* ── FREE TRIAL ROW ── */
@@ -494,10 +452,10 @@ export const Header = () => {
           align-items: center;
           gap: 7px;
           padding: 0 6px;
-          margin-bottom: 2px;
+          margin-bottom: 8px;
         }
         .eros-trial-text {
-          font-size: 13.5px;
+          font-size: 13px;
           font-weight: 400;
           color: #1a1a1a;
           letter-spacing: -0.1px;
@@ -508,15 +466,15 @@ export const Header = () => {
         .eros-chat-card {
           position: relative;
           width: 100%;
-          background: rgba(255,255,255,0.95);
-          border: 1.5px solid rgba(220,220,220,0.4);
-          border-radius: 18px;
-          min-height: 100px;
+          background: rgba(255,255,255,0.98);
+          border: 1px solid rgba(15, 23, 42, 0.10);
+          border-radius: 16px;
+          min-height: 96px;
           display: flex;
           flex-direction: column;
           justify-content: flex-end;
-          margin-top: 10px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+          margin-top: 0;
+          box-shadow: 0 6px 18px rgba(15,23,42,0.06);
         }
         .eros-chat-ta {
           width: 100%;
@@ -524,14 +482,14 @@ export const Header = () => {
           border: none;
           outline: none;
           font-family: 'Poppins', sans-serif;
-          font-size: 14px;
+          font-size: 13.5px;
           font-weight: 400;
           color: #222;
           resize: none;
           line-height: 1.6;
-          min-height: 52px;
-          max-height: 80px;
-          padding: 12px 16px 4px;
+          min-height: 46px;
+          max-height: 84px;
+          padding: 12px 14px 6px;
           letter-spacing: -0.1px;
         }
         .eros-chat-ta::placeholder { color: #aaa; }
@@ -548,7 +506,7 @@ export const Header = () => {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 6px 12px 12px;
+          padding: 8px 10px 10px;
         }
         .eros-chat-left { display: flex; align-items: center; gap: 8px; }
         .eros-chat-right { display: flex; align-items: center; gap: 8px; }
@@ -556,20 +514,20 @@ export const Header = () => {
           display: flex;
           align-items: center;
           gap: 6px;
-          padding: 6px 14px;
-          border: 1px solid rgba(0,0,0,0.1);
+          padding: 0 12px;
+          border: 1px solid rgba(15, 23, 42, 0.10);
           border-radius: 24px;
-          background: transparent;
+          background: rgba(255,255,255,0.70);
           cursor: pointer;
           font-family: 'Poppins', sans-serif;
           font-size: 12.5px;
           font-weight: 400;
           color: #555;
           transition: background 0.15s;
-          height: 30px;
+          height: 32px;
           white-space: nowrap;
         }
-        .eros-action-btn:hover { background: rgba(157,202,230,0.1); }
+        .eros-action-btn:hover { background: rgba(157,202,230,0.18); }
         // .eros-send-btn {
         //     display: flex;
         //   align-items: center;
@@ -594,7 +552,7 @@ export const Header = () => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 0 20px; /* Increased horizontal padding for the pill shape */
+  padding: 0 16px; /* Pill shape */
   
   /* Background and Border */
   background-color: #9dcae6; 
@@ -604,12 +562,12 @@ export const Header = () => {
   /* Text and Icon Styling */
   color: #ffffff; 
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   
   /* Sizing */
-  height: 38px;
-  min-width: 100px;
+  height: 32px;
+  min-width: 88px;
   cursor: pointer;
   white-space: nowrap;
   
@@ -629,20 +587,80 @@ export const Header = () => {
         /* ── RESPONSIVE ── */
         @media (max-width: 1100px) {
           .eros-nav { padding: 0 40px; }
-          .eros-body { padding: 0 40px 80px; }
+          .eros-body { padding: 0 40px; }
         }
         @media (max-width: 900px) {
           .eros-nav { padding: 0 24px; }
           .eros-nav-links { display: none; }
-          .eros-body { padding: 0 20px 60px; }
-          .eros-title { font-size: 30px; }
-          .eros-cards-row { flex-wrap: wrap; justify-content: flex-start; }
-          .eros-card-col { flex: 0 0 calc(33.3% - 10px); max-width: none; }
+          .eros-nav-toggle { display: inline-flex; }
+          .eros-body { padding: 0 20px; }
+          .eros-title { font-size: clamp(24px, 4vw, 32px); }
         }
         @media (max-width: 600px) {
           .eros-nav { height: 68px; }
-          .eros-card-col { flex: 0 0 calc(50% - 8px); }
+          :root { --eros-nav-h: 68px; }
           .eros-title { font-size: 24px; letter-spacing: -0.8px; }
+        }
+        @media (max-width: 380px) {
+          .eros-title-line1 { white-space: normal; }
+        }
+
+        /* Short-height laptops: reduce vertical density so everything fits */
+        @media (max-height: 820px) and (min-width: 900px) {
+          .eros-inner {
+            padding-top: 14px;
+            padding-bottom: 14px;
+            gap: 14px;
+          }
+          .eros-title { font-size: 36px; }
+          .eros-subtitle { font-size: 14px; }
+          .eros-chat-card { min-height: 88px; }
+          .eros-chat-ta { min-height: 44px; max-height: 64px; }
+        }
+
+        /* Very short heights: compress a bit more to avoid overflow */
+        @media (max-height: 740px) and (min-width: 900px) {
+          .eros-title { font-size: 32px; }
+          .eros-subtitle { font-size: 13px; }
+          .eros-tabs { gap: 18px; }
+          .eros-tab { height: 34px; padding: 6px 14px; font-size: 13px; width: 116px; }
+          .eros-chat-card { min-height: 80px; margin-top: 8px; }
+          .eros-chat-ta { min-height: 40px; max-height: 58px; padding: 10px 14px 4px; }
+          .eros-chat-actions { padding: 4px 10px 10px; }
+        }
+
+        /* Large desktops: scale up spacing/controls */
+        @media (min-width: 1440px) and (min-height: 860px) {
+          .eros-nav-container { padding-inline: 64px; }
+          .eros-body { padding-inline: 64px; }
+
+          .eros-inner {
+            justify-content: flex-start;
+            padding-top: 34px;
+            padding-bottom: 28px;
+            gap: 22px;
+          }
+          .eros-title { font-size: clamp(54px, 3.4vw, 64px); max-width: 840px; }
+          .eros-subtitle { font-size: 17.5px; max-width: 720px; }
+          .eros-tabs { gap: 28px; }
+          .eros-tab { height: 42px; padding: 8px 18px; font-size: 14px; width: 140px; }
+          .eros-chat-section {
+            width: min(44vw, 760px);
+            max-width: min(760px, 100%);
+            margin: 0 auto;
+            align-items: center;
+          }
+          .eros-chat-outer { width: 100%; }
+          .eros-chat-card { min-height: 108px; }
+          .eros-chat-ta { min-height: 56px; max-height: 90px; font-size: 15px; }
+        }
+
+        @media (min-width: 1680px) and (min-height: 900px) {
+          .eros-title { font-size: clamp(60px, 3.2vw, 72px); }
+          .eros-subtitle { font-size: 18px; }
+          .eros-nav-container { padding-inline: 80px; }
+          .eros-body { padding-inline: 80px; }
+          .eros-chat-section { width: min(44vw, 860px); max-width: min(860px, 100%); }
         }
       `}</style>
 
@@ -665,7 +683,7 @@ export const Header = () => {
                 <span 
                   key={link.label} 
                   className="eros-nav-link"
-                  onClick={() => document.getElementById(link.id)?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => scrollToSection(link.id)}
                 >
                   {link.label}
                 </span>
@@ -673,12 +691,59 @@ export const Header = () => {
             </div>
 
             <div className="eros-nav-right">
+              <button
+                type="button"
+                className="eros-nav-toggle"
+                aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
+                onClick={() => setMobileNavOpen((v) => !v)}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="2" strokeLinecap="round">
+                  {mobileNavOpen ? (
+                    <>
+                      <path d="M18 6L6 18" />
+                      <path d="M6 6l12 12" />
+                    </>
+                  ) : (
+                    <>
+                      <path d="M4 7h16" />
+                      <path d="M4 12h16" />
+                      <path d="M4 17h16" />
+                    </>
+                  )}
+                </svg>
+              </button>
               <button className="eros-rasi-btn" onClick={() => navigate('/rasi-chart')}>
                 Rasi Chart
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
                 </svg>
               </button>
+            </div>
+          </div>
+
+          <div className={`eros-mobile-panel${mobileNavOpen ? " open" : ""}`}>
+            <div className="eros-mobile-links">
+              {[
+                { label: "Header", id: "header" },
+                { label: "Vita Scan", id: "vita-scan" },
+                { label: "Reports", id: "reports" },
+                { label: "Lucky Section", id: "lucky" },
+                { label: "Explore Sections", id: "explore" },
+                { label: "About", id: "footer" },
+              ].map((link) => (
+                <div
+                  key={link.label}
+                  className="eros-mobile-link"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => scrollToSection(link.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") scrollToSection(link.id);
+                  }}
+                >
+                  {link.label}
+                </div>
+              ))}
             </div>
           </div>
         </nav>
@@ -706,60 +771,16 @@ export const Header = () => {
             {/* Title + Subtitle */}
             <div className="eros-title-block">
               <h1 className="eros-title">
-                <span className="eros-title-grad">EROS Wellness</span>
-                <span className="eros-title-dark"> – AI-driven holistic growth.</span>
+                <span className="eros-title-line eros-title-line1">
+                  <span className="eros-title-grad">EROS Wellness</span>
+                  <span className="eros-title-dark"> – AI-driven</span>
+                </span>
+                <span className="eros-title-line eros-title-dark">holistic growth.</span>
               </h1>
               <p className="eros-subtitle">
                 Your personal AI spiritual companion — illuminating your path through astrology,
                 energy readings, and ancient wisdom tailored uniquely for you.
               </p>
-            </div>
-
-            {/* ── CARDS ── */}
-            <div className="eros-cards-row">
-              {cardsData.map((card) => {
-                const hasReport = reportStatuses[card.reportType];
-                const buttonLabel = loadingStatuses ? "..." : hasReport ? "View report" : "Generate";
-                return (
-                  <div key={card.id} className="eros-card-col">
-                    <div
-                      className="eros-card-box"
-                      onClick={() => handleCardAction(card)}
-                      onKeyDown={(e) => e.key === "Enter" && handleCardAction(card)}
-                      role="button"
-                      tabIndex={0}
-                    >
-                      <div className="eros-card-icon-wrap">
-                        <div
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            maskImage: `url(${card.icon})`,
-                            maskSize: "contain",
-                            maskRepeat: "no-repeat",
-                            maskPosition: "center",
-                            WebkitMaskImage: `url(${card.icon})`,
-                            WebkitMaskSize: "contain",
-                            WebkitMaskRepeat: "no-repeat",
-                            WebkitMaskPosition: "center",
-                            backgroundColor: "#A097C7",
-                          }}
-                          title={card.title.replace(/\n/g, " ")}
-                          aria-hidden
-                        />
-                      </div>
-                      <div className="eros-card-title">{card.title}</div>
-                    </div>
-                    <button
-                      type="button"
-                      className={`eros-card-btn${hasReport ? " view" : ""}`}
-                      onClick={(e) => { e.stopPropagation(); handleCardAction(card); }}
-                    >
-                      {buttonLabel}
-                    </button>
-                  </div>
-                );
-              })}
             </div>
 
             {/* ── CHAT SECTION ── */}
@@ -803,16 +824,16 @@ export const Header = () => {
                     />
                     <div className="eros-chat-actions">
                       <div className="eros-chat-left">
-                        <button className="eros-action-btn">
+                        <button type="button" className="eros-action-btn">
                           <AttachIcon /> Attach
                         </button>
                       </div>
                       <div className="eros-chat-right">
-                        <button className="eros-action-btn">
+                        <button type="button" className="eros-action-btn">
                           <VoiceIcon /> Voice
                         </button>
-                        <button className="eros-send-btn" aria-label="Send" onClick={handleSend}>
-                          <SendIcon />Send
+                        <button type="button" className="eros-send-btn" aria-label="Send" onClick={handleSend}>
+                          <SendIcon /> Send
                         </button>
                       </div>
                     </div>

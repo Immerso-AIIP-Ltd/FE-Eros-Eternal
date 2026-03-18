@@ -77,16 +77,17 @@ const WellnessCard = ({
       onClick={onCardClick}
       style={{
         borderRadius: "18px",
-        padding: "18px 16px",
+        padding: "22px 18px",
         display: "flex",
         flexDirection: "column",
         gap: "10px",
         cursor: "pointer",
         // RESTORED GRADIENT
-        background: "linear-gradient(139.22deg, #ffffff 44.67%, #00b8f8 241.29%)",
-        boxShadow: "8px 4px 25px 0 rgba(0, 0, 0, 0.06)",
+        background: "linear-gradient(139.22deg, #ffffff 44.67%, #00b8f8 281.29%)",
+        boxShadow: "8px 4px 25px 0px #00000014",
         border: "1px solid rgba(255,255,255,0.9)",
         height: "100%",
+        minHeight: "200px",
         transition: "all 0.2s ease",
         fontFamily: "'Poppins', sans-serif",
         position: "relative",
@@ -255,7 +256,7 @@ function extractMetricFromReportResponse(
   return {};
 }
 
-export default function ErosWellnessReports() {
+export default function ErosWellnessReports({ embedded = false }: { embedded?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -290,21 +291,41 @@ export default function ErosWellnessReports() {
 
   return (
     <div style={{
-      height: "100vh",
-      width: "100vw",
-      background: "#FFFFFF",
+      height: embedded ? "auto" : "100vh",
+      width: embedded ? "100%" : "100vw",
+      background: embedded ? "transparent" : "#FFFFFF",
       display: "flex",
       flexDirection: "column",
-      justifyContent: "center",
+      justifyContent: embedded ? "flex-start" : "center",
       alignItems: "center",
-      overflow: "hidden",
-      padding: "20px",
+      overflow: embedded ? "visible" : "hidden",
+      padding: embedded ? "0" : "20px",
       boxSizing: "border-box",
       fontFamily: "'Poppins', sans-serif"
     }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');`}</style>
+      <style>{`
+        .eros-wellness-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 24px;
+          width: 100%;
+        }
 
-      <header style={{ textAlign: "center", marginBottom: "4vh" }}>
+        @media (max-width: 900px) {
+          .eros-wellness-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 520px) {
+          .eros-wellness-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+
+      <header style={{ textAlign: "center", marginBottom: embedded ? "18px" : "4vh" }}>
         <h1 style={{ margin: 0, fontSize: "min(34px, 5.5vh)", fontWeight: 700, color: "#0d1f2d", lineHeight: 1.2 }}>
           EROS Wellness Intelligence Reports
         </h1>
@@ -313,14 +334,13 @@ export default function ErosWellnessReports() {
         </p>
       </header>
 
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "18px",
-        width: "100%",
-        maxWidth: "880px",
-        maxHeight: "70vh", 
-      }}>
+      <div
+        className="eros-wellness-grid"
+        style={{
+          maxWidth: embedded ? "100%" : "880px",
+          maxHeight: embedded ? "none" : "70vh",
+        }}
+      >
         {cardsData.map((card) => (
           <WellnessCard
             key={card.id}
@@ -343,11 +363,7 @@ export default function ErosWellnessReports() {
       </div>
 
       <style>{`
-        @media (max-width: 768px) {
-          div[style*="grid-template-columns"] { grid-template-columns: repeat(2, 1fr) !important; overflow-y: auto; }
-        }
         @media (max-width: 480px) {
-          div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
           h1 { font-size: 24px !important; }
         }
       `}</style>
