@@ -29,7 +29,7 @@ interface PersonalMonthResponse {
   status: number;
 }
 
-export const LuckSection: React.FC = () => {
+export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const [flippedIndexes, setFlippedIndexes] = useState<Set<number>>(new Set());
   const [luckyNumbers, setLuckyNumbers] = useState<LuckyNumbers | null>(null);
   const [horoscope, setHoroscope] = useState<HoroscopeResponse | null>(null);
@@ -197,8 +197,8 @@ export const LuckSection: React.FC = () => {
   return (
     <div
       style={{
-        padding: "56px 24px 64px",
-        backgroundColor: "#ffffff",
+        padding: embedded ? 0 : "56px 24px 64px",
+        backgroundColor: embedded ? "transparent" : "#ffffff",
         fontFamily: "'Poppins', sans-serif",
       }}
     >
@@ -210,10 +210,11 @@ export const LuckSection: React.FC = () => {
 
         .luck-cards-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           gap: 24px;
-          max-width: 1000px;
-          margin: 0 auto;
+          width: 100%;
+          max-width: 100%;
+          margin: 0;
         }
 
         .luck-flip-card {

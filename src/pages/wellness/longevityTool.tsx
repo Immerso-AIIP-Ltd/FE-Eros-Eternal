@@ -385,8 +385,12 @@ const LongevityTool: React.FC = () => {
     const currentInput = inputValue;
     setInputValue("");
 
+    // ✅ Snapshot before clearing
+    const currentFiles = [...attachedFiles];
+    const currentImages = [...attachedImages];
+    const currentVoices = [...attachedVoices];
+
     setIsLoading(true);
-    // FIX: clear attachments immediately after send
     setAttachedImages([]);
     setAttachedFiles([]);
     setAttachedVoices([]);
@@ -404,17 +408,13 @@ const LongevityTool: React.FC = () => {
 
       const formData = new FormData();
       formData.append("report_type", currentReportType);
+      formData.append("answer", currentInput.trim() ? currentInput : "");
 
-      if (currentInput.trim()) {
-        formData.append("answer", currentInput);
-      } else {
-        formData.append("answer", "");
-      }
-
-      if (attachedImages.length > 0 && attachedFiles.length > 0) {
-        formData.append("file", attachedFiles[0]);
-      } else if (attachedVoices.length > 0) {
-        formData.append("file", attachedVoices[0].file);
+      // ✅ Use snapshots
+      if (currentImages.length > 0 && currentFiles.length > 0) {
+        formData.append("file", currentFiles[0]);
+      } else if (currentVoices.length > 0) {
+        formData.append("file", currentVoices[0].file);
       }
 
       const response = await fetch(
@@ -1113,7 +1113,7 @@ const LongevityTool: React.FC = () => {
                             border: "1px solid #188BEF1F",
                           }}
                         >
-                          {message.imageList &&
+                          {/* {message.imageList &&
                             message.imageList.length > 0 && (
                               <div className="mb-2">
                                 {message.imageList.map((img, j) => (
@@ -1130,6 +1130,42 @@ const LongevityTool: React.FC = () => {
                                     onClick={() => setPreviewImage(img)}
                                   />
                                 ))}
+                              </div>
+                            )} */}
+                          {message.imageList &&
+                            message.imageList.length > 0 && (
+                              <div className="mb-2 flex flex-wrap gap-2">
+                                {message.imageList.map((img, j) =>
+                                  img === "pdf" ? (
+                                    // ✅ Render PDF chip instead of broken <img>
+                                    <div
+                                      key={j}
+                                      className="flex items-center gap-2 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2"
+                                      style={{
+                                        fontSize: "13px",
+                                        color: "#555",
+                                      }}
+                                    >
+                                      <span style={{ fontSize: "20px" }}>
+                                        📄
+                                      </span>
+                                      <span>PDF attached</span>
+                                    </div>
+                                  ) : (
+                                    <img
+                                      key={j}
+                                      src={img}
+                                      alt="attachment"
+                                      className="rounded max-w-full h-auto cursor-pointer"
+                                      style={{
+                                        maxWidth: "200px",
+                                        maxHeight: "200px",
+                                        objectFit: "cover",
+                                      }}
+                                      onClick={() => setPreviewImage(img)}
+                                    />
+                                  ),
+                                )}
                               </div>
                             )}
                           {message.audio && (
