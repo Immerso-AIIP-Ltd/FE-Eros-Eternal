@@ -55,8 +55,8 @@ const RasiChartPage: React.FC = () => {
         );
       }
 
-      // Normalize date to MM/DD/YYYY
-      dateOfBirth = normalizeDateToMMDDYYYY(dateOfBirth);
+      // Normalize date to dd/mm/yyyy (API requirement)
+      dateOfBirth = normalizeDateToDDMMYYYY(dateOfBirth);
 
       const payload = {
         user_id,
@@ -140,24 +140,28 @@ const RasiChartPage: React.FC = () => {
     }
   };
 
-  function normalizeDateToMMDDYYYY(input: string): string {
-    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(input)) {
-      return input;
+  function normalizeDateToDDMMYYYY(input: string): string {
+    const trimmed = input.trim();
+    // Already dd/mm/yyyy
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
+      return trimmed;
     }
-    if (/^\d{4}-\d{2}-\d{2}$/.test(input)) {
-      const [year, month, day] = input.split("-");
-      return `${month}/${day}/${year}`;
+    // yyyy-mm-dd (ISO / input type="date")
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      const [year, month, day] = trimmed.split("-");
+      return `${day}/${month}/${year}`;
     }
-    if (/^\d{2}-\d{2}-\d{4}$/.test(input)) {
-      const [part1, part2, year] = input.split("-");
-      return `${part2}/${part1}/${year}`;
+    // dd-mm-yyyy
+    if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(trimmed)) {
+      const [day, month, year] = trimmed.split("-");
+      return `${day}/${month}/${year}`;
     }
-    const cleaned = input.replace(/[\.\s]/g, "/");
+    const cleaned = trimmed.replace(/[\.\s]/g, "/");
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(cleaned)) {
       return cleaned;
     }
     console.warn("Unrecognized date format:", input);
-    return input;
+    return trimmed;
   }
 
   useEffect(() => {

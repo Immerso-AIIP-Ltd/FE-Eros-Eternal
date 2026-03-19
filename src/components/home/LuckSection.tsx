@@ -317,8 +317,7 @@ export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false
             fontWeight: 400,
           }}
         >
-          Lorem ipsum dolor sit amet consectetur. Pulvinar vestibulum cras
-          aliquam tempus nullam arcu sed.
+         Unlock Daily Cosmic Guidance with Personalized Star Insights
         </p>
       </div>
 

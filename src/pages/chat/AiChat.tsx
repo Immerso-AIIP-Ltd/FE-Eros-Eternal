@@ -30,6 +30,7 @@ import credits from "@/assets/credits.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { baseApiUrl } from "@/config/api";
 import { PanelLeft } from "lucide-react";
+import { getAndClearPendingAttachments } from "@/lib/pendingChatAttachments";
 
 const AiChat: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
@@ -234,6 +235,17 @@ const AiChat: React.FC = () => {
       if (savedMessage) {
         setInputValue(savedMessage);
         sessionStorage.removeItem("initialMessage");
+      }
+
+      const pending = getAndClearPendingAttachments();
+      if (
+        pending.files?.length ||
+        pending.imageUrls?.length ||
+        pending.voices?.length
+      ) {
+        if (pending.files?.length) setAttachedFiles(pending.files);
+        if (pending.imageUrls?.length) setAttachedImages(pending.imageUrls);
+        if (pending.voices?.length) setAttachedVoices(pending.voices);
       }
     }
   }, [isInitialized, messages.length]);

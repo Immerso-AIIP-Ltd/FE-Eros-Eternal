@@ -47,28 +47,28 @@ export const ExploreSection: React.FC<{ embedded?: boolean }> = ({ embedded = fa
   const items: ExploreItem[] = [
     {
       title: "Tarot Reading",
-      subtitle: "Lorem ipsum dolor sit amet consectetur. Enim ornare faucibus urna blandit facilisi eu nulla.",
+      subtitle: "Clarity through symbolic guidance and intuitive insight. Find direction and meaning for your path ahead.",
       image: tarot,
       onClick: () => navigate('/card'),
       locked: false,
     },
     {
       title: "Palmistry",
-      subtitle: "Lorem ipsum dolor sit amet consectetur. Enim ornare faucibus urna blandit facilisi eu nulla.",
+      subtitle: "Your hands reveal how you navigate life.Discover insights into your path, choices, and potential.",
       image: palm,
       onClick: () => navigate('/palmcard'),
       locked: false,
     },
     {
       title: "Harmony Index",
-      subtitle: "Lorem ipsum dolor sit amet consectetur. Enim ornare faucibus urna blandit facilisi eu nulla.",
+      subtitle: "Discover Your Inner Balance & Energy Alignment",
       image: harmonyindex,
       onClick: () => navigate('/harmoneyi'),
       locked: false,
     },
     {
       title: "Face Reading",
-      subtitle: "Lorem ipsum dolor sit amet consectetur. Enim ornare faucibus urna blandit facilisi eu nulla.",
+      subtitle: "Your face reflects your inner nature and life patterns. Discover traits, tendencies, and what shapes your path.",
       image: facescan,
       onClick: () => navigate('/facereading'),
       locked: false,
@@ -232,8 +232,7 @@ export const ExploreSection: React.FC<{ embedded?: boolean }> = ({ embedded = fa
             fontWeight: 400,
           }}
         >
-          Lorem ipsum dolor sit amet consectetur. Pulvinar vestibulum cras
-          aliquam tempus nullam arcu sed.
+         Discover Destiny Through Tarot, Palms, Harmony & Face Insights
         </p>
       </div>
 
