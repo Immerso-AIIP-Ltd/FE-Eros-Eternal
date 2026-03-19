@@ -15,7 +15,7 @@ interface ExploreItem {
   locked: boolean;
 }
 
-export const ExploreSection: React.FC = () => {
+export const ExploreSection: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -78,8 +78,8 @@ export const ExploreSection: React.FC = () => {
   return (
     <div
       style={{
-        padding: "56px 24px 64px",
-        backgroundColor: "#ffffff",
+        padding: embedded ? 0 : "56px 24px 64px",
+        backgroundColor: embedded ? "transparent" : "#ffffff",
         fontFamily: "'Poppins', sans-serif",
         width: "100%",
         boxSizing: "border-box",
@@ -90,10 +90,11 @@ export const ExploreSection: React.FC = () => {
 
         .explore-cards-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
-          max-width: 1100px;
-          margin: 0 auto;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 24px;
+          width: 100%;
+          max-width: 100%;
+          margin: 0;
           cursor: default;
         }
 
