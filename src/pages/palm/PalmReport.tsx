@@ -10,6 +10,7 @@ import {
   Alert,
 } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
+import "./PalmReport.css";
 
 const PalmReadingReportPage: React.FC = () => {
   const location = useLocation();
@@ -83,13 +84,13 @@ const PalmReadingReportPage: React.FC = () => {
   if (error) {
     return (
       <div
-        className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4"
-        style={{ backgroundColor: "#fff" }}
+        className="palm-report-page min-vh-100 d-flex flex-column align-items-center justify-content-center"
+        style={{ backgroundColor: "#fff", padding: "clamp(16px, 4vw, 24px)" }}
       >
-        <Alert variant="danger" className="w-100" style={{ maxWidth: 600 }}>
+        <Alert variant="danger" className="w-100" style={{ maxWidth: "min(600px, 100%)" }}>
           {error}
         </Alert>
-        <Button variant="outline-dark" onClick={() => navigate("/result")}>
+        <Button variant="outline-dark" onClick={() => navigate("/result")} className="mt-3">
           Go Back
         </Button>
       </div>
@@ -99,8 +100,8 @@ const PalmReadingReportPage: React.FC = () => {
   if (!report) {
     return (
       <div
-        className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4"
-        style={{ backgroundColor: "#fff" }}
+        className="palm-report-page min-vh-100 d-flex flex-column align-items-center justify-content-center"
+        style={{ backgroundColor: "#fff", padding: "clamp(16px, 4vw, 24px)" }}
       >
         <div className="text-center">
           <div className="spinner-border text-info mb-3" role="status">
@@ -116,56 +117,55 @@ const PalmReadingReportPage: React.FC = () => {
   const { palm_reading_detail } = data;
 
   return (
-    <div 
-      className="vw-100 d-flex flex-column p-4" 
+    <div
+      className="palm-report-page d-flex flex-column"
       style={{
         background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
         minHeight: "100vh",
-        color: "#000"
+        color: "#000",
       }}
     >
+      <div className="palm-report-inner flex-grow-1 d-flex flex-column">
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="palm-report-header d-flex justify-content-between align-items-center mb-3 mb-md-4">
         <button
+          type="button"
           className="btn btn-outline-dark"
           onClick={() => navigate("/result")}
-          style={{ fontSize: "1rem", position: "relative", zIndex: 1000 }}
+          style={{ position: "relative", zIndex: 1000 }}
         >
           ← Back
         </button>
       </div>
 
       {/* User Info */}
-      <div className="d-flex flex-column align-items-center justify-content-center mb-4">
-        <div className="text-center">
-          {username && <h2 className="mt-3 fw-bold" style={{ color: '#1f2937' }}>{username}</h2>}
-          <h6 className="mt-2" style={{ color: '#6b7280', fontWeight: 500 }}>Palm Analysis</h6>
+      <div className="palm-report-user d-flex flex-column align-items-center justify-content-center mb-3 mb-md-4">
+        <div className="text-center px-2">
+          {username && <h2 className="mt-0 mt-md-2 fw-bold" style={{ color: "#1f2937" }}>{username}</h2>}
+          <h6 className="mt-2 mb-0" style={{ color: "#6b7280", fontWeight: 500 }}>Palm Analysis</h6>
         </div>
       </div>
 
       {/* Image Preview */}
-      <div className="d-flex justify-content-center mb-5">
+      <div className="palm-report-image-wrap d-flex justify-content-center mb-4 mb-md-5">
         <img
           src={data.image_url}
           alt="Uploaded Palm"
-          className="img-fluid rounded shadow"
-          style={{ 
-            maxWidth: "80%", 
-            maxHeight: "400px", 
-            objectFit: "contain",
-            border: '1px solid #e5e7eb'
+          className="palm-report-image img-fluid rounded shadow"
+          style={{
+            border: "1px solid #e5e7eb",
           }}
         />
       </div>
 
       {/* Report Sections - Tile Based Design */}
-      <Container>
-        <Row className="g-4">
+      <Container fluid className="palm-report-container px-0">
+        <Row className="g-3 g-md-4">
           {/* Personality Traits */}
           {palm_reading_detail.personality_traits && palm_reading_detail.personality_traits.length > 0 && (
-            <Col md={6} lg={6}>
-              <Card 
-                className="h-100 shadow-sm"
+            <Col xs={12} md={6}>
+              <Card
+                className="palm-report-card h-100 shadow-sm"
                 style={{
                   backgroundColor: "#ffffff",
                   border: '1px solid #e5e7eb',
@@ -194,9 +194,9 @@ const PalmReadingReportPage: React.FC = () => {
 
           {/* Life Patterns */}
           {palm_reading_detail.life_patterns && palm_reading_detail.life_patterns.length > 0 && (
-            <Col md={6} lg={6}>
-              <Card 
-                className="h-100 shadow-sm"
+            <Col xs={12} md={6}>
+              <Card
+                className="palm-report-card h-100 shadow-sm"
                 style={{
                   backgroundColor: "#ffffff",
                   border: '1px solid #e5e7eb',
@@ -225,9 +225,9 @@ const PalmReadingReportPage: React.FC = () => {
 
           {/* Career Insights */}
           {palm_reading_detail.career_insights && palm_reading_detail.career_insights.length > 0 && (
-            <Col md={6} lg={6}>
-              <Card 
-                className="h-100 shadow-sm"
+            <Col xs={12} md={6}>
+              <Card
+                className="palm-report-card h-100 shadow-sm"
                 style={{
                   backgroundColor: "#ffffff",
                   border: '1px solid #e5e7eb',
@@ -256,9 +256,9 @@ const PalmReadingReportPage: React.FC = () => {
 
           {/* Health Observations */}
           {palm_reading_detail.health_observations && palm_reading_detail.health_observations.length > 0 && (
-            <Col md={6} lg={6}>
-              <Card 
-                className="h-100 shadow-sm"
+            <Col xs={12} md={6}>
+              <Card
+                className="palm-report-card h-100 shadow-sm"
                 style={{
                   backgroundColor: "#ffffff",
                   border: '1px solid #e5e7eb',
@@ -287,9 +287,9 @@ const PalmReadingReportPage: React.FC = () => {
 
           {/* Spiritual Guidance */}
           {palm_reading_detail.spiritual_guidance && palm_reading_detail.spiritual_guidance.length > 0 && (
-            <Col md={6} lg={6}>
-              <Card 
-                className="h-100 shadow-sm"
+            <Col xs={12} md={6}>
+              <Card
+                className="palm-report-card h-100 shadow-sm"
                 style={{
                   backgroundColor: "#ffffff",
                   border: '1px solid #e5e7eb',
@@ -318,10 +318,10 @@ const PalmReadingReportPage: React.FC = () => {
         </Row>
 
         {/* Raw Analysis - Full Width */}
-        <Row className="mt-4">
-          <Col md={12}>
-            <Card 
-              className="shadow-sm"
+        <Row className="mt-3 mt-md-4">
+          <Col xs={12}>
+            <Card
+              className="palm-report-card shadow-sm"
               style={{
                 backgroundColor: "#ffffff",
                 border: '1px solid #e5e7eb',
@@ -340,13 +340,7 @@ const PalmReadingReportPage: React.FC = () => {
                 >
                   Detailed Analysis
                 </Card.Title>
-                <div 
-                  style={{
-                    fontSize: "1rem",
-                    lineHeight: "1.8",
-                    color: '#374151'
-                  }}
-                >
+                <div className="palm-report-detail" style={{ color: "#374151" }}>
                   {formatText(data.raw_analysis)}
                 </div>
               </Card.Body>
@@ -356,29 +350,25 @@ const PalmReadingReportPage: React.FC = () => {
       </Container>
 
       <style>{`
-        strong {
+        .palm-report-page strong {
           font-weight: 700;
           color: #1f2937;
         }
-        
-        ul {
+        .palm-report-page ul {
           padding-left: 0;
         }
-        
-        li {
+        .palm-report-page .palm-report-card li {
           color: #374151;
-          font-size: 1rem;
         }
-        
-        .card {
+        .palm-report-page .palm-report-card {
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        
-        .card:hover {
+        .palm-report-page .palm-report-card:hover {
           transform: translateY(-4px);
           box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
         }
       `}</style>
+      </div>
     </div>
   );
 };

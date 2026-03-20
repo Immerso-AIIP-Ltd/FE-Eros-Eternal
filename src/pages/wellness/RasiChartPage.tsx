@@ -11,7 +11,7 @@ import {
   Alert,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { Eye, Download } from "lucide-react";
+import { ArrowLeft, Download, Eye, RefreshCw } from "lucide-react";
 import Stars from "@/components/ui/stars";
 import ChartImage from "@/components/charts/ChartImage";
 import { baseApiUrl } from "@/config/api";
@@ -38,11 +38,19 @@ interface AstrologyResponse {
 const RasiChartPage: React.FC = () => {
   const [data, setData] = useState<AstrologyResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const fetchAstrologyData = async () => {
+  const fetchAstrologyData = async (opts?: { isRefresh?: boolean }) => {
+    const isRefresh = Boolean(opts?.isRefresh);
     try {
+      if (isRefresh) {
+        setRefreshing(true);
+        setError(null);
+      } else {
+        setLoading(true);
+      }
       const user_id = localStorage.getItem("user_id");
       const placeOfBirth =
         localStorage.getItem("place_of_birth") || "Chennai, India";
@@ -136,7 +144,8 @@ const RasiChartPage: React.FC = () => {
       console.error("Fetch error:", err);
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
-      setLoading(false);
+      if (isRefresh) setRefreshing(false);
+      else setLoading(false);
     }
   };
 
@@ -366,17 +375,31 @@ const RasiChartPage: React.FC = () => {
       className="rasi-chart-page vh-100 vw-100 p-4"
       style={{ backgroundColor: "#FFFFFF", color: "#000" }}
     >
-      {/* Header */}
-      <div className="rasi-chart-header d-flex justify-content-between align-items-center mb-4">
+      {/* Header — Figma: back arrow + title left, refresh right */}
+      <header className="rasi-chart-top-bar">
         <button
-          className="btn btn-link text-white"
+          type="button"
+          className="rasi-chart-back"
           onClick={() => navigate(-1)}
-          style={{ fontSize: "1.2rem", textDecoration: "none" }}
+          aria-label="Go back"
         >
-          ← Rasi Chart
+          <ArrowLeft className="rasi-chart-back-icon" size={22} strokeWidth={1.75} />
+          <span className="rasi-chart-back-title">Rasi Chart</span>
         </button>
-        <div></div>
-      </div>
+        <button
+          type="button"
+          className="rasi-chart-refresh"
+          onClick={() => fetchAstrologyData({ isRefresh: true })}
+          disabled={refreshing}
+          aria-label="Refresh charts"
+        >
+          <RefreshCw
+            size={20}
+            strokeWidth={1.75}
+            className={refreshing ? "rasi-chart-refresh-spin" : ""}
+          />
+        </button>
+      </header>
 
       <div className="rasi-chart-user-info d-flex flex-column align-items-center justify-content-center mb-3">
         <h3>{username}</h3>
