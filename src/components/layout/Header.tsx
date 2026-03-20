@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import StarmapIcon from "@/assets/result-images/brightness_5.png";
 import VibrationalIcon from "@/assets/result-images/add_reaction.png";
@@ -20,6 +20,10 @@ import auraBg from "@/assets/reports/aura.png";
 import koshaBg from "@/assets/reports/kosha.png";
 import longevityBg from "@/assets/reports/longevity.png";
 import { baseApiUrl } from "@/config/api";
+import {
+  setPendingAttachments,
+  type PendingVoice,
+} from "@/lib/pendingChatAttachments";
 
 interface CardData {
   id: number;
@@ -41,6 +45,152 @@ export const Header: React.FC = () => {
   );
   const [loadingStatuses, setLoadingStatuses] = useState(true);
   const [chatInput, setChatInput] = useState("");
+  const [attachedFiles, setAttachedFiles] = useState<
+    Array<{ file: File; objectUrl?: string }>
+  >([]);
+  const [attachedVoices, setAttachedVoices] = useState<PendingVoice[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const recordingStartTimeRef = useRef<number>(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
+
+  const handleAttachClick = () => fileInputRef.current?.click();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length) return;
+    const newItems: Array<{ file: File; objectUrl?: string }> = [];
+    for (const f of Array.from(files)) {
+      if (f.type.startsWith("image/")) {
+        newItems.push({ file: f, objectUrl: URL.createObjectURL(f) });
+      } else {
+        newItems.push({ file: f });
+      }
+    }
+    setAttachedFiles((prev) => [...prev, ...newItems]);
+    e.target.value = "";
+  };
+
+  const removeAttachedFile = (index: number) => {
+    setAttachedFiles((prev) => {
+      const item = prev[index];
+      if (item?.objectUrl) URL.revokeObjectURL(item.objectUrl);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const removeAttachedVoice = (index: number) => {
+    setAttachedVoices((prev) => {
+      const item = prev[index];
+      if (item?.url) URL.revokeObjectURL(item.url);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micStreamRef.current = stream;
+      const recorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+          ? "audio/webm;codecs=opus"
+          : "audio/webm",
+      });
+      recordedChunksRef.current = [];
+      recorder.ondataavailable = (ev) => {
+        if (ev.data.size > 0) recordedChunksRef.current.push(ev.data);
+      };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      recordingStartTimeRef.current = Date.now();
+      setRecordingTime(0);
+      setIsRecording(true);
+      timerRef.current = setInterval(() => {
+        setRecordingTime(
+          Math.floor((Date.now() - recordingStartTimeRef.current) / 1000),
+        );
+      }, 500);
+    } catch (err) {
+      console.error("Microphone error:", err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (!mediaRecorderRef.current || !isRecording) return;
+    const start = recordingStartTimeRef.current;
+    mediaRecorderRef.current.onstop = () => {
+      const blob = new Blob(recordedChunksRef.current, {
+        type: mediaRecorderRef.current?.mimeType || "audio/webm",
+      });
+      const url = URL.createObjectURL(blob);
+      const file = new File(
+        [blob],
+        `recording_${Date.now()}.webm`,
+        { type: blob.type },
+      );
+      const duration = Math.floor((Date.now() - start) / 1000);
+      setAttachedVoices((prev) => [...prev, { url, file, duration }]);
+    };
+    mediaRecorderRef.current.stop();
+    mediaRecorderRef.current = null;
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach((t) => t.stop());
+      micStreamRef.current = null;
+    }
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
+    setIsRecording(false);
+    setRecordingTime(0);
+  };
+
+  const cancelRecording = () => {
+    if (mediaRecorderRef.current) mediaRecorderRef.current.stop();
+    mediaRecorderRef.current = null;
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach((t) => t.stop());
+      micStreamRef.current = null;
+    }
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
+    setIsRecording(false);
+    setRecordingTime(0);
+  };
+
+  const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const handleSendToChat = () => {
+    const hasText = chatInput.trim().length > 0;
+    const hasAttachments =
+      attachedFiles.length > 0 || attachedVoices.length > 0;
+    if (!hasText && !hasAttachments) return;
+
+    if (hasText) {
+      sessionStorage.setItem("initialMessage", chatInput.trim());
+    }
+    if (hasAttachments) {
+      setPendingAttachments({
+        files: attachedFiles.map((a) => a.file),
+        imageUrls: attachedFiles
+          .map((a) => a.objectUrl)
+          .filter((u): u is string => !!u),
+        voices: attachedVoices,
+      });
+    }
+    setChatInput("");
+    attachedFiles.forEach((a) => a.objectUrl && URL.revokeObjectURL(a.objectUrl));
+    setAttachedFiles([]);
+    attachedVoices.forEach((v) => v.url && URL.revokeObjectURL(v.url));
+    setAttachedVoices([]);
+    navigate("/ai-chat");
+  };
   const [activeTab, setActiveTab] = useState("Reports");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -537,12 +687,13 @@ export const Header: React.FC = () => {
           position: relative;
           z-index: 1;
           width: 100%;
-          padding: 0 80px;
+          padding: clamp(64px, 10vh, 100px) clamp(24px, 5vw, 80px) clamp(48px, 6vh, 72px);
           box-sizing: border-box;
           flex: 1;
           min-height: calc(100vh - var(--eros-nav-h, 70px));
           display: flex;
-          height: calc(100vh - var(--eros-nav-h, 70px));
+          align-items: center;
+          justify-content: center;
         }
         @media (min-width: 1024px) {
           .eros-body {
@@ -552,16 +703,16 @@ export const Header: React.FC = () => {
         }
         .eros-inner {
           width: 100%;
+          max-width: 900px;
           margin: 0 auto;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding-top: clamp(16px, 3vh, 32px);
-          padding-bottom: clamp(16px, 3vh, 32px);
-          gap: clamp(14px, 2.2vh, 28px);
-          max-height: calc(100vh - var(--eros-nav-h, 70px));
-          min-height: 100%;
+          padding: 0;
+          gap: 0;
+          max-height: calc(100vh - var(--eros-nav-h, 70px) - 120px);
+          min-height: 0;
         }
 
         /* ── AI ICON CIRCLE ── */
@@ -583,8 +734,7 @@ export const Header: React.FC = () => {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 16px;
-          // padding-top: 14px;
+          gap: 24px;
           margin-bottom: 0;
         }
         .eros-title {
@@ -631,27 +781,20 @@ export const Header: React.FC = () => {
           display: flex;
           flex-direction: column;
           gap: 14px;
-          align-items: flex-start;
-          margin-top: clamp(36px, 6vh, 88px);
+          align-items: stretch;
+          margin-top: clamp(60px, 8vh, 100px);
         }
 
-        /* Laptop/tablet: equal top/bottom spacing in viewport */
+        /* Laptop/tablet: centered in viewport */
         @media (min-width: 768px) and (max-width: 1439px) {
           .eros-body {
             min-height: calc(100vh - var(--eros-nav-h, 70px));
-            height: calc(100vh - var(--eros-nav-h, 70px));
+            display: flex;
             align-items: center;
+            padding-top: clamp(48px, 8vh, 80px);
+            padding-bottom: clamp(48px, 8vh, 80px);
           }
-          .eros-inner {
-            max-height: calc(100vh - var(--eros-nav-h, 70px));
-            min-height: 100%;
-            justify-content: center;
-            padding-top: clamp(22px, 4vh, 44px);
-            padding-bottom: clamp(22px, 4vh, 44px);
-          }
-          .eros-chat-section {
-            margin-top: 100px;
-          }
+          .eros-chat-section { margin-top: clamp(56px, 7vh, 88px); }
         }
 
         /* ── TABS ── */
@@ -790,6 +933,32 @@ export const Header: React.FC = () => {
         }
         .eros-chat-ta::placeholder { color: #aaa; }
 
+        .eros-chat-card .hidden { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+        .eros-chat-attachments {
+          display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px 4px;
+        }
+        .eros-chat-attachment-tag {
+          display: inline-flex; align-items: center; gap: 4px;
+          padding: 2px 8px; background: rgba(157,202,230,0.25);
+          border-radius: 12px; font-size: 11px; color: #444;
+        }
+        .eros-chat-attachment-remove {
+          background: none; border: none; cursor: pointer; padding: 0 2px;
+          font-size: 14px; line-height: 1; color: #888;
+        }
+        .eros-chat-attachment-remove:hover { color: #c00; }
+        .eros-chat-recording {
+          display: flex; align-items: center; gap: 8px; padding: 6px 12px;
+          background: rgba(255,100,100,0.12); border-radius: 10px; margin: 6px 10px 2px;
+          font-size: 12px; color: #c33;
+        }
+        .eros-chat-recording-dot {
+          width: 8px; height: 8px; background: #c33; border-radius: 50%;
+          animation: eros-pulse 1s ease-in-out infinite;
+        }
+        @keyframes eros-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .eros-record-stop { color: #0a6; }
+        .eros-record-cancel { color: #888; }
 
         .eros-logo {
   width: 120px;   /* adjust based on your design */
@@ -805,7 +974,7 @@ export const Header: React.FC = () => {
           padding: 8px 10px 10px;
         }
         .eros-chat-left { display: flex; align-items: center; gap: 8px; }
-        .eros-chat-right { display: flex; align-items: center; gap: 8px; }
+        .eros-chat-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
         .eros-action-btn {
           display: flex;
           align-items: center;
@@ -824,6 +993,7 @@ export const Header: React.FC = () => {
           white-space: nowrap;
         }
         .eros-action-btn:hover { background: rgba(157,202,230,0.18); }
+        .eros-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         // .eros-send-btn {
         //     display: flex;
         //   align-items: center;
@@ -869,6 +1039,7 @@ export const Header: React.FC = () => {
 
   /* Smooth interaction */
   transition: opacity 0.2s ease, transform 0.1s ease;
+ 
 }
 
 .eros-send-btn:hover {
@@ -882,42 +1053,44 @@ export const Header: React.FC = () => {
 
         /* ── RESPONSIVE ── */
         @media (max-width: 1100px) {
-          .eros-nav { padding: 0 40px; }
-          .eros-body { padding: 0 40px; }
+          .eros-nav-container { padding-inline: 40px; }
+          .eros-body { padding: clamp(48px, 8vh, 80px) 40px clamp(40px, 6vh, 64px); }
         }
         @media (max-width: 900px) {
-          .eros-nav { padding: 0 24px; }
+          .eros-nav-container { padding-inline: 24px; }
           .eros-nav-links { display: none; }
           .eros-nav-toggle { display: inline-flex; }
-          .eros-body { padding: 0 20px; }
+          .eros-body { padding: clamp(40px, 6vh, 64px) 20px clamp(32px, 5vh, 56px); }
           .eros-title { font-size: clamp(24px, 4vw, 32px); }
+          .eros-chat-section { margin-top: clamp(40px, 6vh, 72px); }
         }
         @media (max-width: 600px) {
           .eros-nav { height: 68px; }
           :root { --eros-nav-h: 68px; }
+          .eros-body { padding: clamp(32px, 5vh, 56px) 16px clamp(24px, 4vh, 40px); }
           .eros-title { font-size: 24px; letter-spacing: -0.8px; }
+          .eros-title-block { gap: 16px; }
+          .eros-chat-section { margin-top: clamp(32px, 5vh, 56px); }
         }
         @media (max-width: 380px) {
           .eros-title-line1 { white-space: normal; }
         }
 
-        /* Short-height laptops: reduce vertical density so everything fits */
-        @media (max-height: 820px) and (min-width: 900px) {
-          .eros-inner {
-            padding-top: 14px;
-            padding-bottom: 14px;
-            gap: 14px;
-          }
-          .eros-title { font-size: 36px; }
+        /* Short-height laptops: reduce vertical density */
+        @media (max-height: 820px) and (min-width: 901px) {
+          .eros-body { padding-top: clamp(40px, 6vh, 64px); padding-bottom: clamp(32px, 5vh, 48px); }
+          .eros-title { font-size: clamp(32px, 3vw, 40px); }
+          .eros-title-block { gap: 18px; }
           .eros-subtitle { font-size: 14px; }
+          .eros-chat-section { margin-top: clamp(40px, 6vh, 64px); }
           .eros-chat-card { min-height: 88px; }
           .eros-chat-ta { min-height: 44px; max-height: 64px; }
         }
 
         /* Very short heights: compress a bit more to avoid overflow */
         @media (max-height: 740px) and (min-width: 900px) {
-          .eros-title { font-size: 32px; }
-          .eros-subtitle { font-size: 13px; }
+          .eros-title { font-size: 48px; }
+          .eros-subtitle { font-size: 14px; }
           .eros-tabs { gap: 18px; }
           .eros-tab { height: 34px; padding: 6px 14px; font-size: 13px; width: 116px; }
           .eros-chat-card { min-height: 80px; margin-top: 8px; }
@@ -925,38 +1098,24 @@ export const Header: React.FC = () => {
           .eros-chat-actions { padding: 4px 10px 10px; }
         }
 
-        /* Large desktops: scale up spacing/controls */
-        @media (min-width: 1440px) and (min-height: 860px) {
-          .eros-nav-container { padding-inline: 64px; }
-          .eros-body { padding-inline: 64px; }
-
-          .eros-inner {
-            justify-content: flex-start;
-            padding-top: 34px;
-            padding-bottom: 28px;
-            gap: 22px;
-          }
-          .eros-title { font-size: clamp(54px, 3.4vw, 64px); max-width: 840px; }
-          .eros-subtitle { font-size: 17.5px; max-width: 720px; }
-          .eros-tabs { gap: 28px; }
-          .eros-tab { height: 42px; padding: 8px 18px; font-size: 14px; width: 140px; }
-          .eros-chat-section {
-            width: min(44vw, 760px);
-            max-width: min(760px, 100%);
-            margin: 0 auto;
-            align-items: center;
-          }
-          .eros-chat-outer { width: 100%; }
-          .eros-chat-card { min-height: 108px; }
-          .eros-chat-ta { min-height: 56px; max-height: 90px; font-size: 15px; }
+        /* Large desktops: scale up spacing */
+        @media (min-width: 1440px) {
+          .eros-nav-container { padding-inline: clamp(48px, 5vw, 80px); }
+          .eros-body { padding: clamp(80px, 10vh, 120px) clamp(48px, 5vw, 80px) clamp(64px, 8vh, 96px); }
+          .eros-title { font-size: clamp(38px, 2.8vw, 48px); max-width: 800px; }
+          .eros-title-block { gap: 28px; }
+          .eros-subtitle { font-size: 17px; max-width: 680px; }
+          .eros-chat-section { margin-top: clamp(72px, 9vh, 120px); max-width: min(600px, 100%); gap: 18px; }
+          .eros-tabs { gap: 24px; }
+          .eros-tab { height: 40px; padding: 8px 20px; font-size: 14px; min-width: 120px; }
+          .eros-chat-card { min-height: 104px; }
+          .eros-chat-ta { min-height: 52px; max-height: 88px; font-size: 15px; }
         }
 
-        @media (min-width: 1680px) and (min-height: 900px) {
-          .eros-title { font-size: clamp(60px, 3.2vw, 72px); }
-          .eros-subtitle { font-size: 18px; }
-          .eros-nav-container { padding-inline: 80px; }
+        @media (min-width: 1680px) {
           .eros-body { padding-inline: 80px; }
-          .eros-chat-section { width: min(44vw, 860px); max-width: min(860px, 100%); }
+          .eros-title { font-size: clamp(42px, 2.5vw, 52px); }
+          .eros-subtitle { font-size: 18px; }
         }
       `}</style>
 
@@ -972,11 +1131,11 @@ export const Header: React.FC = () => {
 
             <div className="eros-nav-links">
               {[
-                { label: "Header", id: "header" },
+                // { label: "Header", id: "header" },
                 { label: "Vita Scan", id: "vita-scan" },
                 { label: "Reports", id: "reports" },
-                { label: "Lucky Section", id: "lucky" },
-                { label: "Explore Sections", id: "explore" },
+                { label: "Discover Luck", id: "lucky" },
+                { label: "Explore", id: "explore" },
                 { label: "About", id: "footer" },
               ].map((link) => (
                 <span
@@ -1138,40 +1297,114 @@ export const Header: React.FC = () => {
 
                   {/* Chat Input Card */}
                   <div className="eros-chat-card">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,application/pdf,audio/*"
+                      multiple
+                      className="hidden"
+                      aria-hidden
+                      onChange={handleFileChange}
+                    />
+                    {(attachedFiles.length > 0 || attachedVoices.length > 0) && (
+                      <div className="eros-chat-attachments">
+                        {attachedFiles.map((item, i) => (
+                          <span
+                            key={i}
+                            className="eros-chat-attachment-tag"
+                            title={item.file.name}
+                          >
+                            {item.file.name.length > 12
+                              ? item.file.name.slice(0, 10) + "…"
+                              : item.file.name}
+                            <button
+                              type="button"
+                              className="eros-chat-attachment-remove"
+                              onClick={() => removeAttachedFile(i)}
+                              aria-label="Remove"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                        {attachedVoices.map((v, i) => (
+                          <span
+                            key={`v-${i}`}
+                            className="eros-chat-attachment-tag"
+                            title="Voice recording"
+                          >
+                            🎤 {formatTime(v.duration || 0)}
+                            <button
+                              type="button"
+                              className="eros-chat-attachment-remove"
+                              onClick={() => removeAttachedVoice(i)}
+                              aria-label="Remove"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {isRecording && (
+                      <div className="eros-chat-recording">
+                        <span className="eros-chat-recording-dot" />
+                        Recording {formatTime(recordingTime)}
+                        <button
+                          type="button"
+                          className="eros-action-btn eros-record-stop"
+                          onClick={stopRecording}
+                        >
+                          Stop
+                        </button>
+                        <button
+                          type="button"
+                          className="eros-action-btn eros-record-cancel"
+                          onClick={cancelRecording}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
                     <textarea
                       className="eros-chat-ta"
                       placeholder="Ask me anything..."
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendToChat();
+                        }
+                      }}
                       rows={2}
                     />
                     <div className="eros-chat-actions">
-                      <div className="eros-chat-left">
-                        <button type="button" className="eros-action-btn">
+                      {/* <div className="eros-chat-left">
+                        <button
+                          type="button"
+                          className="eros-action-btn"
+                          onClick={handleAttachClick}
+                          disabled={isRecording}
+                        >
                           <AttachIcon /> Attach
                         </button>
-                      </div>
+                      </div> */}
                       <div className="eros-chat-right">
-                        <button type="button" className="eros-action-btn">
-                          <VoiceIcon /> Voice
-                        </button>
+                        {/* <button
+                          type="button"
+                          className="eros-action-btn"
+                          onClick={isRecording ? stopRecording : startRecording}
+                          disabled={false}
+                          title={isRecording ? "Stop recording" : "Record voice"}
+                        >
+                          <VoiceIcon /> {isRecording ? "Stop" : "Voice"}
+                        </button> */}
                         <button
                           type="button"
                           className="eros-send-btn"
                           aria-label="Send"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && !e.shiftKey) {
-                              e.preventDefault();
-                              if (chatInput.trim()) {
-                                sessionStorage.setItem(
-                                  "initialMessage",
-                                  chatInput,
-                                );
-                                navigate("/ai-chat");
-                                setChatInput("");
-                              }
-                            }
-                          }}
+                          onClick={handleSendToChat}
                         >
                           <SendIcon /> Send
                         </button>

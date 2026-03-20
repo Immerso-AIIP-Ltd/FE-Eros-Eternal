@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { baseApiUrl } from "@/config/api";
 import Vibration from "../../assets/result-images/add_reaction.png";
 import Aura from "../../assets/result-images/background_replace.png";
 import StarMap from "../../assets/result-images/brightness_5.png";
@@ -47,18 +48,6 @@ type WellnessCardProps = {
   onCardClick: () => void;
 };
 
-const CheckBadgeIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M20 6L9 17l-5-5"
-      stroke="#0EA5B7"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 const WellnessCard = ({
   icon,
   title,
@@ -69,84 +58,60 @@ const WellnessCard = ({
   metricUnitText,
   onCardClick,
 }: WellnessCardProps) => {
-  const displayButtonText = loading ? "..." : hasReport ? "View Report" : "Generate";
+  const displayButtonText = loading ? "..." : hasReport ? "View Report" : "Get Started";
   const shouldShowMetric = Boolean(hasReport && metricText && !loading);
 
   return (
     <div
       onClick={onCardClick}
       style={{
-        borderRadius: "18px",
-        padding: "22px 18px",
+        borderRadius: "24px",
+        padding: "24px",
         display: "flex",
         flexDirection: "column",
-        gap: "10px",
+        gap: "12px",
         cursor: "pointer",
-        // RESTORED GRADIENT
-        background: "linear-gradient(139.22deg, #ffffff 44.67%, #00b8f8 281.29%)",
-        boxShadow: "8px 4px 25px 0px #00000014",
-        border: "1px solid rgba(255,255,255,0.9)",
+        background: "linear-gradient(145deg, #ffffff 0%, #f0f9ff 50%, #e6f4fd 100%)",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
+        border: "1px solid rgba(157,202,230,0.35)",
         height: "100%",
-        minHeight: "200px",
+        minHeight: "240px",
         transition: "all 0.2s ease",
         fontFamily: "'Poppins', sans-serif",
         position: "relative",
       }}
     >
-      {hasReport && !loading && (
-        <div
-          style={{
-            position: "absolute",
-            top: 12,
-            right: 12,
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            padding: "5px 9px",
-            borderRadius: "999px",
-            background: "rgba(14, 165, 183, 0.12)",
-            border: "1px solid rgba(14, 165, 183, 0.25)",
-            color: "#0EA5B7",
-            fontSize: "10.5px",
-            fontWeight: 700,
-            letterSpacing: "0.2px",
-            userSelect: "none",
-          }}
-        >
-          <CheckBadgeIcon />
-          Generated
-        </div>
-      )}
-
-      <div style={{ width: 34, height: 34, borderRadius: "10px", background: "#9DCAE6", display: "flex", alignItems: "center", justifyContent: "center", padding: "6px" }}>
+      <div style={{ width: 40, height: 40, borderRadius: "12px", background: "#9DCAE6", display: "flex", alignItems: "center", justifyContent: "center", padding: "8px", flexShrink: 0 }}>
         <img src={icon} alt={title} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
       </div>
-      <div>
-        <h3 style={{ margin: "0 0 4px 0", fontSize: "14px", fontWeight: 700, color: "#1a2a3a" }}>{title}</h3>
+      <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#0d1f2d", lineHeight: 1.3 }}>{title}</h3>
+      <div style={{ flex: 1, minHeight: "52px" }}>
         {shouldShowMetric ? (
-          <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
-            <div style={{ fontSize: "30px", fontWeight: 800, color: "#0d1f2d", letterSpacing: "-0.5px", lineHeight: 1.1 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "36px", fontWeight: 800, color: "#0d1f2d", letterSpacing: "-0.5px", lineHeight: 1.1 }}>
               {metricText}
-            </div>
+            </span>
             {metricUnitText ? (
-              <div style={{ fontSize: "11px", fontWeight: 700, color: "#6b8aa0" }}>
+              <span style={{ fontSize: "14px", fontWeight: 600, color: "#6b8aa0", marginBottom: "2px" }}>
                 {metricUnitText}
-              </div>
+              </span>
             ) : null}
           </div>
+        ) : hasReport && !loading ? (
+          <p style={{ margin: 0, fontSize: "13px", color: "#0d1f2d", fontWeight: 600, lineHeight: 1.5 }}>Report ready</p>
         ) : (
-          <p style={{ margin: 0, fontSize: "11.5px", color: "#6b8aa0", lineHeight: 1.45 }}>{description}</p>
+          <p style={{ margin: 0, fontSize: "13px", color: "#6b8aa0", lineHeight: 1.5 }}>{description}</p>
         )}
       </div>
-      <div style={{ marginTop: "auto" }}>
+      <div style={{ marginTop: "auto", paddingTop: "4px" }}>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onCardClick(); }}
           style={{ 
             display: "inline-flex", alignItems: "center", gap: "6px", background: "#9dcae6", 
-            border: "none", borderRadius: "20px", padding: "7px 15px", color: "#fff", 
-            fontSize: "11.5px", fontWeight: 600, cursor: "pointer",
-            boxShadow: "0 4px 10px rgba(74, 164, 227, 0.2)"
+            border: "none", borderRadius: "100px", padding: "8px 18px", color: "#fff", 
+            fontSize: "13px", fontWeight: 600, cursor: "pointer",
+            boxShadow: "0 2px 12px rgba(157,202,230,0.35)"
           }}
         >
           {displayButtonText}
