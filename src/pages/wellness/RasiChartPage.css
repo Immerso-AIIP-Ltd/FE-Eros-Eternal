@@ -5,8 +5,91 @@
   padding: 0.75rem 1rem !important;
 }
 
-.rasi-chart-page .rasi-chart-header {
-  margin-bottom: 0.75rem !important;
+/* Top bar — Figma: arrow + title left, refresh right */
+.rasi-chart-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0 4px;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.rasi-chart-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px 8px 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: #0a0a0a;
+  font-family: "Inter", "Poppins", system-ui, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.rasi-chart-back:hover {
+  opacity: 0.72;
+}
+
+.rasi-chart-back:focus-visible {
+  outline: 2px solid #9dcae6;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.rasi-chart-back-icon {
+  flex-shrink: 0;
+  color: #0a0a0a;
+}
+
+.rasi-chart-back-title {
+  line-height: 1.2;
+}
+
+.rasi-chart-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #0a0a0a;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.rasi-chart-refresh:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.rasi-chart-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rasi-chart-refresh:focus-visible {
+  outline: 2px solid #9dcae6;
+  outline-offset: 2px;
+}
+
+@keyframes rasi-refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rasi-chart-refresh-spin {
+  animation: rasi-refresh-spin 0.85s linear infinite;
 }
 
 .rasi-chart-page .rasi-chart-user-info {
@@ -54,7 +137,7 @@
     padding: 0.5rem 1rem !important;
   }
 
-  .rasi-chart-page .rasi-chart-header {
+  .rasi-chart-page .rasi-chart-top-bar {
     margin-bottom: 0.5rem !important;
     flex-shrink: 0;
   }

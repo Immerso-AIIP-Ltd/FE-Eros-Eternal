@@ -1,0 +1,107 @@
+/* Palm report — responsive layout (content unchanged) */
+
+.palm-report-page {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.palm-report-page .palm-report-inner {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(12px, 4vw, 24px);
+  padding-right: clamp(12px, 4vw, 24px);
+  padding-top: clamp(12px, 2vw, 20px);
+  padding-bottom: clamp(24px, 4vw, 40px);
+}
+
+.palm-report-page .palm-report-header {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.palm-report-page .palm-report-header .btn {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  padding: 0.45rem 0.85rem;
+}
+
+.palm-report-page .palm-report-user h2 {
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+}
+
+.palm-report-page .palm-report-user h6 {
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
+}
+
+.palm-report-page .palm-report-image-wrap {
+  width: 100%;
+  max-width: min(560px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 clamp(4px, 2vw, 12px);
+}
+
+.palm-report-page .palm-report-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: min(400px, 55vh);
+  object-fit: contain;
+}
+
+.palm-report-page .palm-report-container {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.palm-report-page .palm-report-card .card-body {
+  padding: clamp(1rem, 3vw, 1.5rem) !important;
+}
+
+.palm-report-page .palm-report-card .card-title {
+  font-size: clamp(1.1rem, 3.5vw, 1.5rem) !important;
+  word-break: break-word;
+}
+
+.palm-report-page .palm-report-card li,
+.palm-report-page .palm-report-detail li {
+  font-size: clamp(0.875rem, 2.8vw, 1rem);
+  line-height: 1.65;
+  margin-left: 0 !important;
+  padding-left: 0.25rem;
+}
+
+.palm-report-page .palm-report-detail {
+  font-size: clamp(0.875rem, 2.8vw, 1rem);
+  line-height: 1.7;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.palm-report-page .palm-report-detail p {
+  margin-bottom: 0.65rem;
+}
+
+/* Slightly reduce hover lift on touch / small screens */
+@media (max-width: 576px) {
+  .palm-report-page .card:hover {
+    transform: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .palm-report-page .palm-report-image {
+    max-height: 420px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .palm-report-page .palm-report-inner {
+    max-width: 1140px;
+  }
+}
