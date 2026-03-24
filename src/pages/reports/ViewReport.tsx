@@ -100,6 +100,7 @@ const ViewReport = () => {
         setError("Missing report information");
         setLoading(false);
         return;
+        
       }
 
       try {

@@ -1,9 +1,23 @@
 import { useNavigate } from "react-router-dom";
+import vitaBackground from "@/assets/result-images/vitabackground.png";
 
-// ─── Figma Assets ─────────────────────────────────────────────────────────────
-const imgPersonFrame  = "https://www.figma.com/api/mcp/asset/05ef58b7-a30e-4712-baf3-82250eebb43a";
-const imgArrowIcon    = "https://www.figma.com/api/mcp/asset/7a3946b0-4e43-46c0-b5a9-f2cc2ad096ad";
-const imgScanOverlay  = "https://www.figma.com/api/mcp/asset/231c2ba0-d19d-4d46-a44a-47c3a2a1a327";
+/** Same arrow as ErosWellnessReports `ArrowIcon` — inline SVG (no external asset). */
+const ArrowIcon = () => (
+  <svg
+    className="vsb-btn-arrow"
+    viewBox="0 0 12 12"
+    fill="none"
+    aria-hidden
+  >
+    <path
+      d="M2 10 L10 2 M10 2 H5 M10 2 V7"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 interface VitaScanBannerProps {
   onGetStarted?: () => void;
@@ -138,16 +152,15 @@ export default function VitaScanBanner({ onGetStarted, embedded = false }: VitaS
         .vsb-btn-arrow {
           width: 16px;
           height: 16px;
-          object-fit: contain;
           flex-shrink: 0;
+          display: block;
         }
 
-        /* ── RIGHT IMAGE ── */
+        /* ── RIGHT IMAGE (vitabackground.png — square composite) ── */
         .vsb-right {
-          /* Figma: w-322.723 h-345.375, flex-shrink-0 */
           flex: 0 0 clamp(200px, 26vw, 323px);
           width: clamp(200px, 26vw, 323px);
-          aspect-ratio: 323 / 345;
+          aspect-ratio: 1;
           height: auto;
           position: relative;
           overflow: hidden;
@@ -160,42 +173,15 @@ export default function VitaScanBanner({ onGetStarted, embedded = false }: VitaS
           max-width: none;
         }
 
-        /* Base person photo */
         .vsb-photo {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
           object-fit: cover;
+          object-position: center top;
           pointer-events: none;
           display: block;
-        }
-
-        /* White frosted panel at bottom (Figma: bg-white/30, rounded-bl-36 rounded-br-35) */
-        .vsb-frost {
-          position: absolute;
-          left: 0;
-          bottom: 0;
-          width: 100%;
-          height: 54.6%; /* 188.46 / 345.38 */
-          background: rgba(255, 255, 255, 0.3);
-          border-radius: 0 0 35px 36px;
-          pointer-events: none;
-          transform: scaleX(1.05);
-          transform-origin: center;
-        }
-
-        /* Scan overlay on top (Group 5) — positioned -14px left, full 350×350 */
-        .vsb-overlay {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          pointer-events: none;
-          display: block;
-          transform: scale(1.05);
-          transform-origin: center;
         }
 
         /* ── RESPONSIVE ── */
@@ -234,21 +220,18 @@ export default function VitaScanBanner({ onGetStarted, embedded = false }: VitaS
             <div className="vsb-btn-wrap">
               <button className="vsb-btn" onClick={handleClick}>
                 Get Started
-                <img src={imgArrowIcon} alt="" className="vsb-btn-arrow" />
+                <ArrowIcon />
               </button>
             </div>
           </div>
 
-          {/* ── RIGHT ── */}
+          {/* ── RIGHT ── local composite: portrait + scan + frame */}
           <div className="vsb-right">
-            {/* Base person image */}
-            <img src={imgPersonFrame} alt="Vita Scan AI" className="vsb-photo" />
-
-            {/* Frosted white panel bottom */}
-            <div className="vsb-frost" />
-
-            {/* Scan glow overlay */}
-            <img src={imgScanOverlay} alt="" className="vsb-overlay" />
+            <img
+              src={vitaBackground}
+              alt="Vita Scan — AI facial vitality analysis"
+              className="vsb-photo"
+            />
           </div>
 
         </div>

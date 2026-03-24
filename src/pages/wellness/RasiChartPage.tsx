@@ -86,58 +86,62 @@ const RasiChartPage: React.FC = () => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const result = await response.json();
 
-      // ✅ COMPREHENSIVE DEBUGGING - Check what we actually received
-      console.log("=== FULL API RESPONSE ===");
-      console.log(JSON.stringify(result, null, 2));
-
       if (!result.success)
         throw new Error(result.message || "Failed to fetch data");
 
-      // ✅ Parse the astrologyData string to extract chart URLs
-      if (result.data?.astrologyData) {
-        const astrologyText = result.data.astrologyData;
-        console.log("=== ASTROLOGY DATA ===");
-        console.log(astrologyText);
+      const api = result.data;
+      const apiCharts = api?.chartImages;
+      const rasiInline = apiCharts?.rasiChart?.inline?.trim() ?? "";
+      const navInline = apiCharts?.navamshaChart?.inline?.trim() ?? "";
 
-        // Extract Rasi Chart URL
-        const rasiMatch = astrologyText.match(
-          /Rasi D1 Chart URL:\s*(https?:\/\/[^\s\n]+)/,
-        );
-        const rasiUrl = rasiMatch ? rasiMatch[1] : null;
-
-        // Extract Navamsha Chart URL
-        const navamshaMatch = astrologyText.match(
-          /Navamsha D9 Chart URL:\s*(https?:\/\/[^\s\n]+)/,
-        );
-        const navamshaUrl = navamshaMatch ? navamshaMatch[1] : null;
-
-        console.log("=== EXTRACTED URLS ===");
-        console.log("Rasi URL:", rasiUrl);
-        console.log("Navamsha URL:", navamshaUrl);
-
-        // Transform the data to match our expected structure
+      // Prefer structured chartImages.inline from API (Rasi D1 / Navamsha D9)
+      if (rasiInline || navInline) {
         const transformedResult: AstrologyResponse = {
           ...result,
           data: {
-            ...result.data,
+            ...(api ?? {}),
             chartImages: {
               rasiChart: {
-                inline: rasiUrl || "",
-                // original: rasiUrl || "",
-                attachment: rasiUrl || "",
+                inline: rasiInline,
+                attachment:
+                  apiCharts?.rasiChart?.attachment?.trim() || rasiInline,
               },
               navamshaChart: {
-                inline: navamshaUrl || "",
-                // original: navamshaUrl || "",
-                attachment: navamshaUrl || "",
+                inline: navInline,
+                attachment:
+                  apiCharts?.navamshaChart?.attachment?.trim() || navInline,
               },
             },
           },
         };
+        setData(transformedResult);
+      } else if (api?.astrologyData) {
+        // Fallback: parse markdown/text in astrologyData for URLs
+        const astrologyText = api.astrologyData;
+        const rasiMatch = astrologyText.match(
+          /Rasi D1 Chart URL:\s*(https?:\/\/[^\s\n]+)/,
+        );
+        const navamshaMatch = astrologyText.match(
+          /Navamsha D9 Chart URL:\s*(https?:\/\/[^\s\n]+)/,
+        );
+        const rasiUrl = rasiMatch?.[1]?.trim() ?? "";
+        const navamshaUrl = navamshaMatch?.[1]?.trim() ?? "";
 
+        const transformedResult: AstrologyResponse = {
+          ...result,
+          data: {
+            ...(api ?? {}),
+            chartImages: {
+              rasiChart: { inline: rasiUrl, attachment: rasiUrl },
+              navamshaChart: {
+                inline: navamshaUrl,
+                attachment: navamshaUrl,
+              },
+            },
+          },
+        };
         setData(transformedResult);
       } else {
-        // Store the data as-is if it already has chartImages
         setData(result);
       }
     } catch (err) {
