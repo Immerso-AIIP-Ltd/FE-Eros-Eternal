@@ -2,7 +2,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "${baseApiUrl}/aitools/wellness/v2/aitools/wellness/v2/$1"
+      "dest": "${baseApiUrl}/api/v1/api/v1/$1"
     }
   ]
 }

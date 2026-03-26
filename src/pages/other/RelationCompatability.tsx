@@ -72,7 +72,7 @@ const RelationshipCompatibility: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/numerology/career_compatibility`,
+        `${baseApiUrl}/api/v1/numerology/career_compatibility`,
         {
           method: "POST",
           body: formData,

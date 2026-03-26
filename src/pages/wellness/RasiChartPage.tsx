@@ -75,7 +75,7 @@ const RasiChartPage: React.FC = () => {
       };
 
       const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/vedastro/get_astrology_data`,
+        `${baseApiUrl}/api/v1/vedastro/get_astrology_data`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -223,11 +223,11 @@ const RasiChartPage: React.FC = () => {
   };
 
   const [stars] = useState(() =>
-    Array.from({ length: 50 }, () => ({
+    Array.from({ length: 80 }, () => ({
       x: Math.random() * 100,
       y: Math.random() * 100,
-      opacity: 0.3 + Math.random() * 0.7,
-      size: Math.random() * 2 + 1,
+      opacity: 0.15 + Math.random() * 0.25,
+      size: Math.random() * 1.5 + 0.5,
     })),
   );
 
@@ -246,18 +246,18 @@ const RasiChartPage: React.FC = () => {
           zIndex: 1050,
         }}
       >
-        <Stars />
-        <div className="absolute inset-0 overflow-hidden z-50">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {stars.map((star, i) => (
             <div
               key={i}
-              className="absolute bg-white rounded-full animate-pulse"
+              className="absolute rounded-full animate-pulse"
               style={{
                 width: `${star.size}px`,
                 height: `${star.size}px`,
-                opacity: star.opacity,
+                opacity: star.opacity * 0.4,
                 top: `${star.y}%`,
                 left: `${star.x}%`,
+                background: "#60A5FA",
                 animationDelay: `${Math.random() * 3}s`,
                 animationDuration: `${2 + Math.random() * 2}s`,
               }}
@@ -387,7 +387,11 @@ const RasiChartPage: React.FC = () => {
           onClick={() => navigate(-1)}
           aria-label="Go back"
         >
-          <ArrowLeft className="rasi-chart-back-icon" size={22} strokeWidth={1.75} />
+          <ArrowLeft
+            className="rasi-chart-back-icon"
+            size={22}
+            strokeWidth={1.75}
+          />
           <span className="rasi-chart-back-title">Rasi Chart</span>
         </button>
         <button
@@ -412,16 +416,25 @@ const RasiChartPage: React.FC = () => {
         </p>
       </div>
 
-      <Container fluid className="rasi-chart-cards-wrapper flex-grow-1 d-flex flex-column" style={{ minHeight: 0 }}>
+      <Container
+        fluid
+        className="rasi-chart-cards-wrapper flex-grow-1 d-flex flex-column"
+        style={{ minHeight: 0 }}
+      >
         <Row className="g-4">
           {/* Rasi Chart */}
           <Col md={6} className="rasi-chart-card">
-            <Card className="h-100" style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
+            <Card
+              className="h-100"
+              style={{ backgroundColor: "#FFFFFF", color: "#000" }}
+            >
               <Card.Body className="d-flex flex-column">
                 <Card.Title className="text-center" style={{ color: "#000" }}>
                   Rasi Chart
                 </Card.Title>
-                <p className=" text-center" style={{ color: "#000" }}>Individual Chart</p>
+                <p className=" text-center" style={{ color: "#000" }}>
+                  Individual Chart
+                </p>
                 <div className="chart-iframe-wrapper flex-grow-1 d-flex align-items-center justify-content-center p-2">
                   {rasiChart?.inline ? (
                     <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
@@ -473,12 +486,17 @@ const RasiChartPage: React.FC = () => {
 
           {/* Navamsha Chart */}
           <Col md={6} className="rasi-chart-card">
-            <Card className="h-100" style={{ backgroundColor: "#FFFFFF", color: "#000" }}>
+            <Card
+              className="h-100"
+              style={{ backgroundColor: "#FFFFFF", color: "#000" }}
+            >
               <Card.Body className="d-flex flex-column">
                 <Card.Title className=" text-center" style={{ color: "#000" }}>
                   Navamsha Chart
                 </Card.Title>
-                <p className=" text-center" style={{ color: "#000" }}>Life Partner Chart</p>
+                <p className=" text-center" style={{ color: "#000" }}>
+                  Life Partner Chart
+                </p>
                 <div className="chart-iframe-wrapper flex-grow-1 d-flex align-items-center justify-content-center p-2">
                   {navamshaChart?.inline ? (
                     <div className="w-100 h-100 d-flex flex-column align-items-center justify-content-center">

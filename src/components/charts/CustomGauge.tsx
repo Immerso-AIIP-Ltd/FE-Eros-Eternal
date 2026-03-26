@@ -85,7 +85,7 @@ const VibrationalFrequencyGauge: React.FC = () => {
 
       try {
         const response = await fetch(
-          `${baseApiUrl}/aitools/wellness/v2/reports/individual_report/?report_type=vibrational_frequency&user_id=${userId}`,
+          `${baseApiUrl}/api/v1/reports/individual_report/?report_type=vibrational_frequency&user_id=${userId}`,
           {
             method: "GET",
             headers: {

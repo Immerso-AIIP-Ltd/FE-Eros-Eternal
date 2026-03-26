@@ -3,4 +3,4 @@
  */
 
 export const baseApiUrl =
-  import.meta.env.VITE_API_BASE_URL || "https://unrefrangible-eddy-magnanimously.ngrok-free.dev";
+  import.meta.env.VITE_API_BASE_URL || "http://164.52.205.108:8500";

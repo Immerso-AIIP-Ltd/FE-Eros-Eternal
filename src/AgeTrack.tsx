@@ -60,7 +60,7 @@ const AgeTrack: React.FC = () => {
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
 
-    const baseApiUrl = 'http://192.168.29.154:8002';
+    const baseApiUrl = 'http://164.52.205.108:8500';
 
     const convertToMp3 = async (audioBlob: Blob): Promise<Blob> => {
         return new Promise((resolve, reject) => {
@@ -251,7 +251,7 @@ const AgeTrack: React.FC = () => {
                 console.log(key, typeof value === 'string' ? value : 'Non-string value');
             }
 
-            const reportUrl = `${baseApiUrl}/aitools/wellness/v2/bio/holistic-analyze`;
+            const reportUrl = `${baseApiUrl}/api/v1/bio/holistic-analyze`;
             const response = await fetch(reportUrl, {
                 method: 'POST',
                 body: formData,

@@ -196,7 +196,7 @@ export const Header: React.FC = () => {
 
   const userId =
     localStorage.getItem("userId") || localStorage.getItem("user_id");
-  const reportsApiUrl = `${baseApiUrl}/aitools/wellness/v2/reports/individual_report/`;
+  const reportsApiUrl = `${baseApiUrl}/api/v1/reports/individual_report/`;
 
   const ReportsIcon = () => (
     <svg
