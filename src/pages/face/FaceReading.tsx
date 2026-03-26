@@ -62,7 +62,7 @@ const FaceReading: React.FC = () => {
       formDataSet.append("mode", "random");
 
       const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/numerology/tarot_reading`,
+        `${baseApiUrl}/api/v1/numerology/tarot_reading`,
         {
           method: "POST",
           body: formDataSet, // don't set Content-Type, browser will set boundary

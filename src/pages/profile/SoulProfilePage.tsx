@@ -252,7 +252,7 @@ const SoulProfilePage: React.FC = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/users/profile/`,
+        `${baseApiUrl}/api/v1/users/profile/`,
         { method: "POST", body: fd },
       );
       const text = await res.text();

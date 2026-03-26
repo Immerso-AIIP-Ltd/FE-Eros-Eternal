@@ -135,7 +135,7 @@ const PalmUploadPage: React.FC = () => {
       formData.append("image_data", selectedFile);
 
       const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/analysis/palm`,
+        `${baseApiUrl}/api/v1/analysis/palm`,
         {
           method: "POST",
           body: formData,
