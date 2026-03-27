@@ -3,6 +3,8 @@ import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
 
+const GATEWAY_ORIGIN = 'https://eu-dev-apigateway.erosuniverse.com'
+
 // https://vite.dev/config/
 export default defineConfig({
   resolve: {
@@ -23,7 +25,34 @@ export default defineConfig({
   assetsInclude: ['**/*.tflite', '**/*.gz'],
   server: {
     host: true,
-      allowedHosts: [
+    proxy: {
+      // Dev: browser calls /aitools/* same-origin; proxy hits gateway.
+      // Rewrite absolute gateway redirects → relative so the browser never follows cross-origin.
+      '/aitools': {
+        target: GATEWAY_ORIGIN,
+        changeOrigin: true,
+        secure: true,
+        configure(proxy) {
+          proxy.on('proxyRes', (proxyRes) => {
+            const code = proxyRes.statusCode
+            const loc = proxyRes.headers.location
+            if (!code || code < 300 || code >= 400 || !loc) return
+            try {
+              const absolute = new URL(loc, GATEWAY_ORIGIN)
+              if (
+                absolute.origin === new URL(GATEWAY_ORIGIN).origin &&
+                absolute.pathname.startsWith('/aitools')
+              ) {
+                proxyRes.headers.location = `${absolute.pathname}${absolute.search}`
+              }
+            } catch {
+              /* ignore bad Location */
+            }
+          })
+        },
+      },
+    },
+    allowedHosts: [
       'localhost',
       '127.0.0.1',
       '*.ngrok-free.dev',  // Allow all ngrok free domains

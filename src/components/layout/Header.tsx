@@ -19,7 +19,9 @@ import flameScoreBg from "@/assets/reports/flame.png";
 import auraBg from "@/assets/reports/aura.png";
 import koshaBg from "@/assets/reports/kosha.png";
 import longevityBg from "@/assets/reports/longevity.png";
-import { baseApiUrl } from "@/config/api";
+import { fetchIndividualReportJson } from "@/lib/individualReportFetch";
+import { hasVitaScanReportCached } from "@/lib/vitaScanCache";
+import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
 import {
   setPendingAttachments,
   type PendingVoice,
@@ -196,7 +198,6 @@ export const Header: React.FC = () => {
 
   const userId =
     localStorage.getItem("userId") || localStorage.getItem("user_id");
-  const reportsApiUrl = `${baseApiUrl}/api/v1/reports/individual_report/`;
 
   const ReportsIcon = () => (
     <svg
@@ -438,19 +439,7 @@ export const Header: React.FC = () => {
       const statuses: Record<string, boolean> = {};
 
       try {
-        // Check vita_scan from localStorage
-        const vitaScanData = localStorage.getItem("faceReportData");
-        if (vitaScanData) {
-          try {
-            const parsedData = JSON.parse(vitaScanData);
-            statuses["vita_scan"] = parsedData && parsedData.success === true;
-          } catch (err) {
-            console.error("Error parsing vita_scan data:", err);
-            statuses["vita_scan"] = false;
-          }
-        } else {
-          statuses["vita_scan"] = false;
-        }
+        statuses["vita_scan"] = hasVitaScanReportCached();
 
         // Check other reports from API only if userId exists
         if (userId) {
@@ -460,12 +449,11 @@ export const Header: React.FC = () => {
             )
             .map(async (card) => {
               try {
-                const response = await fetch(
-                  `${reportsApiUrl}?user_id=${userId}&report_type=${card.reportType}`,
-                );
-                const data = await response.json();
-                const hasReport =
-                  data.success && data.data && data.data.report_data;
+                const data = (await fetchIndividualReportJson(
+                  userId,
+                  card.reportType!,
+                )) as { success?: boolean; data?: { report_data?: unknown } };
+                const hasReport = hasWellnessIndividualReport(data);
                 statuses[card.reportType!] = hasReport;
                 return { reportType: card.reportType!, hasReport };
               } catch (error) {

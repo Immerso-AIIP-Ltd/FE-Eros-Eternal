@@ -30,6 +30,7 @@ interface ReportData {
       kosha_alignment?: string;
       star_magnitude?: string;
       longevity_score?: string;
+      vitality_score?: number;
       calculated_vibrational_frequency?: number;
     };
     flame_vitality_assessment: {
@@ -92,7 +93,7 @@ const ViewReport = () => {
   const location = useLocation();
   const recommendationsRef = useRef(null);
 
-  const reportsApiUrl = `${baseApiUrl}/api/v1/reports/individual_report/`;
+  const reportsApiUrl = `${baseApiUrl}/aitools/wellness/v2/reports/individual_report`;
 
   useEffect(() => {
     const fetchReportData = async () => {
@@ -177,6 +178,7 @@ const ViewReport = () => {
       assessment?.aura_intensity ||
       assessment?.kosha_alignment ||
       assessment?.star_magnitude ||
+      assessment?.vitality_score ||
       assessment?.longevity_score ||
       flameVitality?.current_score ||
       "N/A"

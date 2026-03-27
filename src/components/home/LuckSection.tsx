@@ -29,6 +29,33 @@ interface PersonalMonthResponse {
   status: number;
 }
 
+/** Profile stores DD-MM-YYYY; API may return YYYY-MM-DD. Never send "Invalid date" to numerology. */
+function formatDobForNumerologyApi(dobRaw: string | null): string | null {
+  if (!dobRaw?.trim()) return null;
+  const s = dobRaw.trim();
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const d = moment(s.slice(0, 10), "YYYY-MM-DD", true);
+    return d.isValid() ? d.format("YYYY-MM-DD") : null;
+  }
+
+  const dmy = /^(\d{1,2})-(\d{1,2})-(\d{4})$/.exec(s);
+  if (dmy) {
+    const d = moment(
+      `${dmy[3]}-${dmy[2].padStart(2, "0")}-${dmy[1].padStart(2, "0")}`,
+      "YYYY-MM-DD",
+      true,
+    );
+    return d.isValid() ? d.format("YYYY-MM-DD") : null;
+  }
+
+  const parsed = moment(s, moment.ISO_8601, true);
+  if (parsed.isValid()) return parsed.format("YYYY-MM-DD");
+
+  const fallback = moment(s);
+  return fallback.isValid() ? fallback.format("YYYY-MM-DD") : null;
+}
+
 export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
   const [flippedIndexes, setFlippedIndexes] = useState<Set<number>>(new Set());
   const [luckyNumbers, setLuckyNumbers] = useState<LuckyNumbers | null>(null);
@@ -38,10 +65,11 @@ export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false
   const [error, setError] = useState<Record<number, string>>({});
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
-  const userId = localStorage.getItem("user_id");
+  const userId = localStorage.getItem("userId") || localStorage.getItem("user_id");
   const username = localStorage.getItem("username");
-  const dob = localStorage.getItem("date_of_birth");
-  const hasUserData = userId && username && dob;
+  const dobRaw = localStorage.getItem("date_of_birth");
+  const dobIso = formatDobForNumerologyApi(dobRaw);
+  const hasUserData = Boolean(userId && username && dobIso);
 
   const setLoadingState = (index: number, isLoading: boolean) => {
     setLoading((prev) => ({ ...prev, [index]: isLoading }));
@@ -51,24 +79,21 @@ export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false
     setError((prev) => ({ ...prev, [index]: message }));
   };
 
-  const formatDob = (dobStr: string) => {
-    const [day, month, year] = dobStr.split("-");
-    const formattedDob = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    return moment(formattedDob).format("YYYY-MM-DD");
-  };
-
   useEffect(() => {
     const fetchHoroscope = async () => {
       const index = 0;
-      if (!hasUserData) { setErrorState(index, "User data missing."); return; }
+      if (!hasUserData || !userId || !username || !dobIso) {
+        setErrorState(index, dobRaw && !dobIso ? "Invalid date of birth in profile." : "User data missing.");
+        return;
+      }
       setLoadingState(index, true);
       setErrorState(index, "");
       try {
         const formData = new FormData();
         formData.append("user_id", userId);
         formData.append("user_name", username);
-        if (dob) formData.append("dob", formatDob(dob));
-        const response = await fetch(`${baseApiUrl}/api/v1/numerology/planetary_horoscope`, { method: "POST", body: formData });
+        formData.append("dob", dobIso);
+        const response = await fetch(`${baseApiUrl}/aitools/wellness/v2/numerology/planetary_horoscope`, { method: "POST", body: formData });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (data.success && data.data) setHoroscope(data.data);
@@ -79,20 +104,23 @@ export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false
       } finally { setLoadingState(index, false); }
     };
     fetchHoroscope();
-  }, [hasUserData, userId, username, dob]);
+  }, [hasUserData, userId, username, dobIso, dobRaw]);
 
   useEffect(() => {
     const fetchPersonalMonth = async () => {
       const index = 1;
-      if (!hasUserData) { setErrorState(index, "User data missing."); return; }
+      if (!hasUserData || !userId || !username || !dobIso) {
+        setErrorState(index, dobRaw && !dobIso ? "Invalid date of birth in profile." : "User data missing.");
+        return;
+      }
       setLoadingState(index, true);
       setErrorState(index, "");
       try {
         const formData = new FormData();
         formData.append("user_id", userId);
         formData.append("user_name", username);
-        if (dob) formData.append("dob", formatDob(dob));
-        const response = await fetch(`${baseApiUrl}/api/v1/numerology/personal_month`, { method: "POST", body: formData });
+        formData.append("dob", dobIso);
+        const response = await fetch(`${baseApiUrl}/aitools/wellness/v2/numerology/personal_month`, { method: "POST", body: formData });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (data.success && data.data) setPersonalMonth(data.data);
@@ -103,20 +131,23 @@ export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false
       } finally { setLoadingState(index, false); }
     };
     fetchPersonalMonth();
-  }, [hasUserData, userId, username, dob]);
+  }, [hasUserData, userId, username, dobIso, dobRaw]);
 
   useEffect(() => {
     const fetchLuckyNumbers = async () => {
       const index = 2;
-      if (!hasUserData) { setErrorState(index, "User data missing."); return; }
+      if (!hasUserData || !userId || !username || !dobIso) {
+        setErrorState(index, dobRaw && !dobIso ? "Invalid date of birth in profile." : "User data missing.");
+        return;
+      }
       setLoadingState(index, true);
       setErrorState(index, "");
       try {
         const formData = new FormData();
         formData.append("user_id", userId);
         formData.append("user_name", username);
-        if (dob) formData.append("dob", formatDob(dob));
-        const response = await fetch(`${baseApiUrl}/api/v1/numerology/lucky_numbers`, { method: "POST", body: formData });
+        formData.append("dob", dobIso);
+        const response = await fetch(`${baseApiUrl}/aitools/wellness/v2/numerology/lucky_numbers`, { method: "POST", body: formData });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         if (result.success && result.data) setLuckyNumbers(result.data);
@@ -127,7 +158,7 @@ export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false
       } finally { setLoadingState(index, false); }
     };
     fetchLuckyNumbers();
-  }, [hasUserData, userId, username, dob]);
+  }, [hasUserData, userId, username, dobIso, dobRaw]);
 
   const toggleFlip = (index: number) => {
     const newFlipped = new Set(flippedIndexes);

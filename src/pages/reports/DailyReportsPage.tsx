@@ -57,7 +57,7 @@ const DailyReportsPage: React.FC = () => {
 
       try {
         const response = await fetch(
-          `${baseApiUrl}/api/v1/reports/user_reports/${userId}`,
+          `${baseApiUrl}/aitools/wellness/v2/reports/user_reports/${userId}`,
           {
             method: "GET",
             headers: {

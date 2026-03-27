@@ -252,7 +252,7 @@ const SoulProfilePage: React.FC = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        `${baseApiUrl}/api/v1/users/profile/`,
+        `${baseApiUrl}/aitools/wellness/v2/users/profile`,
         { method: "POST", body: fd },
       );
       const text = await res.text();
@@ -1285,8 +1285,8 @@ const SoulProfilePage: React.FC = () => {
               </div>
 
               <div className="sp-datepicker-grid">
-                {["S", "M", "T", "W", "T", "F", "S"].map((d) => (
-                  <div key={d} className="sp-datepicker-weekday">
+                {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                  <div key={`sp-weekday-${i}`} className="sp-datepicker-weekday">
                     {d}
                   </div>
                 ))}

@@ -20,7 +20,8 @@ import flameScoreBg from "@/assets/reports/flame.png";
 import auraBg from "@/assets/reports/aura.png";
 import koshaBg from "@/assets/reports/kosha.png";
 import longevityBg from "@/assets/reports/longevity.png";
-import { baseApiUrl } from "@/config/api";
+import { fetchIndividualReportJson } from "@/lib/individualReportFetch";
+import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
 
 const StatsCards = () => {
   const navigate = useNavigate();
@@ -28,8 +29,6 @@ const StatsCards = () => {
   const [loading, setLoading] = useState(true);
 
   const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
-  const reportsApiUrl = `${baseApiUrl}/api/v1/reports/individual_report/`;
-
   const reportCards = [
     {
       id: 1,
@@ -91,13 +90,11 @@ const StatsCards = () => {
         // Check all reports concurrently
         const promises = reportCards.map(async (card) => {
           try {
-            const response = await fetch(
-              `${reportsApiUrl}?user_id=${userId}&report_type=${card.reportType}`
-            );
-            const data = await response.json();
-
-            // Check if report exists and has data
-            const hasReport = data.success && data.data && data.data.report_data;
+            const data = (await fetchIndividualReportJson(
+              userId,
+              card.reportType,
+            )) as { success?: boolean; data?: { report_data?: unknown } };
+            const hasReport = hasWellnessIndividualReport(data);
             return { reportType: card.reportType, hasReport };
           } catch (error) {
             console.error(`Error checking ${card.reportType}:`, error);
