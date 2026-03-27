@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { fetchIndividualReportJson } from "@/lib/individualReportFetch";
 import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
+import { getWellnessStoredUserId } from "@/lib/wellnessUserId";
 import Vibration from "../../assets/result-images/add_reaction.png";
 import Aura from "../../assets/result-images/background_replace.png";
 import StarMap from "../../assets/result-images/brightness_5.png";
@@ -132,7 +133,6 @@ type IndividualReportApiResponse = {
         };
         vibrational_frequency?: number;
         current_vibrational_frequency?: number;
-        current_energy_score?: string;
         current_flame_score?: number;
         flame_score?: string;
         aura_intensity?: string;
@@ -140,9 +140,6 @@ type IndividualReportApiResponse = {
         star_magnitude?: string;
         longevity_score?: string;
         vitality_score?: number;
-        spiritual_evolution?: {
-          current_flame_score?: string;
-        };
       };
       flame_vitality_assessment?: {
         current_score?: number;
@@ -151,29 +148,26 @@ type IndividualReportApiResponse = {
   };
 };
 
-/** Large value on card: only numbers (first numeric token in strings). No prose / lorem. */
-function formatMetricForCard(value: unknown): string | undefined {
+function formatMetricValue(value: unknown): string | undefined {
   if (value == null) return undefined;
   if (typeof value === "number") {
+    if (Number.isNaN(value)) return undefined;
     if (!Number.isFinite(value)) return undefined;
     return Math.round(value).toString();
   }
-  if (typeof value === "string") {
-    const t = value.trim();
-    if (!t) return undefined;
-    const m = t.match(/-?\d+(\.\d+)?/);
-    if (!m) return undefined;
-    const n = Number(m[0]);
-    return Number.isFinite(n) ? Math.round(n).toString() : undefined;
-  }
-  return undefined;
-}
 
-function pickMetric(...candidates: unknown[]): string | undefined {
-  for (const c of candidates) {
-    const s = formatMetricForCard(c);
-    if (s !== undefined) return s;
+  if (typeof value === "string") {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return undefined;
+
+    const numericMatch = trimmedValue.match(/-?\d+(\.\d+)?/);
+    if (!numericMatch) return trimmedValue;
+
+    const parsed = Number(numericMatch[0]);
+    if (!Number.isFinite(parsed)) return trimmedValue;
+    return Math.round(parsed).toString();
   }
+
   return undefined;
 }
 
@@ -182,59 +176,49 @@ function extractMetricFromReportResponse(
   responseData: IndividualReportApiResponse
 ): Pick<GeneratedReportStatus, "metricText" | "metricUnitText"> {
   const assessment = responseData.data?.report_data?.assessment;
-  const flameV = responseData.data?.report_data?.flame_vitality_assessment;
+  const flameVitalityAssessment = responseData.data?.report_data?.flame_vitality_assessment;
+
+  if (!assessment) return {};
 
   if (reportType === "vibrational_frequency") {
-    const metricText = pickMetric(
-      assessment?.calculated_vibrational_frequency,
-      assessment?.current_energy_assessment?.vibrational_frequency,
-      assessment?.vibrational_frequency,
-      assessment?.current_vibrational_frequency,
-    );
+    const metricText =
+      formatMetricValue(assessment.calculated_vibrational_frequency) ??
+      formatMetricValue(assessment.current_energy_assessment?.vibrational_frequency) ??
+      formatMetricValue(assessment.vibrational_frequency) ??
+      formatMetricValue(assessment.current_vibrational_frequency);
+
     return metricText ? { metricText, metricUnitText: "Hz" } : {};
   }
 
   if (reportType === "flame_score") {
-    const metricText = pickMetric(
-      assessment?.current_flame_score,
-      assessment?.flame_score,
-      flameV?.current_score,
-      assessment?.spiritual_evolution?.current_flame_score,
-    );
+    const metricText =
+      formatMetricValue(assessment.current_flame_score) ??
+      formatMetricValue(assessment.flame_score) ??
+      formatMetricValue(flameVitalityAssessment?.current_score);
+
     return metricText ? { metricText, metricUnitText: "%" } : {};
   }
 
   if (reportType === "aura_profile") {
-    const metricText = pickMetric(assessment?.aura_intensity);
+    const metricText = formatMetricValue(assessment.aura_intensity);
     return metricText ? { metricText, metricUnitText: "%" } : {};
   }
 
   if (reportType === "longevity_blueprint") {
-    const metricText = pickMetric(
-      assessment?.vitality_score,
-      assessment?.longevity_score,
-    );
+    const metricText =
+      formatMetricValue(assessment.longevity_score) ??
+      formatMetricValue(assessment.vitality_score);
     return metricText ? { metricText, metricUnitText: "%" } : {};
   }
 
   if (reportType === "star_map") {
-    const metricText = pickMetric(
-      assessment?.star_magnitude,
-      assessment?.current_energy_score,
-      assessment?.spiritual_evolution?.current_flame_score,
-      flameV?.current_score,
-    );
-    return metricText ? { metricText, metricUnitText: "%" } : {};
+    const metricText = formatMetricValue(assessment.star_magnitude);
+    return metricText ? { metricText } : {};
   }
 
   if (reportType === "kosha_map") {
-    const metricText = pickMetric(
-      assessment?.kosha_alignment,
-      assessment?.current_energy_score,
-      assessment?.spiritual_evolution?.current_flame_score,
-      flameV?.current_score,
-    );
-    return metricText ? { metricText, metricUnitText: "%" } : {};
+    const metricText = formatMetricValue(assessment.kosha_alignment);
+    return metricText ? { metricText } : {};
   }
 
   return {};
@@ -248,27 +232,36 @@ export default function ErosWellnessReports({ embedded = false }: { embedded?: b
     {} as Record<ReportType, GeneratedReportStatus>
   );
   const [loadingStatuses, setLoadingStatuses] = useState(true);
-  const userId = localStorage.getItem("userId") || localStorage.getItem("user_id");
+  const userId = getWellnessStoredUserId();
   const reportStatusQueryKey = useMemo(() => `${userId ?? "no-user"}:${location.pathname}`, [location.pathname, userId]);
 
   useEffect(() => {
     const fetchStatuses = async () => {
-      if (!userId) { setLoadingStatuses(false); return; }
+      if (!userId) {
+        setLoadingStatuses(false);
+        return;
+      }
       const statuses: Record<ReportType, GeneratedReportStatus> = {} as Record<ReportType, GeneratedReportStatus>;
       try {
-        await Promise.all(cardsData.map(async (card) => {
-          const data = (await fetchIndividualReportJson(
-            userId,
-            card.reportType,
-          )) as IndividualReportApiResponse;
-          const hasReport = hasWellnessIndividualReport(data);
-          statuses[card.reportType] = {
-            hasReport,
-            ...(hasReport ? extractMetricFromReportResponse(card.reportType, data) : {}),
-          };
-        }));
+        await Promise.all(
+          cardsData.map(async (card) => {
+            const data = (await fetchIndividualReportJson(
+              userId,
+              card.reportType,
+            )) as IndividualReportApiResponse;
+            const hasReport = hasWellnessIndividualReport(
+              data as { success?: boolean; data?: { report_data?: unknown } },
+            );
+            statuses[card.reportType] = {
+              hasReport,
+              ...(hasReport ? extractMetricFromReportResponse(card.reportType, data) : {}),
+            };
+          }),
+        );
         setReportStatuses(statuses);
-      } finally { setLoadingStatuses(false); }
+      } finally {
+        setLoadingStatuses(false);
+      }
     };
     fetchStatuses();
   }, [reportStatusQueryKey, userId]);
@@ -335,8 +328,14 @@ export default function ErosWellnessReports({ embedded = false }: { embedded?: b
             metricUnitText={reportStatuses[card.reportType]?.metricUnitText}
             onCardClick={() => {
               const hasReport = reportStatuses[card.reportType]?.hasReport;
-              if (hasReport) {
-                navigate("/view-report", { state: { reportType: card.reportType, userId, title: card.title } });
+              if (hasReport && userId) {
+                const qs = new URLSearchParams({
+                  report_type: card.reportType,
+                  user_id: userId,
+                });
+                navigate(`/view-report?${qs.toString()}`, {
+                  state: { reportType: card.reportType, userId, title: card.title },
+                });
                 return;
               }
 

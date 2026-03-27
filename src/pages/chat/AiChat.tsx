@@ -43,6 +43,8 @@ const AiChat: React.FC = () => {
   const recordedChunksRef = useRef<Blob[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const initialMessageSentRef = useRef(false);
+  /** Cleared synchronously on "New Chat" so the next send opens a new session (no session_id). */
+  const sessionIdRef = useRef<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -251,6 +253,10 @@ const AiChat: React.FC = () => {
   }, [isInitialized, messages.length]);
 
   useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+
+  useEffect(() => {
     if (
       isInitialized &&
       messages.length === 1 &&
@@ -284,17 +290,22 @@ const AiChat: React.FC = () => {
   const handleNewChat = async () => {
     sessionStorage.removeItem("initialMessage");
     initialMessageSentRef.current = false;
+    sessionIdRef.current = null;
     window.history.replaceState({}, document.title);
-    setMessages([]);
+    setSessionId(null);
     setInputValue("");
     setAttachedImages([]);
     setAttachedFiles([]);
     setAttachedVoices([]);
     setIsLoading(false);
-    setSessionId(null);
-    setIsInitialized(false);
-
-    initializeChat();
+    setIsInitialized(true);
+    setMessages([
+      {
+        sender: "ai",
+        text: "🌟  WELCOME TO YOUR SPIRITUAL GUIDE  🌟\n\nI'm here to offer wisdom, guidance, and spiritual reflection.\nAsk me anything about your spiritual journey, meditation, life purpose,\ninner peace, or any other spiritual topic that's on your heart.\n\nType 'help' for commands, or just start chatting!\n\n🧘 Spiritual Guide: Welcome, dear soul. I invite you to share the whispers of your heart. What stirs within you today?",
+        centered: true,
+      },
+    ]);
     fetchSessions();
   };
 
@@ -373,9 +384,12 @@ const AiChat: React.FC = () => {
           }),
         );
         setMessages(formattedMessages);
-        setSessionId(
-          typeof sessionId === "string" ? parseInt(sessionId) : sessionId,
-        );
+        const sid =
+          typeof sessionId === "string"
+            ? parseInt(sessionId, 10)
+            : sessionId;
+        setSessionId(sid);
+        sessionIdRef.current = Number.isFinite(sid) ? sid : null;
       }
     } catch (error) {
       console.error("Error loading conversation:", error);
@@ -571,6 +585,8 @@ const AiChat: React.FC = () => {
     setMessages((prev) => [...prev, userMessage]);
 
     const currentInput = inputValue;
+    const hadImages = attachedImages.length > 0;
+    const hadVoices = attachedVoices.length > 0;
     setInputValue("");
     setAttachedImages([]);
     setAttachedFiles([]);
@@ -592,48 +608,21 @@ const AiChat: React.FC = () => {
       const searchParams = new URLSearchParams(location.search);
       const reportType = searchParams.get("report_type");
 
-      let currentSessionId = sessionId;
+      const currentSessionId = sessionIdRef.current;
+      const messageText =
+        currentInput.trim() ||
+        (hadImages ? "[Image attached]" : "") ||
+        (hadVoices ? "[Voice message]" : "");
 
-      if (!currentSessionId) {
-        const initParams: any = {
-          user_id: userId,
-          message: "start",
-        };
-        if (reportType) {
-          initParams.report_type = reportType;
-        }
-
-        const initResponse = await fetch(
-          `${baseApiUrl}/aitools/wellness/v2/chat/spiritual/${userId}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams(initParams),
-          },
-        );
-
-        const initData = await initResponse.json();
-        if (initData.success) {
-          currentSessionId = initData.data.session_id;
-          setSessionId(currentSessionId);
-          fetchSessions();
-        } else {
-          setMessages((prev) => [
-            ...prev,
-            { sender: "ai", text: "Failed to initialize chat session." },
-          ]);
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      const messageParams: any = {
+      const messageParams: Record<string, string> = {
         user_id: userId,
-        message: currentInput,
-        session_id: currentSessionId?.toString() || "",
+        message: messageText,
       };
       if (reportType) {
         messageParams.report_type = reportType;
+      }
+      if (currentSessionId != null) {
+        messageParams.session_id = String(currentSessionId);
       }
 
       const response = await fetch(
@@ -647,6 +636,21 @@ const AiChat: React.FC = () => {
 
       const data = await response.json();
       if (data.success) {
+        const rawSid = data?.data?.session_id;
+        const parsedSid =
+          typeof rawSid === "number" && Number.isFinite(rawSid)
+            ? rawSid
+            : typeof rawSid === "string"
+              ? parseInt(rawSid, 10)
+              : NaN;
+        const prevSid = sessionIdRef.current;
+        if (Number.isFinite(parsedSid)) {
+          sessionIdRef.current = parsedSid;
+          setSessionId(parsedSid);
+          if (prevSid !== parsedSid) {
+            fetchSessions();
+          }
+        }
         setMessages((prev) => [
           ...prev,
           {

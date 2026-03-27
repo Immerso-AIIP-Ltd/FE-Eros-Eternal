@@ -27,6 +27,9 @@ import MicVisualizer from "@/MicVisualizer";
 import { useNavigate, useLocation } from "react-router-dom";
 import eroslogo from "@/assets/eros-logo.png";
 import { baseApiUrl } from "@/config/api";
+import { navigateToViewReport } from "@/lib/navigateViewReport";
+import { checkWellnessIndividualReportExists } from "@/lib/checkWellnessIndividualReport";
+import { getWellnessStoredUserId } from "@/lib/wellnessUserId";
 import credits from "@/assets/credits.png";
 
 const sidebarMenuItems = [
@@ -284,14 +287,12 @@ const VibrationTool: React.FC = () => {
         const currentDateStr = currentDate.toISOString().split("T")[0];
 
         if (reportDateStr === currentDateStr) {
-          navigate("/view-report", {
-            state: {
-              reportType: reportType,
-              userId: localStorage.getItem("user_id"),
-              title: sidebarMenuItems.find(
-                (item) => item.reportType === reportType,
-              )?.label,
-            },
+          navigateToViewReport(navigate, {
+            reportType,
+            userId: localStorage.getItem("user_id"),
+            title: sidebarMenuItems.find(
+              (item) => item.reportType === reportType,
+            )?.label,
           });
           return;
         }
@@ -389,6 +390,10 @@ const VibrationTool: React.FC = () => {
     const currentInput = inputValue;
     setInputValue("");
 
+    const currentFiles = [...attachedFiles];
+    const currentImages = [...attachedImages];
+    const currentVoices = [...attachedVoices];
+
     setIsLoading(true);
     setAttachedImages([]);
     setAttachedFiles([]);
@@ -414,10 +419,12 @@ const VibrationTool: React.FC = () => {
         formData.append("answer", "");
       }
 
-      if (attachedImages.length > 0 && attachedFiles.length > 0) {
-        formData.append("file", attachedFiles[0]);
-      } else if (attachedVoices.length > 0) {
-        formData.append("file", attachedVoices[0].file);
+      if (currentImages.length > 0 && currentFiles.length > 0) {
+        const f = currentFiles[0];
+        formData.append("file", f, f.name);
+      } else if (currentVoices.length > 0) {
+        const f = currentVoices[0].file;
+        formData.append("file", f, f.name || "voice.webm");
       }
 
       const response = await fetch(
@@ -624,22 +631,23 @@ const VibrationTool: React.FC = () => {
     if (!files || files.length === 0) return;
     const file = files[0];
     const audioUrl = URL.createObjectURL(file);
+    setAttachedVoices((prev) => [
+      ...prev,
+      { url: audioUrl, file, duration: undefined },
+    ]);
     const tempAudio = new Audio(audioUrl);
+    tempAudio.preload = "metadata";
+    tempAudio.load();
     tempAudio.onloadedmetadata = () => {
       const duration = tempAudio.duration;
-      setAttachedVoices((prev) => [
-        ...prev,
-        {
-          url: audioUrl,
-          file,
-          duration:
-            duration && !isNaN(duration) ? Math.floor(duration) : undefined,
-        },
-      ]);
+      if (!duration || Number.isNaN(duration)) return;
+      setAttachedVoices((prev) =>
+        prev.map((v) =>
+          v.file === file ? { ...v, duration: Math.floor(duration) } : v,
+        ),
+      );
     };
-    tempAudio.onerror = () => {
-      setAttachedVoices((prev) => [...prev, { url: audioUrl, file }]);
-    };
+    tempAudio.onerror = () => {};
     e.target.value = "";
   };
 
@@ -891,19 +899,9 @@ const VibrationTool: React.FC = () => {
   };
 
   const checkReportExists = async (reportType: string) => {
-    const userId = localStorage.getItem("user_id");
-    if (!userId) return false;
-
-    try {
-      const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/reports/individual_report?user_id=${userId}&report_type=${reportType}`,
-      );
-
-      return response.ok && response.status === 200;
-    } catch (error) {
-      console.error("Error checking report:", error);
-      return false;
-    }
+    const uid = getWellnessStoredUserId();
+    if (!uid) return false;
+    return checkWellnessIndividualReportExists(uid, reportType);
   };
 
   useEffect(() => {
@@ -1128,12 +1126,10 @@ const VibrationTool: React.FC = () => {
                   const reportExists = await checkReportExists(item.reportType);
 
                   if (reportExists) {
-                    navigate("/view-report", {
-                      state: {
-                        reportType: item.reportType,
-                        userId: localStorage.getItem("user_id"),
-                        title: item.label,
-                      },
+                    navigateToViewReport(navigate, {
+                      reportType: item.reportType,
+                      userId: localStorage.getItem("user_id"),
+                      title: item.label,
                     });
                   } else {
                     navigate(`/${item.id}`);

@@ -34,13 +34,25 @@ export default function VitaScanBanner({ onGetStarted, embedded = false }: VitaS
   const [hasCachedReport, setHasCachedReport] = useState(() => hasVitaScanReportCached());
 
   useEffect(() => {
+    const refresh = () => setHasCachedReport(hasVitaScanReportCached());
     const onStorage = (e: StorageEvent) => {
-      if (e.key === FACE_REPORT_STORAGE_KEY || e.key === null) {
-        setHasCachedReport(hasVitaScanReportCached());
+      if (
+        e.key === FACE_REPORT_STORAGE_KEY ||
+        e.key === "latestHealthScan" ||
+        e.key === null
+      ) {
+        refresh();
       }
     };
+    const onVitaUpdated = () => refresh();
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    window.addEventListener("vitaScanUpdated", onVitaUpdated);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("vitaScanUpdated", onVitaUpdated);
+      window.removeEventListener("focus", refresh);
+    };
   }, []);
 
   const handleClick = () => {

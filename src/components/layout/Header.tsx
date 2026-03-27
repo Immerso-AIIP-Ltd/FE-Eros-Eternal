@@ -19,13 +19,18 @@ import flameScoreBg from "@/assets/reports/flame.png";
 import auraBg from "@/assets/reports/aura.png";
 import koshaBg from "@/assets/reports/kosha.png";
 import longevityBg from "@/assets/reports/longevity.png";
-import { fetchIndividualReportJson } from "@/lib/individualReportFetch";
-import { hasVitaScanReportCached } from "@/lib/vitaScanCache";
-import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
+import { baseApiUrl } from "@/config/api";
 import {
   setPendingAttachments,
   type PendingVoice,
 } from "@/lib/pendingChatAttachments";
+import {
+  FACE_REPORT_STORAGE_KEY,
+  hasVitaScanReportCached,
+  LATEST_HEALTH_SCAN_KEY,
+} from "@/lib/vitaScanCache";
+import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
+import { getWellnessStoredUserId } from "@/lib/wellnessUserId";
 
 interface CardData {
   id: number;
@@ -196,8 +201,8 @@ export const Header: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Reports");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  const userId =
-    localStorage.getItem("userId") || localStorage.getItem("user_id");
+  const userId = getWellnessStoredUserId();
+  const reportsApiUrl = `${baseApiUrl}/aitools/wellness/v2/reports/individual_report`;
 
   const ReportsIcon = () => (
     <svg
@@ -449,10 +454,10 @@ export const Header: React.FC = () => {
             )
             .map(async (card) => {
               try {
-                const data = (await fetchIndividualReportJson(
-                  userId,
-                  card.reportType!,
-                )) as { success?: boolean; data?: { report_data?: unknown } };
+                const response = await fetch(
+                  `${reportsApiUrl}?user_id=${userId}&report_type=${card.reportType}`,
+                );
+                const data = await response.json();
                 const hasReport = hasWellnessIndividualReport(data);
                 statuses[card.reportType!] = hasReport;
                 return { reportType: card.reportType!, hasReport };
@@ -478,7 +483,11 @@ export const Header: React.FC = () => {
 
     // Listen for storage changes (e.g., when vita_scan is completed)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "faceReportData") {
+      if (
+        e.key === FACE_REPORT_STORAGE_KEY ||
+        e.key === LATEST_HEALTH_SCAN_KEY ||
+        e.key === null
+      ) {
         fetchReportStatuses();
       }
     };
@@ -519,7 +528,11 @@ export const Header: React.FC = () => {
       // Handle other report types
       const hasReport = reportStatuses[card.reportType];
       if (hasReport) {
-        navigate("/view-report", {
+        const qs = new URLSearchParams({
+          report_type: card.reportType,
+          user_id: String(userId),
+        });
+        navigate(`/view-report?${qs.toString()}`, {
           state: { reportType: card.reportType, userId, title: card.title },
         });
       } else if (card.route) {

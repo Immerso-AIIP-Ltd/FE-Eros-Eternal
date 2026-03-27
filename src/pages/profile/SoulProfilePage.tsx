@@ -1027,7 +1027,7 @@ const SoulProfilePage: React.FC = () => {
                     <input
                       className="sp-input"
                       type="text"
-                      placeholder="Current Location (optional)"
+                      placeholder="Current Location"
                       value={formData.currentLocation}
                       onChange={(e) => set("currentLocation", e.target.value)}
                     />

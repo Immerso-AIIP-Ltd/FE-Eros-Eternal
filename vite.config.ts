@@ -58,7 +58,8 @@ export default defineConfig({
       '*.ngrok-free.dev',  // Allow all ngrok free domains
       'microtonal-jacquetta-unepigrammatically.ngrok-free.dev',
       'shakticloud.ai',  // Your specific ngrok
-      'ungrammatical-skimpily-doretha.ngrok-free.dev'
+      'ungrammatical-skimpily-doretha.ngrok-free.dev',
+      'removable-nervily-ervin.ngrok-free.dev'
     ]
   },
   worker: {

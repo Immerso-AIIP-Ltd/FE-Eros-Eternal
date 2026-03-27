@@ -20,15 +20,18 @@ import flameScoreBg from "@/assets/reports/flame.png";
 import auraBg from "@/assets/reports/aura.png";
 import koshaBg from "@/assets/reports/kosha.png";
 import longevityBg from "@/assets/reports/longevity.png";
-import { fetchIndividualReportJson } from "@/lib/individualReportFetch";
+import { baseApiUrl } from "@/config/api";
 import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
+import { getWellnessStoredUserId } from "@/lib/wellnessUserId";
 
 const StatsCards = () => {
   const navigate = useNavigate();
   const [reportStatuses, setReportStatuses] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const userId = localStorage.getItem('userId') || localStorage.getItem('user_id');
+  const userId = getWellnessStoredUserId();
+  const reportsApiUrl = `${baseApiUrl}/aitools/wellness/v2/reports/individual_report`;
+
   const reportCards = [
     {
       id: 1,
@@ -86,14 +89,20 @@ const StatsCards = () => {
       setLoading(true);
       const statuses = {};
 
+      if (!userId) {
+        setReportStatuses({});
+        setLoading(false);
+        return;
+      }
+
       try {
         // Check all reports concurrently
         const promises = reportCards.map(async (card) => {
           try {
-            const data = (await fetchIndividualReportJson(
-              userId,
-              card.reportType,
-            )) as { success?: boolean; data?: { report_data?: unknown } };
+            const response = await fetch(
+              `${reportsApiUrl}?user_id=${userId}&report_type=${card.reportType}`
+            );
+            const data = await response.json();
             const hasReport = hasWellnessIndividualReport(data);
             return { reportType: card.reportType, hasReport };
           } catch (error) {
@@ -126,14 +135,17 @@ const StatsCards = () => {
 
     const hasReport = reportStatuses[card.reportType];
 
-    if (hasReport) {
-      // Navigate to view report page with report data
-      navigate('/view-report', {
+    if (hasReport && userId) {
+      const qs = new URLSearchParams({
+        report_type: card.reportType,
+        user_id: userId,
+      });
+      navigate(`/view-report?${qs.toString()}`, {
         state: {
           reportType: card.reportType,
-          userId: userId,
-          title: card.title
-        }
+          userId,
+          title: card.title,
+        },
       });
     } else {
       // Navigate to generation page or show generation UI
@@ -144,15 +156,18 @@ const StatsCards = () => {
   const handleButtonClick = (card) => {
     const hasReport = reportStatuses[card.reportType];
 
-    if (hasReport) {
-      // Navigate to view report page and scroll to recommendations
-      navigate('/view-report', {
+    if (hasReport && userId) {
+      const qs = new URLSearchParams({
+        report_type: card.reportType,
+        user_id: userId,
+      });
+      navigate(`/view-report?${qs.toString()}`, {
         state: {
           reportType: card.reportType,
-          userId: userId,
+          userId,
           title: card.title,
-          scrollToRecommendations: true // This will trigger scroll to recommendations
-        }
+          scrollToRecommendations: true,
+        },
       });
     } else {
       // Navigate to generation page
