@@ -203,14 +203,14 @@ const ChatPage: React.FC = () => {
       const form = new FormData();
 
       if (chatMode === "spiritual") {
-        url = `${baseApiUrl}/api/v1/chat/spiritual/${userId}`;
+        url = `${baseApiUrl}/aitools/wellness/v2/chat/spiritual/${userId}`;
         form.append("user_id", userId || "0");
         form.append("message", message);
         // if (spiritualSessionId) {
         //   form.append("session_id", spiritualSessionId);
         // }
       } else {
-        url = `${baseApiUrl}/api/v1/chat/answer_question/${userId}`;
+        url = `${baseApiUrl}/aitools/wellness/v2/chat/answer_question/${userId}`;
         form.append("report_type", reportType || "vibrational_frequency");
         form.append("answer", message);
         if (hasFiles) {
@@ -503,7 +503,7 @@ const ChatPage: React.FC = () => {
 
     try {
       const res = await fetch(
-        `${baseApiUrl}/api/v1/chat/select_soul_report/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/select_soul_report/${userId}`,
         { method: "POST", body: form }
       );
       const data = await res.json();
@@ -528,7 +528,7 @@ const ChatPage: React.FC = () => {
 
     try {
       const res = await fetch(
-        `${baseApiUrl}/api/v1/chat/generate_soul_report/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/generate_soul_report/${userId}`,
         { method: "POST", body: form }
       );
       const data = await res.json();
@@ -649,7 +649,7 @@ const ChatPage: React.FC = () => {
       setReportGenerated(false);
       try {
         const res = await fetch(
-          `${baseApiUrl}/api/v1/chat/spiritual/${userId}`,
+          `${baseApiUrl}/aitools/wellness/v2/chat/spiritual/${userId}`,
           {
             method: "POST",
             body: form,
@@ -718,7 +718,7 @@ const ChatPage: React.FC = () => {
       console.log("Sending converted audio file:", fileName);
       console.log("File size:", audioBlob.size, "bytes");
 
-      const voiceUrl = `${baseApiUrl}/api/v1/chat/answer_question/${userId}`;
+      const voiceUrl = `${baseApiUrl}/aitools/wellness/v2/chat/answer_question/${userId}`;
       const response = await fetch(voiceUrl, {
         method: "POST",
         body: formData,

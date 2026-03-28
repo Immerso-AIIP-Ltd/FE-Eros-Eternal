@@ -1,6 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { baseApiUrl } from "@/config/api";
+import { fetchIndividualReportJson } from "@/lib/individualReportFetch";
+import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
+import { getWellnessStoredUserId } from "@/lib/wellnessUserId";
 import Vibration from "../../assets/result-images/add_reaction.png";
 import Aura from "../../assets/result-images/background_replace.png";
 import StarMap from "../../assets/result-images/brightness_5.png";
@@ -97,8 +99,6 @@ const WellnessCard = ({
               </span>
             ) : null}
           </div>
-        ) : hasReport && !loading ? (
-          <p style={{ margin: 0, fontSize: "13px", color: "#0d1f2d", fontWeight: 600, lineHeight: 1.5 }}>Report ready</p>
         ) : (
           <p style={{ margin: 0, fontSize: "13px", color: "#6b8aa0", lineHeight: 1.5 }}>{description}</p>
         )}
@@ -139,6 +139,7 @@ type IndividualReportApiResponse = {
         kosha_alignment?: string;
         star_magnitude?: string;
         longevity_score?: string;
+        vitality_score?: number;
       };
       flame_vitality_assessment?: {
         current_score?: number;
@@ -204,7 +205,9 @@ function extractMetricFromReportResponse(
   }
 
   if (reportType === "longevity_blueprint") {
-    const metricText = formatMetricValue(assessment.longevity_score);
+    const metricText =
+      formatMetricValue(assessment.longevity_score) ??
+      formatMetricValue(assessment.vitality_score);
     return metricText ? { metricText, metricUnitText: "%" } : {};
   }
 
@@ -229,27 +232,36 @@ export default function ErosWellnessReports({ embedded = false }: { embedded?: b
     {} as Record<ReportType, GeneratedReportStatus>
   );
   const [loadingStatuses, setLoadingStatuses] = useState(true);
-  const userId = localStorage.getItem("userId") || localStorage.getItem("user_id");
+  const userId = getWellnessStoredUserId();
   const reportStatusQueryKey = useMemo(() => `${userId ?? "no-user"}:${location.pathname}`, [location.pathname, userId]);
 
   useEffect(() => {
     const fetchStatuses = async () => {
-      if (!userId) { setLoadingStatuses(false); return; }
+      if (!userId) {
+        setLoadingStatuses(false);
+        return;
+      }
       const statuses: Record<ReportType, GeneratedReportStatus> = {} as Record<ReportType, GeneratedReportStatus>;
       try {
-        await Promise.all(cardsData.map(async (card) => {
-          const res = await fetch(
-            `${baseApiUrl}/api/v1/reports/individual_report/?user_id=${userId}&report_type=${card.reportType}`
-          );
-          const data = (await res.json()) as IndividualReportApiResponse;
-          const hasReport = Boolean(data.success && data.data?.report_data);
-          statuses[card.reportType] = {
-            hasReport,
-            ...(hasReport ? extractMetricFromReportResponse(card.reportType, data) : {}),
-          };
-        }));
+        await Promise.all(
+          cardsData.map(async (card) => {
+            const data = (await fetchIndividualReportJson(
+              userId,
+              card.reportType,
+            )) as IndividualReportApiResponse;
+            const hasReport = hasWellnessIndividualReport(
+              data as { success?: boolean; data?: { report_data?: unknown } },
+            );
+            statuses[card.reportType] = {
+              hasReport,
+              ...(hasReport ? extractMetricFromReportResponse(card.reportType, data) : {}),
+            };
+          }),
+        );
         setReportStatuses(statuses);
-      } finally { setLoadingStatuses(false); }
+      } finally {
+        setLoadingStatuses(false);
+      }
     };
     fetchStatuses();
   }, [reportStatusQueryKey, userId]);
@@ -316,8 +328,14 @@ export default function ErosWellnessReports({ embedded = false }: { embedded?: b
             metricUnitText={reportStatuses[card.reportType]?.metricUnitText}
             onCardClick={() => {
               const hasReport = reportStatuses[card.reportType]?.hasReport;
-              if (hasReport) {
-                navigate("/view-report", { state: { reportType: card.reportType, userId, title: card.title } });
+              if (hasReport && userId) {
+                const qs = new URLSearchParams({
+                  report_type: card.reportType,
+                  user_id: userId,
+                });
+                navigate(`/view-report?${qs.toString()}`, {
+                  state: { reportType: card.reportType, userId, title: card.title },
+                });
                 return;
               }
 

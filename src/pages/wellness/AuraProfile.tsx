@@ -28,6 +28,9 @@ import MicVisualizer from "@/MicVisualizer";
 import { useNavigate, useLocation } from "react-router-dom";
 import eroslogo from "@/assets/eros-logo.png";
 import { baseApiUrl } from "@/config/api";
+import { navigateToViewReport } from "@/lib/navigateViewReport";
+import { checkWellnessIndividualReportExists } from "@/lib/checkWellnessIndividualReport";
+import { getWellnessStoredUserId } from "@/lib/wellnessUserId";
 import credits from "@/assets/credits.png";
 
 const sidebarMenuItems = [
@@ -273,16 +276,17 @@ const AuraProfile: React.FC = () => {
       setActiveMenuItem(reportType.replace("_", "-"));
 
       const reportExists = await checkReportExists(reportType);
+      const fromViewReport =
+        (location.state as { regenerateFromViewReport?: boolean } | null)
+          ?.regenerateFromViewReport === true;
 
-      if (reportExists) {
-        navigate("/view-report", {
-          state: {
-            reportType: reportType,
-            userId: localStorage.getItem("user_id"),
-            title: sidebarMenuItems.find(
-              (item) => item.reportType === reportType,
-            )?.label,
-          },
+      if (reportExists && !fromViewReport) {
+        navigateToViewReport(navigate, {
+          reportType,
+          userId: localStorage.getItem("user_id"),
+          title: sidebarMenuItems.find(
+            (item) => item.reportType === reportType,
+          )?.label,
         });
       } else {
         await startSoulReportAssessment(reportType);
@@ -319,7 +323,7 @@ const AuraProfile: React.FC = () => {
       }
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/select_soul_report/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/select_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -421,7 +425,7 @@ const AuraProfile: React.FC = () => {
       }
 
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/answer_question/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/answer_question/${userId}`,
         {
           method: "POST",
           body: formData,
@@ -491,7 +495,7 @@ const AuraProfile: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${baseApiUrl}/api/v1/chat/generate_soul_report/${userId}`,
+        `${baseApiUrl}/aitools/wellness/v2/chat/generate_soul_report/${userId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -794,18 +798,9 @@ const AuraProfile: React.FC = () => {
   };
 
   const checkReportExists = async (reportType: string) => {
-    const userId = localStorage.getItem("user_id");
-    if (!userId) return false;
-
-    try {
-      const response = await fetch(
-        `${baseApiUrl}/api/v1/reports/individual_report/?user_id=${userId}&report_type=${reportType}`,
-      );
-      return response.ok && response.status === 200;
-    } catch (error) {
-      console.error("Error checking report:", error);
-      return false;
-    }
+    const uid = getWellnessStoredUserId();
+    if (!uid) return false;
+    return checkWellnessIndividualReportExists(uid, reportType);
   };
 
   useEffect(() => {
@@ -975,12 +970,10 @@ const AuraProfile: React.FC = () => {
                                     const reportExists = await checkReportExists(item.reportType);
 
                                     if (reportExists) {
-                                        navigate('/view-report', {
-                                            state: {
-                                                reportType: item.reportType,
-                                                userId: localStorage.getItem('user_id'),
-                                                title: item.label
-                                            }
+                                        navigateToViewReport(navigate, {
+                                            reportType: item.reportType,
+                                            userId: localStorage.getItem('user_id'),
+                                            title: item.label,
                                         });
                                     } else {
                                         navigate(`/${item.id}`);

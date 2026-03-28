@@ -6,6 +6,8 @@ import { Box, Typography } from "@mui/material";
 import fire from "@/assets/fire.png";
 import { ArrowLeft } from "lucide-react";
 import { baseApiUrl } from "@/config/api";
+import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
+import { getWellnessStoredUserId } from "@/lib/wellnessUserId";
 
 interface ReportData {
   timestamp: string;
@@ -30,18 +32,85 @@ interface ReportData {
       kosha_alignment?: string;
       star_magnitude?: string;
       longevity_score?: string;
+      vitality_score?: number;
       calculated_vibrational_frequency?: number;
     };
     flame_vitality_assessment: {
       current_score?: number;
     }
-    detailed_analysis?: string;
+    detailed_analysis?: string | unknown;
     recommendations?: {
-      practices?: string[];
-      guidance?: string[];
-      considerations?: string[];
+      practices?: unknown[];
+      guidance?: unknown[];
+      considerations?: unknown[];
     };
   };
+}
+
+/** API sometimes returns strings; star_map / others may use { practice, explanation } objects. */
+function renderRecommendationItem(item: unknown): React.ReactNode {
+  if (item == null) return null;
+  if (typeof item === "string" || typeof item === "number") {
+    return String(item);
+  }
+  if (typeof item === "object") {
+    const o = item as Record<string, unknown>;
+    const practice = o.practice;
+    const explanation = o.explanation;
+    if (typeof practice === "string") {
+      return (
+        <>
+          <strong>{practice}</strong>
+          {typeof explanation === "string" && explanation.trim()
+            ? `: ${explanation}`
+            : null}
+        </>
+      );
+    }
+    const text =
+      (typeof o.text === "string" && o.text) ||
+      (typeof o.title === "string" && typeof o.description === "string"
+        ? `${o.title}: ${o.description}`
+        : null) ||
+      (typeof o.guidance === "string" && o.guidance) ||
+      (typeof o.point === "string" && o.point);
+    if (text) return text;
+    try {
+      return JSON.stringify(item);
+    } catch {
+      return "[Invalid item]";
+    }
+  }
+  return String(item);
+}
+
+function detailedAnalysisToParagraphs(detail: unknown): string[] {
+  if (detail == null) return [];
+  if (typeof detail === "string") {
+    return detail
+      .split("\n")
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+  }
+  if (Array.isArray(detail)) {
+    return detail
+      .map((chunk) =>
+        typeof chunk === "string"
+          ? chunk.trim()
+          : typeof chunk === "object" && chunk !== null && "text" in chunk
+            ? String((chunk as { text: unknown }).text).trim()
+            : JSON.stringify(chunk),
+      )
+      .filter((p) => p.length > 0);
+  }
+  if (typeof detail === "object") {
+    try {
+      return [JSON.stringify(detail, null, 2)];
+    } catch {
+      return [];
+    }
+  }
+  return [String(detail)];
 }
 
 const reportCards = [
@@ -87,26 +156,43 @@ const ViewReport = () => {
   const [expandedFaq, setExpandedFaq] = useState<number[]>([0]);
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const recommendationsRef = useRef(null);
 
-  const reportsApiUrl = `${baseApiUrl}/api/v1/reports/individual_report/`;
+  const reportsApiUrl = `${baseApiUrl}/aitools/wellness/v2/reports/individual_report`;
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const navState = location.state as
+      | {
+          reportType?: string;
+          userId?: string;
+          title?: string;
+          scrollToRecommendations?: boolean;
+        }
+      | undefined;
+
+    const userId =
+      navState?.userId ??
+      searchParams.get("user_id") ??
+      getWellnessStoredUserId();
+    const reportType =
+      navState?.reportType ?? searchParams.get("report_type") ?? "";
+
     const fetchReportData = async () => {
-      if (!location.state?.reportType || !location.state?.userId) {
+      if (!reportType || !userId) {
         setError("Missing report information");
         setLoading(false);
         return;
-        
       }
 
       try {
         setLoading(true);
+        setError(null);
         const response = await fetch(
-          `${reportsApiUrl}?user_id=${location.state.userId}&report_type=${location.state.reportType}`
+          `${reportsApiUrl}?user_id=${encodeURIComponent(userId)}&report_type=${encodeURIComponent(reportType)}`,
         );
 
         if (!response.ok) {
@@ -115,10 +201,10 @@ const ViewReport = () => {
 
         const data = await response.json();
 
-        if (data.success && data.data && data.data.report_data) {
+        if (hasWellnessIndividualReport(data)) {
           setReportData(data.data);
 
-          if (location.state.scrollToRecommendations) {
+          if (navState?.scrollToRecommendations) {
             setTimeout(() => {
               recommendationsRef.current?.scrollIntoView({
                 behavior: "smooth",
@@ -128,16 +214,18 @@ const ViewReport = () => {
         } else {
           throw new Error(data.message || "No report data found");
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Error fetching report data:", error);
-        setError(error.message || "Failed to load report");
+        const message =
+          error instanceof Error ? error.message : "Failed to load report";
+        setError(message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchReportData();
-  }, [location.state]);
+  }, [location.key, location.pathname, location.search]);
 
   const toggleFaq = (index: number) => {
     setExpandedFaq(prev =>
@@ -177,6 +265,7 @@ const ViewReport = () => {
       assessment?.aura_intensity ||
       assessment?.kosha_alignment ||
       assessment?.star_magnitude ||
+      assessment?.vitality_score ||
       assessment?.longevity_score ||
       flameVitality?.current_score ||
       "N/A"
@@ -204,21 +293,18 @@ const ViewReport = () => {
   };
 
   const getReportContent = () => {
-    const detailedAnalysis = reportData?.report_data?.detailed_analysis;
-    if (!detailedAnalysis) return [];
-
-    // Split by newlines to get paragraphs
-    return detailedAnalysis
-      .split('\n')
-      .map(paragraph => paragraph.trim())
-      .filter(paragraph => paragraph.length > 0);
+    return detailedAnalysisToParagraphs(
+      reportData?.report_data?.detailed_analysis,
+    );
   };
 
   const getReportItems = () => {
-    const detailedAnalysis = reportData?.report_data?.detailed_analysis;
-    if (!detailedAnalysis) return [];
-
-    return detailedAnalysis
+    const paragraphs = detailedAnalysisToParagraphs(
+      reportData?.report_data?.detailed_analysis,
+    );
+    if (paragraphs.length === 0) return [];
+    const joined = paragraphs.join(" ");
+    return joined
       .split(/[.!?]+/)
       .map((sentence) => sentence.trim())
       .filter((sentence) => sentence.length > 20)
@@ -305,16 +391,9 @@ const ViewReport = () => {
   const reportItems = getReportItems();
   const recommendationSections = getRecommendations();
 
-  const reportTimestamp = new Date(reportData?.timestamp || "");
-  const currentTimestamp = new Date();
-  const reportDateStr = reportTimestamp.toISOString().split("T")[0];
-  const currentDateStr = currentTimestamp.toISOString().split("T")[0];
-
-  const isReportTypeMatch = reportCards.some(
-    (card) => card.reportType === reportData?.report_type
-  );
-
-  const shouldShowContinueChat = isReportTypeMatch && reportDateStr !== currentDateStr;
+  const reportGenerationRoute = reportCards.find(
+    (c) => c.reportType === reportData?.report_type,
+  )?.route;
 
   return (
     <div
@@ -432,7 +511,12 @@ const ViewReport = () => {
                           <Typography variant="h4" fontWeight="bold" mb={1} color="#1F2937">
                             {frequency}
                             <span style={{ fontSize: "0.6em" }}>
-                              {location.state?.reportType?.includes("frequency") ? "Hz" : ""}
+                              {reportData?.report_type === "vibrational_frequency" ||
+                              String(location.state?.reportType ?? "").includes("frequency")
+                                ? "Hz"
+                                : reportData?.report_type === "longevity_blueprint"
+                                  ? "%"
+                                  : ""}
                             </span>
                           </Typography>
                           <Typography variant="body2" color="#6B7280">
@@ -562,7 +646,7 @@ const ViewReport = () => {
                                     marginBottom: itemIndex < section.items.length - 1 ? "8px" : "0",
                                   }}
                                 >
-                                  {item}
+                                  {renderRecommendationItem(item)}
                                 </li>
                               ))}
                             </ul>
@@ -590,25 +674,8 @@ const ViewReport = () => {
                 deeper insights
               </p>
 
-              {/* <button
-                className="btn px-5 py-2"
-                style={{
-                  background: "#00B8F8",
-                  border: "none",
-                  borderRadius: "25px",
-                  color: "white",
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  minWidth: "180px",
-                  boxShadow: "0 2px 8px rgba(6, 182, 212, 0.3)",
-                }}
-                onClick={() => {
-                  navigate('/ai-chat');
-                }}
-              >
-                Continue to Chat
-              </button> */}
               <button
+                type="button"
                 className="btn px-5 py-2"
                 style={{
                   background: "#00B8F8",
@@ -621,13 +688,13 @@ const ViewReport = () => {
                   boxShadow: "0 2px 8px rgba(6, 182, 212, 0.3)",
                 }}
                 onClick={() => {
-                  navigate("/ai-chat", {
-                    state: {
-                      userId: location.state?.userId,
-                      reportType: reportData?.report_type,
-                      fromContinueChat: true,
-                    },
-                  });
+                  if (reportGenerationRoute) {
+                    navigate(reportGenerationRoute, {
+                      state: { regenerateFromViewReport: true },
+                    });
+                  } else {
+                    navigate("/result");
+                  }
                 }}
               >
                 Continue to Chat

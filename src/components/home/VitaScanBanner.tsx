@@ -1,5 +1,10 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import vitaBackground from "@/assets/result-images/vitabackground.png";
+import {
+  FACE_REPORT_STORAGE_KEY,
+  hasVitaScanReportCached,
+} from "@/lib/vitaScanCache";
 
 /** Same arrow as ErosWellnessReports `ArrowIcon` — inline SVG (no external asset). */
 const ArrowIcon = () => (
@@ -26,8 +31,35 @@ interface VitaScanBannerProps {
 
 export default function VitaScanBanner({ onGetStarted, embedded = false }: VitaScanBannerProps) {
   const navigate = useNavigate();
+  const [hasCachedReport, setHasCachedReport] = useState(() => hasVitaScanReportCached());
+
+  useEffect(() => {
+    const refresh = () => setHasCachedReport(hasVitaScanReportCached());
+    const onStorage = (e: StorageEvent) => {
+      if (
+        e.key === FACE_REPORT_STORAGE_KEY ||
+        e.key === "latestHealthScan" ||
+        e.key === null
+      ) {
+        refresh();
+      }
+    };
+    const onVitaUpdated = () => refresh();
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("vitaScanUpdated", onVitaUpdated);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("vitaScanUpdated", onVitaUpdated);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
 
   const handleClick = () => {
+    if (hasCachedReport) {
+      navigate("/face-report");
+      return;
+    }
     onGetStarted?.();
     navigate("/facescan");
   };
@@ -218,8 +250,8 @@ export default function VitaScanBanner({ onGetStarted, embedded = false }: VitaS
             </p>
 
             <div className="vsb-btn-wrap">
-              <button className="vsb-btn" onClick={handleClick}>
-                Get Started
+              <button type="button" className="vsb-btn" onClick={handleClick}>
+                {hasCachedReport ? "View Report" : "Get Started"}
                 <ArrowIcon />
               </button>
             </div>
