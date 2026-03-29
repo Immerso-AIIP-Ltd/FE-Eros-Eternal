@@ -1,5 +1,5 @@
 // src/pages/TarotFlow.tsx
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import TarotCard from "./TarrotCard";
 import "./Tarot.css";
@@ -8,7 +8,7 @@ import { BsArrowLeft } from "react-icons/bs";
 import { PiArrowLeft } from "react-icons/pi";
 import TarotCardSelector from "@/components/Tarot/TarotCardSelector";
 import Stars from "@/components/ui/stars";
-import { Calendar } from 'lucide-react';
+import { SoulProfileDateField } from "@/components/dateField/DateField";
 import { useNavigate } from "react-router-dom";
 import Tarrot from "@/assets/images/lighttarrot.png";
 import { baseApiUrl } from "@/config/api";
@@ -30,14 +30,6 @@ const TarotFlow: React.FC = () => {
   });
   const [cardData, setCardData] = useState<TarotReading | null>(null);
   const userId = localStorage.getItem("user_id");
-
-  const dateInputRef = useRef(null);
-
-  const openDatePicker = () => {
-    if (dateInputRef.current) {
-      dateInputRef.current.showPicker();
-    }
-  };
 
   // Handle input changes
   const handleChange = (
@@ -93,6 +85,8 @@ const TarotFlow: React.FC = () => {
     setStep(step);
     setFormData({ name: "", gender: "", dob: "" });
   };
+
+  const today = new Date().toISOString().split("T")[0];
 
   return (
 
@@ -252,26 +246,22 @@ const TarotFlow: React.FC = () => {
                 </select>
               </div>
 
-              <div className="mb-3 position-relative">
-                <label className="form-label" style={{ color: "#000" }}>Date of birth</label>
-                <div className="input-group">
-                  <input
-                    type="date"
-                    className="form-control"
-                    name="dob"
-                    value={formData.dob}
-                    onChange={handleChange}
-                    ref={dateInputRef}
-                    style={{
-                      backgroundColor: "#FFFFFF",
-                      border: "1px solid #D1D5DB",
-                      borderRadius: "8px",
-                      padding: "12px",
-                      color: "#000"
-                    }}
-                  />
-                </div>
-              </div>
+              <SoulProfileDateField
+                label="Date of birth"
+                labelClassName="form-label"
+                labelStyle={{ color: "#000" }}
+                maxIsoDate={today}
+                value={formData.dob}
+                onChange={(dob) => setFormData((f) => ({ ...f, dob }))}
+                inputClassName="form-control"
+                inputStyle={{
+                  backgroundColor: "#FFFFFF",
+                  border: "1px solid #D1D5DB",
+                  borderRadius: "8px",
+                  padding: "12px",
+                  color: "#000",
+                }}
+              />
 
               <button
                 type="submit"

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { UsersRound } from "lucide-react";
 import { Card, Col, Row, Container } from "react-bootstrap";
 import { baseApiUrl } from "@/config/api";
+import { SoulProfileDateField } from "@/components/dateField/DateField";
 
 interface CompatibilityData {
   match_for: string;
@@ -35,8 +36,14 @@ interface ApiResponse {
   data: CompatibilityData;
 }
 
+function todayIsoLocal(): string {
+  const t = new Date();
+  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
+}
+
 const RelationshipCompatibility: React.FC = () => {
   const navigate = useNavigate();
+  const dobMax = todayIsoLocal();
 
   const [yourName, setYourName] = useState("");
   const [yourDob, setYourDob] = useState("");
@@ -474,29 +481,20 @@ const RelationshipCompatibility: React.FC = () => {
                         />
                       </div>
 
-                      <div className="mb-3">
-                        <label
-                          htmlFor="yourDob"
-                          className="form-label"
-                          style={{ fontWeight: 500, color: "#374151" }}
-                        >
-                          Date of Birth
-                        </label>
-                        <input
-                          type="date"
-                          id="yourDob"
-                          className="form-control"
-                          value={yourDob}
-                          onChange={(e) => setYourDob(e.target.value)}
-                          max={new Date().toISOString().split("T")[0]}
-                          required
-                          style={{
-                            borderColor: "#e5e7eb",
-                            padding: "0.75rem",
-                            color: "#000",
-                          }}
-                        />
-                      </div>
+                      <SoulProfileDateField
+                        label="Date of Birth"
+                        labelClassName="form-label"
+                        labelStyle={{ fontWeight: 500, color: "#374151" }}
+                        value={yourDob}
+                        onChange={setYourDob}
+                        maxIsoDate={dobMax}
+                        inputClassName="form-control"
+                        inputStyle={{
+                          borderColor: "#e5e7eb",
+                          padding: "0.75rem",
+                          color: "#000",
+                        }}
+                      />
                     </div>
                   </Col>
 
@@ -539,28 +537,19 @@ const RelationshipCompatibility: React.FC = () => {
                         />
                       </div>
 
-                      <div className="mb-3">
-                        <label
-                          htmlFor="partnerDob"
-                          className="form-label"
-                          style={{ fontWeight: 500, color: "#374151" }}
-                        >
-                          Date of Birth
-                        </label>
-                        <input
-                          type="date"
-                          id="partnerDob"
-                          className="form-control"
-                          value={partnerDob}
-                          onChange={(e) => setPartnerDob(e.target.value)}
-                          max={new Date().toISOString().split("T")[0]}
-                          required
-                          style={{
-                            borderColor: "#e5e7eb",
-                            padding: "0.75rem",
-                          }}
-                        />
-                      </div>
+                      <SoulProfileDateField
+                        label="Date of Birth"
+                        labelClassName="form-label"
+                        labelStyle={{ fontWeight: 500, color: "#374151" }}
+                        value={partnerDob}
+                        onChange={setPartnerDob}
+                        maxIsoDate={dobMax}
+                        inputClassName="form-control"
+                        inputStyle={{
+                          borderColor: "#e5e7eb",
+                          padding: "0.75rem",
+                        }}
+                      />
                     </div>
                   </Col>
                 </Row>
