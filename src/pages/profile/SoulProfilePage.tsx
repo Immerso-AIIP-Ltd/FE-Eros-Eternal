@@ -284,6 +284,11 @@ const SoulProfilePage: React.FC = () => {
     }
   };
 
+  function getTodayLocal() {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
   return (
     <>
       <style>{`
@@ -365,6 +370,12 @@ const SoulProfilePage: React.FC = () => {
           padding: 0 1.75rem;
           margin-top: clamp(1.5rem, 7%, 4.5rem);
         }
+
+        .sp-datepicker-day.sp-disabled {
+            color: #cbd5e1;
+            cursor: not-allowed;
+            pointer-events: none;
+          }
 
         .sp-title {
           font-family: 'Montserrat', sans-serif;
@@ -1286,7 +1297,10 @@ const SoulProfilePage: React.FC = () => {
 
               <div className="sp-datepicker-grid">
                 {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                  <div key={`sp-weekday-${i}`} className="sp-datepicker-weekday">
+                  <div
+                    key={`sp-weekday-${i}`}
+                    className="sp-datepicker-weekday"
+                  >
                     {d}
                   </div>
                 ))}
@@ -1311,21 +1325,28 @@ const SoulProfilePage: React.FC = () => {
                       />,
                     );
                   }
+                  const today = getTodayLocal();
+
                   for (let day = 1; day <= daysInMonth; day++) {
                     const current = new Date(pickerYear, pickerMonth, day);
+
                     const isSelected =
                       pickerSelected &&
                       current.toDateString() === pickerSelected.toDateString();
+
+                    const isFuture = current > today;
                     cells.push(
                       <button
                         key={day}
                         type="button"
                         className={
                           "sp-datepicker-day" +
-                          (isSelected ? " sp-selected" : "")
+                          (isSelected ? " sp-selected" : "") +
+                          (isFuture ? " sp-disabled" : "")
                         }
+                        disabled={isFuture}
                         onClick={() => {
-                          setPickerSelected(current);
+                          if (!isFuture) setPickerSelected(current);
                         }}
                       >
                         {day}
@@ -1351,9 +1372,11 @@ const SoulProfilePage: React.FC = () => {
                   "sp-datepicker-btn sp-ok" +
                   (pickerSelected ? " sp-enabled" : "")
                 }
-                disabled={!pickerSelected}
+                disabled={!pickerSelected || pickerSelected > getTodayLocal()}
                 onClick={() => {
-                  if (!pickerSelected) return;
+                  if (!pickerSelected || pickerSelected > getTodayLocal())
+                    return;
+
                   const y = pickerSelected.getFullYear();
                   const m = String(pickerSelected.getMonth() + 1).padStart(
                     2,
