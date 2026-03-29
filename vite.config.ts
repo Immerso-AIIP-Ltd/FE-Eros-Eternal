@@ -25,6 +25,7 @@ export default defineConfig({
   assetsInclude: ['**/*.tflite', '**/*.gz'],
   server: {
     host: true,
+    port: 5179,
     proxy: {
       // Dev: browser calls /aitools/* same-origin; proxy hits gateway.
       // Rewrite absolute gateway redirects → relative so the browser never follows cross-origin.
