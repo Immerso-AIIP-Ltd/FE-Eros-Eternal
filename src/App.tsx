@@ -43,7 +43,7 @@ import FaceAnalyseReport from "./pages/face/FaceAnalyseReport";
 
 const App: React.FC = () => {
   return (
-    <Router>
+    <Router basename="/wellness">
       <div className="app overflow-fix">
         <Routes>
           <Route path="/" element={<WellnessScreen />} />
