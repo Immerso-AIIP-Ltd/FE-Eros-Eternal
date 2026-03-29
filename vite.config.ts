@@ -7,6 +7,7 @@ const GATEWAY_ORIGIN = 'https://eu-dev-apigateway.erosuniverse.com'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/wellness/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -109,7 +109,7 @@ const VitalMonitor: React.FC = () => {
         try {
           faceDetectorRef.current = await FaceDetector.createFromOptions(vision, {
             baseOptions: {
-              modelAssetPath: "/models/blaze_face_short_range.tflite",
+              modelAssetPath: `${import.meta.env.BASE_URL}models/blaze_face_short_range.tflite`,
               delegate: "GPU"
             },
             runningMode: "VIDEO"
@@ -117,7 +117,7 @@ const VitalMonitor: React.FC = () => {
         } catch (err) {
           faceDetectorRef.current = await FaceDetector.createFromOptions(vision, {
             baseOptions: {
-              modelAssetPath: "/models/blaze_face_short_range.tflite",
+              modelAssetPath: `${import.meta.env.BASE_URL}models/blaze_face_short_range.tflite`,
               delegate: "CPU"
             },
             runningMode: "VIDEO"
@@ -125,12 +125,13 @@ const VitalMonitor: React.FC = () => {
         }
         
         // Load model files
+        const m = (name: string) => `${import.meta.env.BASE_URL}models/${name}`;
         const [modelRes, projRes, sqiRes, psdRes, stateRes] = await Promise.all([
-          fetch('/models/model.tflite'),
-          fetch('/models/proj.tflite'),
-          fetch('/models/sqi_model.tflite'),
-          fetch('/models/psd_model.tflite'),
-          fetch('/models/state.gz')
+          fetch(m('model.tflite')),
+          fetch(m('proj.tflite')),
+          fetch(m('sqi_model.tflite')),
+          fetch(m('psd_model.tflite')),
+          fetch(m('state.gz'))
         ]);
         
         if (!modelRes.ok || !projRes.ok || !sqiRes.ok || !psdRes.ok) {
