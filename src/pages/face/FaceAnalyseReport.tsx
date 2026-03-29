@@ -39,7 +39,7 @@ const FaceAnalyseReport: React.FC = () => {
             
             // Check if line is a section header (contains ** at start and end or is all caps)
             const isHeader = /^\*\*(.*?)\*\*:?$/.test(trimmedLine) || 
-                           (/^[A-Z\s]+:?$/.test(trimmedLine) && trimmedLine.length < 50);
+               (/^[A-Z][a-z]+(\s[A-Z][a-z]+)*:?$/.test(trimmedLine) && trimmedLine.length < 50);
             
             if (isHeader) {
                 // Save previous section
@@ -60,7 +60,7 @@ const FaceAnalyseReport: React.FC = () => {
             } else {
                 // No section yet, create a general one
                 if (!currentSection) {
-                    currentSection = { title: 'Overview', content: [] };
+                    currentSection = { title: 'Overall Analysis', content: [] };
                 }
                 if (trimmedLine.startsWith('-')) {
                     currentSection.content.push(trimmedLine.substring(1).trim());
