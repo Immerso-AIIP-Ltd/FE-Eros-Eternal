@@ -44,7 +44,13 @@ interface CardData {
 
 const chatTabs = ["Analyze", "Guide", "Recommend", "Health", "Astro", "Report"];
 
-export const Header: React.FC = () => {
+type HeaderLayoutDensity = "hero" | "compact";
+
+export type HeaderProps = {
+  layoutDensity?: HeaderLayoutDensity;
+};
+
+export default function Header({ layoutDensity = "hero" }: HeaderProps) {
   const navigate = useNavigate();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [reportStatuses, setReportStatuses] = useState<Record<string, boolean>>(
@@ -1118,9 +1124,59 @@ export const Header: React.FC = () => {
           .eros-title { font-size: clamp(42px, 2.5vw, 52px); }
           .eros-subtitle { font-size: 18px; }
         }
+
+        /* Compact: long scroll pages (e.g. /wellness/result) — no full-viewport hero, tight vertical rhythm */
+        .eros-root.eros-header--compact {
+          min-height: auto;
+        }
+        .eros-header--compact .eros-body {
+          min-height: 0;
+          align-items: flex-start;
+          justify-content: flex-start;
+          padding: 24px clamp(20px, 4vw, 64px) 28px;
+        }
+        .eros-header--compact .eros-inner {
+          justify-content: flex-start;
+        }
+        .eros-header--compact .eros-title-block {
+          gap: 14px;
+        }
+        .eros-header--compact .eros-chat-section {
+          margin-top: 20px;
+        }
+        @media (min-width: 768px) and (max-width: 1439px) {
+          .eros-header--compact .eros-body {
+            min-height: 0;
+            align-items: flex-start;
+            padding-top: 20px;
+            padding-bottom: 24px;
+          }
+          .eros-header--compact .eros-chat-section {
+            margin-top: 18px;
+          }
+        }
+        @media (min-width: 1440px) {
+          .eros-header--compact .eros-body {
+            padding: 28px clamp(32px, 5vw, 72px) 32px;
+          }
+          .eros-header--compact .eros-title-block {
+            gap: 18px;
+          }
+          .eros-header--compact .eros-chat-section {
+            margin-top: 22px;
+          }
+          .eros-header--compact .eros-title {
+            font-size: clamp(32px, 2.5vw, 44px);
+          }
+          .eros-header--compact .eros-subtitle {
+            font-size: clamp(14px, 1.1vw, 16px);
+          }
+        }
       `}</style>
 
-      <div className="eros-root">
+      <div
+        className={`eros-root${layoutDensity === "compact" ? " eros-header--compact" : ""}`}
+      >
         {/* ── NAVBAR ── */}
         <nav className="eros-nav">
           <div className="eros-nav-container">
@@ -1420,6 +1476,4 @@ export const Header: React.FC = () => {
       </div>
     </>
   );
-};
-
-export default Header;
+}
