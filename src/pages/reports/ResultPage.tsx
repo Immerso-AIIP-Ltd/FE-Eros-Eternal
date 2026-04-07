@@ -49,11 +49,10 @@ const ResultPage: React.FC = () => {
           :root { --result-gutter: 64px; --result-section-pad: 80px; }
         }
 
-        /* Desktop-only: let sections expand to fill wide screens.
-           Keeps laptop behavior unchanged by only applying at large widths. */
+        /* Desktop-only: let sections expand to fill wide screens (was 100px by mistake → crushed layout). */
         @media (min-width: 1440px) {
           :root {
-            --result-max-width: 100px;
+            --result-max-width: min(100%, 1400px);
             --result-gutter: 64px;
             --result-section-pad: 72px;
           }
@@ -95,18 +94,8 @@ const ResultPage: React.FC = () => {
         /* Prevent embedded sections from adding side padding */
         .vsb-wrap { padding: 0 !important; }
 
-        /* Laptop & tablet: header section fills viewport */
-        @media (min-width: 768px) and (max-width: 1439px) {
-          #header { min-height: 100vh; }
-        }
-        /* Mobile: full-height header */
-        @media (max-width: 767px) {
-          #header { min-height: 100vh; }
-        }
-        /* Large desktop only: header flows with content */
-        @media (min-width: 1440px) {
-          #header { min-height: 0; }
-        }
+        /* Header height follows content — no full-viewport min-height (avoids huge vertical gaps). */
+        #header { min-height: 0; }
       `}</style>
       {/* Main Content Area */}
       <main
@@ -128,7 +117,7 @@ const ResultPage: React.FC = () => {
           }}
         >
           <div id="header">
-            <Header />
+            <Header layoutDensity={"compact" as const} />
           </div>
 
           <div id="vita-scan" className="result-container result-section">
