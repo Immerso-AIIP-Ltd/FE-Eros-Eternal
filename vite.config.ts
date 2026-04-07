@@ -68,8 +68,8 @@ export default defineConfig({
     format: 'es',
   },
   preview: {
-    allowedHosts: [
-      ".shakticloud.ai"
-    ]
+    host: true,
+    port: 5179,
+    allowedHosts: "all"
   }
 })
