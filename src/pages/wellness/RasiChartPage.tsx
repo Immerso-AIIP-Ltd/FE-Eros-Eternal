@@ -12,7 +12,6 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Download, Eye, RefreshCw } from "lucide-react";
-import Stars from "@/components/ui/stars";
 import ChartImage from "@/components/charts/ChartImage";
 import { baseApiUrl } from "@/config/api";
 
@@ -93,9 +92,13 @@ const RasiChartPage: React.FC = () => {
       const apiCharts = api?.chartImages;
       const rasiInline = apiCharts?.rasiChart?.inline?.trim() ?? "";
       const navInline = apiCharts?.navamshaChart?.inline?.trim() ?? "";
+      const rasiAttachment =
+        apiCharts?.rasiChart?.attachment?.trim() ?? "";
+      const navAttachment =
+        apiCharts?.navamshaChart?.attachment?.trim() ?? "";
 
-      // Prefer structured chartImages.inline from API (Rasi D1 / Navamsha D9)
-      if (rasiInline || navInline) {
+      // Prefer structured chartImages: inline = preview only, attachment = download only
+      if (rasiInline || navInline || rasiAttachment || navAttachment) {
         const transformedResult: AstrologyResponse = {
           ...result,
           data: {
@@ -103,13 +106,11 @@ const RasiChartPage: React.FC = () => {
             chartImages: {
               rasiChart: {
                 inline: rasiInline,
-                attachment:
-                  apiCharts?.rasiChart?.attachment?.trim() || rasiInline,
+                attachment: rasiAttachment,
               },
               navamshaChart: {
                 inline: navInline,
-                attachment:
-                  apiCharts?.navamshaChart?.attachment?.trim() || navInline,
+                attachment: navAttachment,
               },
             },
           },
@@ -181,45 +182,13 @@ const RasiChartPage: React.FC = () => {
     fetchAstrologyData();
   }, []);
 
-  // ✅ Fixed download function with null checks
-  const downloadImage = (url: string | undefined, filename: string) => {
-    if (!url) {
-      alert("Chart URL not available");
+
+  const openAttachmentDownload = (attachmentUrl: string | undefined) => {
+    if (!attachmentUrl?.trim()) {
+      alert("Download link not available.");
       return;
     }
-
-    const cleanUrl = url.trim();
-
-    // Handle data URLs
-    if (cleanUrl.startsWith("data:")) {
-      const link = document.createElement("a");
-      link.href = cleanUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      return;
-    }
-
-    // Fetch remote URL (SVG in this case)
-    fetch(cleanUrl)
-      .then((response) => {
-        if (!response.ok) throw new Error("Network response was not ok");
-        return response.blob();
-      })
-      .then((blob) => {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-      })
-      .catch((err) => {
-        console.error("Download error:", err);
-        alert("Failed to download image. Try opening in new tab.");
-      });
+    window.open(attachmentUrl.trim(), "_blank", "noopener,noreferrer");
   };
 
   const [stars] = useState(() =>
@@ -472,9 +441,7 @@ const RasiChartPage: React.FC = () => {
                   <Button
                     variant="info"
                     size="sm"
-                    onClick={() =>
-                      downloadImage(rasiChart?.attachment, "rasi_chart.svg")
-                    }
+                    onClick={() => openAttachmentDownload(rasiChart?.attachment)}
                     disabled={!rasiChart?.attachment}
                   >
                     <Download />
@@ -535,10 +502,7 @@ const RasiChartPage: React.FC = () => {
                     variant="info"
                     size="sm"
                     onClick={() =>
-                      downloadImage(
-                        navamshaChart?.attachment,
-                        "navamsha_chart.svg",
-                      )
+                      openAttachmentDownload(navamshaChart?.attachment)
                     }
                     disabled={!navamshaChart?.attachment}
                   >
