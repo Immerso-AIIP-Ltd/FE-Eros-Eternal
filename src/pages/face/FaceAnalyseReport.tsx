@@ -1,327 +1,347 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Button, Container, Row, Col, Alert, Badge } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Button, Container, Row, Col, Alert } from "react-bootstrap";
+import { useLocation, useNavigate } from "react-router-dom";
+import "../palm/PalmReport.css";
+
+type FaceAnalyseReportState = {
+  success?: boolean;
+  data?: {
+    spiritual_interpretation?: string;
+  };
+  uploadedImage?: string;
+};
+
+type ParsedSection = { title: string; content: string[] };
+
+type FaceDetailTile = {
+  key: string;
+  title: string;
+  prose?: string;
+  items?: string[];
+};
+
+/** Same grid rule as palm / compatibility: first two full width, then pairs. */
+function detailColMd(idx: number, total: number): number {
+  if (total <= 0) return 12;
+  if (idx < 2) return 12;
+  const rest = total - 2;
+  if (rest % 2 === 1 && idx === total - 1) return 12;
+  return 6;
+}
+
+function normalizeProseLine(line: string): string {
+  return line
+    .replace(/^\*\s+/, "")
+    .replace(/^-\s+/, "")
+    .trim();
+}
+
+function formatBoldAndItalic(line: string): string {
+  if (!line) return "";
+  const t = normalizeProseLine(line);
+  return t
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+?)\*/g, "<em>$1</em>");
+}
+
+function renderApiProse(text: string | null | undefined): React.ReactNode {
+  if (text == null || String(text).trim() === "") return null;
+  const paragraphs = String(text).split(/\n\n+/);
+  return (
+    <div className="palm-prose">
+      {paragraphs.map((para, i) => {
+        const trimmed = para.trim();
+        if (!trimmed) return null;
+        const lines = trimmed.split("\n");
+        return (
+          <p key={i} className="palm-prose-paragraph">
+            {lines.map((line, j) => (
+              <React.Fragment key={j}>
+                {j > 0 ? <br /> : null}
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: formatBoldAndItalic(line.trim()),
+                  }}
+                />
+              </React.Fragment>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+function parseInterpretation(text: string): ParsedSection[] {
+  if (!text) return [];
+
+  const lines = text
+    .split("\n")
+    .filter((line) => line.trim() && !/^[=-]+\s*$/.test(line));
+  const sections: ParsedSection[] = [];
+  let current: ParsedSection | null = null;
+
+  const flush = () => {
+    if (current && current.content.length > 0) {
+      sections.push(current);
+    }
+    current = null;
+  };
+
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    const isHeader =
+      /^\*\*(.*?)\*\*:?$/.test(trimmedLine) ||
+      (/^[A-Z][a-z]+(\s[A-Z][a-z]+)*:?$/.test(trimmedLine) &&
+        trimmedLine.length < 50);
+
+    if (isHeader) {
+      flush();
+      const title = trimmedLine
+        .replace(/\*\*/g, "")
+        .replace(/:$/, "")
+        .trim();
+      current = { title, content: [] };
+    } else if (current) {
+      if (trimmedLine.startsWith("-")) {
+        current.content.push(trimmedLine.substring(1).trim());
+      } else if (trimmedLine) {
+        current.content.push(trimmedLine);
+      }
+    } else {
+      if (!current) {
+        current = { title: "Overall analysis", content: [] };
+      }
+      if (trimmedLine.startsWith("-")) {
+        current.content.push(trimmedLine.substring(1).trim());
+      } else if (trimmedLine) {
+        current.content.push(trimmedLine);
+      }
+    }
+  }
+  flush();
+
+  return sections;
+}
+
+function parsedSectionsToTiles(sections: ParsedSection[]): FaceDetailTile[] {
+  return sections.map((s, i) => {
+    const key = `${i}-${s.title.replace(/\s+/g, "-").slice(0, 40)}`;
+    if (s.content.length === 1) {
+      return { key, title: s.title, prose: s.content[0] };
+    }
+    return { key, title: s.title, items: s.content };
+  });
+}
+
+function buildFaceDetailTiles(
+  spiritualInterpretation: string | undefined,
+): FaceDetailTile[] {
+  const raw = spiritualInterpretation?.trim() ?? "";
+  if (!raw) return [];
+
+  const parsed = parseInterpretation(raw);
+  if (parsed.length === 0) {
+    return [{ key: "fallback", title: "Spiritual interpretation", prose: raw }];
+  }
+  return parsedSectionsToTiles(parsed);
+}
 
 const FaceAnalyseReport: React.FC = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [report, setReport] = useState<any>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-    const [username, setUsername] = useState<string>('');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [report, setReport] = useState<FaceAnalyseReportState | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>("");
 
-    useEffect(() => {
-        if (location.state && location.state.success) {
-            setReport(location.state);
-            if (location.state.uploadedImage) {
-                setUploadedImage(location.state.uploadedImage);
-            }
-        } else {
-            setError('No report data found. Please upload a face image first.');
-        }
-
-        const storedUsername = localStorage.getItem('username');
-        if (storedUsername) {
-            setUsername(storedUsername);
-        }
-    }, [location.state]);
-
-    // Function to parse and categorize the spiritual interpretation
-    const parseInterpretation = (text: string) => {
-        if (!text) return [];
-
-        const lines = text.split('\n').filter(line => line.trim() && !/^[=-]+\s*$/.test(line));
-        const sections: Array<{ title: string; content: string[] }> = [];
-        let currentSection: { title: string; content: string[] } | null = null;
-
-        lines.forEach(line => {
-            const trimmedLine = line.trim();
-            
-            // Check if line is a section header (contains ** at start and end or is all caps)
-            const isHeader = /^\*\*(.*?)\*\*:?$/.test(trimmedLine) || 
-               (/^[A-Z][a-z]+(\s[A-Z][a-z]+)*:?$/.test(trimmedLine) && trimmedLine.length < 50);
-            
-            if (isHeader) {
-                // Save previous section
-                if (currentSection && currentSection.content.length > 0) {
-                    sections.push(currentSection);
-                }
-                
-                // Start new section
-                const title = trimmedLine.replace(/\*\*/g, '').replace(/:$/, '').trim();
-                currentSection = { title, content: [] };
-            } else if (currentSection) {
-                // Add content to current section
-                if (trimmedLine.startsWith('-')) {
-                    currentSection.content.push(trimmedLine.substring(1).trim());
-                } else if (trimmedLine) {
-                    currentSection.content.push(trimmedLine);
-                }
-            } else {
-                // No section yet, create a general one
-                if (!currentSection) {
-                    currentSection = { title: 'Overall Analysis', content: [] };
-                }
-                if (trimmedLine.startsWith('-')) {
-                    currentSection.content.push(trimmedLine.substring(1).trim());
-                } else if (trimmedLine) {
-                    currentSection.content.push(trimmedLine);
-                }
-            }
-        });
-
-        // Add last section
-        if (currentSection && currentSection.content.length > 0) {
-            sections.push(currentSection);
-        }
-
-        return sections;
-    };
-
-    // Function to format text with bold
-    const formatText = (text: string) => {
-        const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        return <span dangerouslySetInnerHTML={{ __html: formatted }} />;
-    };
-
-    if (error) {
-        return (
-            <div className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4" 
-                 style={{ background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)" }}>
-                <Alert variant="danger" className="w-100" style={{ maxWidth: 600 }}>
-                    {error}
-                </Alert>
-                <Button variant="outline-dark" onClick={() => navigate('/')}>
-                    Go Back
-                </Button>
-            </div>
-        );
+  useEffect(() => {
+    const state = location.state as FaceAnalyseReportState | null;
+    if (state?.success) {
+      setReport(state);
+      if (state.uploadedImage) {
+        setUploadedImage(state.uploadedImage);
+      }
+    } else {
+      setError("No report data found. Please upload a face image first.");
     }
 
-    if (!report) {
-        return (
-            <div className="vh-100 vw-100 d-flex flex-column align-items-center justify-content-center p-4" 
-                 style={{ background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)" }}>
-                <div className="text-center">
-                    <div className="spinner-border text-info mb-3" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <p style={{ color: '#374151' }}>Analyzing your face...</p>
-                </div>
-            </div>
-        );
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername);
     }
+  }, [location.state]);
 
-    const { data } = report;
-    const sections = parseInterpretation(data.spiritual_interpretation);
-
+  if (error) {
     return (
-        <div className="vw-100 d-flex flex-column p-4" style={{
-            background: "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 40%, #FFFFFF 60%)",
-            minHeight: "100vh",
-            color: "#000"
-        }}>
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <button
-                    className="btn btn-outline-dark"
-                    onClick={() => navigate("/result")}
-                    style={{ fontSize: '1rem', position: 'relative', zIndex: 1000 }}
-                >
-                    ← Back
-                </button>
-            </div>
-
-            {/* User Info with Image */}
-            <div className="d-flex flex-column align-items-center justify-content-center mb-5">
-                {uploadedImage && (
-                    <div className="text-center">
-                        <img
-                            src={uploadedImage}
-                            alt="Uploaded face"
-                            className="shadow"
-                            style={{
-                                width: '150px',
-                                height: '150px',
-                                borderRadius: '50%',
-                                objectFit: 'cover',
-                                border: '3px solid #e5e7eb'
-                            }}
-                        />
-                        {/* {username && (
-                            <h2 className="mt-3 fw-bold" style={{ color: '#1f2937' }}>
-                                {username}
-                            </h2>
-                        )} */}
-                        <h6 className="mt-2" style={{ color: '#6b7280', fontWeight: 500 }}>
-                            Face Analysis
-                        </h6>
-                    </div>
-                )}
-            </div>
-
-            {/* Analysis Sections - Tile Design */}
-            <Container>
-                <Row className="g-4">
-                    {sections.map((section, index) => {
-                        // Determine if section should be full width or half
-                        const isFullWidth = section.content.length > 3 || 
-                                          section.content.join(' ').length > 200 ||
-                                          section.title.toLowerCase().includes('overview') ||
-                                          section.title.toLowerCase().includes('summary');
-
-                        return (
-                            <Col key={index} md={isFullWidth ? 12 : 6}>
-                                <Card 
-                                    className="h-100 shadow-sm"
-                                    style={{
-                                        backgroundColor: "#ffffff",
-                                        border: '1px solid #e5e7eb',
-                                        borderRadius: '16px'
-                                    }}
-                                >
-                                    <Card.Body className="p-4">
-                                        <Card.Title 
-                                            className="mb-4 pb-3" 
-                                            style={{ 
-                                                fontSize: '1.5rem', 
-                                                fontWeight: 700,
-                                                color: '#1f2937',
-                                                borderBottom: '2px solid #e5e7eb'
-                                            }}
-                                        >
-                                            {section.title}
-                                        </Card.Title>
-                                        
-                                        {section.content.length === 1 ? (
-                                            // Single paragraph
-                                            <p style={{ 
-                                                color: '#374151', 
-                                                lineHeight: '1.8', 
-                                                margin: 0,
-                                                fontSize: '1rem'
-                                            }}>
-                                                {formatText(section.content[0])}
-                                            </p>
-                                        ) : (
-                                            // Multiple items as list
-                                            <ul className="list-unstyled mb-0">
-                                                {section.content.map((item, idx) => (
-                                                    <li 
-                                                        key={idx} 
-                                                        className="mb-3"
-                                                        style={{
-                                                            listStyleType: 'disc',
-                                                            marginLeft: '20px',
-                                                            lineHeight: '1.8',
-                                                            color: '#374151',
-                                                            fontSize: '1rem'
-                                                        }}
-                                                    >
-                                                        {formatText(item)}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        );
-                    })}
-
-                    {/* If no sections parsed, show full text */}
-                    {sections.length === 0 && (
-                        <Col md={12}>
-                            <Card 
-                                className="shadow-sm"
-                                style={{
-                                    backgroundColor: "#ffffff",
-                                    border: '1px solid #e5e7eb',
-                                    borderRadius: '16px'
-                                }}
-                            >
-                                <Card.Body className="p-4">
-                                    <Card.Title 
-                                        className="mb-4 pb-3" 
-                                        style={{ 
-                                            fontSize: '1.5rem', 
-                                            fontWeight: 700,
-                                            color: '#1f2937',
-                                            borderBottom: '2px solid #e5e7eb'
-                                        }}
-                                    >
-                                        Spiritual Interpretation
-                                    </Card.Title>
-                                    <div style={{
-                                        fontSize: "1rem",
-                                        lineHeight: "1.8",
-                                        color: '#374151'
-                                    }}>
-                                        {data.spiritual_interpretation
-                                            ?.split('\n')
-                                            .filter(line => line.trim() && !/^[=-]+\s*$/.test(line))
-                                            .map((line, index) => {
-                                                const trimmedLine = line.trim();
-                                                const isBullet = trimmedLine.startsWith('-');
-                                                const cleanLine = isBullet ? trimmedLine.substring(1).trim() : trimmedLine;
-                                                const formattedLine = cleanLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                                                
-                                                if (isBullet) {
-                                                    return (
-                                                        <li 
-                                                            key={index}
-                                                            className="mb-2"
-                                                            style={{
-                                                                listStyleType: 'disc',
-                                                                marginLeft: '20px',
-                                                                lineHeight: '1.8'
-                                                            }}
-                                                        >
-                                                            <span dangerouslySetInnerHTML={{ __html: formattedLine }} />
-                                                        </li>
-                                                    );
-                                                } else {
-                                                    return (
-                                                        <p key={index} className="mb-2">
-                                                            <span dangerouslySetInnerHTML={{ __html: formattedLine }} />
-                                                        </p>
-                                                    );
-                                                }
-                                            })}
-                                    </div>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    )}
-                </Row>
-            </Container>
-
-            <style>{`
-                strong {
-                    font-weight: 700;
-                    color: #1f2937;
-                }
-                
-                ul {
-                    padding-left: 0;
-                }
-                
-                li {
-                    color: #374151;
-                    font-size: 1rem;
-                }
-                
-                .card {
-                    transition: transform 0.2s ease, box-shadow 0.2s ease;
-                }
-                
-                .card:hover {
-                    transform: translateY(-4px);
-                    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
-                }
-            `}</style>
-        </div>
+      <div
+        className="palm-report-page min-vh-100 d-flex flex-column align-items-center justify-content-center"
+        style={{ backgroundColor: "#fff", padding: "clamp(16px, 4vw, 24px)" }}
+      >
+        <Alert
+          variant="danger"
+          className="w-100"
+          style={{ maxWidth: "min(600px, 100%)" }}
+        >
+          {error}
+        </Alert>
+        <Button
+          variant="outline-dark"
+          onClick={() => navigate("/result")}
+          className="mt-3"
+        >
+          Go Back
+        </Button>
+      </div>
     );
+  }
+
+  if (!report) {
+    return (
+      <div
+        className="palm-report-page min-vh-100 d-flex flex-column align-items-center justify-content-center"
+        style={{ backgroundColor: "#fff", padding: "clamp(16px, 4vw, 24px)" }}
+      >
+        <div className="text-center">
+          <div className="spinner-border text-secondary mb-3" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="text-dark">Analyzing your face...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const spiritual = report.data?.spiritual_interpretation;
+  const detailTiles = buildFaceDetailTiles(spiritual);
+
+  return (
+    <div
+      className="palm-report-page d-flex flex-column"
+      style={{
+        background:
+          "linear-gradient(to bottom, #E0F2FE 0%, #F0F9FF 45%, #f8fafc 100%)",
+        minHeight: "100vh",
+        color: "#0a0a0a",
+      }}
+    >
+      <div className="palm-report-inner flex-grow-1 d-flex flex-column">
+        <div className="palm-report-header d-flex justify-content-between align-items-center mb-3">
+          <button
+            type="button"
+            className="btn btn-outline-dark palm-report-back"
+            onClick={() => navigate("/result")}
+          >
+            ← Back
+          </button>
+        </div>
+
+        <Container fluid className="palm-report-container px-0">
+          <Row className="g-3 palm-tile-stack">
+            <Col xs={12}>
+              <article>
+                <header className="palm-tile__head palm-tile__head--center">
+                  <h2 className="palm-tile__title">Face Analysis</h2>
+                </header>
+              </article>
+            </Col>
+
+            {uploadedImage ? (
+              <Col xs={12}>
+                <article className="palm-tile--media mb-3">
+                  <div className="palm-tile__body palm-tile__body--media">
+                    <div className="face-report-avatar-wrap">
+                      <img
+                        src={uploadedImage}
+                        alt="Uploaded face for analysis"
+                        className="face-report-avatar img-fluid"
+                      />
+                    </div>
+                  </div>
+                </article>
+              </Col>
+            ) : null}
+          </Row>
+
+          <div className="palm-report-detail-grid">
+            <Row className="g-3">
+              {detailTiles.length === 0 ? (
+                <Col xs={12}>
+                  <article className="palm-tile palm-tile--report-section palm-tile--compat-grid h-100">
+                    <header className="palm-tile__head">
+                      <h2 className="palm-tile__title">Spiritual interpretation</h2>
+                      <div className="palm-tile__divider" aria-hidden />
+                    </header>
+                    <div className="palm-tile__body">
+                      <p className="mb-0 text-muted small">
+                        No interpretation text was included in this result.
+                      </p>
+                    </div>
+                  </article>
+                </Col>
+              ) : (
+                detailTiles.map((tile, idx) => (
+                  <Col
+                    xs={12}
+                    md={detailColMd(idx, detailTiles.length)}
+                    key={tile.key}
+                  >
+                    <article className="palm-tile palm-tile--report-section palm-tile--compat-grid h-100">
+                      <header className="palm-tile__head">
+                        <h2 className="palm-tile__title">{tile.title}</h2>
+                        <div className="palm-tile__divider" aria-hidden />
+                      </header>
+                      <div className="palm-tile__body">
+                        {tile.prose != null ? (
+                          renderApiProse(tile.prose)
+                        ) : (
+                          <ul className="palm-detail-bullets palm-detail-bullets--compat">
+                            {(tile.items ?? []).map((item, i) => (
+                              <li key={i}>
+                                <span
+                                  dangerouslySetInnerHTML={{
+                                    __html: formatBoldAndItalic(item),
+                                  }}
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </article>
+                  </Col>
+                ))
+              )}
+            </Row>
+          </div>
+        </Container>
+
+        <style>{`
+        .palm-report-page strong {
+          font-weight: 700;
+          color: #0a0a0a;
+        }
+        .palm-report-page em {
+          font-style: italic;
+          color: #0a0a0a;
+        }
+        .palm-report-page .palm-prose {
+          width: 100%;
+          max-width: 100%;
+          color: #334155;
+        }
+        .palm-report-page .palm-prose-paragraph {
+          margin: 0 0 1.1rem 0;
+          line-height: 1.75;
+          font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+        .palm-report-page .palm-prose-paragraph:last-child {
+          margin-bottom: 0;
+        }
+      `}</style>
+      </div>
+    </div>
+  );
 };
 
 export default FaceAnalyseReport;
