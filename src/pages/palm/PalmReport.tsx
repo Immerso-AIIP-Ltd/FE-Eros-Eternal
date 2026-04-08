@@ -25,11 +25,67 @@ type PalmReportState = {
   };
 };
 
-function hasStringArrayValue(v: unknown): v is string[] {
-  return (
-    Array.isArray(v) &&
-    v.some((x) => typeof x === "string" && String(x).trim().length > 0)
-  );
+type DetailSectionKey = keyof PalmReadingDetail;
+
+const PALM_DETAIL_SECTIONS: { key: DetailSectionKey; label: string }[] = [
+  { key: "hand_shape", label: "Hand shape" },
+  { key: "finger_analysis", label: "Finger analysis" },
+  { key: "palm_lines", label: "Palm lines" },
+  { key: "characteristics", label: "Characteristics" },
+  { key: "personality_traits", label: "Personality traits" },
+  { key: "life_patterns", label: "Life patterns" },
+  { key: "career_insights", label: "Career insights" },
+  { key: "health_observations", label: "Health observations" },
+  { key: "spiritual_guidance", label: "Spiritual guidance" },
+];
+
+function getDetailSectionPayload(
+  detail: PalmReadingDetail,
+  key: DetailSectionKey,
+):
+  | { kind: "prose"; text: string }
+  | { kind: "list"; items: string[] }
+  | null {
+  const v = detail[key];
+  if (v == null) return null;
+  if (typeof v === "string") {
+    const t = v.trim();
+    return t ? { kind: "prose", text: t } : null;
+  }
+  if (Array.isArray(v)) {
+    const items = v
+      .filter((x) => typeof x === "string" && String(x).trim())
+      .map((x) => String(x).trim());
+    return items.length ? { kind: "list", items } : null;
+  }
+  return null;
+}
+
+type VisibleDetailSection = {
+  key: DetailSectionKey;
+  label: string;
+  payload: { kind: "prose"; text: string } | { kind: "list"; items: string[] };
+};
+
+function buildVisibleDetailSections(
+  detail: PalmReadingDetail,
+): VisibleDetailSection[] {
+  const out: VisibleDetailSection[] = [];
+  for (const sec of PALM_DETAIL_SECTIONS) {
+    const payload = getDetailSectionPayload(detail, sec.key);
+    if (!payload) continue;
+    out.push({ key: sec.key, label: sec.label, payload });
+  }
+  return out;
+}
+
+/** Same grid rule as Relationship Compatibility: first two full width, then pairs (md=6). */
+function detailColMd(idx: number, total: number): number {
+  if (total <= 0) return 12;
+  if (idx < 2) return 12;
+  const rest = total - 2;
+  if (rest % 2 === 1 && idx === total - 1) return 12;
+  return 6;
 }
 
 /** Strip leading `*` / `-` list markers from API lines (prose, not bullets). */
@@ -78,127 +134,6 @@ function renderApiProse(text: string | null | undefined): React.ReactNode {
         );
       })}
     </div>
-  );
-}
-
-function combineSpiritualGuidance(detail: PalmReadingDetail): string {
-  const v = detail.spiritual_guidance;
-  if (!hasStringArrayValue(v)) return "";
-  return v
-    .filter((s) => s && String(s).trim())
-    .map((s) => String(s).trim())
-    .join("\n\n");
-}
-
-/** Line opens a numbered block like `**1. HAND STRUCTURE:**` or `2. Palm Lines:` */
-function parseSectionHeaderLine(
-  line: string,
-): { num: string; titleRaw: string } | null {
-  const t = line.trim();
-  const m = t.match(/^(\*{0,2})(\d+)\.\s+(.+?)(\*{0,2}):\s*(\*{0,2})?\s*$/);
-  if (!m) return null;
-  const titleRaw = m[3].replace(/\*+/g, "").trim();
-  if (!titleRaw) return null;
-  return { num: m[2], titleRaw };
-}
-
-function toSectionHeading(num: string, titleRaw: string): string {
-  const title = titleRaw
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(" ");
-  return `${num}. ${title}`;
-}
-
-type ParsedSpiritualSection = { num: string; titleRaw: string; body: string };
-
-function parseSpiritualGuidanceSections(combined: string): {
-  intro: string;
-  sections: ParsedSpiritualSection[];
-} {
-  const lines = combined.split(/\r?\n/);
-  const sections: ParsedSpiritualSection[] = [];
-  const introLines: string[] = [];
-  let current: { num: string; titleRaw: string; body: string[] } | null =
-    null;
-
-  const flush = () => {
-    if (current) {
-      sections.push({
-        num: current.num,
-        titleRaw: current.titleRaw,
-        body: current.body.join("\n").trim(),
-      });
-      current = null;
-    }
-  };
-
-  for (const line of lines) {
-    const h = parseSectionHeaderLine(line);
-    if (h) {
-      flush();
-      current = { num: h.num, titleRaw: h.titleRaw, body: [] };
-      continue;
-    }
-    if (!current) introLines.push(line);
-    else current.body.push(line);
-  }
-  flush();
-
-  let intro = introLines.join("\n").trim();
-  if (sections.length > 0 && intro) {
-    const first = sections[0];
-    sections[0] = {
-      ...first,
-      body: first.body ? `${intro}\n\n${first.body}` : intro,
-    };
-    intro = "";
-  }
-
-  return { intro, sections };
-}
-
-/** One stacked tile per numbered section; fallback single tile if no headers found. */
-function renderSpiritualGuidanceSectionTiles(
-  detail: PalmReadingDetail,
-): React.ReactNode {
-  const combined = combineSpiritualGuidance(detail);
-  if (!combined) return null;
-
-  const { intro, sections } = parseSpiritualGuidanceSections(combined);
-
-  if (sections.length === 0) {
-    const body = intro || combined;
-    return (
-      <Col xs={12} key="spiritual-fallback">
-        <article className="palm-tile palm-tile--content-only">
-          <div className="palm-tile__body palm-tile__body--solo">
-            {renderApiProse(body)}
-          </div>
-        </article>
-      </Col>
-    );
-  }
-
-  return (
-    <>
-      {sections.map((sec, idx) => (
-        <Col xs={12} key={`${sec.num}-${sec.titleRaw}-${idx}`}>
-          <article className="palm-tile">
-            <header className="palm-tile__head">
-              <h2 className="palm-tile__title">
-                {toSectionHeading(sec.num, sec.titleRaw)}
-              </h2>
-              <div className="palm-tile__divider" aria-hidden />
-            </header>
-            <div className="palm-tile__body">
-              {renderApiProse(sec.body)}
-            </div>
-          </article>
-        </Col>
-      ))}
-    </>
   );
 }
 
@@ -264,6 +199,7 @@ const PalmReadingReportPage: React.FC = () => {
 
   const { data } = report;
   const detail: PalmReadingDetail = data.palm_reading_detail ?? {};
+  const visibleSections = buildVisibleDetailSections(detail);
 
   return (
     <div
@@ -287,41 +223,59 @@ const PalmReadingReportPage: React.FC = () => {
         </div>
 
         <Container fluid className="palm-report-container px-0">
-          <Row className="g-4 palm-tile-stack">
-            {/* Tile 1 — profile header */}
-            <div className="palm-report-user d-flex flex-column align-items-center justify-content-center mb-3 mb-md-4">
-              <div className="text-center px-2">
-                <h5
-                  className="mt-2 mb-0"
-                  style={{ color: "#374151", fontWeight: 500 }}
-                >
-                  Palm Analysis
-                </h5>
-              </div>
-            </div>
+          <Row className="g-3 palm-tile-stack">
+            <Col xs={12}>
+              <article>
+                <header className="palm-tile__head palm-tile__head--center">
+                  <h2 className="palm-tile__title">Palm Analysis</h2>
+                </header>
+              </article>
+            </Col>
 
-            <div className="palm-report-image-wrap d-flex justify-content-center mb-4 mb-md-5">
-              <img
-                src={data.image_url}
-                alt="Uploaded Palm"
-                className="palm-report-image img-fluid rounded shadow"
-                style={{ border: "1px solid #e5e7eb" }}
-              />
-            </div>
-
-            {hasStringArrayValue(detail.spiritual_guidance) ? (
-              <Col xs={12}>
-                <article >
-                  <header className="palm-tile__head">
-                    <h1 className="palm-tile__title mb-3 pb-3" style={{fontSize: '1.5rem', fontWeight: 700}}>Spiritual Guidance</h1>
-                  </header>
-                  <div className="palm-tile__body" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    {renderSpiritualGuidanceSectionTiles(detail)}
+            <Col xs={12}>
+              <article className="palm-tile--media mb-3">
+                <div className="palm-tile__body palm-tile__body--media">
+                  <div className="palm-report-image-wrap d-flex justify-content-center">
+                    <img
+                      src={data.image_url}
+                      alt="Uploaded palm for analysis"
+                      className="palm-report-image img-fluid"
+                    />
                   </div>
-                </article>
-              </Col>
-            ) : null}
+                </div>
+              </article>
+            </Col>
           </Row>
+
+          <div className="palm-report-detail-grid">
+            <Row className="g-3">
+              {visibleSections.map((entry, idx) => (
+                <Col
+                  xs={12}
+                  md={detailColMd(idx, visibleSections.length)}
+                  key={entry.key}
+                >
+                  <article className="palm-tile palm-tile--report-section palm-tile--compat-grid h-100">
+                    <header className="palm-tile__head">
+                      <h2 className="palm-tile__title">{entry.label}</h2>
+                      <div className="palm-tile__divider" aria-hidden />
+                    </header>
+                    <div className="palm-tile__body">
+                      {entry.payload.kind === "prose" ? (
+                        renderApiProse(entry.payload.text)
+                      ) : (
+                        <ul className="palm-detail-bullets palm-detail-bullets--compat">
+                          {entry.payload.items.map((item, i) => (
+                            <li key={i}>{item}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </article>
+                </Col>
+              ))}
+            </Row>
+          </div>
         </Container>
 
         <style>{`
