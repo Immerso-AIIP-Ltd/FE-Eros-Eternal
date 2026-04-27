@@ -3,7 +3,8 @@ import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
 
-const GATEWAY_ORIGIN = 'https://eu-dev-apigateway.erosuniverse.com'
+const GATEWAY_ORIGIN =
+  process.env.VITE_DEV_PROXY_TARGET || 'https://eu-dev-apigateway.erosuniverse.com'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -28,12 +29,13 @@ export default defineConfig({
     host: true,
     port: 5179,
     proxy: {
-      // Dev: browser calls /aitools/* same-origin; proxy hits gateway.
-      // Rewrite absolute gateway redirects → relative so the browser never follows cross-origin.
+      // Dev: browser calls /aitools/* same-origin; proxy forwards to GATEWAY_ORIGIN
+      // (defaults to the gateway, override locally via VITE_DEV_PROXY_TARGET).
+      // Rewrite absolute backend redirects → relative so the browser never follows cross-origin.
       '/aitools': {
         target: GATEWAY_ORIGIN,
         changeOrigin: true,
-        secure: true,
+        secure: GATEWAY_ORIGIN.startsWith('https://'),
         configure(proxy) {
           proxy.on('proxyRes', (proxyRes) => {
             const code = proxyRes.statusCode
