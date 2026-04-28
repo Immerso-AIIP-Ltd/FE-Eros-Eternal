@@ -112,7 +112,7 @@ export default function VitaScanBanner({ onGetStarted, embedded = false }: VitaS
           max-width: 678px;
         }
 
-        /* "Vita Scan" label */
+        /* "Bio Care" label */
         .vsb-label {
           font-family: 'Anybody', sans-serif;
           font-weight: 500;
@@ -238,7 +238,7 @@ export default function VitaScanBanner({ onGetStarted, embedded = false }: VitaS
 
           {/* ── LEFT ── */}
           <div className="vsb-left">
-            <p className="vsb-label">Vita Scan</p>
+            <p className="vsb-label">Bio Care</p>
 
             <h2 className="vsb-heading">
               Unlock AI-Powered Vitality &amp; Health Intelligence
@@ -261,7 +261,7 @@ export default function VitaScanBanner({ onGetStarted, embedded = false }: VitaS
           <div className="vsb-right">
             <img
               src={vitaBackground}
-              alt="Vita Scan — AI facial vitality analysis"
+              alt="Bio Care — AI facial vitality analysis"
               className="vsb-photo"
             />
           </div>

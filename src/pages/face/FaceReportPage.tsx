@@ -3,6 +3,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { baseApiUrl } from '@/config/api';
 
 import {
   AreaChart,
@@ -242,7 +243,7 @@ const FaceReportPage: React.FC = () => {
       }
 
       const timestamp = new Date().toISOString().slice(0, 10);
-      pdf.save(`Vita-Health-Report-${timestamp}.pdf`);
+      pdf.save(`BioCare-Report-${timestamp}.pdf`);
     } catch (err) {
       console.error('PDF generation failed:', err);
     } finally {
@@ -280,7 +281,37 @@ const FaceReportPage: React.FC = () => {
     const storedUsername = localStorage.getItem('username');
     if (storedUsername) {
       setUsername(storedUsername);
+      return;
     }
+
+    // Fallback: fetch from the profile API if localStorage was cleared but
+    // user_id is still around.
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `${baseApiUrl}/aitools/wellness/v2/users/profile/${userId}`,
+        );
+        if (!res.ok) return;
+        const json = await res.json();
+        const name: string | undefined = json?.data?.username ?? json?.username;
+        if (!cancelled && name) {
+          setUsername(name);
+          try {
+            localStorage.setItem('username', name);
+          } catch {
+            /* ignore */
+          }
+        }
+      } catch {
+        /* network noise — header just hides if no name is available */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [location.state]);
 
   // Helper: classify insight text
@@ -534,8 +565,20 @@ const FaceReportPage: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div>
             <h1 style={{ color: '#111827', fontSize: '1.875rem', fontWeight: 700, margin: '0 0 4px 0' }}>
-              Health Scan Report
+              Bio Care Report
             </h1>
+            {username && (
+              <p
+                style={{
+                  color: '#111827',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  margin: '0 0 4px 0',
+                }}
+              >
+                Prepared for: <span style={{ fontWeight: 700 }}>{username}</span>
+              </p>
+            )}
             <p style={{ color: '#9CA3AF', fontSize: '0.875rem', margin: 0 }}>
               Biometric analysis & monitoring
             </p>
@@ -1372,7 +1415,7 @@ const FaceReportPage: React.FC = () => {
         }}
       >
         <p style={{ color: '#6B7280', fontSize: '0.9rem', margin: 0, textAlign: 'center' }}>
-          Discover More insights into your Vita Scan and interact to get more deeper insights
+          Discover More insights into your Bio Care report and interact to get deeper insights
         </p>
         <button
           onClick={() => navigate('/ai-chat')}

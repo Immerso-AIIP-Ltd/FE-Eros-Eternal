@@ -382,7 +382,7 @@ export default function Header({ layoutDensity = "hero" }: HeaderProps) {
     {
       id: 1,
       icon: VitaScanIcon,
-      title: "Vita Scan",
+      title: "Bio Care",
       buttonText: "Generate",
       reportType: "vita_scan",
       route: "/facescan",
@@ -1189,7 +1189,7 @@ export default function Header({ layoutDensity = "hero" }: HeaderProps) {
             <div className="eros-nav-links">
               {[
                 // { label: "Header", id: "header" },
-                { label: "Vita Scan", id: "vita-scan" },
+                { label: "Bio Care", id: "vita-scan" },
                 { label: "Reports", id: "reports" },
                 { label: "Discover Luck", id: "lucky" },
                 { label: "Explore", id: "explore" },
@@ -1261,7 +1261,7 @@ export default function Header({ layoutDensity = "hero" }: HeaderProps) {
             <div className="eros-mobile-links">
               {[
                 { label: "Header", id: "header" },
-                { label: "Vita Scan", id: "vita-scan" },
+                { label: "Bio Care", id: "vita-scan" },
                 { label: "Reports", id: "reports" },
                 { label: "Lucky Section", id: "lucky" },
                 { label: "Explore Sections", id: "explore" },

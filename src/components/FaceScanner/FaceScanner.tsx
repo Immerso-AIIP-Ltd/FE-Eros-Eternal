@@ -2078,7 +2078,7 @@ const FaceScanner: React.FC = () => {
                   letterSpacing: '0.05em',
                   marginBottom: '1rem'
                 }}>
-                  Vita Scan
+                  Bio Care
                 </h2>
 
                 <h1 style={{ fontSize: '2.25rem', fontWeight: 400, lineHeight: 1.2, marginBottom: '0.5rem', color: '#000' }}>

@@ -1,9 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ReactMarkdown from "react-markdown";
+import { baseApiUrl } from "@/config/api";
 
 interface MetricCardProps {
     icon: string;
@@ -105,6 +106,46 @@ const VitaScanReport: React.FC = () => {
     // Extract AI report (check both snake_case and camelCase)
     const aiReport = healthScanData?.ai_report || healthScanData?.aiReport || null;
 
+    // User name shown in the report header & exported PDF.
+    // Primary source: localStorage (populated by SoulProfilePage on profile create).
+    // Fallback: GET /aitools/wellness/v2/users/profile/{user_id} — refreshes if
+    // localStorage was cleared but user_id is still around.
+    const [userName, setUserName] = useState<string>(
+        () => localStorage.getItem("username") || "",
+    );
+
+    useEffect(() => {
+        if (userName) return;
+        const userId = localStorage.getItem("user_id");
+        if (!userId) return;
+
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch(
+                    `${baseApiUrl}/aitools/wellness/v2/users/profile/${userId}`,
+                );
+                if (!res.ok) return;
+                const json = await res.json();
+                const name: string | undefined =
+                    json?.data?.username ?? json?.username;
+                if (!cancelled && name) {
+                    setUserName(name);
+                    try {
+                        localStorage.setItem("username", name);
+                    } catch {
+                        /* ignore */
+                    }
+                }
+            } catch {
+                /* network noise — leave userName empty, header just hides */
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [userName]);
+
     const waveformData = Array.from({ length: 150 }, (_, i) => {
         const x = (i / 150) * Math.PI * 6;
         return (
@@ -153,7 +194,7 @@ const VitaScanReport: React.FC = () => {
                 const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
                 pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-                pdf.save("VitaScan-Report.pdf");
+                pdf.save("BioCare-Report.pdf");
 
             } catch (error) {
                 console.error("PDF Generation Error:", error);
@@ -197,7 +238,15 @@ const VitaScanReport: React.FC = () => {
 
                 <div className="d-flex justify-content-between align-items-start">
                     <div>
-                        <h1 className="h2 fw-bold mb-1">Vita Scan Report</h1>
+                        <h1 className="h2 fw-bold mb-1">Bio Care Report</h1>
+                        {userName && (
+                            <p
+                                className="text-white mb-1"
+                                style={{ fontSize: "15px", fontWeight: 500 }}
+                            >
+                                Prepared for: <span style={{ fontWeight: 600 }}>{userName}</span>
+                            </p>
+                        )}
                         <p className="text-secondary mb-0" style={{ fontSize: "14px" }}>
                             Biometric analysis & monitoring
                         </p>
@@ -486,7 +535,7 @@ const VitaScanReport: React.FC = () => {
             {/* Footer */}
             <div className="text-center mt-5">
                 <p className="text-secondary mb-3" style={{ fontSize: "13px" }}>
-                    Discover More insights into your Vita Scan and interact to get more deeper insights
+                    Discover More insights into your Bio Care report and interact to get deeper insights
                 </p>
                 {!isExporting && (
                     <Button

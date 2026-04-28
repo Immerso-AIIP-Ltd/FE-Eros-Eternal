@@ -40,12 +40,14 @@ import ErosHome from "./pages/home/ErosHome";
 import FaceScanner from "./components/FaceScanner/FaceScanner";
 import VitaScanReport from "./pages/reports/VitaScanReport";
 import FaceAnalyseReport from "./pages/face/FaceAnalyseReport";
+import PasswordGate from "./components/auth/PasswordGate";
 
 const App: React.FC = () => {
   return (
     <Router basename="/wellness">
-      <div className="app overflow-fix">
-        <Routes>
+      <PasswordGate>
+        <div className="app overflow-fix">
+          <Routes>
           <Route path="/" element={<WellnessScreen />} />
           <Route path="/chat" element={<ErosChatUI />} />
           <Route path="/profile" element={<SoulProfilePage />} />
@@ -82,8 +84,9 @@ const App: React.FC = () => {
           <Route path="/ai-chat" element={<AiChat />} />
           <Route path="/age-tracker" element={<AgeTrack />} />
           <Route path="/view-report" element={<ViewReport />} />
-        </Routes>
-      </div>
+          </Routes>
+        </div>
+      </PasswordGate>
     </Router>
   );
 };
