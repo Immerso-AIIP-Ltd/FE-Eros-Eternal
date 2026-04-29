@@ -1,0 +1,177 @@
+/* Same date-picker visuals as SoulProfilePage (date modal only). */
+.spd-dob-wrap {
+  position: relative;
+  width: 100%;
+}
+.spd-dob-ico {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1;
+}
+.spd-datepicker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.spd-datepicker {
+  width: 380px;
+  max-width: 96vw;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 22px;
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.28),
+    0 0 0 1px rgba(148, 163, 184, 0.18);
+  padding: 18px 22px 14px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: #0f172a;
+}
+.spd-datepicker-header {
+  margin-bottom: 12px;
+}
+.spd-datepicker-title {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+.spd-datepicker-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.spd-datepicker-body {
+  margin-top: 6px;
+}
+.spd-datepicker-month-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  gap: 10px;
+}
+.spd-datepicker-month-row-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+}
+.spd-datepicker-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.spd-datepicker-select {
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  padding: 5px 26px 5px 12px;
+  font-size: 0.8rem;
+  background: #ffffff;
+  color: #0f172a;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  appearance: none;
+  -webkit-appearance: none;
+}
+.spd-datepicker-select:focus {
+  border-color: #00b8f8;
+  box-shadow: 0 0 0 2px rgba(0, 184, 248, 0.2);
+  background: #f0f9ff;
+}
+.spd-datepicker-pencil {
+  position: absolute;
+  right: 8px;
+  pointer-events: none;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spd-datepicker-arrow-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 999px;
+  color: #64748b;
+}
+.spd-datepicker-arrow-btn:hover {
+  background: rgba(148, 163, 184, 0.16);
+}
+.spd-datepicker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  font-size: 0.78rem;
+}
+.spd-datepicker-weekday {
+  text-align: center;
+  color: #94a3b8;
+  padding: 4px 0;
+}
+.spd-datepicker-day {
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #0f172a;
+}
+.spd-datepicker-day.spd-outside {
+  visibility: hidden;
+}
+.spd-datepicker-day.spd-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.spd-datepicker-day.spd-selected {
+  background: #00b8f8;
+  color: #ffffff;
+}
+.spd-datepicker-day:not(.spd-selected):hover {
+  background: rgba(148, 163, 184, 0.18);
+}
+.spd-datepicker-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.8rem;
+}
+.spd-datepicker-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+.spd-datepicker-btn.spd-cancel {
+  color: #f97373;
+}
+.spd-datepicker-btn.spd-ok {
+  color: #0f172a;
+  opacity: 0.35;
+}
+.spd-datepicker-btn.spd-ok.spd-enabled {
+  color: #00b8f8;
+  opacity: 1;
+}

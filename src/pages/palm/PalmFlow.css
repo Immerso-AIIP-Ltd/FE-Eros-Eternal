@@ -1,0 +1,36 @@
+/* PalmFlow - Laptop view centering fixes */
+
+/* Step 1: Intro screen - center content, prevent hand/title overlap */
+@media (max-height: 900px), (max-width: 1440px) {
+  .palm-intro-screen {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding-top: 3rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .palm-intro-image-section {
+    height: 50vh !important;
+    flex-shrink: 0;
+  }
+
+  .palm-intro-content-section {
+    height: auto !important;
+    min-height: auto !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+    flex: 1;
+    justify-content: center !important;
+  }
+
+  .palm-intro-title {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .palm-intro-desc {
+    font-size: 0.85rem !important;
+    margin-bottom: 1rem !important;
+  }
+}

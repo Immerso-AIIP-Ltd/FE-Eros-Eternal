@@ -60,7 +60,7 @@ const AgeTrack: React.FC = () => {
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
 
-    const baseApiUrl = 'http://192.168.29.154:8002';
+    const baseApiUrl = 'http://164.52.205.108:8500';
 
     const convertToMp3 = async (audioBlob: Blob): Promise<Blob> => {
         return new Promise((resolve, reject) => {
@@ -251,7 +251,7 @@ const AgeTrack: React.FC = () => {
                 console.log(key, typeof value === 'string' ? value : 'Non-string value');
             }
 
-            const reportUrl = `${baseApiUrl}/api/v1/bio/holistic-analyze`;
+            const reportUrl = `${baseApiUrl}/aitools/wellness/v2/bio/holistic-analyze`;
             const response = await fetch(reportUrl, {
                 method: 'POST',
                 body: formData,
@@ -542,39 +542,39 @@ Thank you for using our service! (Generated at 02:47 PM IST on Saturday, Septemb
         return currentStep !== 'image_uploaded';
     };
 
-     const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+    const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
 
-    const file = files[0];
-    const audioUrl = URL.createObjectURL(file);
+        const file = files[0];
+        const audioUrl = URL.createObjectURL(file);
 
-    // Save voice data for API
-    setCollectedData((prev) => ({ ...prev, voiceData: file }));
+        // Save voice data for API
+        setCollectedData((prev) => ({ ...prev, voiceData: file }));
 
-    // Add to chat messages
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "user",
-        audio: audioUrl,
-        audioBlob: file,
-        duration: 0, // not available for uploads
-      },
-    ]);
+        // Add to chat messages
+        setMessages((prev) => [
+            ...prev,
+            {
+                sender: "user",
+                audio: audioUrl,
+                audioBlob: file,
+                duration: 0, // not available for uploads
+            },
+        ]);
 
-    // Move to next step
-    if (currentStep === "image_uploaded") {
-      setCurrentStep("voice_uploaded");
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "ai",
-          text: "Perfect! Audio uploaded. Now please describe your stool pattern (e.g., frequency, consistency, color, any irregularities).",
-        },
-      ]);
-    }
-  };
+        // Move to next step
+        if (currentStep === "image_uploaded") {
+            setCurrentStep("voice_uploaded");
+            setMessages((prev) => [
+                ...prev,
+                {
+                    sender: "ai",
+                    text: "Perfect! Audio uploaded. Now please describe your stool pattern (e.g., frequency, consistency, color, any irregularities).",
+                },
+            ]);
+        }
+    };
 
     return (
         <div className="d-flex w-100 h-100 min-vh-100 min-vw-100 bg-black text-white overflow-hidden">
@@ -606,20 +606,20 @@ Thank you for using our service! (Generated at 02:47 PM IST on Saturday, Septemb
                         {/* <h2 className="h4 fw-bold mb-0" style={{ color: "#00A2FF" }}>
                             Eternal AI
                         </h2> */}
-                         <h2 
-    className="h4 fw-bold" 
-    style={{
-      background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text',
-      color: 'transparent',
-      margin: 0,
-      fontFamily: "'Poppins', sans-serif"
-    }}
-  >
-    Eternal AI
-  </h2>
+                        <h2
+                            className="h4 fw-bold"
+                            style={{
+                                background: 'linear-gradient(90deg, rgb(74, 222, 128), rgb(96, 165, 250))',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                                color: 'transparent',
+                                margin: 0,
+                                fontFamily: "'Poppins', sans-serif"
+                            }}
+                        >
+                            Eternal AI
+                        </h2>
                     </div>
                 </div>
 
@@ -892,29 +892,29 @@ Thank you for using our service! (Generated at 02:47 PM IST on Saturday, Septemb
                                             </Button> */}
 
                                             <Button
-                        as="label"
-                        variant="link"
-                        className="border-0 p-2"
-                        style={{
-                          color:
-                            currentStep !== "image_uploaded" ? "#555" : "#ccc",
-                          fontSize: "1.2rem",
-                          cursor:
-                            currentStep !== "image_uploaded"
-                              ? "not-allowed"
-                              : "pointer",
-                        }}
-                        disabled={currentStep !== "image_uploaded"}
-                      >
-                        <i className="bi bi-music-note"></i>
-                        <input
-                          type="file"
-                          accept=".mp3,.wav"
-                          hidden
-                          onChange={(e) => handleAudioUpload(e)}
-                          disabled={currentStep !== "image_uploaded"}
-                        />
-                      </Button>
+                                                as="label"
+                                                variant="link"
+                                                className="border-0 p-2"
+                                                style={{
+                                                    color:
+                                                        currentStep !== "image_uploaded" ? "#555" : "#ccc",
+                                                    fontSize: "1.2rem",
+                                                    cursor:
+                                                        currentStep !== "image_uploaded"
+                                                            ? "not-allowed"
+                                                            : "pointer",
+                                                }}
+                                                disabled={currentStep !== "image_uploaded"}
+                                            >
+                                                <i className="bi bi-music-note"></i>
+                                                <input
+                                                    type="file"
+                                                    accept=".mp3,.wav"
+                                                    hidden
+                                                    onChange={(e) => handleAudioUpload(e)}
+                                                    disabled={currentStep !== "image_uploaded"}
+                                                />
+                                            </Button>
                                             <Button
                                                 variant="info"
                                                 className="rounded-pill px-3 py-2 ms-2"

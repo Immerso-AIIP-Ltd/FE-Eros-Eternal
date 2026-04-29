@@ -65,9 +65,9 @@ const HealingModal: React.FC = () => {
     recent_breakthroughs: [] as string[],
   });
 
-//   const baseApiUrl = import.meta.env.VITE_API_BASE_URL;
-const baseApiUrl = "http://192.168.29.154:8002";
-console.log("baseApiUrl", baseApiUrl);
+  //   const baseApiUrl = import.meta.env.VITE_API_BASE_URL;
+  const baseApiUrl = "http://164.52.205.108:8500";
+  console.log("baseApiUrl", baseApiUrl);
   const convertToMp3 = async (audioBlob: Blob): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const audioContext = new (window.AudioContext ||
@@ -312,7 +312,7 @@ console.log("baseApiUrl", baseApiUrl);
 
       console.log("Final prescription payload:", finalPayload);
 
-      const healingUrl = `${baseApiUrl}/api/v1/healing/generate_healing_prescription`;
+      const healingUrl = `${baseApiUrl}/aitools/wellness/v2/healing/generate_healing_prescription`;
       const response = await fetch(healingUrl, {
         method: "POST",
         headers: {
@@ -398,7 +398,7 @@ console.log("baseApiUrl", baseApiUrl);
       formData.append("image_data", attachedFiles[0], "image.png");
       formData.append("user_id", userId || "123");
 
-      const faceUrl = `${baseApiUrl}/api/v1/analysis/face`;
+      const faceUrl = `${baseApiUrl}/aitools/wellness/v2/analysis/face`;
       const faceResponse = await fetch(faceUrl, {
         method: "POST",
         body: formData,
@@ -458,7 +458,7 @@ console.log("baseApiUrl", baseApiUrl);
         timezone: getTimezoneOffset(),
       };
 
-      const astrologyUrl = `${baseApiUrl}/api/v1/vedastro/get_astrology_data`;
+      const astrologyUrl = `${baseApiUrl}/aitools/wellness/v2/vedastro/get_astrology_data`;
       const response = await fetch(astrologyUrl, {
         method: "POST",
         headers: {
@@ -598,8 +598,8 @@ console.log("baseApiUrl", baseApiUrl);
       const fileExtension = audioBlob.type.includes("wav")
         ? ".wav"
         : audioBlob.type.includes("mp3")
-        ? ".mp3"
-        : ".webm";
+          ? ".mp3"
+          : ".webm";
       const fileName = `voice_recording${fileExtension}`;
 
       formData.append("audio_data", audioBlob, fileName);
@@ -608,7 +608,7 @@ console.log("baseApiUrl", baseApiUrl);
       console.log("Sending converted audio file:", fileName);
       console.log("File size:", audioBlob.size, "bytes");
 
-      const voiceUrl = `${baseApiUrl}/api/v1/analysis/voice`;
+      const voiceUrl = `${baseApiUrl}/aitools/wellness/v2/analysis/voice`;
       const response = await fetch(voiceUrl, {
         method: "POST",
         body: formData,
@@ -680,7 +680,7 @@ console.log("baseApiUrl", baseApiUrl);
       formData.append("audio_url", audioUrl); // Send URL as string
       formData.append("user_id", userId || "123");
 
-      const voiceUrl = `${baseApiUrl}/api/v1/analysis/voice`;
+      const voiceUrl = `${baseApiUrl}/aitools/wellness/v2/analysis/voice`;
       const response = await fetch(voiceUrl, {
         method: "POST",
         body: formData,
@@ -852,7 +852,7 @@ console.log("baseApiUrl", baseApiUrl);
   };
 
   const handleSuggestionClick = (question: string) => {
-  
+
     // Add user message
     setMessages((prev) => [...prev, { sender: "user", text: question }]);
 
@@ -1024,9 +1024,8 @@ console.log("baseApiUrl", baseApiUrl);
               return (
                 <div
                   key={i}
-                  className={`d-flex mb-2 ${
-                    isUser ? "justify-content-end" : "justify-content-start"
-                  }`}
+                  className={`d-flex mb-2 ${isUser ? "justify-content-end" : "justify-content-start"
+                    }`}
                 >
                   <div
                     className="px-3 py-2 rounded-3"
@@ -1036,13 +1035,13 @@ console.log("baseApiUrl", baseApiUrl);
                       background: isUser
                         ? "#00b8f8"
                         : isSuggestion
-                        ? "#e9ecef"
-                        : "#6c757d",
+                          ? "#e9ecef"
+                          : "#6c757d",
                       color: isUser
                         ? "white"
                         : isSuggestion
-                        ? "black"
-                        : "white",
+                          ? "black"
+                          : "white",
                       cursor: isSuggestion ? "pointer" : "default",
                       userSelect: "none",
                     }}
