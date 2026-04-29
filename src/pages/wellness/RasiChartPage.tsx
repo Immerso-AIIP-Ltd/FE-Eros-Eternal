@@ -13,11 +13,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Download, Eye, RefreshCw } from "lucide-react";
 import ChartImage from "@/components/charts/ChartImage";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
+import { normalizeVedastroTob } from "@/lib/vedastroTime";
 
-// Define proper types
-interface ChartImage {
-  // original?: string;
+interface ChartImageUrls {
   inline?: string;
   attachment?: string;
 }
@@ -25,12 +24,91 @@ interface ChartImage {
 interface AstrologyResponse {
   success: boolean;
   message: string;
-  data: {
-    astrologyData?: string; // The API returns this as a string
+  data: Record<string, unknown> & {
     chartImages?: {
-      rasiChart: ChartImage;
-      navamshaChart: ChartImage;
+      rasiChart: ChartImageUrls;
+      navamshaChart: ChartImageUrls;
     };
+  };
+}
+
+/** Maps current API (snake_case + chart_images + *_url) and legacy camelCase into chartImages for the UI. */
+function normalizeVedastroResponse(result: {
+  success: boolean;
+  message: string;
+  data?: Record<string, unknown>;
+}): AstrologyResponse {
+  const api = { ...(result.data ?? {}) } as Record<string, unknown>;
+
+  const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+
+  const legacyCharts = api.chartImages as
+    | {
+        rasiChart?: ChartImageUrls;
+        navamshaChart?: ChartImageUrls;
+      }
+    | undefined;
+
+  const snakeCharts = api.chart_images as
+    | {
+        rasi_chart?: ChartImageUrls;
+        navamsha_chart?: ChartImageUrls;
+      }
+    | undefined;
+
+  let rasiInline =
+    str(snakeCharts?.rasi_chart?.inline) ||
+    str(legacyCharts?.rasiChart?.inline) ||
+    str(api.rasi_chart_url);
+  let rasiAtt =
+    str(snakeCharts?.rasi_chart?.attachment) ||
+    str(legacyCharts?.rasiChart?.attachment) ||
+    rasiInline ||
+    str(api.rasi_chart_url);
+
+  let navInline =
+    str(snakeCharts?.navamsha_chart?.inline) ||
+    str(legacyCharts?.navamshaChart?.inline) ||
+    str(api.navamsha_chart_url);
+  let navAtt =
+    str(snakeCharts?.navamsha_chart?.attachment) ||
+    str(legacyCharts?.navamshaChart?.attachment) ||
+    navInline ||
+    str(api.navamsha_chart_url);
+
+  const astrologyText =
+    str(api.astrology_data) ||
+    str(api.astrologyData) ||
+    "";
+
+  if (!rasiInline && !navInline && astrologyText) {
+    const rasiMatch = astrologyText.match(
+      /Rasi D1 Chart URL:\s*(https?:\/\/[^\s\n]+)/,
+    );
+    const navMatch = astrologyText.match(
+      /Navamsha D9 Chart URL:\s*(https?:\/\/[^\s\n]+)/,
+    );
+    rasiInline = rasiMatch?.[1]?.trim() ?? rasiInline;
+    navInline = navMatch?.[1]?.trim() ?? navInline;
+    if (rasiInline && !rasiAtt) rasiAtt = rasiInline;
+    if (navInline && !navAtt) navAtt = navInline;
+  }
+
+  return {
+    ...result,
+    data: {
+      ...api,
+      chartImages: {
+        rasiChart: {
+          inline: rasiInline,
+          attachment: rasiAtt || rasiInline,
+        },
+        navamshaChart: {
+          inline: navInline,
+          attachment: navAtt || navInline,
+        },
+      },
+    },
   };
 }
 
@@ -65,19 +143,27 @@ const RasiChartPage: React.FC = () => {
       // Normalize date to dd/mm/yyyy (API requirement)
       dateOfBirth = normalizeDateToDDMMYYYY(dateOfBirth);
 
+      let tobApi: string;
+      try {
+        tobApi = normalizeVedastroTob(timeOfBirth);
+      } catch {
+        throw new Error(
+          "Time of birth must be valid 24-hour time (HH:MM). Update your soul profile.",
+        );
+      }
+
       const payload = {
-        user_id,
         location: placeOfBirth,
         dob: dateOfBirth,
-        tob: timeOfBirth,
+        tob: tobApi,
         timezone: "5:30",
       };
 
       const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/vedastro/get_astrology_data`,
+        wellnessApiUrl("/vedastro/get_astrology_data"),
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: eternalUserIdHeaders(user_id, { json: true }),
           body: JSON.stringify(payload),
         },
       );
@@ -88,63 +174,7 @@ const RasiChartPage: React.FC = () => {
       if (!result.success)
         throw new Error(result.message || "Failed to fetch data");
 
-      const api = result.data;
-      const apiCharts = api?.chartImages;
-      const rasiInline = apiCharts?.rasiChart?.inline?.trim() ?? "";
-      const navInline = apiCharts?.navamshaChart?.inline?.trim() ?? "";
-      const rasiAttachment =
-        apiCharts?.rasiChart?.attachment?.trim() ?? "";
-      const navAttachment =
-        apiCharts?.navamshaChart?.attachment?.trim() ?? "";
-
-      // Prefer structured chartImages: inline = preview only, attachment = download only
-      if (rasiInline || navInline || rasiAttachment || navAttachment) {
-        const transformedResult: AstrologyResponse = {
-          ...result,
-          data: {
-            ...(api ?? {}),
-            chartImages: {
-              rasiChart: {
-                inline: rasiInline,
-                attachment: rasiAttachment,
-              },
-              navamshaChart: {
-                inline: navInline,
-                attachment: navAttachment,
-              },
-            },
-          },
-        };
-        setData(transformedResult);
-      } else if (api?.astrologyData) {
-        // Fallback: parse markdown/text in astrologyData for URLs
-        const astrologyText = api.astrologyData;
-        const rasiMatch = astrologyText.match(
-          /Rasi D1 Chart URL:\s*(https?:\/\/[^\s\n]+)/,
-        );
-        const navamshaMatch = astrologyText.match(
-          /Navamsha D9 Chart URL:\s*(https?:\/\/[^\s\n]+)/,
-        );
-        const rasiUrl = rasiMatch?.[1]?.trim() ?? "";
-        const navamshaUrl = navamshaMatch?.[1]?.trim() ?? "";
-
-        const transformedResult: AstrologyResponse = {
-          ...result,
-          data: {
-            ...(api ?? {}),
-            chartImages: {
-              rasiChart: { inline: rasiUrl, attachment: rasiUrl },
-              navamshaChart: {
-                inline: navamshaUrl,
-                attachment: navamshaUrl,
-              },
-            },
-          },
-        };
-        setData(transformedResult);
-      } else {
-        setData(result);
-      }
+      setData(normalizeVedastroResponse(result));
     } catch (err) {
       console.error("Fetch error:", err);
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -279,8 +309,12 @@ const RasiChartPage: React.FC = () => {
     );
   }
 
+  const hasChartUrls =
+    !!data?.data?.chartImages?.rasiChart?.inline ||
+    !!data?.data?.chartImages?.navamshaChart?.inline;
+
   // === No Data State ===
-  if (!data?.data?.chartImages) {
+  if (!hasChartUrls) {
     return (
       <div
         className="vh-100 d-flex flex-column align-items-center justify-content-center"
@@ -312,36 +346,11 @@ const RasiChartPage: React.FC = () => {
   const tob = localStorage.getItem("time_of_birth");
   const birthPlace = localStorage.getItem("place_of_birth");
 
-  const { rasiChart, navamshaChart } = data.data.chartImages;
-
-  // ✅ DEBUG: Log the chart objects
-  console.log("=== RENDERING CHARTS ===");
-  console.log("rasiChart object:", rasiChart);
-  console.log("rasiChart.inline:", rasiChart?.inline);
-  console.log("navamshaChart object:", navamshaChart);
-  console.log("navamshaChart.inline:", navamshaChart?.inline);
-
-  // ✅ Additional safety check before rendering
-  if (!rasiChart || !navamshaChart) {
-    return (
-      <div
-        className="vh-100 d-flex flex-column align-items-center justify-content-center"
-        style={{ backgroundColor: "#000" }}
-      >
-        <Alert variant="warning">
-          <div>Chart data is incomplete.</div>
-          <div className="mt-2 small">
-            rasiChart exists: {rasiChart ? "Yes" : "No"}
-            <br />
-            navamshaChart exists: {navamshaChart ? "Yes" : "No"}
-          </div>
-        </Alert>
-        <Button variant="outline-light" onClick={() => navigate(-1)}>
-          ← Go Back
-        </Button>
-      </div>
-    );
-  }
+  const chartImages = data?.data?.chartImages ?? {
+    rasiChart: { inline: "", attachment: "" },
+    navamshaChart: { inline: "", attachment: "" },
+  };
+  const { rasiChart, navamshaChart } = chartImages;
 
   return (
     <div
@@ -411,9 +420,6 @@ const RasiChartPage: React.FC = () => {
                         src={rasiChart.inline}
                         alt="Rasi Chart"
                         className="rasi-chart-img"
-                        onLoad={() =>
-                          console.log("✅ Rasi chart loaded successfully")
-                        }
                       />
                     </div>
                   ) : (
@@ -471,9 +477,6 @@ const RasiChartPage: React.FC = () => {
                         src={navamshaChart.inline}
                         alt="Navamsha Chart"
                         className="rasi-chart-img"
-                        onLoad={() =>
-                          console.log("✅ Navamsha chart loaded successfully")
-                        }
                       />
                     </div>
                   ) : (

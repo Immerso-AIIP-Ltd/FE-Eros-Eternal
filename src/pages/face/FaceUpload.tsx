@@ -3,7 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Card, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Stars from "@/components/ui/stars";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 type PageState = "upload" | "preview" | "loading";
 
@@ -127,16 +127,13 @@ const FaceUploadPage: React.FC = () => {
       }
 
       const formData = new FormData();
-      formData.append("user_id", userId);
       formData.append("image", selectedFile);
 
-      const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/face_reading/analyze`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      const response = await fetch(wellnessApiUrl("/face_reading/analyze"), {
+        method: "POST",
+        headers: eternalUserIdHeaders(userId),
+        body: formData,
+      });
 
       const data = await response.json().catch(() => ({}));
 

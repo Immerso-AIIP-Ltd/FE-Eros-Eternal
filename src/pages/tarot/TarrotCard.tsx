@@ -1,7 +1,7 @@
 // src/pages/TarotCard.tsx
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 interface TarotCard {
   card: string;
@@ -47,18 +47,16 @@ const TarotCard: React.FC = () => {
 
       try {
         const response = await fetch(
-          `${baseApiUrl}/aitools/wellness/v2/numerology/tarot_reading`,
+          wellnessApiUrl("/numerology/tarot_reading"),
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: eternalUserIdHeaders(userId, { json: true }),
             body: JSON.stringify({
-              user_id: userId,
               user_name: username,
-              dob: dob,
+              dob,
+              mode: "random",
             }),
-          }
+          },
         );
 
         if (!response.ok) {

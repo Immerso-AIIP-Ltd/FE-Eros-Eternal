@@ -21,7 +21,10 @@ type PalmReportState = {
   data?: {
     image_url?: string;
     raw_analysis?: string;
+    /** Legacy API */
     palm_reading_detail?: PalmReadingDetail;
+    /** Current API (same shape as palm_reading_detail) */
+    palm_detail?: PalmReadingDetail;
   };
 };
 
@@ -198,7 +201,8 @@ const PalmReadingReportPage: React.FC = () => {
   }
 
   const { data } = report;
-  const detail: PalmReadingDetail = data.palm_reading_detail ?? {};
+  const detail: PalmReadingDetail =
+    data.palm_reading_detail ?? data.palm_detail ?? {};
   const visibleSections = buildVisibleDetailSections(detail);
 
   return (
@@ -237,7 +241,7 @@ const PalmReadingReportPage: React.FC = () => {
                 <div className="palm-tile__body palm-tile__body--media">
                   <div className="palm-report-image-wrap d-flex justify-content-center">
                     <img
-                      src={data.image_url}
+                      src={data.image_url || ""}
                       alt="Uploaded palm for analysis"
                       className="palm-report-image img-fluid"
                     />

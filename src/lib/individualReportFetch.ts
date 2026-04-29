@@ -1,4 +1,4 @@
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
 
 /** Dedupes concurrent GETs and reuses the last JSON per user + report_type (avoids duplicate 307/follow-up rows from Strict Mode or staggered mounts). */
@@ -29,9 +29,9 @@ export function fetchIndividualReportJson(
   const existing = inflight.get(key);
   if (existing) return existing;
 
-  const url = `${baseApiUrl}/aitools/wellness/v2/reports/individual_report?user_id=${encodeURIComponent(userId)}&report_type=${encodeURIComponent(reportType)}`;
+  const url = `${wellnessApiUrl("/reports/individual_report")}?report_type=${encodeURIComponent(reportType)}`;
 
-  const p = fetch(url)
+  const p = fetch(url, { headers: eternalUserIdHeaders(userId) })
     .then((r) => r.json())
     .then((data) => {
       // Do not cache "no report" payloads — after generating on the server, UI must refetch.

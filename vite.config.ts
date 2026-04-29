@@ -1,13 +1,15 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
 
-const GATEWAY_ORIGIN =
-  process.env.VITE_DEV_PROXY_TARGET || 'https://eu-dev-apigateway.erosuniverse.com'
-
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const GATEWAY_ORIGIN =
+    env.VITE_DEV_PROXY_TARGET || 'http://192.168.1.171:6007'
+
+  return {
   base: '/wellness/',
   resolve: {
     alias: {
@@ -32,6 +34,18 @@ export default defineConfig({
       // Dev: browser calls /aitools/* same-origin; proxy forwards to GATEWAY_ORIGIN
       // (defaults to the gateway, override locally via VITE_DEV_PROXY_TARGET).
       // Rewrite absolute backend redirects → relative so the browser never follows cross-origin.
+      // Eternal LangChain routes at API root (Postman); same gateway target as /aitools
+      '/users': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
+      '/chat': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
+      '/reports': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
+      '/numerology': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
+      '/vedastro': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
+      '/analysis': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
+      '/face_reading': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
+      '/health': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
+      '/welcome': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
+      '/healing': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
+      '/bio': { target: GATEWAY_ORIGIN, changeOrigin: true, secure: GATEWAY_ORIGIN.startsWith('https://') },
       '/aitools': {
         target: GATEWAY_ORIGIN,
         changeOrigin: true,
@@ -59,6 +73,7 @@ export default defineConfig({
     allowedHosts: [
       'localhost',
       '127.0.0.1',
+      '192.168.1.171',
       '*.ngrok-free.dev',  // Allow all ngrok free domains
       'microtonal-jacquetta-unepigrammatically.ngrok-free.dev',
       'shakticloud.ai',  // Your specific ngrok
@@ -73,5 +88,6 @@ export default defineConfig({
     host: true,
     port: 5179,
     allowedHosts: "all"
+  },
   }
 })

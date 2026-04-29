@@ -18,7 +18,7 @@ import Magic from "@/assets/webm/Magic Crystal Ball.webm";
 import Star from "@/assets/webm/Star.webm";
 
 import "@/components/layout/header.css";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 interface Message {
   sender: "user" | "ai";
@@ -199,26 +199,34 @@ const ChatPage: React.FC = () => {
       textAreaRef.current.style.height = "40px";
     }
     try {
-      let url = "";
-      const form = new FormData();
-
+      let res: Response;
+      const uid = userId || "0";
       if (chatMode === "spiritual") {
-        url = `${baseApiUrl}/aitools/wellness/v2/chat/spiritual/${userId}`;
-        form.append("user_id", userId || "0");
-        form.append("message", message);
-        // if (spiritualSessionId) {
-        //   form.append("session_id", spiritualSessionId);
-        // }
+        const body: Record<string, unknown> = { message };
+        if (spiritualSessionId != null && spiritualSessionId !== "") {
+          const n = Number(spiritualSessionId);
+          body.session_id = Number.isFinite(n) ? n : spiritualSessionId;
+        }
+        res = await fetch(wellnessApiUrl("/chat/spiritual"), {
+          method: "POST",
+          headers: eternalUserIdHeaders(uid, { json: true }),
+          body: JSON.stringify(body),
+        });
       } else {
-        url = `${baseApiUrl}/aitools/wellness/v2/chat/answer_question/${userId}`;
+        const answerUrl = wellnessApiUrl("/chat/answer_question");
+        const form = new FormData();
         form.append("report_type", reportType || "vibrational_frequency");
         form.append("answer", message);
         if (hasFiles) {
           attachedFiles.forEach((f) => form.append("file", f, f.name));
         }
+        res = await fetch(answerUrl, {
+          method: "POST",
+          headers: eternalUserIdHeaders(uid),
+          body: form,
+        });
       }
 
-      const res = await fetch(url, { method: "POST", body: form });
       const data = await res.json();
 
       setMessages((prev) => prev.filter((m) => !m.isThinking));
@@ -498,14 +506,13 @@ const ChatPage: React.FC = () => {
     ]);
 
     const userId = localStorage.getItem("user_id") || "0";
-    const form = new FormData();
-    form.append("report_type", type);
 
     try {
-      const res = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/chat/select_soul_report/${userId}`,
-        { method: "POST", body: form }
-      );
+      const res = await fetch(wellnessApiUrl("/chat/select_soul_report"), {
+        method: "POST",
+        headers: eternalUserIdHeaders(userId, { json: true }),
+        body: JSON.stringify({ report_type: type }),
+      });
       const data = await res.json();
       setMessages((prev) => [
         ...prev,
@@ -522,15 +529,13 @@ const ChatPage: React.FC = () => {
 
   const generateReport = async () => {
     const userId = localStorage.getItem("user_id") || "0";
-    const form = new FormData();
-    form.append("user_id", userId);
-    form.append("report_type", reportType || "");
 
     try {
-      const res = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/chat/generate_soul_report/${userId}`,
-        { method: "POST", body: form }
-      );
+      const res = await fetch(wellnessApiUrl("/chat/generate_soul_report"), {
+        method: "POST",
+        headers: eternalUserIdHeaders(userId, { json: true }),
+        body: JSON.stringify({ report_type: reportType || "" }),
+      });
       const data = await res.json();
       setMessages((prev) => [
         ...prev,
@@ -638,23 +643,19 @@ const ChatPage: React.FC = () => {
     if (choice === "Explore Current Report") {
       setChatMode("spiritual");
       const userId = localStorage.getItem("user_id") || "0";
-      const form = new FormData();
-      form.append("user_id", userId);
-      form.append("message", "hi");
-
+      const body: Record<string, unknown> = { message: "hi" };
       if (spiritualSessionId) {
-        form.append("session_id", spiritualSessionId);
+        const n = Number(spiritualSessionId);
+        body.session_id = Number.isFinite(n) ? n : spiritualSessionId;
       }
 
       setReportGenerated(false);
       try {
-        const res = await fetch(
-          `${baseApiUrl}/aitools/wellness/v2/chat/spiritual/${userId}`,
-          {
-            method: "POST",
-            body: form,
-          }
-        );
+        const res = await fetch(wellnessApiUrl("/chat/spiritual"), {
+          method: "POST",
+          headers: eternalUserIdHeaders(userId, { json: true }),
+          body: JSON.stringify(body),
+        });
         const data = await res.json();
 
         if (data?.data?.session_id && !spiritualSessionId) {
@@ -718,9 +719,10 @@ const ChatPage: React.FC = () => {
       console.log("Sending converted audio file:", fileName);
       console.log("File size:", audioBlob.size, "bytes");
 
-      const voiceUrl = `${baseApiUrl}/aitools/wellness/v2/chat/answer_question/${userId}`;
+      const voiceUrl = wellnessApiUrl("/chat/answer_question");
       const response = await fetch(voiceUrl, {
         method: "POST",
+        headers: eternalUserIdHeaders(userId),
         body: formData,
       });
 

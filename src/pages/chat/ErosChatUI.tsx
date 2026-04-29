@@ -14,7 +14,7 @@ import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
 
 import { useNavigate } from "react-router-dom";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 const sidebarMenuItems = [
   { id: 'vibrational-frequency', label: 'Vibrational Frequency', icon: <ImagePlus size={16} /> },
@@ -388,13 +388,10 @@ const ErosChatUI: React.FC = () => {
       let currentSessionId = sessionId;
 
       if (!currentSessionId) {
-        const initResponse = await fetch(`${baseApiUrl}/aitools/wellness/v2/chat/spiritual`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({
-            user_id: userId,
-            message: "start"
-          })
+        const initResponse = await fetch(wellnessApiUrl("/chat/spiritual"), {
+          method: "POST",
+          headers: eternalUserIdHeaders(userId, { json: true }),
+          body: JSON.stringify({ message: "start" }),
         });
         const initData = await initResponse.json();
         if (initData.success) {
@@ -407,14 +404,15 @@ const ErosChatUI: React.FC = () => {
         }
       }
 
-      const response = await fetch(`${baseApiUrl}/aitools/wellness/v2/chat/spiritual`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          user_id: userId,
+      const response = await fetch(wellnessApiUrl("/chat/spiritual"), {
+        method: "POST",
+        headers: eternalUserIdHeaders(userId, { json: true }),
+        body: JSON.stringify({
           message: currentInput,
-          session_id: currentSessionId?.toString() || ""
-        })
+          ...(currentSessionId != null
+            ? { session_id: currentSessionId }
+            : {}),
+        }),
       });
 
       const data = await response.json();

@@ -4,7 +4,7 @@ import { Button } from "react-bootstrap";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import ReactMarkdown from "react-markdown";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 interface MetricCardProps {
     icon: string;
@@ -108,7 +108,7 @@ const VitaScanReport: React.FC = () => {
 
     // User name shown in the report header & exported PDF.
     // Primary source: localStorage (populated by SoulProfilePage on profile create).
-    // Fallback: GET /aitools/wellness/v2/users/profile/{user_id} — refreshes if
+    // Fallback: GET /users/profile/ + x-user-id — refreshes if
     // localStorage was cleared but user_id is still around.
     const [userName, setUserName] = useState<string>(
         () => localStorage.getItem("username") || "",
@@ -123,7 +123,8 @@ const VitaScanReport: React.FC = () => {
         (async () => {
             try {
                 const res = await fetch(
-                    `${baseApiUrl}/aitools/wellness/v2/users/profile/${userId}`,
+                    wellnessApiUrl("/users/profile/"),
+                    { headers: eternalUserIdHeaders(userId) },
                 );
                 if (!res.ok) return;
                 const json = await res.json();

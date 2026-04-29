@@ -4,7 +4,7 @@ import moment from "moment";
 import StartlightBg from "@/assets/images/horoscope.png";
 import SpiritualBg from "@/assets/images/personalMonth.png";
 import LuckyBg from "@/assets/images/luckyNumber.png";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 interface LuckyNumbers {
   destiny_number: number;
@@ -89,11 +89,14 @@ export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false
       setLoadingState(index, true);
       setErrorState(index, "");
       try {
-        const formData = new FormData();
-        formData.append("user_id", userId);
-        formData.append("user_name", username);
-        formData.append("dob", dobIso);
-        const response = await fetch(`${baseApiUrl}/aitools/wellness/v2/numerology/planetary_horoscope`, { method: "POST", body: formData });
+        const response = await fetch(
+          wellnessApiUrl("/numerology/planetary_horoscope"),
+          {
+            method: "POST",
+            headers: eternalUserIdHeaders(userId, { json: true }),
+            body: JSON.stringify({ user_name: username, dob: dobIso }),
+          },
+        );
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (data.success && data.data) setHoroscope(data.data);
@@ -116,11 +119,11 @@ export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false
       setLoadingState(index, true);
       setErrorState(index, "");
       try {
-        const formData = new FormData();
-        formData.append("user_id", userId);
-        formData.append("user_name", username);
-        formData.append("dob", dobIso);
-        const response = await fetch(`${baseApiUrl}/aitools/wellness/v2/numerology/personal_month`, { method: "POST", body: formData });
+        const response = await fetch(wellnessApiUrl("/numerology/personal_month"), {
+          method: "POST",
+          headers: eternalUserIdHeaders(userId, { json: true }),
+          body: JSON.stringify({ user_name: username, dob: dobIso }),
+        });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         if (data.success && data.data) setPersonalMonth(data.data);
@@ -143,11 +146,11 @@ export const LuckSection: React.FC<{ embedded?: boolean }> = ({ embedded = false
       setLoadingState(index, true);
       setErrorState(index, "");
       try {
-        const formData = new FormData();
-        formData.append("user_id", userId);
-        formData.append("user_name", username);
-        formData.append("dob", dobIso);
-        const response = await fetch(`${baseApiUrl}/aitools/wellness/v2/numerology/lucky_numbers`, { method: "POST", body: formData });
+        const response = await fetch(wellnessApiUrl("/numerology/lucky_numbers"), {
+          method: "POST",
+          headers: eternalUserIdHeaders(userId, { json: true }),
+          body: JSON.stringify({ user_name: username, dob: dobIso }),
+        });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
         if (result.success && result.data) setLuckyNumbers(result.data);

@@ -5,17 +5,21 @@ import { Gauge } from "@mui/x-charts/Gauge";
 import { Box, Typography } from "@mui/material";
 import fire from "@/assets/fire.png";
 import { ArrowLeft } from "lucide-react";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
 import { getWellnessStoredUserId } from "@/lib/wellnessUserId";
-
 interface ReportData {
-  timestamp: string;
+  timestamp?: string;
   report_type: string;
   report_data: {
     report_title: string;
+    timestamp?: string;
     assessment: {
       vibrational_frequency?: number;
+      current_status?: string;
+      key_metrics?: string;
+      strengths?: string[];
+      areas_for_improvement?: string[];
       current_flame_score?: number;
       // calculated_vibrational_frequency?: number;
       current_energy_assessment: {
@@ -84,10 +88,15 @@ function renderRecommendationItem(item: unknown): React.ReactNode {
   return String(item);
 }
 
+/** Literal `\\n` in API strings → real newlines. */
+function normalizeReportNewlines(raw: string): string {
+  return raw.replace(/\\n/g, "\n").replace(/\r\n/g, "\n");
+}
+
 function detailedAnalysisToParagraphs(detail: unknown): string[] {
   if (detail == null) return [];
   if (typeof detail === "string") {
-    return detail
+    return normalizeReportNewlines(detail)
       .split("\n")
       .map((p) => p.trim())
       .filter((p) => p.length > 0);
@@ -111,6 +120,81 @@ function detailedAnalysisToParagraphs(detail: unknown): string[] {
     }
   }
   return [String(detail)];
+}
+
+function hasDetailedAnalysisContent(detail: unknown): boolean {
+  if (detail == null) return false;
+  if (typeof detail === "string")
+    return normalizeReportNewlines(detail).trim().length > 0;
+  return detailedAnalysisToParagraphs(detail).length > 0;
+}
+
+/** Split before the next section: `A. ...:` or ALL-CAPS `WORD WORD:`. */
+function splitDetailedAnalysisSections(norm: string): string[] {
+  return norm
+    .split(/\n(?=[A-Z](?:\.\s+[^:]+:\s*|[A-Z0-9\s,&\-]+:))/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function isAllCapsHeaderLine(s: string): boolean {
+  const t = s.replace(/\s+/g, " ").trim();
+  if (!/^[A-Z0-9][A-Z0-9\s,&\-]+$/.test(t)) return false;
+  return t === t.toUpperCase();
+}
+
+/** View Report: section labels bold + uppercase; body respects `\n` / `\n\n` via pre-wrap. */
+function ViewReportDetailedAnalysisFormatted({ text }: { text: string }) {
+  const norm = normalizeReportNewlines(text).trim();
+  const segments = splitDetailedAnalysisSections(norm);
+  const bodyStyle: React.CSSProperties = {
+    color: "#4B5563",
+    fontSize: "14px",
+    lineHeight: 1.6,
+    whiteSpace: "pre-wrap",
+    fontWeight: 400,
+  };
+  const labelStyle: React.CSSProperties = {
+    fontWeight: 700,
+    fontSize: "14px",
+    color: "#111827",
+    marginBottom: "0.5rem",
+    display: "block",
+  };
+
+  return (
+    <>
+      {segments.map((seg, i) => {
+        const star = seg.match(/^([A-Z]\.\s+[^:]+:\s*)([\s\S]*)$/);
+        if (star) {
+          return (
+            <div key={i} className="mb-3">
+              <strong className="fw-bold" style={labelStyle}>
+                {star[1].trim().toUpperCase()}
+              </strong>
+              <div style={bodyStyle}>{star[2].trim()}</div>
+            </div>
+          );
+        }
+        const caps = seg.match(/^([A-Z][A-Z0-9\s,&\-]+):\s*([\s\S]*)$/);
+        if (caps && isAllCapsHeaderLine(caps[1])) {
+          return (
+            <div key={i} className="mb-3">
+              <strong className="fw-bold" style={labelStyle}>
+                {`${caps[1].trim().toUpperCase()}:`}
+              </strong>
+              <div style={bodyStyle}>{caps[2].trim()}</div>
+            </div>
+          );
+        }
+        return (
+          <div key={i} className="mb-3" style={bodyStyle}>
+            {seg.trim()}
+          </div>
+        );
+      })}
+    </>
+  );
 }
 
 const reportCards = [
@@ -161,7 +245,7 @@ const ViewReport = () => {
   const location = useLocation();
   const recommendationsRef = useRef(null);
 
-  const reportsApiUrl = `${baseApiUrl}/aitools/wellness/v2/reports/individual_report`;
+  const reportsApiUrl = wellnessApiUrl("/reports/individual_report");
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -192,7 +276,8 @@ const ViewReport = () => {
         setLoading(true);
         setError(null);
         const response = await fetch(
-          `${reportsApiUrl}?user_id=${encodeURIComponent(userId)}&report_type=${encodeURIComponent(reportType)}`,
+          `${reportsApiUrl}?report_type=${encodeURIComponent(reportType)}`,
+          { headers: eternalUserIdHeaders(userId) },
         );
 
         if (!response.ok) {
@@ -276,26 +361,43 @@ const ViewReport = () => {
     const assessment = reportData?.report_data?.assessment;
     if (!assessment) return "High";
 
+    const statusText = [
+      assessment.current_energy_state,
+      (assessment as { current_status?: string }).current_status,
+    ]
+      .filter(Boolean)
+      .join(" ");
+    if (statusText) {
+      const s = statusText.toLowerCase();
+      if (s.includes("high") || s.includes("strong") || s.includes("excellent"))
+        return "High";
+      if (s.includes("low") || s.includes("heavy burden")) return "Low";
+      if (
+        s.includes("medium") ||
+        s.includes("balanced") ||
+        s.includes("moderate") ||
+        s.includes("slightly")
+      )
+        return "Medium";
+    }
+
     const energyState = assessment.current_energy_state || "";
     if (energyState.toLowerCase().includes("high")) return "High";
     if (energyState.toLowerCase().includes("low")) return "Low";
     if (energyState.toLowerCase().includes("medium")) return "Medium";
 
     const frequency = getFrequencyValue();
-    if (frequency > 70) return "High";
-    if (frequency > 40) return "Medium";
-    return "Low";
+    if (typeof frequency === "number" && !Number.isNaN(frequency)) {
+      if (frequency > 70) return "High";
+      if (frequency > 40) return "Medium";
+      return "Low";
+    }
+    return "Medium";
   };
 
   const getGaugeValue = () => {
     const frequency = getFrequencyValue();
     return Math.max(0, Math.min(100, frequency));
-  };
-
-  const getReportContent = () => {
-    return detailedAnalysisToParagraphs(
-      reportData?.report_data?.detailed_analysis,
-    );
   };
 
   const getReportItems = () => {
@@ -387,8 +489,9 @@ const ViewReport = () => {
   const frequency = getFrequencyValue();
   const level = getLevel();
   const gaugeValue = getGaugeValue();
-  const reportContent = getReportContent();
   const reportItems = getReportItems();
+  const detailedAnalysisRaw = reportData?.report_data?.detailed_analysis;
+  const showDetailedAnalysis = hasDetailedAnalysisContent(detailedAnalysisRaw);
   const recommendationSections = getRecommendations();
 
   const reportGenerationRoute = reportCards.find(
@@ -530,36 +633,49 @@ const ViewReport = () => {
                         {displayTitle}
                       </h6>
                       <small style={{ color: "#06B6D4", fontSize: "12px" }}>
-                        Report • {new Date(reportData.timestamp).toLocaleDateString()}
+                        Report •{" "}
+                        {new Date(
+                          reportData.timestamp ??
+                            reportData.report_data?.timestamp ??
+                            Date.now(),
+                        ).toLocaleDateString()}
                       </small>
                     </div>
                   </div>
                 </div>
               )}
 
-            {/* Report Section */}
-            {/* Report Section */}
-            {reportContent.length > 0 && (
+            {/* Report Section — string `detailed_analysis`: section labels bold+uppercase; `\n` / `\n\n` preserved */}
+            {showDetailedAnalysis && (
               <div className="mb-4">
                 <h4 className="mb-3" style={{ fontWeight: "700", color: "black" }}>
                   Report
                 </h4>
                 <div className="card-body p-0">
-                  <ul className="mb-0" style={{ paddingLeft: "20px", listStyleType: "disc" }}>
-                    {reportContent.map((paragraph, index) => (
-                      <li
-                        key={index}
-                        className="mb-3"
-                        style={{
-                          color: "#4B5563",
-                          fontSize: "14px",
-                          lineHeight: "1.6",
-                        }}
-                      >
-                        {paragraph}
-                      </li>
-                    ))}
-                  </ul>
+                  {typeof detailedAnalysisRaw === "string" ? (
+                    <ViewReportDetailedAnalysisFormatted text={detailedAnalysisRaw} />
+                  ) : (
+                    <ul
+                      className="mb-0"
+                      style={{ paddingLeft: "20px", listStyleType: "disc" }}
+                    >
+                      {detailedAnalysisToParagraphs(detailedAnalysisRaw).map(
+                        (paragraph, index) => (
+                          <li
+                            key={index}
+                            className="mb-3"
+                            style={{
+                              color: "#4B5563",
+                              fontSize: "14px",
+                              lineHeight: "1.6",
+                            }}
+                          >
+                            {paragraph}
+                          </li>
+                        ),
+                      )}
+                    </ul>
+                  )}
                 </div>
               </div>
             )}

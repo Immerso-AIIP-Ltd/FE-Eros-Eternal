@@ -11,7 +11,7 @@ import Stars from "@/components/ui/stars";
 import { SoulProfileDateField } from "@/components/dateField/DateField";
 import { useNavigate } from "react-router-dom";
 import Tarrot from "@/assets/images/lighttarrot.png";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 interface TarotReading {
   card_backcover: string;
@@ -58,19 +58,15 @@ const TarotFlow: React.FC = () => {
   const fetchTarot = async () => {
 
     try {
-      const formDataSet = new FormData();
-      formDataSet.append("user_id", userId);
-      formDataSet.append("user_name", formData.name);
-      formDataSet.append("dob", formData.dob); // format: YYYY-MM-DD
-      formDataSet.append("mode", "random");
-
-      const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/numerology/tarot_reading`,
-        {
-          method: "POST",
-          body: formDataSet, // don't set Content-Type, browser will set boundary
-        }
-      );
+      const response = await fetch(wellnessApiUrl("/numerology/tarot_reading"), {
+        method: "POST",
+        headers: eternalUserIdHeaders(userId, { json: true }),
+        body: JSON.stringify({
+          user_name: formData.name,
+          dob: formData.dob,
+          mode: "random",
+        }),
+      });
 
       const data = await response.json();
       console.log("Tarot result:", data?.data?.reading);

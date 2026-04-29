@@ -1,6 +1,6 @@
 // src/pages/HarmonyIndexPage.tsx
 import React, { useState } from 'react';
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 interface CompatibilityData {
   match_for: string;
@@ -38,18 +38,18 @@ const HarmonyIndexPage: React.FC = () => {
     setData(null);
 
     try {
-      const response = await fetch(`${baseApiUrl}/aitools/wellness/v2/numerology/career_compatibility`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        wellnessApiUrl("/numerology/career_compatibility"),
+        {
+          method: "POST",
+          headers: eternalUserIdHeaders(userId, { json: true }),
+          body: JSON.stringify({
+            user_name: username,
+            dob: yourDob,
+            dob_partner: partnerDob,
+          }),
         },
-        body: JSON.stringify({
-          user_id: userId,
-          user_name: username,
-          dob: yourDob,         // Already YYYY-MM-DD
-          dob_partner: partnerDob, // Also YYYY-MM-DD from <input type="date">
-        }),
-      });
+      );
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 

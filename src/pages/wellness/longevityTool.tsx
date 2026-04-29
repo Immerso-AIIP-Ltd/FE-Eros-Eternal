@@ -26,10 +26,11 @@ import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
 import { useNavigate, useLocation } from "react-router-dom";
 import eroslogo from "@/assets/eros-logo.png";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 import { navigateToViewReport } from "@/lib/navigateViewReport";
 import { checkWellnessIndividualReportExists } from "@/lib/checkWellnessIndividualReport";
 import { getWellnessStoredUserId } from "@/lib/wellnessUserId";
+import { soulReportChatContent } from "@/lib/soulReportChatContent";
 import credits from "@/assets/credits.png";
 
 const sidebarMenuItems = [
@@ -318,16 +319,11 @@ const LongevityTool: React.FC = () => {
         return;
       }
 
-      const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/chat/select_soul_report/${userId}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            report_type: reportType,
-          }),
-        },
-      );
+      const response = await fetch(wellnessApiUrl("/chat/select_soul_report"), {
+        method: "POST",
+        headers: eternalUserIdHeaders(userId, { json: true }),
+        body: JSON.stringify({ report_type: reportType }),
+      });
 
       const data = await response.json();
 
@@ -410,26 +406,29 @@ const LongevityTool: React.FC = () => {
         return;
       }
 
+      const answerUrl = wellnessApiUrl("/chat/answer_question");
+      const hasFile =
+        (currentImages.length > 0 && currentFiles.length > 0) ||
+        currentVoices.length > 0;
+
+      const answerText = currentInput.trim() ? currentInput : "";
       const formData = new FormData();
       formData.append("report_type", currentReportType);
-      formData.append("answer", currentInput.trim() ? currentInput : "");
-
-      // ✅ Use snapshots
-      if (currentImages.length > 0 && currentFiles.length > 0) {
-        const f = currentFiles[0];
-        formData.append("file", f, f.name);
-      } else if (currentVoices.length > 0) {
-        const f = currentVoices[0].file;
-        formData.append("file", f, f.name || "voice.webm");
+      formData.append("answer", answerText);
+      if (hasFile) {
+        if (currentImages.length > 0 && currentFiles.length > 0) {
+          const f = currentFiles[0];
+          formData.append("file", f, f.name);
+        } else if (currentVoices.length > 0) {
+          const f = currentVoices[0].file;
+          formData.append("file", f, f.name || "voice.webm");
+        }
       }
-
-      const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/chat/answer_question/${userId}`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      const response = await fetch(answerUrl, {
+        method: "POST",
+        headers: eternalUserIdHeaders(userId),
+        body: formData,
+      });
 
       const data = await response.json();
 
@@ -492,13 +491,11 @@ const LongevityTool: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/chat/generate_soul_report/${userId}`,
+        wellnessApiUrl("/chat/generate_soul_report"),
         {
           method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            report_type: currentReportType,
-          }),
+          headers: eternalUserIdHeaders(userId, { json: true }),
+          body: JSON.stringify({ report_type: currentReportType }),
         },
       );
 
@@ -506,9 +503,11 @@ const LongevityTool: React.FC = () => {
 
       if (data.success) {
         setReportData(data.data);
-        setAssessmentStatus("report_generated");
+        setAssessmentStatus(
+          (data.data?.assessment_status as string) || "report_generated",
+        );
 
-        const reportContent = formatReportContent(data.data);
+        const reportContent = soulReportChatContent(data.data);
         setMessages((prev) => [
           ...prev,
           {
@@ -537,69 +536,6 @@ const LongevityTool: React.FC = () => {
     }
 
     setIsGeneratingReport(false);
-  };
-
-  const renderValue = (val: any): JSX.Element | string => {
-    if (val === null || val === undefined) return "";
-
-    if (
-      typeof val === "string" ||
-      typeof val === "number" ||
-      typeof val === "boolean"
-    ) {
-      return String(val);
-    }
-
-    if (Array.isArray(val)) {
-      return (
-        <ul>
-          {val.map((item, idx) => (
-            <li key={idx}>{renderValue(item)}</li>
-          ))}
-        </ul>
-      );
-    }
-
-    if (typeof val === "object") {
-      return (
-        <div style={{ marginLeft: "10px" }}>
-          {Object.entries(val).map(([k, v]) => (
-            <div key={k} className="mb-2">
-              <b>{formatKey(k)}:</b>{" "}
-              {typeof v === "object" ? renderValue(v) : String(v)}
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    return String(val);
-  };
-
-  const formatKey = (key: string) => {
-    return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  };
-
-  const renderReportDynamic = (report: any) => {
-    if (!report) return null;
-
-    return (
-      <div style={{ whiteSpace: "pre-wrap" }}>
-        {Object.entries(report).map(([key, value]) => (
-          <div key={key} className="mb-3">
-            <h6 className="fw-semibold">{formatKey(key)}</h6>
-            <div>{renderValue(value)}</div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const formatReportContent = (reportData: any) => {
-    if (!reportData || !reportData.report)
-      return "Report generated successfully!";
-
-    return renderReportDynamic(reportData.report);
   };
 
   const handleNewChat = async () => {

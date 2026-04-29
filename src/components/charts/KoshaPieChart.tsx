@@ -1,7 +1,7 @@
 // src/components/KoshaPieChart.tsx
 import React, { useState, useEffect } from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 // Define Kosha types
 interface KoshaScore {
@@ -77,12 +77,12 @@ const KoshaPieChart: React.FC = () => {
 
       try {
         const response = await fetch(
-          `${baseApiUrl}/aitools/wellness/v2/reports/individual_report?report_type=kosha_map&user_id=${userId}`,
+          `${wellnessApiUrl("/reports/individual_report")}?report_type=kosha_map`,
           {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: eternalUserIdHeaders(userId, {
+              extra: { "Content-Type": "application/json" },
+            }),
           }
         );
 

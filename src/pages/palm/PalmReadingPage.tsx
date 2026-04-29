@@ -1,26 +1,27 @@
 // src/pages/PalmReadingPage.tsx
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 interface PalmReadingDetail {
-  hand_shape: string;
-  finger_analysis: string;
-  palm_lines: string;
-  characteristics: string;
-  personality_traits: string[];
-  life_patterns: string[];
-  career_insights: string[];
-  health_observations: string[];
-  spiritual_guidance: string[];
+  hand_shape?: string;
+  finger_analysis?: string;
+  palm_lines?: string;
+  characteristics?: string;
+  personality_traits?: string[];
+  life_patterns?: string[];
+  career_insights?: string[];
+  health_observations?: string[];
+  spiritual_guidance?: string[];
 }
 
 interface PalmReadingResponse {
   image_url: string;
-  reading_type: string;
-  palm_reading_detail: PalmReadingDetail;
-  raw_analysis: string;
-  reading_timestamp: string;
+  reading_type?: string;
+  palm_reading_detail?: PalmReadingDetail;
+  palm_detail?: PalmReadingDetail;
+  raw_analysis?: string;
+  reading_timestamp?: string;
 }
 
 const PalmReadingPage: React.FC = () => {
@@ -31,6 +32,14 @@ const PalmReadingPage: React.FC = () => {
   const [data, setData] = useState<PalmReadingResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const palmBlocks = useMemo(
+    () =>
+      data
+        ? (data.palm_reading_detail ?? data.palm_detail ?? {})
+        : {},
+    [data],
+  );
 
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,12 +78,12 @@ const PalmReadingPage: React.FC = () => {
     setData(null);
 
     const formData = new FormData();
-    formData.append('user_id', userId);
-    formData.append('image_data', image);
+    formData.append("image", image);
 
     try {
-      const response = await fetch(`${baseApiUrl}/aitools/wellness/v2/analysis/palm/`, {
-        method: 'POST',
+      const response = await fetch(wellnessApiUrl("/analysis/palm"), {
+        method: "POST",
+        headers: eternalUserIdHeaders(userId),
         body: formData,
       });
 
@@ -283,37 +292,43 @@ const PalmReadingPage: React.FC = () => {
               🔮 Mystical Palm Reading
             </h2>
 
+            <NarrativeBlock title="✋ Hand Shape" text={palmBlocks.hand_shape} />
+            <NarrativeBlock title="🖐 Finger Analysis" text={palmBlocks.finger_analysis} />
+            <NarrativeBlock title="〰 Palm Lines" text={palmBlocks.palm_lines} />
+            <NarrativeBlock title="✨ Characteristics" text={palmBlocks.characteristics} />
+
             {/* Personality Traits */}
             <Section
               title="🌟 Personality Traits"
-              items={data.palm_reading_detail.personality_traits}
+              items={palmBlocks.personality_traits ?? []}
             />
 
             {/* Life Patterns */}
             <Section
               title="🌀 Life Patterns"
-              items={data.palm_reading_detail.life_patterns}
+              items={palmBlocks.life_patterns ?? []}
             />
 
             {/* Health Observations */}
             <Section
               title="🩺 Health & Vitality"
-              items={data.palm_reading_detail.health_observations}
+              items={palmBlocks.health_observations ?? []}
             />
 
             {/* Career Insights */}
             <Section
               title="💼 Career Insights"
-              items={data.palm_reading_detail.career_insights}
+              items={palmBlocks.career_insights ?? []}
             />
 
             {/* Spiritual Guidance */}
             <Section
               title="🧘 Spiritual Guidance"
-              items={data.palm_reading_detail.spiritual_guidance}
+              items={palmBlocks.spiritual_guidance ?? []}
             />
 
             {/* Raw Analysis (Optional) */}
+            {data.raw_analysis ? (
             <div className="mt-5 p-4 bg-black bg-opacity-30 rounded">
               <h5 className="text-info">📜 Full Reading</h5>
               <pre
@@ -328,6 +343,7 @@ const PalmReadingPage: React.FC = () => {
                 {data.raw_analysis}
               </pre>
             </div>
+            ) : null}
           </div>
 
           {/* Footer */}
@@ -338,6 +354,27 @@ const PalmReadingPage: React.FC = () => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+const NarrativeBlock: React.FC<{ title: string; text?: string }> = ({
+  title,
+  text,
+}) => {
+  const t = text?.trim();
+  if (!t) return null;
+  return (
+    <div className="mb-5">
+      <h4
+        className="text-warning fw-bold border-bottom pb-2"
+        style={{ borderColor: "#00B8F8" }}
+      >
+        {title}
+      </h4>
+      <p className="text-light mb-0" style={{ whiteSpace: "pre-wrap" }}>
+        {t}
+      </p>
     </div>
   );
 };

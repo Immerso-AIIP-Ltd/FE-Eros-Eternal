@@ -10,7 +10,8 @@ import sparkle from "@/assets/images/sparkle.png";
 import Stars from "@/components/ui/stars";
 import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
+import { normalizeVedastroTob } from "@/lib/vedastroTime";
 
 interface Message {
   sender: "user" | "ai";
@@ -310,12 +311,10 @@ const HealingModal: React.FC = () => {
 
       console.log("Final prescription payload:", finalPayload);
 
-      const healingUrl = `${baseApiUrl}/aitools/wellness/v2/healing/generate_healing_prescription`;
+      const healingUrl = wellnessApiUrl("/healing/generate_healing_prescription");
       const response = await fetch(healingUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: eternalUserIdHeaders(userId, { json: true }),
         body: JSON.stringify(finalPayload),
       });
 
@@ -394,11 +393,11 @@ const HealingModal: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append("image_data", attachedFiles[0], "image.png");
-      formData.append("user_id", userId || "123");
 
-      const faceUrl = `${baseApiUrl}/aitools/wellness/v2/analysis/face`;
+      const faceUrl = wellnessApiUrl("/analysis/face");
       const faceResponse = await fetch(faceUrl, {
         method: "POST",
+        headers: eternalUserIdHeaders(userId),
         body: formData,
       });
       const faceData = await faceResponse.json();
@@ -449,19 +448,25 @@ const HealingModal: React.FC = () => {
         { sender: "ai", text: "Getting astrology data..." },
       ]);
 
+      const rawTob = localStorage.getItem("tob") || "01:55";
+      let tobApi: string;
+      try {
+        tobApi = normalizeVedastroTob(rawTob);
+      } catch {
+        tobApi = normalizeVedastroTob("01:55");
+      }
+
       const astrologyData = {
         location: localStorage.getItem("location") || "Chennai, India",
         dob: localStorage.getItem("dob") || "07/04/2002",
-        tob: localStorage.getItem("tob") || "01:55",
+        tob: tobApi,
         timezone: getTimezoneOffset(),
       };
 
-      const astrologyUrl = `${baseApiUrl}/aitools/wellness/v2/vedastro/get_astrology_data`;
+      const astrologyUrl = wellnessApiUrl("/vedastro/get_astrology_data");
       const response = await fetch(astrologyUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: eternalUserIdHeaders(userId, { json: true }),
         body: JSON.stringify(astrologyData),
       });
 
@@ -601,14 +606,14 @@ const HealingModal: React.FC = () => {
       const fileName = `voice_recording${fileExtension}`;
 
       formData.append("audio_data", audioBlob, fileName);
-      formData.append("user_id", userId || "123");
 
       console.log("Sending converted audio file:", fileName);
       console.log("File size:", audioBlob.size, "bytes");
 
-      const voiceUrl = `${baseApiUrl}/aitools/wellness/v2/analysis/voice`;
+      const voiceUrl = wellnessApiUrl("/analysis/voice");
       const response = await fetch(voiceUrl, {
         method: "POST",
+        headers: eternalUserIdHeaders(userId),
         body: formData,
       });
 
@@ -676,11 +681,11 @@ const HealingModal: React.FC = () => {
 
       const formData = new FormData();
       formData.append("audio_url", audioUrl); // Send URL as string
-      formData.append("user_id", userId || "123");
 
-      const voiceUrl = `${baseApiUrl}/aitools/wellness/v2/analysis/voice`;
+      const voiceUrl = wellnessApiUrl("/analysis/voice");
       const response = await fetch(voiceUrl, {
         method: "POST",
+        headers: eternalUserIdHeaders(userId),
         body: formData,
       });
 

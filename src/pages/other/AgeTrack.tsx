@@ -10,7 +10,7 @@ import sparkle from "@/assets/images/sparkle.png";
 import Stars from "@/components/ui/stars";
 import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 interface Message {
     sender: "user" | "ai";
@@ -244,16 +244,15 @@ const AgeTrack: React.FC = () => {
             formData.append('stool_pattern', collectedData.stoolPattern || '');
             formData.append('daily_routine', collectedData.dailyRoutine || '');
             formData.append('additional_info', collectedData.additionalInfo || '');
-            formData.append('user_id', userId || '123');
-
             // Log FormData contents for debugging
             for (let [key, value] of formData.entries()) {
                 console.log(key, typeof value === 'string' ? value : 'Non-string value');
             }
 
-            const reportUrl = `${baseApiUrl}/aitools/wellness/v2/bio/holistic-analyze`;
+            const reportUrl = wellnessApiUrl("/bio/holistic-analyze");
             const response = await fetch(reportUrl, {
                 method: 'POST',
+                headers: eternalUserIdHeaders(userId),
                 body: formData,
             });
 

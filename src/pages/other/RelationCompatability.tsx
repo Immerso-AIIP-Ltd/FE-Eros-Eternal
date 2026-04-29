@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UsersRound } from "lucide-react";
 import { Card, Col, Row, Container } from "react-bootstrap";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 import { SoulProfileDateField } from "@/components/dateField/DateField";
 
 interface CompatibilityData {
@@ -71,19 +71,18 @@ const RelationshipCompatibility: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append("user_id", userId || "123");
-    formData.append("user_name", yourName);
-    formData.append("dob", yourDob);
-    formData.append("dob_partner", partnerDob);
-
     try {
       const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/numerology/career_compatibility`,
+        wellnessApiUrl("/numerology/career_compatibility"),
         {
           method: "POST",
-          body: formData,
-        }
+          headers: eternalUserIdHeaders(userId, { json: true }),
+          body: JSON.stringify({
+            user_name: yourName,
+            dob: yourDob,
+            dob_partner: partnerDob,
+          }),
+        },
       );
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
