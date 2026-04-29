@@ -46,7 +46,7 @@ jobs:
           cd eros-universe-gcp-helm-charts
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          yq e '.image.repository = "immersoaiip/creator_tools"' -i ai-tools-model-worker-helm/values.yaml
+          yq e '.image.repository = "immersoaiip/creator_tools"' -i eternal-demo-frontend/values.yaml
           yq e '.image.tag = strenv(IMAGE_TAG)' -i eros-eternal-demo/values.yaml
           git add ai-tools-model-worker-helm/values.yaml eros-eternal-demo/values.yaml
           if git diff --staged --quiet; then
