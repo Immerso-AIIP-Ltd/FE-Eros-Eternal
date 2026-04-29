@@ -63,14 +63,14 @@ jobs:
 
           # Update Helm values
           yq e '.image.repository = "immersoaiip/creator_tools"' -i ai-tools-model-worker-helm/values.yaml
-          yq e '.image.tag = strenv(IMAGE_TAG)' -i eternal-demo-frontend/values.yaml
+          yq e '.image.tag = strenv(IMAGE_TAG)' -i eros-eternal-demo/values.yaml
 
-          git add eternal-demo-frontend/values.yaml
+          git add eros-eternal-demo/values.yaml
 
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: update eternal-demo-frontend image tag to ${IMAGE_TAG}"
+            git commit -m "chore: update eros-eternal-demo image tag to ${IMAGE_TAG}"
             git pull --rebase origin gcp-eros-univese-dev
             git push origin gcp-eros-univese-dev
           fi
