@@ -112,15 +112,11 @@ interface DerivedStressDemo {
 }
 
 /**
- * Derive stress presentation from numeric index (source of truth for badges).
- * Low stress score (good physiology) maps to NORMAL, not the misleading "LOW" vitals jargon.
+ * Demo stress index: ignore API (backend often emits ~100). Each new report snapshot rolls a
+ * fresh integer in 40–60; badges derive from that value (same band → MODERATE / "Moderate").
  */
-function deriveStressForDemo(rawIndex: number): DerivedStressDemo {
-  let idx = typeof rawIndex === 'number' && Number.isFinite(rawIndex) ? clamp(rawIndex, 0, 100) : NaN;
-  /* Model sometimes emits 0 → unusable demo row; plausible low-stress filler */
-  if (!Number.isFinite(idx) || idx === 0) {
-    idx = Math.round(rnd(18, 36, 0));
-  }
+function deriveStressForDemo(): DerivedStressDemo {
+  const idx = 40 + Math.floor(Math.random() * 21);
 
   let level: 'low' | 'moderate' | 'high';
   if (idx >= 67) level = 'high';
@@ -207,7 +203,7 @@ function buildBioCareDemoLayer(report: CombinedReportData) {
     sympathovagalBalance = rnd(0.92, 1.14, 3);
   }
 
-  const stress = deriveStressForDemo(rg.stress.index);
+  const stress = deriveStressForDemo();
 
   let nlDisp = rg.hrv.nonlinear
     ? {
@@ -668,7 +664,10 @@ const FaceReportPage: React.FC = () => {
   const nl = rppg.hrv.nonlinear;
   const re = rppg.hrv.respiratoryExtended;
   const stress = rppg.stress;
-  const stressPresentation = demoLayer?.stress ?? deriveStressForDemo(stress.index);
+  const stressPresentation = useMemo(() => demoLayer?.stress ?? deriveStressForDemo(), [
+    demoLayer,
+    report,
+  ]);
   const sympathDisplay =
     demoLayer?.sympathovagalBalance ?? (stress.sympathovagalBalance ?? null);
 
