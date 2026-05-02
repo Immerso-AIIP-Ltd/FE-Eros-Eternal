@@ -280,12 +280,12 @@ export interface CombinedReportData {
     riskFactors: string[];
     disclaimer: string;
   };
-  /** Per-section GPT insights */
+  /** Per-section GPT insights (legacy payloads may include optional frequencyDomain; UI omits spectral bands.) */
   sectionInsights?: {
     timeDomain: string;
-    frequencyDomain: string;
     nonlinear: string;
     stressRespiratory: string;
+    frequencyDomain?: string;
   };
   /** Health data from backend API (merged after scan) */
   apiHealthData?: {

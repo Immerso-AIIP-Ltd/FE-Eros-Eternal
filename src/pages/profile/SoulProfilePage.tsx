@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import BackgroundImage from "../../assets/images/background.png";
 import { baseApiUrl } from "../../config/api";
 
+/** Persisted when the user completes soul profile; shown for regulatory transparency. */
+export const EROS_WELLNESS_CONSENT_STORAGE_KEY = "erosWellnessCitizenConsent";
+export const EROS_WELLNESS_DATA_CONTROLLER = "Eros Wellness AI Clinic";
+
 interface FormData {
   name: string;
   gender: string;
@@ -84,6 +88,37 @@ const SoulProfilePage: React.FC = () => {
   const periodRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  /** Four separate, citizen-elected consent choices (online + camp-aligned). */
+  const [consent, setConsent] = useState({
+    aiProcessing: false,
+    clinicalValidationLogging: false,
+    anonymisedResearch: false,
+    deIdentifiedCommercialResearch: false,
+  });
+  const allConsentsSelected =
+    consent.aiProcessing &&
+    consent.clinicalValidationLogging &&
+    consent.anonymisedResearch &&
+    consent.deIdentifiedCommercialResearch;
+
+  const consentAllSelected = (): void => {
+    setConsent({
+      aiProcessing: true,
+      clinicalValidationLogging: true,
+      anonymisedResearch: true,
+      deIdentifiedCommercialResearch: true,
+    });
+  };
+
+  const consentClearAll = (): void => {
+    setConsent({
+      aiProcessing: false,
+      clinicalValidationLogging: false,
+      anonymisedResearch: false,
+      deIdentifiedCommercialResearch: false,
+    });
+  };
+
   const [formData, setFormData] = useState<FormData>({
     name: "",
     gender: "",
@@ -239,6 +274,16 @@ const SoulProfilePage: React.FC = () => {
       return setErrorMsg("Please select date of birth.");
     if (!formData.timeOfBirth)
       return setErrorMsg("Please select time of birth.");
+    if (
+      !consent.aiProcessing ||
+      !consent.clinicalValidationLogging ||
+      !consent.anonymisedResearch ||
+      !consent.deIdentifiedCommercialResearch
+    ) {
+      return setErrorMsg(
+        "Please confirm all four consent choices below before continuing.",
+      );
+    }
 
     const [y, m, d] = formData.dateOfBirth.split("-");
     const fd = new FormData();
@@ -274,6 +319,25 @@ const SoulProfilePage: React.FC = () => {
           "current_location",
           "time_of_birth",
         ].forEach((k) => localStorage.setItem(k, result.data[k] ?? ""));
+        try {
+          localStorage.setItem(
+            EROS_WELLNESS_CONSENT_STORAGE_KEY,
+            JSON.stringify({
+              version: 1,
+              acceptedAt: new Date().toISOString(),
+              dataController: EROS_WELLNESS_DATA_CONTROLLER,
+              channel: "soul_profile_web",
+              choices: {
+                aiProcessing: true,
+                clinicalValidationLogging: true,
+                anonymisedResearchUse: true,
+                deIdentifiedCommercialResearch: true,
+              },
+            }),
+          );
+        } catch {
+          /* ignore quota */
+        }
         localStorage.removeItem("soulProfile");
         navigate("/eros-home");
       } else throw new Error(result.message || "Profile creation failed");
@@ -563,6 +627,87 @@ const SoulProfilePage: React.FC = () => {
         }
         .sp-btn:active:not(:disabled) { transform: translateY(0); }
         .sp-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+        .sp-consent-block {
+          margin-top: 6px;
+          padding: 12px 12px 10px;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          background: #f8fafc;
+        }
+        .sp-consent-heading {
+          font-size: 0.78rem;
+          font-weight: 600;
+          color: #0f172a;
+          margin-bottom: 6px;
+          line-height: 1.35;
+        }
+        .sp-consent-sub {
+          font-size: 0.72rem;
+          color: #64748b;
+          margin-bottom: 10px;
+          line-height: 1.45;
+        }
+        .sp-consent-row {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          margin-bottom: 8px;
+          font-size: 0.74rem;
+          color: #334155;
+          line-height: 1.4;
+        }
+        .sp-consent-row input {
+          margin-top: 3px;
+          flex-shrink: 0;
+          accent-color: #00b8f8;
+        }
+        .sp-consent-entity {
+          margin-top: 8px;
+          font-size: 0.72rem;
+          color: #475569;
+          line-height: 1.45;
+        }
+        .sp-consent-entity strong { color: #0f172a; }
+
+        .sp-consent-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          align-items: center;
+          margin-bottom: 10px;
+        }
+        .sp-consent-select-all,
+        .sp-consent-clear {
+          border-radius: 8px;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.74rem;
+          font-weight: 600;
+          padding: 6px 12px;
+          cursor: pointer;
+          transition: background 0.18s, color 0.18s;
+        }
+        .sp-consent-select-all {
+          background: #e0f2fe;
+          color: #0369a1;
+          border: 1px solid #7dd3fc;
+        }
+        .sp-consent-select-all:hover:not(:disabled) {
+          background: #bae6fd;
+        }
+        .sp-consent-select-all:disabled {
+          opacity: 0.55;
+          cursor: default;
+        }
+        .sp-consent-clear {
+          background: transparent;
+          color: #64748b;
+          border: 1px solid #cbd5e1;
+        }
+        .sp-consent-clear:hover {
+          background: #f1f5f9;
+          color: #334155;
+        }
 
         /* ══════════ DATE PICKER ══════════ */
 
@@ -1149,6 +1294,107 @@ const SoulProfilePage: React.FC = () => {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="sp-consent-block">
+                  <div className="sp-consent-heading">
+                    Citizen consent (online)
+                  </div>
+                  <p className="sp-consent-sub">
+                    Confirm that you understand camp consent forms are structured
+                    to cover four separate, citizen-elected choices. Tick each to
+                    continue, or use Select all.
+                  </p>
+                  <div className="sp-consent-actions">
+                    <button
+                      type="button"
+                      className="sp-consent-select-all"
+                      onClick={() => consentAllSelected()}
+                      disabled={allConsentsSelected}
+                    >
+                      {allConsentsSelected
+                        ? "All options selected"
+                        : "Select all consent options"}
+                    </button>
+                    <button
+                      type="button"
+                      className="sp-consent-clear"
+                      onClick={() => consentClearAll()}
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                  <label className="sp-consent-row">
+                    <input
+                      type="checkbox"
+                      checked={consent.aiProcessing}
+                      onChange={(e) =>
+                        setConsent((c) => ({
+                          ...c,
+                          aiProcessing: e.target.checked,
+                        }))
+                      }
+                    />
+                    <span>
+                      (a) <strong>AI processing</strong> of my wellness data for
+                      screening and insights.
+                    </span>
+                  </label>
+                  <label className="sp-consent-row">
+                    <input
+                      type="checkbox"
+                      checked={consent.clinicalValidationLogging}
+                      onChange={(e) =>
+                        setConsent((c) => ({
+                          ...c,
+                          clinicalValidationLogging: e.target.checked,
+                        }))
+                      }
+                    />
+                    <span>
+                      (b) <strong>Clinical validation logging</strong> when
+                      physical diagnostics or clinical protocols are used to
+                      cross-check screening results.
+                    </span>
+                  </label>
+                  <label className="sp-consent-row">
+                    <input
+                      type="checkbox"
+                      checked={consent.anonymisedResearch}
+                      onChange={(e) =>
+                        setConsent((c) => ({
+                          ...c,
+                          anonymisedResearch: e.target.checked,
+                        }))
+                      }
+                    />
+                    <span>
+                      (c) <strong>Anonymised research use</strong> to improve
+                      population health models.
+                    </span>
+                  </label>
+                  <label className="sp-consent-row">
+                    <input
+                      type="checkbox"
+                      checked={consent.deIdentifiedCommercialResearch}
+                      onChange={(e) =>
+                        setConsent((c) => ({
+                          ...c,
+                          deIdentifiedCommercialResearch: e.target.checked,
+                        }))
+                      }
+                    />
+                    <span>
+                      (d) <strong>De-identified commercial research</strong> in
+                      line with applicable law and policy.
+                    </span>
+                  </label>
+                  <p className="sp-consent-entity">
+                    <strong>Data operator for this service:</strong>{" "}
+                    {EROS_WELLNESS_DATA_CONTROLLER}. By creating your profile you
+                    acknowledge the choices above; camp paper or tablet forms may
+                    restate the same structure for in-person sessions.
+                  </p>
                 </div>
 
                 {/* Submit */}

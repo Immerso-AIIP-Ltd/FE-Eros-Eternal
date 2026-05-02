@@ -248,7 +248,7 @@ const VitaScanReport: React.FC = () => {
                             </p>
                         )}
                         <p className="text-secondary mb-0" style={{ fontSize: "14px" }}>
-                            Biometric analysis & monitoring
+                            Preventive wellness screening — use onsite diagnostics for clinical validation.
                         </p>
                     </div>
                     {!isExporting && (
@@ -269,12 +269,36 @@ const VitaScanReport: React.FC = () => {
                 </div>
             </div>
 
+            <div className="row g-3 mb-4">
+                <div className="col-12">
+                    <div
+                        className="rounded-3 p-3"
+                        style={{
+                            background: "rgba(6, 182, 212, 0.12)",
+                            border: "1px solid rgba(6, 182, 212, 0.35)",
+                        }}
+                    >
+                        <p className="mb-2 fw-semibold" style={{ fontSize: "13px", color: "#e0f2fe" }}>
+                            Wellness indicators — not medical measurements
+                        </p>
+                        <p className="mb-2 text-secondary" style={{ fontSize: "12px", lineHeight: 1.6 }}>
+                            BP, HR and HRV-like values are wellness indicators. Screening is designed for trends; abnormal
+                            signals should be cross-checked using physical diagnostics and clinical assessment where available.
+                        </p>
+                        <p className="mb-0 text-secondary" style={{ fontSize: "12px", lineHeight: 1.6 }}>
+                            <strong className="text-white">Standard scan conditions:</strong> consistent lighting; fixed posture;
+                            minimal movement; reduce reflections / eyewear impact.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* Metrics Grid */}
             <div className="row g-3 mb-4">
                 <div className="col-12 col-md-6 col-lg-3">
                     <MetricCard
                         icon="bi-heart-pulse"
-                        label="Heart Rate"
+                        label="Heart rate (wellness)"
                         value="57"
                         unit="BPM"
                         status="Low"
@@ -294,7 +318,7 @@ const VitaScanReport: React.FC = () => {
                 <div className="col-12 col-md-6 col-lg-3">
                     <MetricCard
                         icon="bi-emoji-neutral"
-                        label="Stress Index"
+                        label="Relaxation / recovery score"
                         value="44"
                         status="Low"
                         iconBg="rgba(59, 130, 246, 0.2)"
@@ -444,7 +468,7 @@ const VitaScanReport: React.FC = () => {
                             >
                                 <i className="bi bi-graph-up text-info" style={{ fontSize: "16px" }}></i>
                             </div>
-                            <h3 className="h6 fw-semibold mb-0">HRV Time Domain</h3>
+                            <h3 className="h6 fw-semibold mb-0">Recovery pattern (time-domain)</h3>
                         </div>
                         <div>
                             {[
@@ -476,7 +500,7 @@ const VitaScanReport: React.FC = () => {
                             border: "1px solid rgba(255, 255, 255, 0.1)",
                         }}
                     >
-                        <h4 className="h6 fw-semibold mb-4">Advanced Analysis</h4>
+                        <h4 className="h6 fw-semibold mb-4">Recovery pattern (nonlinear)</h4>
                         {[
                             { label: "SD1 (Poincare)", value: "76.5ms", status: "Normal" },
                             { label: "SD2 (Poincare)", value: "76.5ms", status: "High" },

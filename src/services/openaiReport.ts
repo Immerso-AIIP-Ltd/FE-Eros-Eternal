@@ -43,15 +43,18 @@ VITALS:
 - Signal Quality: ${data.vitals.signalQuality.percentage}% (${data.vitals.signalQuality.status})
 - Breathing Rate: ${data.vitals.breathingRate.value} ${data.vitals.breathingRate.unit} (${data.vitals.breathingRate.status})
 
-HEART RATE VARIABILITY (HRV):
+HEART / RECOVERY PATTERN METRICS (time-domain wellness indicators—not medical diagnostics):
 - SDNN: ${data.hrv.sdnn.value} ${data.hrv.sdnn.unit} (${data.hrv.sdnn.status})
 - RMSSD: ${data.hrv.rmssd.value} ${data.hrv.rmssd.unit} (${data.hrv.rmssd.status})
 - pNN20: ${data.hrv.pnn20.value} ${data.hrv.pnn20.unit} (${data.hrv.pnn20.status})
 - pNN50: ${data.hrv.pnn50.value} ${data.hrv.pnn50.unit} (${data.hrv.pnn50.status})
 
-STRESS ANALYSIS:
-- Stress Level: ${data.stress.level}
-- Stress Index: ${data.stress.index}/100
+RELAXATION / RECOVERY (wellness screening score—not clinical stress testing):
+- Legacy level label (from device): ${data.stress.level}
+- Relaxation / recovery score (/100): ${data.stress.index}
+
+CONTEXT: This is an AI-powered preventive wellness screening pathway. Prefer language about recovery patterns,
+relaxation indicators, and trend screening—not definitive medical diagnosis.
 
 SCAN METADATA:
 - Duration: ${data.metadata.scanDurationSeconds} seconds
@@ -72,7 +75,8 @@ Provide a JSON response with this structure:
       messages: [
         {
           role: 'system',
-          content: 'You are a health analysis AI. Analyze biometric data and provide insights. Be professional but accessible. Always include appropriate medical disclaimers.'
+          content:
+            'You summarize preventive wellness screening from AI-derived wellness indicators only. BP/HR/recovery-pattern numbers are not medical measurements. Use terms like relaxation, recovery pattern, and trend screening—not definitive diagnoses. Encourage verification with clinical assessment and diagnostics. Always include disclaimers; this is not medical advice.',
         },
         {
           role: 'user',
@@ -103,7 +107,6 @@ Provide a JSON response with this structure:
 
 export interface SectionInsights {
   timeDomain: string;
-  frequencyDomain: string;
   nonlinear: string;
   stressRespiratory: string;
 }
@@ -124,13 +127,7 @@ export interface SectionInsightsInput {
   pnn20Status: string;
   rrIntervalCount: number;
   recordingClass: string;
-  // Frequency domain
-  vlf?: number;
-  lf?: number;
-  hf?: number;
-  tp?: number;
-  lfHfRatio?: number;
-  // Nonlinear
+  // Nonlinear wellness indicators
   sd1?: number;
   sd2?: number;
   sd1Sd2Ratio?: number;
@@ -146,47 +143,33 @@ export interface SectionInsightsInput {
 }
 
 export async function generateSectionInsights(data: SectionInsightsInput): Promise<SectionInsights> {
-  const prompt = `You are a health analysis AI. Given these biometric scan results, provide a brief interpretation (2-3 sentences) for EACH section explaining what the user's specific numbers mean for their health.
+  const prompt = `You interpret preventive wellness screening data (NOT medical diagnostics). Preferred language: recovery pattern, relaxation score, wellness trends.
 
-TIME DOMAIN HRV:
-- Heart Rate: ${data.heartRate} BPM (${data.heartRateStatus})
+SECTION 1 — RECOVERY PATTERN (time-domain indicators):
+- Heart rate (wellness): ${data.heartRate} BPM (${data.heartRateStatus})
 - SDNN: ${data.sdnn} ms (${data.sdnnStatus})
 - RMSSD: ${data.rmssd} ms (${data.rmssdStatus})
 - pNN20: ${data.pnn20}% (${data.pnn20Status})
 - pNN50: ${data.pnn50}% (${data.pnn50Status})
-- RR Intervals: ${data.rrIntervalCount} collected
+- RR intervals captured: ${data.rrIntervalCount}
 - Recording: ${data.recordingClass}
 
-FREQUENCY DOMAIN HRV:
-- VLF: ${data.vlf ?? 'N/A'} ms²
-- LF: ${data.lf ?? 'N/A'} ms²
-- HF: ${data.hf ?? 'N/A'} ms²
-- Total Power: ${data.tp ?? 'N/A'} ms²
-- LF/HF Ratio: ${data.lfHfRatio ?? 'N/A'}
-
-NONLINEAR HRV:
-- SD1: ${data.sd1 ?? 'N/A'} ms (short-term variability)
-- SD2: ${data.sd2 ?? 'N/A'} ms (long-term variability)
+SECTION 2 — RECOVERY PATTERN (nonlinear indicators):
+- SD1: ${data.sd1 ?? 'N/A'} ms
+- SD2: ${data.sd2 ?? 'N/A'} ms
 - SD1/SD2 Ratio: ${data.sd1Sd2Ratio ?? 'N/A'}
 - Sample Entropy: ${data.sampleEntropy ?? 'N/A'}
 - DFA Alpha1: ${data.dfaAlpha1 ?? 'N/A'}
 
-STRESS & RESPIRATORY:
-- Stress Level: ${data.stressLevel}
-- Stress Index: ${data.stressIndex}/100
-- Sympathovagal Balance: ${data.sympathovagalBalance ?? 'N/A'}
-- Breathing Rate: ${data.breathingRate} breaths/min (${data.breathingRateStatus})
-- Breathing Rate SD: ${data.breathingRateSd ?? 'N/A'} breaths/min
-- Breathing Stability: ${data.breathingStability ?? 'N/A'}
-- Breath Cycles: ${data.breathCyclesDetected ?? 'N/A'}
+SECTION 3 — RELAXATION / RECOVERY & BREATHING:
+- Legacy level label (sensor): ${data.stressLevel}
+- Relaxation / recovery score (/100): ${data.stressIndex}
+- Sympathovagal balance: ${data.sympathovagalBalance ?? 'N/A'}
+- Breathing: ${data.breathingRate} breaths/min (${data.breathingRateStatus}); SD ${data.breathingRateSd ?? 'N/A'}; stability ${data.breathingStability ?? 'N/A'}; cycles ${data.breathCyclesDetected ?? 'N/A'}
 
-Respond in JSON:
-{
-  "timeDomain": "2-3 sentence interpretation of the time domain HRV numbers",
-  "frequencyDomain": "2-3 sentence interpretation of the frequency domain numbers",
-  "nonlinear": "2-3 sentence interpretation of the nonlinear analysis numbers",
-  "stressRespiratory": "2-3 sentence interpretation of the stress and respiratory numbers"
-}`;
+Do not analyse VLF, LF, HF, or LF/HF ratio.
+
+Respond in JSON with ONLY: timeDomain, nonlinear, stressRespiratory (each 2–3 sentences).`;
 
   try {
     const response = await openai.chat.completions.create({
@@ -194,18 +177,25 @@ Respond in JSON:
       messages: [
         {
           role: 'system',
-          content: 'You are a health biometrics analyst. Interpret specific scan numbers for the user in plain language. Be concise, specific to their values, and professional. Do not give medical advice — only explain what the numbers indicate.'
+          content:
+            'Explain wellness-screening summaries only. Never diagnose. Use recovery / relaxation wording. Mention clinical + device validation for concerns.',
         },
-        { role: 'user', content: prompt }
+        { role: 'user', content: prompt },
       ],
       response_format: { type: 'json_object' },
       temperature: 0.7,
-      max_tokens: 600
+      max_tokens: 600,
     });
 
     const content = response.choices[0]?.message?.content;
     if (!content) throw new Error('No response');
-    return JSON.parse(content) as SectionInsights;
+    const parsed = JSON.parse(content) as Record<string, string>;
+    return {
+      timeDomain: typeof parsed.timeDomain === 'string' ? parsed.timeDomain : '',
+      nonlinear: typeof parsed.nonlinear === 'string' ? parsed.nonlinear : '',
+      stressRespiratory:
+        typeof parsed.stressRespiratory === 'string' ? parsed.stressRespiratory : '',
+    };
   } catch (error) {
     console.error('Failed to generate section insights:', error);
     return generateFallbackSectionInsights(data);
@@ -213,16 +203,15 @@ Respond in JSON:
 }
 
 function generateFallbackSectionInsights(data: SectionInsightsInput): SectionInsights {
-  const rmssdDesc = data.rmssd < 20 ? 'very low, suggesting reduced parasympathetic activity' : data.rmssd < 40 ? 'moderate' : 'healthy';
-  const sdnnDesc = data.sdnn < 30 ? 'below normal, indicating limited overall variability' : data.sdnn < 100 ? 'within normal range' : 'high, indicating strong variability';
+  const rmssdDesc =
+    data.rmssd < 20 ? 'on the lower side for this modality' : data.rmssd < 40 ? 'moderate' : 'relatively favourable';
+  const sdnnDesc =
+    data.sdnn < 30 ? 'limited for this snapshot' : data.sdnn < 100 ? 'typical illustrative band' : 'elevated for this snapshot';
 
   return {
-    timeDomain: `Your SDNN of ${data.sdnn.toFixed(1)}ms is ${sdnnDesc}. RMSSD of ${data.rmssd.toFixed(1)}ms is ${rmssdDesc}. pNN20 of ${data.pnn20.toFixed(1)}% ${data.pnn20 < 5 ? 'suggests limited beat-to-beat variation' : data.pnn20 > 60 ? 'shows high parasympathetic activity' : 'shows healthy successive interval differences'}${data.pnn50 > 0 ? `. pNN50 of ${data.pnn50.toFixed(1)}% ${data.pnn50 < 3 ? 'is typical for short rPPG recordings' : 'confirms normal variability'}` : ''}.`,
-    frequencyDomain: data.tp && data.tp > 0
-      ? `Total spectral power is ${data.tp.toFixed(2)}ms². LF/HF ratio of ${(data.lfHfRatio || 0).toFixed(2)} ${(data.lfHfRatio || 0) > 2 ? 'suggests sympathetic dominance' : (data.lfHfRatio || 0) < 0.5 ? 'suggests parasympathetic dominance' : 'indicates balanced autonomic tone'}.`
-      : 'Frequency domain data was limited for this scan. A longer recording may yield more detailed spectral analysis.',
-    nonlinear: `SD1 of ${(data.sd1 || 0).toFixed(1)}ms reflects short-term variability, while SD2 of ${(data.sd2 || 0).toFixed(1)}ms captures longer-term patterns. ${data.sampleEntropy !== null && data.sampleEntropy !== undefined ? `Sample entropy of ${data.sampleEntropy.toFixed(3)} indicates ${data.sampleEntropy < 0.5 ? 'low signal complexity' : 'moderate to good complexity'}.` : ''}`,
-    stressRespiratory: `Stress level is ${data.stressLevel} with an index of ${data.stressIndex}/100. Breathing rate of ${data.breathingRate} breaths/min is ${data.breathingRateStatus.toLowerCase()}. ${data.breathingStability ? `Breathing stability is ${data.breathingStability}.` : ''}`,
+    timeDomain: `Recovery-pattern snapshot: SDNN ~${data.sdnn.toFixed(1)} ms (${sdnnDesc}), RMSSD ~${data.rmssd.toFixed(1)} ms (${rmssdDesc}). These are wellness-level markers—not substitutes for clinical HRV testing.`,
+    nonlinear: `Nonlinear indicators describe shape complexity of beat-to-beat variation for trend awareness only.`,
+    stressRespiratory: `Relaxation / recovery score context: ${data.stressIndex}/100 (legacy sensor label "${data.stressLevel}"). Breathing ${data.breathingRate} breaths/min. Cross-check onsite if concerns.`,
   };
 }
 
@@ -232,22 +221,26 @@ function generateFallbackReport(data: HealthData): AIReport {
   const stressLevel = data.stress.level;
   
   return {
-    summary: `Your scan shows a heart rate of ${hr} BPM (${hrStatus}) with ${stressLevel} stress levels. Overall HRV metrics indicate ${data.hrv.sdnn.status} autonomic function.`,
+    summary: `Preventive wellness snapshot: heart rate ${hr} BPM (${hrStatus}); recovery-pattern indicators are wellness-level—not medical diagnostics. Relaxation-score context (${data.stress.index}/100, legacy sensor label "${stressLevel}") is for screening narratives only.`,
     insights: [
-      `Heart rate is ${hrStatus.toLowerCase()} at ${hr} BPM`,
-      `HRV SDNN of ${data.hrv.sdnn.value}ms indicates ${data.hrv.sdnn.status.toLowerCase()} variability`,
-      `RMSSD of ${data.hrv.rmssd.value}ms shows ${data.hrv.rmssd.status.toLowerCase()} parasympathetic activity`,
-      `Stress analysis reveals ${stressLevel} sympathetic tone`,
-      `Signal quality was ${data.vitals.signalQuality.status.toLowerCase()} at ${data.vitals.signalQuality.percentage}%`
+      `Heart-rate trend (wellness): ${hrStatus.toLowerCase()} at ${hr} BPM`,
+      `Recovery-pattern marker SDNN (~${data.hrv.sdnn.value} ms) — illustrative, non-diagnostic`,
+      `Recovery-pattern marker RMSSD (~${data.hrv.rmssd.value} ms) — illustrative, non-diagnostic`,
+      `Relaxation / recovery score ${data.stress.index}/100 from onboard analytics; verify with clinician if concerned`,
+      `Capture quality ~${data.vitals.signalQuality.percentage}% (${data.vitals.signalQuality.status.toLowerCase()})`,
     ],
     recommendations: [
-      'Maintain regular cardiovascular exercise',
-      'Practice stress management techniques',
-      'Ensure adequate sleep for recovery',
-      'Monitor heart rate trends over time',
-      'Consult healthcare provider if symptoms persist'
+      'Maintain regular cardiovascular-friendly movement where appropriate',
+      'Use breathwork and downtime to support subjective recovery',
+      'Repeat scans under stable lighting and posture for comparable trends',
+      'Follow up with onsite diagnostics where camps provide BP/glucose/etc.',
+      'Consult a healthcare provider for symptoms or abnormal clinical vitals',
     ],
-    riskFactors: hrStatus === 'HIGH' || hrStatus === 'LOW' ? [`${hrStatus} heart rate detected - consult physician`] : [],
-    disclaimer: 'This report is AI-generated for informational purposes only. Not a substitute for professional medical advice. Consult a healthcare provider for medical concerns.'
+    riskFactors:
+      hrStatus === 'HIGH' || hrStatus === 'LOW'
+        ? [`Marked heart-rate band "${hrStatus}" on this wellness screen—seek clinical confirmation`]
+        : [],
+    disclaimer:
+      'BP, HR and HRV-like outputs are wellness indicators, not medical measurements. Not medical advice.',
   };
 }

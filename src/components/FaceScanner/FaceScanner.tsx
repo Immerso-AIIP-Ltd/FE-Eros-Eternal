@@ -1292,7 +1292,6 @@ const FaceScanner: React.FC = () => {
       };
 
       // Build section insights input
-      const fd = rppgData?.hrv.frequencyDomain;
       const nl = rppgData?.hrv.nonlinear;
       const re = rppgData?.hrv.respiratoryExtended;
       const sectionInput = {
@@ -1311,7 +1310,6 @@ const FaceScanner: React.FC = () => {
         pnn20Status: rppgData?.hrv.pnn20?.status || 'NORMAL',
         rrIntervalCount: rppgData?.hrv.rrIntervalCount || 0,
         recordingClass: rppgData?.hrv.recordingClass || 'insufficient_data',
-        vlf: fd?.vlf, lf: fd?.lf, hf: fd?.hf, tp: fd?.tp, lfHfRatio: fd?.lfHfRatio,
         sd1: nl?.sd1?.value, sd2: nl?.sd2?.value, sd1Sd2Ratio: nl?.sd1Sd2Ratio,
         sampleEntropy: nl?.sampleEntropy?.value, dfaAlpha1: nl?.dfaAlpha1?.value,
         stressLevel: rppgData?.stress.level || 'unknown',

@@ -31,11 +31,10 @@ import {
   Zap,
   CheckCircle2,
   Info,
-  BarChart3,
   Waves,
   Download,
 } from 'lucide-react';
-import type { CombinedReportData, RppgFrequencyDomain } from '@/types/rppg';
+import type { CombinedReportData } from '@/types/rppg';
 import { getStatusColorCode } from '@/utils/rppgHelpers';
 
 // ── Demo display helpers — fill implausible/zero values with plausible "normal-range"
@@ -62,46 +61,6 @@ function normalizeHrvNumeric(v: unknown, normLo: number, normHi: number, decimal
   }
   const p = 10 ** decimals;
   return Math.round(n * p) / p;
-}
-
-function freqStatusForRatio(ratio: number): string {
-  if (ratio < 1.0) return 'NORMAL';
-  if (ratio < 2.0) return 'MODERATE';
-  return 'HIGH';
-}
-
-/** Build a plausible frequency-domain block when the model returns zeros / nonsense */
-function normalizeFrequencyDomain(raw: RppgFrequencyDomain | undefined): RppgFrequencyDomain | undefined {
-  if (!raw) return raw;
-  const tp = Number(raw.tp) || 0;
-  const lf = Number(raw.lf) || 0;
-  const hf = Number(raw.hf) || 0;
-  const vlf = Number(raw.vlf) || 0;
-  const ratio = Number(raw.lfHfRatio);
-  const anyZeroCore = lf <= 0 || hf <= 0 || vlf <= 0;
-  const badTp = !(tp > 80);
-  const badLfHf =
-    !Number.isFinite(ratio) || !(ratio >= 0.4 && ratio <= 4);
-
-  if (badTp || badLfHf || anyZeroCore) {
-    const newTp = rnd(950, 3200, 1);
-    const vlfP = rnd(0.08, 0.18, 3);
-    const lfP = rnd(0.38, 0.52, 3);
-    const hfP = 1 - vlfP - lfP;
-    const newVlf = rnd(50, 240, 1);
-    const newLf = newTp * lfP * rnd(0.85, 1.15, 2);
-    const newHf = Math.max(newTp * hfP * rnd(0.85, 1.15, 2), 1);
-    const newRatio = rnd(0.75, 1.65, 2);
-    return {
-      ...raw,
-      vlf: Math.max(newVlf, 1),
-      lf: Math.max(newLf, 1),
-      hf: newHf,
-      tp: Math.max(newVlf + newLf + newHf, newTp),
-      lfHfRatio: newRatio,
-    };
-  }
-  return raw;
 }
 
 interface DerivedStressDemo {
@@ -189,8 +148,6 @@ function buildBioCareDemoLayer(report: CombinedReportData) {
   const rmssdStatus = 'NORMAL';
   const pnn20Status = 'NORMAL';
   const pnn50Status = 'NORMAL';
-
-  const frequencyDomain = normalizeFrequencyDomain(rg.hrv.frequencyDomain);
 
   let sympathovagalBalance: number | null = rg.stress.sympathovagalBalance ?? null;
   if (
@@ -286,7 +243,6 @@ function buildBioCareDemoLayer(report: CombinedReportData) {
     rmssdStatus,
     pnn20Status,
     pnn50Status,
-    frequencyDomain,
     stress,
     sympathovagalBalance,
     nlDisp,
@@ -660,7 +616,6 @@ const FaceReportPage: React.FC = () => {
     ? { systolicStatus: demoLayer.systolicStatus, diastolicStatus: demoLayer.diastolicStatus }
     : getBpBand(bpSystolic, bpDiastolic);
 
-  const fdVisual = demoLayer?.frequencyDomain ?? rppg.hrv.frequencyDomain;
   const nl = rppg.hrv.nonlinear;
   const re = rppg.hrv.respiratoryExtended;
   const stress = rppg.stress;
@@ -879,6 +834,62 @@ const FaceReportPage: React.FC = () => {
           </button>
         </div>
 
+        <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div
+            style={{
+              padding: '14px 16px',
+              backgroundColor: '#EFF6FF',
+              borderRadius: '12px',
+              border: '1px solid #BFDBFE',
+            }}
+          >
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+              <Info size={20} style={{ color: '#2563EB', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <p style={{ margin: 0, fontSize: '0.88rem', color: '#1E3A8A', fontWeight: 600 }}>
+                  AI-powered preventive wellness and early risk screening
+                </p>
+                <p style={{ margin: '8px 0 0', fontSize: '0.8rem', color: '#1E40AF', lineHeight: 1.55 }}>
+                  Screening highlights patterns for trend detection. Any concern should be cross-checked with physical
+                  diagnostic devices and clinical assessment—AI screens, devices validate, clinicians decide.
+                </p>
+                <p
+                  style={{
+                    margin: '10px 0 0',
+                    fontSize: '0.78rem',
+                    color: '#92400E',
+                    lineHeight: 1.55,
+                    padding: '8px 10px',
+                    backgroundColor: '#FFFBEB',
+                    borderRadius: '8px',
+                    border: '1px solid #FDE68A',
+                  }}
+                >
+                  <strong>Wellness indicators:</strong> BP, HR and HRV are wellness indicators and not medical
+                  measurements.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            style={{
+              padding: '12px 16px',
+              backgroundColor: '#F9FAFB',
+              borderRadius: '12px',
+              border: '1px solid #E5E7EB',
+            }}
+          >
+            <p style={{ margin: '0 0 6px', fontSize: '0.78rem', fontWeight: 600, color: '#374151' }}>
+              Standard scan conditions
+            </p>
+            <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.76rem', color: '#6B7280', lineHeight: 1.55 }}>
+              <li>Consistent lighting</li>
+              <li>Fixed posture and minimal movement</li>
+              <li>Reduce reflections; limit eyewear impact on the face region</li>
+            </ul>
+          </div>
+        </div>
+
         {/* Top Metrics Row */}
         <div
           className="metrics-grid"
@@ -890,7 +901,7 @@ const FaceReportPage: React.FC = () => {
           }}
         >
           <MetricCard
-            title="Heart Rate"
+            title="Heart rate (wellness)"
             value={heartRateValue.toFixed(1)}
             unit="BPM"
             status={heartRateStatus}
@@ -898,7 +909,7 @@ const FaceReportPage: React.FC = () => {
             color="#EF4444"
           />
           <MetricCard
-            title="BP Systolic"
+            title="Estimated BP trend (systolic)"
             value={bpSystolic.toFixed(1)}
             unit="mmHg"
             status={systolicStatus}
@@ -906,7 +917,7 @@ const FaceReportPage: React.FC = () => {
             color="#3B82F6"
           />
           <MetricCard
-            title="BP Diastolic"
+            title="Estimated BP trend (diastolic)"
             value={bpDiastolic.toFixed(1)}
             unit="mmHg"
             status={diastolicStatus}
@@ -922,7 +933,7 @@ const FaceReportPage: React.FC = () => {
             color="#00B8D4"
           />
           <MetricCard
-            title="Stress Index"
+            title="Relaxation / recovery score"
             value={stressPresentation.index}
             unit="/100"
             status={stressPresentation.metricBadge}
@@ -1110,17 +1121,8 @@ const FaceReportPage: React.FC = () => {
           </div>
         </div>
 
-        {/* HRV Section: Time Domain + Frequency Domain - 2 columns */}
-        <div
-          className="content-grid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '24px',
-            marginBottom: '24px',
-          }}
-        >
-          {/* HRV Time Domain */}
+        {/* Recovery pattern · time-domain (VLF/LF/HF spectral bands not shown — wellness screening only) */}
+        <div style={{ marginBottom: '24px' }}>
           <div
             style={{
               backgroundColor: '#ffffff',
@@ -1133,11 +1135,11 @@ const FaceReportPage: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
                 <Clock size={20} style={{ color: '#F59E0B' }} />
                 <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-                  HRV Time Domain
+                  Recovery pattern (time-domain)
                 </h3>
               </div>
               <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: '0 0 0 30px', lineHeight: 1.4 }}>
-                Statistical measures of beat-to-beat interval variation over time. Higher values generally indicate better autonomic flexibility.
+                Wellness indicators of interval variation for trend screening—not medical HRV diagnostics.
               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -1213,115 +1215,9 @@ const FaceReportPage: React.FC = () => {
               )}
             </div>
           </div>
-
-          {/* HRV Frequency Domain */}
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #E5E7EB',
-              borderRadius: '16px',
-              padding: '24px',
-            }}
-          >
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                <BarChart3 size={20} style={{ color: '#8B5CF6' }} />
-                <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-                  HRV Frequency Domain
-                </h3>
-              </div>
-              <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: '0 0 0 30px', lineHeight: 1.4 }}>
-                Spectral analysis of heart rate oscillations. Each band covers a frequency range (Hz); power (ms²) indicates the strength of oscillations in that band.
-              </p>
-            </div>
-            {fdVisual ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {/* Column headers for clarity */}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '8px 20px',
-                    borderBottom: '1px solid #E5E7EB',
-                  }}
-                >
-                  <span style={{ color: '#9CA3AF', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Band (Frequency Range)
-                  </span>
-                  <span style={{ color: '#9CA3AF', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Power (ms²)
-                  </span>
-                </div>
-                <HrvRow label="VLF · 0.003–0.04 Hz" value={fdVisual.vlf.toFixed(2)} unit="ms²" description="Very Low Frequency" />
-                <HrvRow label="LF · 0.04–0.15 Hz" value={fdVisual.lf.toFixed(2)} unit="ms²" description="Low Frequency · Sympathetic + Parasympathetic" />
-                <HrvRow label="HF · 0.15–0.4 Hz" value={fdVisual.hf.toFixed(2)} unit="ms²" description="High Frequency · Parasympathetic (vagal) tone" />
-                <HrvRow label="Total Power (all bands)" value={fdVisual.tp.toFixed(2)} unit="ms²" />
-                <HrvRow
-                  label="LF/HF Ratio"
-                  value={fdVisual.lfHfRatio.toFixed(2)}
-                  status={freqStatusForRatio(fdVisual.lfHfRatio)}
-                  description="Sympathovagal balance indicator (unitless)"
-                />
-
-                {/* Visual bar breakdown */}
-                <div style={{ padding: '12px 20px', backgroundColor: '#F9FAFB', borderRadius: '12px' }}>
-                  <span style={{ color: '#6B7280', fontSize: '0.8rem', display: 'block', marginBottom: '8px' }}>
-                    Power Distribution
-                  </span>
-                  <div style={{ display: 'flex', height: '24px', borderRadius: '6px', overflow: 'hidden' }}>
-                    {fdVisual.tp > 0 ? (
-                      <>
-                        <div style={{ width: `${(fdVisual.vlf / fdVisual.tp) * 100}%`, backgroundColor: '#93C5FD', minWidth: '2px' }} title={`VLF: ${((fdVisual.vlf / fdVisual.tp) * 100).toFixed(1)}%`} />
-                        <div style={{ width: `${(fdVisual.lf / fdVisual.tp) * 100}%`, backgroundColor: '#8B5CF6', minWidth: '2px' }} title={`LF: ${((fdVisual.lf / fdVisual.tp) * 100).toFixed(1)}%`} />
-                        <div style={{ width: `${(fdVisual.hf / fdVisual.tp) * 100}%`, backgroundColor: '#10B981', minWidth: '2px' }} title={`HF: ${((fdVisual.hf / fdVisual.tp) * 100).toFixed(1)}%`} />
-                      </>
-                    ) : (
-                      <div style={{ width: '100%', backgroundColor: '#E5E7EB' }} />
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
-                    <span style={{ fontSize: '0.7rem', color: '#93C5FD', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: '#93C5FD', display: 'inline-block' }} /> VLF
-                    </span>
-                    <span style={{ fontSize: '0.7rem', color: '#8B5CF6', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: '#8B5CF6', display: 'inline-block' }} /> LF
-                    </span>
-                    <span style={{ fontSize: '0.7rem', color: '#10B981', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: '#10B981', display: 'inline-block' }} /> HF
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div style={{ color: '#9CA3AF', fontSize: '0.875rem', padding: '20px', textAlign: 'center' }}>
-                Insufficient data for frequency domain analysis. A longer scan is required.
-              </div>
-            )}
-
-            {/* GPT Section Insight */}
-            {si?.frequencyDomain && (
-              <div
-                style={{
-                  marginTop: '12px',
-                  padding: '16px',
-                  backgroundColor: 'rgba(59, 130, 246, 0.06)',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(59, 130, 246, 0.15)',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                  <Brain size={14} style={{ color: '#3B82F6' }} />
-                  <span style={{ color: '#3B82F6', fontSize: '0.75rem', fontWeight: 600 }}>AI Insight</span>
-                </div>
-                <p style={{ color: '#374151', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
-                  {si.frequencyDomain}
-                </p>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* Nonlinear HRV + Stress Analysis - 2 columns */}
+        {/* Nonlinear recovery pattern · relaxation & breathing */}
         <div
           className="content-grid"
           style={{
@@ -1331,7 +1227,7 @@ const FaceReportPage: React.FC = () => {
             marginBottom: '24px',
           }}
         >
-          {/* Nonlinear HRV */}
+          {/* Recovery pattern · nonlinear */}
           <div
             style={{
               backgroundColor: '#ffffff',
@@ -1344,11 +1240,11 @@ const FaceReportPage: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
                 <Waves size={20} style={{ color: '#EC4899' }} />
                 <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-                  Nonlinear HRV Analysis
+                  Recovery pattern (nonlinear)
                 </h3>
               </div>
               <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: '0 0 0 30px', lineHeight: 1.4 }}>
-                Complexity and fractal measures of heart rate dynamics. These capture patterns not visible in standard time/frequency analysis.
+                Additional shape-based wellness indicators—not for clinical diagnosis.
               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -1392,7 +1288,7 @@ const FaceReportPage: React.FC = () => {
                     label="SD1"
                     value={typeof sd1FallbackApproxRow === 'number' && sd1FallbackApproxRow > 0 ? sd1FallbackApproxRow.toFixed(1) : '0'}
                     unit="ms"
-                    description="Short-term HRV variability"
+                    description="Short-term recovery-pattern variability"
                   />
                   <HrvRow label="SD2" value="N/A" description="Requires more data" />
                 </>
@@ -1460,7 +1356,7 @@ const FaceReportPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Stress Analysis + Respiratory */}
+          {/* Relaxation / recovery & breathing */}
           <div
             style={{
               backgroundColor: '#ffffff',
@@ -1473,21 +1369,22 @@ const FaceReportPage: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
                 <Zap size={20} style={{ color: '#F59E0B' }} />
                 <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-                  Stress & Respiratory Analysis
+                  Relaxation, recovery & breathing
                 </h3>
               </div>
               <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: '0 0 0 30px', lineHeight: 1.4 }}>
-                Autonomic stress indicators derived from HRV and breathing pattern analysis. Lower stress index and stable breathing indicate better recovery capacity.
+                Signals derived from scanning for wellness trends. Stable breathing and a favourable relaxation score
+                suggest better perceived recovery—not a medical diagnosis.
               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {/* Stress */}
               <HrvRow
-                label="Stress Level"
+                label="Relaxation / recovery level"
                 value={stressPresentation.levelWord}
                 status={stressPresentation.rowStatus}
               />
-              <HrvRow label="Stress Index" value={stressPresentation.index} unit="/100" />
+              <HrvRow label="Relaxation / recovery score" value={stressPresentation.index} unit="/100" />
 
               {sympathDisplay !== undefined && sympathDisplay !== null && (
                 <HrvRow
@@ -1668,9 +1565,11 @@ const FaceReportPage: React.FC = () => {
             </span>
           </div>
           <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: 0, lineHeight: 1.6 }}>
-            This report is AI-generated and for informational purposes only. It does not constitute
-            medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider
-            for medical concerns. Do not disregard professional medical advice based on these readings.
+            BP, HR and HRV-like metrics in this report are wellness indicators and not medical
+            measurements. This report is AI-generated and for informational purposes only—not
+            medical advice, diagnosis, or treatment. Screening is designed for trend detection; findings
+            should be validated with physical diagnostics and clinical assessment where appropriate.
+            Always consult a qualified healthcare provider for medical concerns.
           </p>
         </div>
 
