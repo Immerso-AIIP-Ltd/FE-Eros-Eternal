@@ -32,9 +32,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Set IMAGE_TAG
-        run: |
-          ACTUAL_SHA=$(git rev-parse --short HEAD)
-          echo "IMAGE_TAG=eternal-wellness-${ACTUAL_SHA}" >> $GITHUB_ENV
+        run: echo "IMAGE_TAG=eternal-wellness-${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -69,9 +67,11 @@ jobs:
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
+          # Update Helm values
           yq e '.image.repository = "immersoaiip/creator_tools"' -i eternal-demo-frontend/values.yaml
           yq e '.image.tag = strenv(IMAGE_TAG)' -i eternal-demo-frontend/values.yaml
 
+          # Commit changes
           git add eternal-demo-frontend/values.yaml
 
           if git diff --staged --quiet; then
