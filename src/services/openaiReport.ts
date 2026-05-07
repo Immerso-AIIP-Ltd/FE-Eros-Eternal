@@ -24,6 +24,8 @@ export interface HealthData {
   metadata: {
     scanDurationSeconds: number;
     timestamp: string;
+    reportLanguage?: string;
+    locale?: string;
   };
 }
 
@@ -36,6 +38,10 @@ export interface AIReport {
 }
 
 export async function generateHealthReport(data: HealthData): Promise<AIReport> {
+  const wantsGujarati = data.metadata.reportLanguage === 'gu' || data.metadata.locale === 'gu-IN';
+  const languageInstruction = wantsGujarati
+    ? 'Write the entire JSON response values in Gujarati. Keep JSON keys exactly in English.'
+    : 'Write the JSON response values in English.';
   const prompt = `Analyze this health scan data and provide a comprehensive report:
 
 VITALS:
@@ -59,6 +65,7 @@ relaxation indicators, and trend screening—not definitive medical diagnosis.
 SCAN METADATA:
 - Duration: ${data.metadata.scanDurationSeconds} seconds
 - Time: ${data.metadata.timestamp}
+- Output language: ${wantsGujarati ? 'Gujarati (gu-IN)' : 'English (en-US)'}
 
 Provide a JSON response with this structure:
 {
@@ -67,7 +74,9 @@ Provide a JSON response with this structure:
   "recommendations": ["4-5 actionable health recommendations"],
   "riskFactors": ["0-3 potential risk factors if any"],
   "disclaimer": "Medical disclaimer text"
-}`;
+}
+
+${languageInstruction}`;
 
   try {
     const response = await openai.chat.completions.create({
@@ -112,6 +121,8 @@ export interface SectionInsights {
 }
 
 export interface SectionInsightsInput {
+  language?: string;
+  locale?: string;
   heartRate: number;
   heartRateStatus: string;
   signalQuality: number;
@@ -143,6 +154,10 @@ export interface SectionInsightsInput {
 }
 
 export async function generateSectionInsights(data: SectionInsightsInput): Promise<SectionInsights> {
+  const wantsGujarati = data.language === 'gu' || data.locale === 'gu-IN';
+  const languageInstruction = wantsGujarati
+    ? 'Write all JSON values in Gujarati. Keep JSON keys exactly as timeDomain, nonlinear, stressRespiratory.'
+    : 'Write all JSON values in English.';
   const prompt = `You interpret preventive wellness screening data (NOT medical diagnostics). Preferred language: recovery pattern, relaxation score, wellness trends.
 
 SECTION 1 — RECOVERY PATTERN (time-domain indicators):
@@ -169,7 +184,8 @@ SECTION 3 — RELAXATION / RECOVERY & BREATHING:
 
 Do not analyse VLF, LF, HF, or LF/HF ratio.
 
-Respond in JSON with ONLY: timeDomain, nonlinear, stressRespiratory (each 2–3 sentences).`;
+Respond in JSON with ONLY: timeDomain, nonlinear, stressRespiratory (each 2–3 sentences).
+${languageInstruction}`;
 
   try {
     const response = await openai.chat.completions.create({
@@ -203,6 +219,14 @@ Respond in JSON with ONLY: timeDomain, nonlinear, stressRespiratory (each 2–3 
 }
 
 function generateFallbackSectionInsights(data: SectionInsightsInput): SectionInsights {
+  const wantsGujarati = data.language === 'gu' || data.locale === 'gu-IN';
+  if (wantsGujarati) {
+    return {
+      timeDomain: `રિકવરી પેટર્ન સ્નેપશોટ: SDNN આશરે ${data.sdnn.toFixed(1)} ms અને RMSSD આશરે ${data.rmssd.toFixed(1)} ms. આ વેલનેસ સ્તરના સૂચકાંકો છે, ક્લિનિકલ HRV ટેસ્ટનો વિકલ્પ નથી.`,
+      nonlinear: 'નોનલિનિયર સૂચકાંકો ટ્રેન્ડ સમજવા માટે ધબકારા વચ્ચેના ફેરફારની રચના દર્શાવે છે. આ ક્લિનિકલ નિદાન માટે નથી.',
+      stressRespiratory: `રિલેક્સેશન / રિકવરી સ્કોર ${data.stressIndex}/100 છે. શ્વાસ દર ${data.breathingRate} breaths/min છે; ચિંતા હોય તો PHC ડિવાઇસથી ચકાસો.`,
+    };
+  }
   const rmssdDesc =
     data.rmssd < 20 ? 'on the lower side for this modality' : data.rmssd < 40 ? 'moderate' : 'relatively favourable';
   const sdnnDesc =
@@ -216,9 +240,35 @@ function generateFallbackSectionInsights(data: SectionInsightsInput): SectionIns
 }
 
 function generateFallbackReport(data: HealthData): AIReport {
+  const wantsGujarati = data.metadata.reportLanguage === 'gu' || data.metadata.locale === 'gu-IN';
   const hr = data.vitals.heartRate.value;
   const hrStatus = data.vitals.heartRate.status;
   const stressLevel = data.stress.level;
+  if (wantsGujarati) {
+    return {
+      summary: `પ્રિવેન્ટિવ વેલનેસ સ્નેપશોટ: હાર્ટ રેટ ${hr} BPM (${hrStatus}); રિકવરી પેટર્ન સૂચકાંકો વેલનેસ સ્તરના છે, મેડિકલ નિદાન નથી. રિલેક્સેશન સ્કોર ${data.stress.index}/100 છે.`,
+      insights: [
+        `હાર્ટ રેટ ટ્રેન્ડ: ${hr} BPM (${hrStatus})`,
+        `SDNN આશરે ${data.hrv.sdnn.value} ms - વેલનેસ સૂચક`,
+        `RMSSD આશરે ${data.hrv.rmssd.value} ms - વેલનેસ સૂચક`,
+        `રિલેક્સેશન / રિકવરી સ્કોર ${data.stress.index}/100; જરૂર પડે તો ક્લિનિકલ ચકાસણી કરો`,
+        `કેપ્ચર ગુણવત્તા આશરે ${data.vitals.signalQuality.percentage}% (${data.vitals.signalQuality.status})`,
+      ],
+      recommendations: [
+        'યોગ્ય હોય ત્યારે નિયમિત હળવી શારીરિક પ્રવૃત્તિ ચાલુ રાખો',
+        'શ્વાસ કસરત અને આરામનો સમય રિકવરીમાં મદદરૂપ થઈ શકે છે',
+        'સરખામણી માટે સમાન પ્રકાશ અને પોઝ્ચરમાં ફરી સ્કેન કરો',
+        'PHCમાં ઉપલબ્ધ BP/શુગર/SpO2 જેવા ડિવાઇસથી ચકાસણી કરો',
+        'લક્ષણો અથવા અસામાન્ય ક્લિનિકલ વાઇટલ્સ હોય તો આરોગ્યકર્મીનો સંપર્ક કરો',
+      ],
+      riskFactors:
+        hrStatus === 'HIGH' || hrStatus === 'LOW'
+          ? [`આ વેલનેસ સ્ક્રીનમાં હાર્ટ રેટ "${hrStatus}" છે - ક્લિનિકલ પુષ્ટિ કરાવો`]
+          : [],
+      disclaimer:
+        'BP, HR અને HRV જેવા આઉટપુટ વેલનેસ સૂચકાંકો છે, મેડિકલ માપદંડ નથી. આ મેડિકલ સલાહ નથી.',
+    };
+  }
   
   return {
     summary: `Preventive wellness snapshot: heart rate ${hr} BPM (${hrStatus}); recovery-pattern indicators are wellness-level—not medical diagnostics. Relaxation-score context (${data.stress.index}/100, legacy sensor label "${stressLevel}") is for screening narratives only.`,

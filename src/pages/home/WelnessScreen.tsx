@@ -1,10 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import background from "@/assets/images/welcome-screen.jpg";
+import { usePhcSession } from "@/context/PhcSessionContext";
+import { getPhcCopy } from "@/i18n/phcCopy";
 
 
 const WellnessScreen = () => {
       const navigate = useNavigate();
+      const { language } = usePhcSession();
+      const t = getPhcCopy(language);
 
       const handleClick = () =>{
         navigate("/profile");
@@ -66,8 +70,18 @@ const WellnessScreen = () => {
             fontWeight: 'bold',
           }}
         >
-          Welcome to EROS Wellness
+          {t.welcomeTitle}
         </h2>
+        <p
+          style={{
+            margin: "-12px 0 0",
+            fontSize: "18px",
+            fontWeight: 600,
+            opacity: 0.92,
+          }}
+        >
+          {t.welcomeSubtitle}
+        </p>
         
         <button 
           style={{
@@ -87,7 +101,7 @@ const WellnessScreen = () => {
           onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
           onClick={handleClick}
         >
-          Continue
+          {t.continue}
         </button>
       </div>
     </div>

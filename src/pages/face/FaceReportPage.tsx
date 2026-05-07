@@ -36,61 +36,22 @@ import {
 } from 'lucide-react';
 import type { CombinedReportData } from '@/types/rppg';
 import { getStatusColorCode } from '@/utils/rppgHelpers';
-
-// ── Demo display helpers — fill implausible/zero values with plausible "normal-range"
-// placeholders for stakeholder demos only. ======================================
-function rnd(min: number, max: number, decimals = 1): number {
-  const raw = min + Math.random() * (max - min);
-  const p = 10 ** decimals;
-  return Math.round(raw * p) / p;
-}
+import { usePhcSession } from '@/context/PhcSessionContext';
+import { getPhcCopy } from '@/i18n/phcCopy';
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, n));
 }
 
-function inClosedRange(n: number, lo: number, hi: number): boolean {
-  return Number.isFinite(n) && n >= lo && n <= hi;
-}
-
-/** Normalize numeric: 0 / NaN / outside [lo-hi] → random within normal band */
-function normalizeHrvNumeric(v: unknown, normLo: number, normHi: number, decimals = 1): number {
-  const n = typeof v === 'number' ? v : Number(v);
-  if (!Number.isFinite(n) || n === 0 || !inClosedRange(n, normLo, normHi)) {
-    return rnd(normLo + (normHi - normLo) * 0.12, normHi - (normHi - normLo) * 0.08, decimals);
-  }
-  const p = 10 ** decimals;
-  return Math.round(n * p) / p;
-}
-
-interface DerivedStressDemo {
+interface StressPresentation {
   index: number;
-  metricBadge: 'NORMAL' | 'MODERATE' | 'HIGH';
+  metricBadge: 'NORMAL' | 'MODERATE' | 'HIGH' | 'UNKNOWN';
   levelWord: string;
-  rowStatus: 'NORMAL' | 'MODERATE' | 'HIGH';
-}
-
-/**
- * Demo stress index: ignore API (backend often emits ~100). Each new report snapshot rolls a
- * fresh integer in 40–60; badges derive from that value (same band → MODERATE / "Moderate").
- */
-function deriveStressForDemo(): DerivedStressDemo {
-  const idx = 40 + Math.floor(Math.random() * 21);
-
-  let level: 'low' | 'moderate' | 'high';
-  if (idx >= 67) level = 'high';
-  else if (idx >= 34) level = 'moderate';
-  else level = 'low';
-
-  const metricBadge: DerivedStressDemo['metricBadge'] =
-    level === 'low' ? 'NORMAL' : level === 'moderate' ? 'MODERATE' : 'HIGH';
-
-  const levelWord = level === 'low' ? 'Low' : level === 'moderate' ? 'Moderate' : 'High';
-
-  return { index: idx, metricBadge, levelWord, rowStatus: metricBadge };
+  rowStatus: 'NORMAL' | 'MODERATE' | 'HIGH' | 'UNKNOWN';
 }
 
 function getHeartRateBand(hr: number): string {
+  if (!Number.isFinite(hr) || hr <= 0) return 'UNKNOWN';
   if (hr < 60) return 'LOW';
   if (hr > 100) return 'HIGH';
   return 'NORMAL';
@@ -99,88 +60,68 @@ function getHeartRateBand(hr: number): string {
 function getBpBand(systolic: number, diastolic: number) {
   let systolicStatus = 'NORMAL';
   let diastolicStatus = 'NORMAL';
+  if (!Number.isFinite(systolic) || systolic <= 0) systolicStatus = 'UNKNOWN';
+  else
   if (systolic < 90) systolicStatus = 'LOW';
   else if (systolic >= 130) systolicStatus = 'HIGH';
   else if (systolic >= 120) systolicStatus = 'ELEVATED';
+  if (!Number.isFinite(diastolic) || diastolic <= 0) diastolicStatus = 'UNKNOWN';
+  else
   if (diastolic < 60) diastolicStatus = 'LOW';
   else if (diastolic >= 80) diastolicStatus = 'HIGH';
   return { systolicStatus, diastolicStatus };
 }
 
-function buildBioCareDemoLayer(report: CombinedReportData) {
+function getStressPresentation(stress: CombinedReportData['rppg']['stress']): StressPresentation {
+  const idx = Number(stress.index ?? 0);
+  const level = String(stress.level || 'unknown').toLowerCase();
+  const metricBadge: StressPresentation['metricBadge'] =
+    level === 'low' ? 'NORMAL' : level === 'moderate' ? 'MODERATE' : level === 'high' ? 'HIGH' : 'UNKNOWN';
+  return {
+    index: Number.isFinite(idx) ? idx : 0,
+    metricBadge,
+    levelWord: level ? level.charAt(0).toUpperCase() + level.slice(1) : 'Unknown',
+    rowStatus: metricBadge,
+  };
+}
+
+function buildBioCareActualLayer(report: CombinedReportData) {
   const rg = report.rppg!;
   const api = report.apiHealthData;
 
-  const hrRaw = api?.heart_rate ?? rg.vitals.heartRate.value;
-  let heartRate = hrRaw;
-  if (!Number.isFinite(heartRate) || heartRate <= 0 || heartRate < 46 || heartRate > 138) {
-    heartRate = rnd(63, 79, 1);
-  }
+  const heartRate = Number(api?.heart_rate ?? rg.vitals.heartRate.value ?? 0);
   const heartRateStatus = getHeartRateBand(heartRate);
 
-  let bpSys = api?.bp_systolic ?? 0;
-  let bpDia = api?.bp_diastolic ?? 0;
-  if (!Number.isFinite(bpSys) || bpSys <= 0 || !inClosedRange(bpSys, 95, 135)) bpSys = rnd(108, 125, 1);
-  if (!Number.isFinite(bpDia) || bpDia <= 0 || !inClosedRange(bpDia, 60, 90)) bpDia = rnd(70, 84, 1);
+  const bpSys = Number(api?.bp_systolic ?? 0);
+  const bpDia = Number(api?.bp_diastolic ?? 0);
   const { systolicStatus, diastolicStatus } = getBpBand(bpSys, bpDia);
 
-  const breathingRate = normalizeHrvNumeric(rg.vitals.breathingRate.value, 11, 20);
+  const breathingRate = Number(rg.vitals.breathingRate.value ?? 0);
   const breathingRateStatus =
-    breathingRate < 12 ? 'LOW' : breathingRate > 20 ? 'HIGH' : 'NORMAL';
+    !Number.isFinite(breathingRate) || breathingRate <= 0 ? 'UNKNOWN' : breathingRate < 12 ? 'LOW' : breathingRate > 20 ? 'HIGH' : 'NORMAL';
 
-  let signalQualityDec = rg.vitals.signalQuality.value;
-  if (
-    !Number.isFinite(signalQualityDec) ||
-    signalQualityDec <= 0 ||
-    signalQualityDec > 1.02 ||
-    signalQualityDec < 0.35
-  ) {
-    signalQualityDec = rnd(0.78, 0.93, 2);
-  }
-  signalQualityDec = clamp(signalQualityDec, 0.12, 0.995);
+  const signalQualityDec = clamp(Number(rg.vitals.signalQuality.value ?? 0), 0, 1);
   const signalQualityStatus = signalQualityDec >= 0.86 ? 'EXCELLENT' : signalQualityDec >= 0.71 ? 'GOOD' : 'FAIR';
 
-  const sdnn = normalizeHrvNumeric(rg.hrv.sdnn?.value ?? 0, 50, 100, 1);
-  const rmssd = normalizeHrvNumeric(rg.hrv.rmssd?.value ?? 0, 18, 50, 1);
-  const pnn20 = normalizeHrvNumeric(rg.hrv.pnn20?.value ?? 0, 5, 60, 2);
-  const pnn50 = normalizeHrvNumeric(rg.hrv.pnn50?.value ?? 0, 3.5, 25, 2);
-  const sdnnStatus = 'NORMAL';
-  const rmssdStatus = 'NORMAL';
-  const pnn20Status = 'NORMAL';
-  const pnn50Status = 'NORMAL';
+  const sdnn = Number(rg.hrv.sdnn?.value ?? 0);
+  const rmssd = Number(rg.hrv.rmssd?.value ?? 0);
+  const pnn20 = Number(rg.hrv.pnn20?.value ?? 0);
+  const pnn50 = Number(rg.hrv.pnn50?.value ?? 0);
+  const sdnnStatus = rg.hrv.sdnn?.status ?? 'UNKNOWN';
+  const rmssdStatus = rg.hrv.rmssd?.status ?? 'UNKNOWN';
+  const pnn20Status = rg.hrv.pnn20?.status ?? 'UNKNOWN';
+  const pnn50Status = rg.hrv.pnn50?.status ?? 'UNKNOWN';
 
-  let sympathovagalBalance: number | null = rg.stress.sympathovagalBalance ?? null;
-  if (
-    sympathovagalBalance !== null &&
-    sympathovagalBalance !== undefined &&
-    (sympathovagalBalance <= 0 ||
-      sympathovagalBalance > 2.85 ||
-      !Number.isFinite(sympathovagalBalance))
-  ) {
-    sympathovagalBalance = rnd(0.92, 1.14, 3);
-  }
+  const sympathovagalBalance = rg.stress.sympathovagalBalance ?? null;
+  const stress = getStressPresentation(rg.stress);
 
-  const stress = deriveStressForDemo();
-
-  let nlDisp = rg.hrv.nonlinear
+  const nlDisp = rg.hrv.nonlinear
     ? {
-        sd1Val: normalizeHrvNumeric(rg.hrv.nonlinear.sd1.value, 14, 95, 1),
-        sd2Val: normalizeHrvNumeric(rg.hrv.nonlinear.sd2.value, 35, 100, 1),
+        sd1Val: Number(rg.hrv.nonlinear.sd1.value ?? 0),
+        sd2Val: Number(rg.hrv.nonlinear.sd2.value ?? 0),
         sd1Sd2Ratio: rg.hrv.nonlinear.sd1Sd2Ratio,
-        sampleEntropyVal: (() => {
-          const v = rg.hrv.nonlinear!.sampleEntropy.value;
-          if (v === null || !Number.isFinite(v) || v <= 0 || !inClosedRange(v, 0.35, 2.35)) {
-            return rnd(0.88, 1.72, 3);
-          }
-          return Math.round(v * 1000) / 1000;
-        })(),
-        dfaVal: (() => {
-          const v = rg.hrv.nonlinear!.dfaAlpha1.value;
-          if (v === null || !Number.isFinite(v) || v <= 0 || !inClosedRange(v, 0.52, 1.28)) {
-            return rnd(0.76, 1.09, 3);
-          }
-          return Math.round(v * 1000) / 1000;
-        })(),
+        sampleEntropyVal: rg.hrv.nonlinear.sampleEntropy.value,
+        dfaVal: rg.hrv.nonlinear.dfaAlpha1.value,
         dfaReliable: rg.hrv.nonlinear.dfaAlpha1.reliable,
         sd1Desc: rg.hrv.nonlinear.sd1.description,
         sd2Desc: rg.hrv.nonlinear.sd2.description,
@@ -189,40 +130,19 @@ function buildBioCareDemoLayer(report: CombinedReportData) {
       }
     : null;
 
-  if (nlDisp) {
-    const ratio =
-      nlDisp.sd2Val > 0 ? nlDisp.sd1Val / nlDisp.sd2Val : nlDisp.sd1Sd2Ratio;
-    nlDisp.sd1Sd2Ratio =
-      ratio && Number.isFinite(ratio) && inClosedRange(ratio, 0.03, 0.92)
-        ? ratio
-        : rnd(0.15, 0.72, 3);
-    if (
-      nlDisp.sampleEntropyVal === null ||
-      !Number.isFinite(nlDisp.sampleEntropyVal) ||
-      nlDisp.sampleEntropyVal <= 0
-    )
-      nlDisp.sampleEntropyVal = rnd(0.85, 1.55, 3);
-    if (!Number.isFinite(nlDisp.dfaVal) || nlDisp.dfaVal <= 0) nlDisp.dfaVal = rnd(0.78, 1.08, 3);
-  }
-
   const sd1FallbackApprox =
-    rg.hrv.rmssd?.value !== undefined ? Math.round((rmssd / Math.sqrt(2)) * 10) / 10 : rnd(35, 70, 1);
+    rg.hrv.rmssd?.value !== undefined ? Math.round((rmssd / Math.sqrt(2)) * 10) / 10 : 0;
 
   let breathingRateSdDisp: number | undefined;
   if (rg.hrv.respiratoryExtended) {
-    let v = rg.hrv.respiratoryExtended.breathingRateSd.value;
-    if (!Number.isFinite(v) || v <= 0 || v > 9) v = rnd(0.85, 2.6, 1);
-    breathingRateSdDisp = v;
+    breathingRateSdDisp = rg.hrv.respiratoryExtended.breathingRateSd.value;
   }
 
-  let breatheMeanDisp =
+  const breatheMeanDisp =
     rg.hrv.respiratoryExtended?.breathingRateMean.value ?? rg.vitals.breathingRate.value;
-  breatheMeanDisp = normalizeHrvNumeric(breatheMeanDisp, 11, 20);
 
-  let compSdnn = rg.stress.components?.sdnn;
-  let compRmssd = rg.stress.components?.rmssd;
-  if (!Number.isFinite(compSdnn as number) || (compSdnn as number) <= 0) compSdnn = sdnn;
-  if (!Number.isFinite(compRmssd as number) || (compRmssd as number) <= 0) compRmssd = rmssd;
+  const compSdnn = rg.stress.components?.sdnn ?? sdnn;
+  const compRmssd = rg.stress.components?.rmssd ?? rmssd;
 
   return {
     heartRate,
@@ -258,8 +178,25 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  const { language } = usePhcSession();
   const color = getStatusColorCode(status);
   const normalizedStatus = status.toUpperCase();
+  const translatedStatus =
+    language === 'gu'
+      ? ({
+          NORMAL: 'સામાન્ય',
+          GOOD: 'સારું',
+          EXCELLENT: 'ઉત્તમ',
+          LOW: 'ઓછું',
+          HIGH: 'વધુ',
+          FAIR: 'મધ્યમ',
+          MODERATE: 'મધ્યમ',
+          POOR: 'નબળું',
+          WARNING: 'ચેતવણી',
+          ELEVATED: 'વધેલું',
+          UNKNOWN: 'અજ્ઞાત',
+        } as Record<string, string>)[normalizedStatus] ?? status
+      : status;
 
   let icon = <Minus size={12} />;
   if (normalizedStatus === 'LOW' || normalizedStatus === 'GOOD' || normalizedStatus === 'EXCELLENT' || normalizedStatus === 'NORMAL') {
@@ -286,7 +223,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
       }}
     >
       {icon}
-      {status}
+      {translatedStatus}
     </div>
   );
 };
@@ -408,12 +345,30 @@ const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
 const FaceReportPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const {
+    language,
+    patient,
+    bioCareReport,
+    setBioCareReport,
+    resetPatientFlow,
+  } = usePhcSession();
+  const t = getPhcCopy(language);
 
   const [report, setReport] = useState<CombinedReportData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [username, setUsername] = useState<string>('');
   const [downloading, setDownloading] = useState(false);
+  const [clinicalInputs, setClinicalInputs] = useState({
+    bpSystolic: '',
+    bpDiastolic: '',
+    sugar: '',
+    spo2: '',
+    ecg: '',
+    bmi: '',
+  });
+  const [clinicalSaveStatus, setClinicalSaveStatus] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
   const reportRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadPdf = useCallback(async () => {
@@ -465,68 +420,69 @@ const FaceReportPage: React.FC = () => {
     }
   }, []);
 
-  // Load report data from navigation state or localStorage
+  // Load report data from navigation state or in-memory PHC session.
   useEffect(() => {
     if (location.state && location.state.success) {
       const reportData = location.state as CombinedReportData;
       setReport(reportData);
-      localStorage.setItem('faceReportData', JSON.stringify(reportData));
-      if (reportData.uploadedImage) {
-        setUploadedImage(reportData.uploadedImage);
-      }
+      setBioCareReport(reportData);
+    } else if (bioCareReport) {
+      setReport(bioCareReport);
     } else {
-      const savedReport = localStorage.getItem('faceReportData');
-      if (savedReport) {
-        try {
-          const parsedReport = JSON.parse(savedReport) as CombinedReportData;
-          setReport(parsedReport);
-          if (parsedReport.uploadedImage) {
-            setUploadedImage(parsedReport.uploadedImage);
-          }
-        } catch (err) {
-          console.error('Failed to parse saved report data:', err);
-          setError('No report data found. Please complete a face scan first.');
-        }
-      } else {
-        setError('No report data found. Please complete a face scan first.');
-      }
+      setError(t.noReport);
     }
 
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
+    setUsername(patient?.username ?? '');
+  }, [bioCareReport, location.state, patient?.username, setBioCareReport, t.noReport]);
+
+  const handleNextPerson = () => {
+    resetPatientFlow();
+    navigate('/profile', { replace: true });
+  };
+
+  const setClinicalField = (field: keyof typeof clinicalInputs, value: string) => {
+    setClinicalSaveStatus('idle');
+    setClinicalInputs((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleClinicalSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!patient?.userId) {
+      setClinicalSaveStatus('error');
       return;
     }
 
-    // Fallback: fetch from the profile API if localStorage was cleared but
-    // user_id is still around.
-    const userId = localStorage.getItem('user_id');
-    if (!userId) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch(
-          `${baseApiUrl}/aitools/wellness/v2/users/profile/${userId}`,
-        );
-        if (!res.ok) return;
-        const json = await res.json();
-        const name: string | undefined = json?.data?.username ?? json?.username;
-        if (!cancelled && name) {
-          setUsername(name);
-          try {
-            localStorage.setItem('username', name);
-          } catch {
-            /* ignore */
-          }
-        }
-      } catch {
-        /* network noise — header just hides if no name is available */
+    setClinicalSaveStatus('saving');
+    try {
+      const payload = {
+        user_id: patient.userId,
+        report_language: language === 'gu' ? 'gu' : 'en',
+        locale: language === 'gu' ? 'gu-IN' : 'en-US',
+        scan_timestamp: report?.rppg.metadata.timestamp,
+        bp_systolic: clinicalInputs.bpSystolic ? Number(clinicalInputs.bpSystolic) : null,
+        bp_diastolic: clinicalInputs.bpDiastolic ? Number(clinicalInputs.bpDiastolic) : null,
+        sugar: clinicalInputs.sugar ? Number(clinicalInputs.sugar) : null,
+        spo2: clinicalInputs.spo2 ? Number(clinicalInputs.spo2) : null,
+        ecg: clinicalInputs.ecg.trim() || null,
+        bmi: clinicalInputs.bmi ? Number(clinicalInputs.bmi) : null,
+      };
+      const response = await fetch(
+        `${baseApiUrl}/aitools/wellness/v2/health/scan/${patient.userId}/clinical-inputs`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        },
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [location.state]);
+      setClinicalSaveStatus('saved');
+    } catch (err) {
+      console.error('Failed to save clinical inputs:', err);
+      setClinicalSaveStatus('error');
+    }
+  };
 
   // Helper: classify insight text
   const classifyInsight = (text: string) => {
@@ -546,20 +502,20 @@ const FaceReportPage: React.FC = () => {
     if (aiData?.insights && aiData.insights.length > 0) {
       return aiData.insights.map((insight: string) => ({ type: classifyInsight(insight), text: insight }));
     }
-    return [{ type: 'info', text: 'Complete a scan to receive AI-generated insights.' }];
-  }, [report?.aiReport]);
+    return [{ type: 'info', text: t.fallbackInsight }];
+  }, [report?.aiReport, t.fallbackInsight]);
 
   // Use AI report recommendations from report (includes merged API data)
   const recommendations = useMemo(() => {
     const aiData = report?.aiReport;
     if (aiData?.recommendations && aiData.recommendations.length > 0) return aiData.recommendations;
-    return ['Complete a scan to receive personalized recommendations.'];
-  }, [report?.aiReport]);
+    return [t.fallbackRecommendation];
+  }, [report?.aiReport, t.fallbackRecommendation]);
 
-  const demoLayer = useMemo(() => {
+  const actualLayer = useMemo(() => {
     if (!report?.rppg) return null;
     try {
-      return buildBioCareDemoLayer(report);
+      return buildBioCareActualLayer(report);
     } catch {
       return null;
     }
@@ -594,49 +550,49 @@ const FaceReportPage: React.FC = () => {
 
   // Get AI report from report state (includes merged API data)
   const aiReport = report?.aiReport || {
-    summary: 'No AI analysis available. Please complete a scan to generate insights.',
-    insights: ['Complete a health scan to receive personalized insights.'],
-    recommendations: ['Scan for at least 30 seconds for best results.'],
+    summary: t.fallbackSummary,
+    insights: [t.fallbackInsight],
+    recommendations: [t.fallbackRecommendationScan],
     riskFactors: [] as string[],
-    disclaimer: 'This report is AI-generated and for informational purposes only.',
+    disclaimer: t.fallbackDisclaimer,
   };
 
-  // Vitals (+ demo polishing for plausible "normal-range" placeholders)
+  // Vitals from processed scan/backend data. Missing values remain visibly empty/unknown.
   const fallbackHr = report?.apiHealthData?.heart_rate ?? rppg.vitals.heartRate.value;
   const fallbackSys = report?.apiHealthData?.bp_systolic ?? 0;
   const fallbackDia = report?.apiHealthData?.bp_diastolic ?? 0;
 
-  const heartRateValue = demoLayer?.heartRate ?? fallbackHr;
-  const heartRateStatus = demoLayer?.heartRateStatus ?? getHeartRateBand(fallbackHr);
+  const heartRateValue = actualLayer?.heartRate ?? fallbackHr;
+  const heartRateStatus = actualLayer?.heartRateStatus ?? getHeartRateBand(fallbackHr);
   const scanDuration = report?.apiHealthData?.scan_duration_seconds ?? rppg.metadata.scanDurationSeconds;
 
-  const bpSystolic = demoLayer?.bpSys ?? fallbackSys;
-  const bpDiastolic = demoLayer?.bpDia ?? fallbackDia;
-  const { systolicStatus, diastolicStatus } = demoLayer
-    ? { systolicStatus: demoLayer.systolicStatus, diastolicStatus: demoLayer.diastolicStatus }
+  const bpSystolic = actualLayer?.bpSys ?? fallbackSys;
+  const bpDiastolic = actualLayer?.bpDia ?? fallbackDia;
+  const { systolicStatus, diastolicStatus } = actualLayer
+    ? { systolicStatus: actualLayer.systolicStatus, diastolicStatus: actualLayer.diastolicStatus }
     : getBpBand(bpSystolic, bpDiastolic);
 
   const nl = rppg.hrv.nonlinear;
   const re = rppg.hrv.respiratoryExtended;
   const stress = rppg.stress;
-  const stressPresentation = useMemo(() => demoLayer?.stress ?? deriveStressForDemo(), [
-    demoLayer,
-    report,
+  const stressPresentation = useMemo(() => actualLayer?.stress ?? getStressPresentation(stress), [
+    actualLayer,
+    stress,
   ]);
   const sympathDisplay =
-    demoLayer?.sympathovagalBalance ?? (stress.sympathovagalBalance ?? null);
+    actualLayer?.sympathovagalBalance ?? (stress.sympathovagalBalance ?? null);
 
   const si = report?.sectionInsights;
 
   const breatheMeanDisplay =
-    demoLayer?.breatheMeanDisp ?? re?.breathingRateMean?.value ?? rppg.vitals.breathingRate.value;
+    actualLayer?.breatheMeanDisp ?? re?.breathingRateMean?.value ?? rppg.vitals.breathingRate.value;
 
-  const rmssdForSd1Approx = demoLayer?.rmssd ?? rppg.hrv.rmssd?.value ?? 0;
+  const rmssdForSd1Approx = actualLayer?.rmssd ?? rppg.hrv.rmssd?.value ?? 0;
   const sd1FallbackApproxRow =
-    demoLayer?.sd1FallbackApprox ??
+    actualLayer?.sd1FallbackApprox ??
     (rmssdForSd1Approx > 0 ? Math.round((rmssdForSd1Approx / Math.sqrt(2)) * 10) / 10 : 0);
 
-  const breathingRateSdShown = demoLayer?.breathingRateSdDisp ?? re?.breathingRateSd?.value ?? 0;
+  const breathingRateSdShown = actualLayer?.breathingRateSdDisp ?? re?.breathingRateSd?.value ?? 0;
   // Convert timestamps to relative seconds for chart (from modal data) - MUST be before any conditional returns
   const chartData = useMemo(() => {
     if (!rppg.hrHistory || rppg.hrHistory.length === 0) return [];
@@ -678,10 +634,10 @@ const FaceReportPage: React.FC = () => {
           }}
         >
           <AlertCircle size={48} style={{ color: '#EF4444', marginBottom: '16px' }} />
-          <h3 style={{ color: '#111827', margin: '0 0 8px 0', fontSize: '1.25rem' }}>Error</h3>
+          <h3 style={{ color: '#111827', margin: '0 0 8px 0', fontSize: '1.25rem' }}>{t.errorTitle}</h3>
           <p style={{ color: '#6B7280', margin: '0 0 20px 0' }}>{error}</p>
           <button
-            onClick={() => navigate('/')}
+            onClick={handleNextPerson}
             style={{
               backgroundColor: 'rgba(0, 0, 0, 0.05)',
               border: '1px solid rgba(0, 0, 0, 0.1)',
@@ -700,7 +656,7 @@ const FaceReportPage: React.FC = () => {
               e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
             }}
           >
-            Return Home
+            {t.returnToRegistration}
           </button>
         </div>
       </div>
@@ -732,7 +688,7 @@ const FaceReportPage: React.FC = () => {
               margin: '0 auto 16px',
             }}
           />
-          <p style={{ color: '#6B7280', fontSize: '1rem' }}>Loading report...</p>
+          <p style={{ color: '#6B7280', fontSize: '1rem' }}>{t.loadingReport}</p>
         </div>
         <style>{`
           @keyframes spin {
@@ -755,7 +711,7 @@ const FaceReportPage: React.FC = () => {
       {/* Back button (outside PDF capture area) */}
       <div style={{ marginBottom: '16px' }}>
         <button
-          onClick={() => navigate('/result')}
+          onClick={() => navigate('/facescan')}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -777,7 +733,7 @@ const FaceReportPage: React.FC = () => {
           }}
         >
           <ArrowLeft size={18} />
-          Back
+          {t.back}
         </button>
       </div>
 
@@ -787,7 +743,7 @@ const FaceReportPage: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div>
             <h1 style={{ color: '#111827', fontSize: '1.875rem', fontWeight: 700, margin: '0 0 4px 0' }}>
-              Bio Care Report
+              {t.bioCareReport}
             </h1>
             {username && (
               <p
@@ -798,11 +754,11 @@ const FaceReportPage: React.FC = () => {
                   margin: '0 0 4px 0',
                 }}
               >
-                Prepared for: <span style={{ fontWeight: 700 }}>{username}</span>
+                {t.preparedFor}: <span style={{ fontWeight: 700 }}>{username}</span>
               </p>
             )}
             <p style={{ color: '#9CA3AF', fontSize: '0.875rem', margin: 0 }}>
-              Biometric analysis & monitoring
+              {t.biometricAnalysis}
             </p>
           </div>
           <button
@@ -830,7 +786,7 @@ const FaceReportPage: React.FC = () => {
             }}
           >
             <Download size={16} />
-            {downloading ? 'Generating PDF...' : 'Download PDF'}
+            {downloading ? t.generatingPdf : t.downloadPdf}
           </button>
         </div>
 
@@ -847,11 +803,10 @@ const FaceReportPage: React.FC = () => {
               <Info size={20} style={{ color: '#2563EB', flexShrink: 0, marginTop: '2px' }} />
               <div>
                 <p style={{ margin: 0, fontSize: '0.88rem', color: '#1E3A8A', fontWeight: 600 }}>
-                  AI-powered preventive wellness and early risk screening
+                  {t.scanNoticeTitle}
                 </p>
                 <p style={{ margin: '8px 0 0', fontSize: '0.8rem', color: '#1E40AF', lineHeight: 1.55 }}>
-                  Screening highlights patterns for trend detection. Any concern should be cross-checked with physical
-                  diagnostic devices and clinical assessment—AI screens, devices validate, clinicians decide.
+                  {t.scanNotice}
                 </p>
                 <p
                   style={{
@@ -865,8 +820,7 @@ const FaceReportPage: React.FC = () => {
                     border: '1px solid #FDE68A',
                   }}
                 >
-                  <strong>Wellness indicators:</strong> BP, HR and HRV are wellness indicators and not medical
-                  measurements.
+                  <strong>{t.bioCare}:</strong> {t.wellnessIndicators}
                 </p>
               </div>
             </div>
@@ -880,12 +834,12 @@ const FaceReportPage: React.FC = () => {
             }}
           >
             <p style={{ margin: '0 0 6px', fontSize: '0.78rem', fontWeight: 600, color: '#374151' }}>
-              Standard scan conditions
+              {t.standardConditions}
             </p>
             <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '0.76rem', color: '#6B7280', lineHeight: 1.55 }}>
-              <li>Consistent lighting</li>
-              <li>Fixed posture and minimal movement</li>
-              <li>Reduce reflections; limit eyewear impact on the face region</li>
+              <li>{t.lighting}</li>
+              <li>{t.stillPosture}</li>
+              <li>{t.noEyewear}</li>
             </ul>
           </div>
         </div>
@@ -901,7 +855,7 @@ const FaceReportPage: React.FC = () => {
           }}
         >
           <MetricCard
-            title="Heart rate (wellness)"
+            title={t.heartRate}
             value={heartRateValue.toFixed(1)}
             unit="BPM"
             status={heartRateStatus}
@@ -909,7 +863,7 @@ const FaceReportPage: React.FC = () => {
             color="#EF4444"
           />
           <MetricCard
-            title="Estimated BP trend (systolic)"
+            title={t.systolicBp}
             value={bpSystolic.toFixed(1)}
             unit="mmHg"
             status={systolicStatus}
@@ -917,7 +871,7 @@ const FaceReportPage: React.FC = () => {
             color="#3B82F6"
           />
           <MetricCard
-            title="Estimated BP trend (diastolic)"
+            title={t.diastolicBp}
             value={bpDiastolic.toFixed(1)}
             unit="mmHg"
             status={diastolicStatus}
@@ -925,15 +879,15 @@ const FaceReportPage: React.FC = () => {
             color="#8B5CF6"
           />
           <MetricCard
-            title="Breathing Rate"
-            value={demoLayer?.breathingRate ?? rppg.vitals.breathingRate.value}
+            title={t.breathingRate}
+            value={actualLayer?.breathingRate ?? rppg.vitals.breathingRate.value}
             unit="breaths/min"
-            status={demoLayer?.breathingRateStatus ?? rppg.vitals.breathingRate.status}
+            status={actualLayer?.breathingRateStatus ?? rppg.vitals.breathingRate.status}
             icon={<Wind size={20} />}
             color="#00B8D4"
           />
           <MetricCard
-            title="Relaxation / recovery score"
+            title={t.recoveryScore}
             value={stressPresentation.index}
             unit="/100"
             status={stressPresentation.metricBadge}
@@ -941,10 +895,10 @@ const FaceReportPage: React.FC = () => {
             color="#F59E0B"
           />
           <MetricCard
-            title="Signal Quality"
-            value={((demoLayer?.signalQualityDec ?? rppg.vitals.signalQuality.value) * 100).toFixed(0)}
+            title={t.signalQuality}
+            value={((actualLayer?.signalQualityDec ?? rppg.vitals.signalQuality.value) * 100).toFixed(0)}
             unit="%"
-            status={demoLayer?.signalQualityStatus ?? rppg.vitals.signalQuality.status}
+            status={actualLayer?.signalQualityStatus ?? rppg.vitals.signalQuality.status}
             icon={<Signal size={20} />}
             color="#10B981"
           />
@@ -975,7 +929,7 @@ const FaceReportPage: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
               <Activity size={20} style={{ color: '#00B8D4' }} />
               <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-                Live Scan Waveform
+                {t.waveform}
               </h3>
             </div>
             <div style={{ flex: 1, minHeight: '250px', position: 'relative' }}>
@@ -1024,16 +978,16 @@ const FaceReportPage: React.FC = () => {
                   color: '#9CA3AF',
                   fontSize: '0.875rem'
                 }}>
-                  No waveform data available
+                  {t.noWaveform}
                 </div>
               )}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px' }}>
               <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
-                Duration: {scanDuration}s
+                {t.duration}: {scanDuration}s
               </span>
               <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
-                Samples: {rppg.metadata.samplesCollected}
+                {t.samples}: {rppg.metadata.samplesCollected}
               </span>
             </div>
           </div>
@@ -1050,7 +1004,7 @@ const FaceReportPage: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
               <Brain size={20} style={{ color: '#A855F7' }} />
               <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-                AI Health Insights
+                {t.aiInsights}
               </h3>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -1103,7 +1057,7 @@ const FaceReportPage: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                   <AlertCircle size={16} style={{ color: '#EF4444' }} />
                   <span style={{ color: '#EF4444', fontSize: '0.875rem', fontWeight: 600 }}>
-                    Risk Factors to Monitor
+                    {t.riskFactors}
                   </span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -1135,18 +1089,18 @@ const FaceReportPage: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
                 <Clock size={20} style={{ color: '#F59E0B' }} />
                 <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-                  Recovery pattern (time-domain)
+                  {t.recoveryTimeDomain}
                 </h3>
               </div>
               <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: '0 0 0 30px', lineHeight: 1.4 }}>
-                Wellness indicators of interval variation for trend screening—not medical HRV diagnostics.
+                {t.recoveryTimeDescription}
               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <HrvRow label="SDNN (Standard Deviation)" value={demoLayer?.sdnn ?? rppg.hrv.sdnn.value} unit="ms" status={demoLayer?.sdnnStatus ?? rppg.hrv.sdnn.status} description="Normal range: 50–100 ms" />
-              <HrvRow label="RMSSD (Root Mean Square)" value={demoLayer?.rmssd ?? rppg.hrv.rmssd.value} unit="ms" status={demoLayer?.rmssdStatus ?? rppg.hrv.rmssd.status} description="Normal range: 20–50 ms · Parasympathetic indicator" />
-              <HrvRow label="pNN20 (Beat-to-Beat Variation)" value={demoLayer?.pnn20 ?? rppg.hrv.pnn20?.value ?? 0} unit="%" status={demoLayer?.pnn20Status ?? rppg.hrv.pnn20?.status ?? 'NORMAL'} description="Normal range: 5–60% · % of successive RR differences > 20 ms" />
-              <HrvRow label="pNN50 (Successive Differences)" value={demoLayer?.pnn50 ?? rppg.hrv.pnn50.value} unit="%" status={demoLayer?.pnn50Status ?? rppg.hrv.pnn50.status} description="Normal range: 3–25% · May show 0% in short rPPG recordings" />
+              <HrvRow label="SDNN" value={actualLayer?.sdnn ?? rppg.hrv.sdnn.value} unit="ms" status={actualLayer?.sdnnStatus ?? rppg.hrv.sdnn.status} description={`${t.normalRange}: 50-100 ms`} />
+              <HrvRow label="RMSSD" value={actualLayer?.rmssd ?? rppg.hrv.rmssd.value} unit="ms" status={actualLayer?.rmssdStatus ?? rppg.hrv.rmssd.status} description={`${t.normalRange}: 20-50 ms · ${t.parasympatheticIndicator}`} />
+              <HrvRow label="pNN20" value={actualLayer?.pnn20 ?? rppg.hrv.pnn20?.value ?? 0} unit="%" status={actualLayer?.pnn20Status ?? rppg.hrv.pnn20?.status ?? 'NORMAL'} description={`${t.normalRange}: 5-60% · ${t.beatVariationDescription}`} />
+              <HrvRow label="pNN50" value={actualLayer?.pnn50 ?? rppg.hrv.pnn50.value} unit="%" status={actualLayer?.pnn50Status ?? rppg.hrv.pnn50.status} description={`${t.normalRange}: 3-25% · ${t.shortRecordingNote}`} />
 
               {/* RR Interval Count */}
               {rppg.hrv.rrIntervalCount !== undefined && rppg.hrv.rrIntervalCount > 0 && (
@@ -1161,7 +1115,7 @@ const FaceReportPage: React.FC = () => {
                     border: '1px solid rgba(0, 184, 212, 0.15)',
                   }}
                 >
-                  <span style={{ color: '#6B7280', fontSize: '0.875rem' }}>RR Intervals Collected</span>
+                  <span style={{ color: '#6B7280', fontSize: '0.875rem' }}>{t.rrCollected}</span>
                   <span style={{ color: '#00B8D4', fontSize: '0.875rem', fontWeight: 600 }}>
                     {rppg.hrv.rrIntervalCount}
                   </span>
@@ -1180,7 +1134,7 @@ const FaceReportPage: React.FC = () => {
                   border: '1px solid rgba(0, 184, 212, 0.15)',
                 }}
               >
-                <span style={{ color: '#6B7280', fontSize: '0.875rem' }}>Recording Quality</span>
+                <span style={{ color: '#6B7280', fontSize: '0.875rem' }}>{t.recordingQuality}</span>
                 <span
                   style={{
                     color: '#00B8D4',
@@ -1206,7 +1160,7 @@ const FaceReportPage: React.FC = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                     <Brain size={14} style={{ color: '#3B82F6' }} />
-                    <span style={{ color: '#3B82F6', fontSize: '0.75rem', fontWeight: 600 }}>AI Insight</span>
+                    <span style={{ color: '#3B82F6', fontSize: '0.75rem', fontWeight: 600 }}>{t.aiInsight}</span>
                   </div>
                   <p style={{ color: '#374151', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
                     {si.timeDomain}
@@ -1240,29 +1194,29 @@ const FaceReportPage: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
                 <Waves size={20} style={{ color: '#EC4899' }} />
                 <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-                  Recovery pattern (nonlinear)
+                  {t.nonlinearRecovery}
                 </h3>
               </div>
               <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: '0 0 0 30px', lineHeight: 1.4 }}>
-                Additional shape-based wellness indicators—not for clinical diagnosis.
+                {t.nonlinearDescription}
               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {demoLayer?.nlDisp ? (
+              {actualLayer?.nlDisp ? (
                 <>
-                  <HrvRow label="SD1" value={demoLayer.nlDisp.sd1Val} unit="ms" description={demoLayer.nlDisp.sd1Desc} />
-                  <HrvRow label="SD2" value={demoLayer.nlDisp.sd2Val} unit="ms" description={demoLayer.nlDisp.sd2Desc} />
-                  <HrvRow label="SD1/SD2 Ratio" value={demoLayer.nlDisp.sd1Sd2Ratio.toFixed(3)} />
+                  <HrvRow label="SD1" value={actualLayer.nlDisp.sd1Val} unit="ms" description={actualLayer.nlDisp.sd1Desc} />
+                  <HrvRow label="SD2" value={actualLayer.nlDisp.sd2Val} unit="ms" description={actualLayer.nlDisp.sd2Desc} />
+                  <HrvRow label="SD1/SD2 Ratio" value={Number.isFinite(actualLayer.nlDisp.sd1Sd2Ratio) ? actualLayer.nlDisp.sd1Sd2Ratio.toFixed(3) : 'N/A'} />
                   <HrvRow
                     label="Sample Entropy"
-                    value={demoLayer.nlDisp.sampleEntropyVal.toFixed(3)}
-                    description={demoLayer.nlDisp.sampleDesc}
+                    value={actualLayer.nlDisp.sampleEntropyVal !== null && Number.isFinite(actualLayer.nlDisp.sampleEntropyVal) ? actualLayer.nlDisp.sampleEntropyVal.toFixed(3) : 'N/A'}
+                    description={actualLayer.nlDisp.sampleDesc}
                   />
                   <HrvRow
                     label="DFA Alpha1"
-                    value={demoLayer.nlDisp.dfaVal.toFixed(3)}
-                    description={demoLayer.nlDisp.dfaDesc}
-                    status={demoLayer.nlDisp.dfaReliable ? 'GOOD' : 'FAIR'}
+                    value={actualLayer.nlDisp.dfaVal !== null && Number.isFinite(actualLayer.nlDisp.dfaVal) ? actualLayer.nlDisp.dfaVal.toFixed(3) : 'N/A'}
+                    description={actualLayer.nlDisp.dfaDesc}
+                    status={actualLayer.nlDisp.dfaReliable ? 'GOOD' : 'FAIR'}
                   />
                 </>
               ) : nl ? (
@@ -1346,7 +1300,7 @@ const FaceReportPage: React.FC = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                     <Brain size={14} style={{ color: '#3B82F6' }} />
-                    <span style={{ color: '#3B82F6', fontSize: '0.75rem', fontWeight: 600 }}>AI Insight</span>
+                    <span style={{ color: '#3B82F6', fontSize: '0.75rem', fontWeight: 600 }}>{t.aiInsight}</span>
                   </div>
                   <p style={{ color: '#374151', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
                     {si.nonlinear}
@@ -1369,42 +1323,41 @@ const FaceReportPage: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
                 <Zap size={20} style={{ color: '#F59E0B' }} />
                 <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-                  Relaxation, recovery & breathing
+                  {t.relaxationBreathing}
                 </h3>
               </div>
               <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: '0 0 0 30px', lineHeight: 1.4 }}>
-                Signals derived from scanning for wellness trends. Stable breathing and a favourable relaxation score
-                suggest better perceived recovery—not a medical diagnosis.
+                {t.relaxationDescription}
               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {/* Stress */}
               <HrvRow
-                label="Relaxation / recovery level"
+                label={t.relaxationBreathing}
                 value={stressPresentation.levelWord}
                 status={stressPresentation.rowStatus}
               />
-              <HrvRow label="Relaxation / recovery score" value={stressPresentation.index} unit="/100" />
+              <HrvRow label={t.recoveryScore} value={stressPresentation.index} unit="/100" />
 
               {sympathDisplay !== undefined && sympathDisplay !== null && (
                 <HrvRow
                   label="Sympathovagal Balance"
                   value={sympathDisplay.toFixed(3)}
-                  description="ln(SDNN) / ln(RMSSD) ratio"
+                    description="ln(SDNN) / ln(RMSSD)"
                   status={
                     sympathDisplay < 1.0 ? 'NORMAL' : sympathDisplay < 1.5 ? 'MODERATE' : 'HIGH'
                   }
                 />
               )}
 
-              {(demoLayer?.stressComponents || stress.components) && (
+              {(actualLayer?.stressComponents || stress.components) && (
                 <div style={{ padding: '12px 20px', backgroundColor: '#F9FAFB', borderRadius: '12px' }}>
-                  <span style={{ color: '#6B7280', fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>Components</span>
+                  <span style={{ color: '#6B7280', fontSize: '0.8rem', display: 'block', marginBottom: '4px' }}>{t.components}</span>
                   <span style={{ color: '#374151', fontSize: '0.85rem' }}>
                     SDNN:{' '}
-                    {(demoLayer?.stressComponents?.sdnn ?? stress.components?.sdnn ?? 0).toFixed(1)} ms
+                    {(actualLayer?.stressComponents?.sdnn ?? stress.components?.sdnn ?? 0).toFixed(1)} ms
                     &nbsp;|&nbsp; RMSSD:{' '}
-                    {(demoLayer?.stressComponents?.rmssd ?? stress.components?.rmssd ?? 0).toFixed(1)} ms
+                    {(actualLayer?.stressComponents?.rmssd ?? stress.components?.rmssd ?? 0).toFixed(1)} ms
                   </span>
                 </div>
               )}
@@ -1426,27 +1379,27 @@ const FaceReportPage: React.FC = () => {
               {/* Respiratory Extended */}
               <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '12px', marginTop: '4px' }}>
                 <span style={{ color: '#6B7280', fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '12px' }}>
-                  Respiratory Metrics
+                  {t.respiratoryMetrics}
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <HrvRow
-                    label="Breathing Rate"
+                    label={t.breathingRate}
                     value={breatheMeanDisplay}
                     unit="breaths/min"
-                    status={demoLayer?.breathingRateStatus ?? rppg.vitals.breathingRate.status}
+                    status={actualLayer?.breathingRateStatus ?? rppg.vitals.breathingRate.status}
                   />
                   {re && breathingRateSdShown > 0 && (
-                    <HrvRow label="Breathing Rate SD" value={breathingRateSdShown.toFixed(1)} unit="breaths/min" />
+                    <HrvRow label={t.breathingRateSd} value={breathingRateSdShown.toFixed(1)} unit="breaths/min" />
                   )}
                   {re && (
                     <>
                       <HrvRow
-                        label="Breathing Stability"
+                        label={t.breathingStability}
                         value={re.stability.charAt(0).toUpperCase() + re.stability.slice(1)}
                         status={re.stability === 'stable' ? 'NORMAL' : re.stability === 'variable' ? 'MODERATE' : 'HIGH'}
                       />
                       {re.breathCyclesDetected > 0 && (
-                        <HrvRow label="Breath Cycles Detected" value={re.breathCyclesDetected} />
+                        <HrvRow label={t.breathCycles} value={re.breathCyclesDetected} />
                       )}
                     </>
                   )}
@@ -1466,7 +1419,7 @@ const FaceReportPage: React.FC = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                     <Brain size={14} style={{ color: '#3B82F6' }} />
-                    <span style={{ color: '#3B82F6', fontSize: '0.75rem', fontWeight: 600 }}>AI Insight</span>
+                    <span style={{ color: '#3B82F6', fontSize: '0.75rem', fontWeight: 600 }}>{t.aiInsight}</span>
                   </div>
                   <p style={{ color: '#374151', fontSize: '0.85rem', margin: 0, lineHeight: 1.6 }}>
                     {si.stressRespiratory}
@@ -1490,7 +1443,7 @@ const FaceReportPage: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
             <CheckCircle2 size={20} style={{ color: '#10B981' }} />
             <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-              Recommendations
+              {t.recommendations}
             </h3>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="content-grid">
@@ -1526,7 +1479,7 @@ const FaceReportPage: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
               <Brain size={20} style={{ color: '#3B82F6' }} />
               <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>
-                AI Health Summary
+                {t.aiSummary}
               </h3>
               <span
                 style={{
@@ -1539,7 +1492,7 @@ const FaceReportPage: React.FC = () => {
                   fontWeight: 600,
                 }}
               >
-                Eros GPT powered
+                Eros GPT
               </span>
             </div>
             <p style={{ color: '#374151', fontSize: '1rem', lineHeight: 1.7, margin: 0 }}>
@@ -1561,15 +1514,11 @@ const FaceReportPage: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <AlertCircle size={16} style={{ color: '#9CA3AF' }} />
             <span style={{ color: '#6B7280', fontSize: '0.875rem', fontWeight: 600 }}>
-              DISCLAIMER
+              {t.disclaimer}
             </span>
           </div>
           <p style={{ color: '#9CA3AF', fontSize: '0.8rem', margin: 0, lineHeight: 1.6 }}>
-            BP, HR and HRV-like metrics in this report are wellness indicators and not medical
-            measurements. This report is AI-generated and for informational purposes only—not
-            medical advice, diagnosis, or treatment. Screening is designed for trend detection; findings
-            should be validated with physical diagnostics and clinical assessment where appropriate.
-            Always consult a qualified healthcare provider for medical concerns.
+            {t.disclaimerText}
           </p>
         </div>
 
@@ -1586,17 +1535,138 @@ const FaceReportPage: React.FC = () => {
           }}
         >
           <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
-            Scan Date: {new Date(rppg.metadata.timestamp).toLocaleString()}
+            {t.scanDate}: {new Date(rppg.metadata.timestamp).toLocaleString()}
           </span>
           <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
             <Info size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
-            For informational purposes only - not medical advice
+            {t.informationalOnly}
           </span>
         </div>
       </div>
       {/* End of PDF capture area */}
 
-      {/* Continue to Chat (outside PDF) */}
+      <form
+        onSubmit={handleClinicalSubmit}
+        style={{
+          maxWidth: 1100,
+          margin: '24px auto 0',
+          backgroundColor: '#ffffff',
+          border: '1px solid #E5E7EB',
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
+        }}
+      >
+        <div style={{ marginBottom: 18 }}>
+          <h3 style={{ color: '#111827', fontSize: '1.125rem', fontWeight: 700, margin: '0 0 6px' }}>
+            {t.clinicalInputs}
+          </h3>
+          <p style={{ color: '#6B7280', fontSize: '0.875rem', margin: 0 }}>
+            {t.clinicalInputsSubtitle}
+          </p>
+        </div>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: 14,
+          }}
+          className="clinical-grid"
+        >
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: '#374151', fontSize: 13, fontWeight: 700 }}>
+            {t.originalBp} {t.systolic}
+            <input
+              value={clinicalInputs.bpSystolic}
+              onChange={(e) => setClinicalField('bpSystolic', e.target.value)}
+              type="number"
+              inputMode="decimal"
+              placeholder="120"
+              style={{ border: '1px solid #D1D5DB', borderRadius: 10, padding: '11px 12px', fontSize: 15 }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: '#374151', fontSize: 13, fontWeight: 700 }}>
+            {t.originalBp} {t.diastolic}
+            <input
+              value={clinicalInputs.bpDiastolic}
+              onChange={(e) => setClinicalField('bpDiastolic', e.target.value)}
+              type="number"
+              inputMode="decimal"
+              placeholder="80"
+              style={{ border: '1px solid #D1D5DB', borderRadius: 10, padding: '11px 12px', fontSize: 15 }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: '#374151', fontSize: 13, fontWeight: 700 }}>
+            {t.sugar}
+            <input
+              value={clinicalInputs.sugar}
+              onChange={(e) => setClinicalField('sugar', e.target.value)}
+              type="number"
+              inputMode="decimal"
+              placeholder="110"
+              style={{ border: '1px solid #D1D5DB', borderRadius: 10, padding: '11px 12px', fontSize: 15 }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: '#374151', fontSize: 13, fontWeight: 700 }}>
+            {t.spo2}
+            <input
+              value={clinicalInputs.spo2}
+              onChange={(e) => setClinicalField('spo2', e.target.value)}
+              type="number"
+              inputMode="decimal"
+              placeholder="98"
+              style={{ border: '1px solid #D1D5DB', borderRadius: 10, padding: '11px 12px', fontSize: 15 }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: '#374151', fontSize: 13, fontWeight: 700 }}>
+            {t.ecg}
+            <input
+              value={clinicalInputs.ecg}
+              onChange={(e) => setClinicalField('ecg', e.target.value)}
+              type="text"
+              placeholder={t.ecgPlaceholder}
+              style={{ border: '1px solid #D1D5DB', borderRadius: 10, padding: '11px 12px', fontSize: 15 }}
+            />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 6, color: '#374151', fontSize: 13, fontWeight: 700 }}>
+            {t.bmi}
+            <input
+              value={clinicalInputs.bmi}
+              onChange={(e) => setClinicalField('bmi', e.target.value)}
+              type="number"
+              inputMode="decimal"
+              step="0.1"
+              placeholder="24.2"
+              style={{ border: '1px solid #D1D5DB', borderRadius: 10, padding: '11px 12px', fontSize: 15 }}
+            />
+          </label>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18, flexWrap: 'wrap' }}>
+          <button
+            type="submit"
+            disabled={clinicalSaveStatus === 'saving'}
+            style={{
+              backgroundColor: clinicalSaveStatus === 'saving' ? '#9CA3AF' : '#00B8D4',
+              color: '#fff',
+              border: 'none',
+              padding: '12px 22px',
+              borderRadius: 12,
+              fontSize: '0.9rem',
+              fontWeight: 700,
+              cursor: clinicalSaveStatus === 'saving' ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {clinicalSaveStatus === 'saving' ? t.saving : t.saveClinicalInputs}
+          </button>
+          {clinicalSaveStatus === 'saved' && (
+            <span style={{ color: '#059669', fontSize: 14, fontWeight: 700 }}>{t.saved}</span>
+          )}
+          {clinicalSaveStatus === 'error' && (
+            <span style={{ color: '#DC2626', fontSize: 14, fontWeight: 700 }}>{t.saveFailed}</span>
+          )}
+        </div>
+      </form>
+
+      {/* Next patient action */}
       <div
         style={{
           display: 'flex',
@@ -1607,11 +1677,8 @@ const FaceReportPage: React.FC = () => {
           marginBottom: '24px',
         }}
       >
-        <p style={{ color: '#6B7280', fontSize: '0.9rem', margin: 0, textAlign: 'center' }}>
-          Discover More insights into your Bio Care report and interact to get deeper insights
-        </p>
         <button
-          onClick={() => navigate('/ai-chat')}
+          onClick={handleNextPerson}
           style={{
             backgroundColor: '#00B8D4',
             color: '#fff',
@@ -1630,7 +1697,7 @@ const FaceReportPage: React.FC = () => {
             e.currentTarget.style.backgroundColor = '#00B8D4';
           }}
         >
-          Continue to Chat
+          {t.nextPerson}
         </button>
       </div>
 
@@ -1646,6 +1713,9 @@ const FaceReportPage: React.FC = () => {
             grid-template-columns: 1fr !important;
           }
           .content-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .clinical-grid {
             grid-template-columns: 1fr !important;
           }
         }

@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import BackgroundImage from "../../assets/images/background.png";
 import { baseApiUrl } from "../../config/api";
+import { usePhcSession } from "@/context/PhcSessionContext";
+import { getPhcCopy } from "@/i18n/phcCopy";
 
 interface FormData {
   name: string;
+  phoneNumber: string;
   gender: string;
   placeOfBirth: string;
   currentLocation: string;
@@ -77,6 +80,8 @@ const IcoChevronDown = () => (
 
 const SoulProfilePage: React.FC = () => {
   const navigate = useNavigate();
+  const { language, setPatient, setBioCareReport } = usePhcSession();
+  const t = getPhcCopy(language);
   const dobRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
   const hourRef = useRef<HTMLDivElement>(null);
@@ -86,6 +91,7 @@ const SoulProfilePage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: "",
+    phoneNumber: "",
     gender: "",
     placeOfBirth: "",
     currentLocation: "",
@@ -202,39 +208,17 @@ const SoulProfilePage: React.FC = () => {
     }
   }, [showTimePicker]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("soulProfile");
-    if (!saved) return;
-    try {
-      const p = JSON.parse(saved);
-      const isDate = (v: string) =>
-        !!v && /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(+new Date(v));
-      const isTime = (v: string) => !!v && /^([01]?\d|2[0-3]):[0-5]\d/.test(v);
-      setFormData({
-        name: p.name || "",
-        gender: p.gender || "",
-        placeOfBirth: p.placeOfBirth || "",
-        currentLocation: p.currentLocation || "",
-        dateOfBirth: isDate(p.dateOfBirth) ? p.dateOfBirth : "",
-        timeOfBirth: isTime(p.timeOfBirth) ? p.timeOfBirth.slice(0, 5) : "",
-      });
-    } catch {
-      localStorage.removeItem("soulProfile");
-    }
-  }, []);
-
   const set = (field: keyof FormData, value: string) => {
-    setFormData((prev) => {
-      const next = { ...prev, [field]: value };
-      localStorage.setItem("soulProfile", JSON.stringify(next));
-      return next;
-    });
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     if (!formData.name.trim()) return setErrorMsg("Please enter your name.");
+    if (!/^\+?[0-9\s-]{7,15}$/.test(formData.phoneNumber.trim())) {
+      return setErrorMsg("Please enter a valid phone number.");
+    }
     if (!formData.dateOfBirth)
       return setErrorMsg("Please select date of birth.");
     if (!formData.timeOfBirth)
@@ -244,6 +228,7 @@ const SoulProfilePage: React.FC = () => {
     const fd = new FormData();
     fd.append("gender", formData.gender);
     fd.append("username", formData.name.trim());
+    fd.append("phone_number", formData.phoneNumber.trim());
     fd.append("place_of_birth", formData.placeOfBirth.trim());
     fd.append("current_location", formData.currentLocation.trim());
     fd.append("date_of_birth", `${d}-${m}-${y}`);
@@ -265,17 +250,30 @@ const SoulProfilePage: React.FC = () => {
       if (!res.ok)
         throw new Error(result?.message || result?.error || "Server error");
       if (result.success) {
-        [
-          "user_id",
-          "username",
-          "date_of_birth",
-          "gender",
-          "place_of_birth",
-          "current_location",
-          "time_of_birth",
-        ].forEach((k) => localStorage.setItem(k, result.data[k] ?? ""));
-        localStorage.removeItem("soulProfile");
-        navigate("/eros-home");
+        const userId =
+          result.data?.user_id ??
+          result.data?.id ??
+          result.user_id ??
+          result.id;
+        if (!userId) {
+          throw new Error("Profile created, but user_id was not returned.");
+        }
+        setBioCareReport(null);
+        setPatient({
+          userId: String(userId),
+          username: result.data?.username ?? formData.name.trim(),
+          phoneNumber:
+            result.data?.phone_number ??
+            result.data?.phoneNumber ??
+            formData.phoneNumber.trim(),
+          gender: result.data?.gender ?? formData.gender,
+          dateOfBirth: result.data?.date_of_birth ?? formData.dateOfBirth,
+          timeOfBirth: result.data?.time_of_birth ?? formData.timeOfBirth,
+          placeOfBirth: result.data?.place_of_birth ?? formData.placeOfBirth,
+          currentLocation:
+            result.data?.current_location ?? formData.currentLocation,
+        });
+        navigate("/facescan");
       } else throw new Error(result.message || "Profile creation failed");
     } catch (err: any) {
       setErrorMsg(err.message || "Something went wrong.");
@@ -950,8 +948,8 @@ const SoulProfilePage: React.FC = () => {
         {/* ══════════ LEFT ══════════ */}
         <div className="sp-left">
           <div className="sp-left-text">
-            <h1 className="sp-title">Welcome to EROS Wellness</h1>
-            <p className="sp-sub">Your AI-driven holistic growth</p>
+            <h1 className="sp-title">{t.welcomeTitle}</h1>
+            <p className="sp-sub">{t.welcomeSubtitle}</p>
           </div>
 
           {/* Centered + rotating zodiac wheel */}
@@ -967,7 +965,10 @@ const SoulProfilePage: React.FC = () => {
         {/* ══════════ RIGHT ══════════ */}
         <div className="sp-right">
           <div className="sp-card">
-            <h2 className="sp-card-title">Create Your Soul Profile</h2>
+            <h2 className="sp-card-title">{t.createProfile}</h2>
+            <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 18 }}>
+              {t.profileSubtitle}
+            </p>
 
             {errorMsg && <div className="sp-error">{errorMsg}</div>}
 
@@ -975,7 +976,7 @@ const SoulProfilePage: React.FC = () => {
               <div className="sp-fields">
                 {/* Gender */}
                 <div>
-                  <label className="sp-field-label">Gender</label>
+                  <label className="sp-field-label">{t.gender}</label>
                   <div className="sp-wrap">
                     <span className="sp-ico">
                       <IcoChevronDown />
@@ -998,12 +999,12 @@ const SoulProfilePage: React.FC = () => {
 
                 {/* Name */}
                 <div>
-                  <label className="sp-field-label">Name</label>
+                  <label className="sp-field-label">{t.fullName}</label>
                   <div className="sp-wrap">
                     <input
                       className="sp-input no-icon"
                       type="text"
-                      placeholder="Your full name"
+                      placeholder={t.fullName}
                       value={formData.name}
                       onChange={(e) => set("name", e.target.value)}
                       required
@@ -1011,9 +1012,25 @@ const SoulProfilePage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Phone */}
+                <div>
+                  <label className="sp-field-label">{t.phoneNumber}</label>
+                  <div className="sp-wrap">
+                    <input
+                      className="sp-input no-icon"
+                      type="tel"
+                      inputMode="tel"
+                      placeholder={t.phoneNumber}
+                      value={formData.phoneNumber}
+                      onChange={(e) => set("phoneNumber", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
                 {/* Place of Birth */}
                 <div>
-                  <label className="sp-field-label">Place of birth</label>
+                  <label className="sp-field-label">{t.placeOfBirth}</label>
                   <div className="sp-wrap">
                     <span className="sp-ico">
                       <IcoLocation />
@@ -1021,7 +1038,7 @@ const SoulProfilePage: React.FC = () => {
                     <input
                       className="sp-input"
                       type="text"
-                      placeholder="Place of Birth"
+                      placeholder={t.placeOfBirth}
                       value={formData.placeOfBirth}
                       onChange={(e) => set("placeOfBirth", e.target.value)}
                     />
@@ -1030,7 +1047,7 @@ const SoulProfilePage: React.FC = () => {
 
                 {/* Current Location */}
                 <div>
-                  <label className="sp-field-label">Current location</label>
+                  <label className="sp-field-label">{t.currentLocation}</label>
                   <div className="sp-wrap">
                     <span className="sp-ico">
                       <IcoLocation />
@@ -1038,7 +1055,7 @@ const SoulProfilePage: React.FC = () => {
                     <input
                       className="sp-input"
                       type="text"
-                      placeholder="Current Location"
+                      placeholder={t.currentLocation}
                       value={formData.currentLocation}
                       onChange={(e) => set("currentLocation", e.target.value)}
                     />
@@ -1047,7 +1064,7 @@ const SoulProfilePage: React.FC = () => {
 
                 {/* Date of Birth */}
                 <div>
-                  <label className="sp-field-label">Date of birth</label>
+                  <label className="sp-field-label">{t.dateOfBirth}</label>
                   <div className="sp-wrap">
                     <span
                       className="sp-ico sp-ico-btn"
@@ -1104,7 +1121,7 @@ const SoulProfilePage: React.FC = () => {
 
                 {/* Time of Birth */}
                 <div>
-                  <label className="sp-field-label">Time of birth</label>
+                  <label className="sp-field-label">{t.timeOfBirth}</label>
                   <div className="sp-wrap">
                     <span
                       className="sp-ico sp-ico-btn"
@@ -1153,7 +1170,7 @@ const SoulProfilePage: React.FC = () => {
 
                 {/* Submit */}
                 <button type="submit" className="sp-btn" disabled={loading}>
-                  {loading ? "Creating…" : "Create your soul profile"}
+                  {loading ? t.creating : t.createAndStart}
                 </button>
               </div>
             </form>

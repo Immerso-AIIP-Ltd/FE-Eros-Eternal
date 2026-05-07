@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
 
 const GATEWAY_ORIGIN =
-  process.env.VITE_DEV_PROXY_TARGET || 'https://eu-dev-apigateway.erosuniverse.com'
+  process.env.VITE_DEV_PROXY_TARGET || 'http://localhost:8080'
 
 // https://vite.dev/config/
 export default defineConfig({

@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Stars from '../ui/stars';
 import { baseApiUrl } from '@/config/api';
+import { usePhcSession } from '@/context/PhcSessionContext';
+import { getPhcCopy } from '@/i18n/phcCopy';
 import type { CombinedReportData, HrHistoryPoint } from '../../types/rppg';
 import {
   KalmanFilter1D,
@@ -37,7 +39,7 @@ const INPUT_BUFFER_SIZE = 450;  // 15 seconds at 30 FPS
 const SQI_THRESHOLD = 0.38;
 const TARGET_FPS = 30;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
-const RECORDING_DURATION = 40; // seconds
+const RECORDING_DURATION = 60; // seconds
 
 const FaceScanner: React.FC = () => {
   const [scanState, setScanState] = useState<ScanState>('initial');
@@ -54,6 +56,18 @@ const FaceScanner: React.FC = () => {
   const [isUploadingData, setIsUploadingData] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { language, patient, setBioCareReport } = usePhcSession();
+  const t = getPhcCopy(language);
+  const reportLanguage = language === 'gu' ? 'gu' : 'en';
+  const reportLocale = language === 'gu' ? 'gu-IN' : 'en-US';
+  const scanDos = [t.dosStill, t.dosGaze, t.dosQuality];
+  const scanDonts = [t.dontTalk, t.dontMove, t.dontEnvironment];
+
+  useEffect(() => {
+    if (!patient?.userId) {
+      navigate('/profile', { replace: true });
+    }
+  }, [navigate, patient?.userId]);
 
 
   // rPPG State
@@ -868,7 +882,7 @@ const FaceScanner: React.FC = () => {
     }
   };
 
-  // Recording timer and auto-stop after 40 seconds
+  // Recording timer and auto-stop after the configured capture window.
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
@@ -958,18 +972,6 @@ const FaceScanner: React.FC = () => {
     trajHistoryRef.current = [];
     heatmapRangeRef.current = { min: 0, max: 1 };
     faceBboxRef.current = null;
-  };
-
-  // Handle skip to results
-  const handleSkip = () => {
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-
-
-    navigate('/result');
   };
 
   // Get final rPPG metrics
@@ -1090,7 +1092,7 @@ const FaceScanner: React.FC = () => {
         return null;
       }
 
-      const userId = localStorage.getItem('user_id');
+      const userId = patient?.userId;
       const response = await fetch(
         `${baseApiUrl}/aitools/wellness/v2/health/bp-predict`,
         {
@@ -1101,6 +1103,8 @@ const FaceScanner: React.FC = () => {
             sample_rate: 30,
             scan_duration_seconds: recordingTime,
             user_id: userId || undefined,
+            report_language: reportLanguage,
+            locale: reportLocale,
           }),
         }
       );
@@ -1159,6 +1163,8 @@ const FaceScanner: React.FC = () => {
           metadata: {
             scanDurationSeconds: recordingTime,
             timestamp: new Date().toISOString(),
+            reportLanguage,
+            locale: reportLocale,
           },
         };
         aiReport = await generateHealthReport(healthData);
@@ -1168,11 +1174,15 @@ const FaceScanner: React.FC = () => {
 
       // Prepare API payload matching the expected format
       const apiPayload = {
+        report_language: reportLanguage,
+        locale: reportLocale,
         data: {
           metadata: {
             timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
             scan_duration_seconds: recordingTime,
             frames_processed: hrLogRef.current.length || 0,
+            report_language: reportLanguage,
+            locale: reportLocale,
           },
           vitals: {
             heart_rate: {
@@ -1210,11 +1220,16 @@ const FaceScanner: React.FC = () => {
           } : undefined,
           latency: 0.0,
           ai_report: aiReport || "Health assessment completed successfully.",
+          report_language: reportLanguage,
+          locale: reportLocale,
         },
       };
 
       // Send data to API
-      const userId = localStorage.getItem('user_id');
+      const userId = patient?.userId;
+      if (!userId) {
+        throw new Error('No active patient session. Please register the patient again.');
+      }
       const response = await fetch(
         `${baseApiUrl}/aitools/wellness/v2/health/scan/${userId}`,
         {
@@ -1254,6 +1269,42 @@ const FaceScanner: React.FC = () => {
     }
   };
 
+  const saveBioCareReportToAPI = async (reportData: CombinedReportData) => {
+    const userId = patient?.userId;
+    if (!userId) {
+      throw new Error('No active patient session. Please register the patient again.');
+    }
+
+    const payload = {
+      user_id: userId,
+      report_type: 'bio_care',
+      report_language: reportLanguage,
+      locale: reportLocale,
+      scan_timestamp: reportData.rppg.metadata.timestamp,
+      report_data: {
+        rppg: reportData.rppg,
+        ai_report: reportData.aiReport ?? null,
+        section_insights: reportData.sectionInsights ?? null,
+        api_health_data: reportData.apiHealthData ?? null,
+      },
+    };
+
+    const response = await fetch(
+      `${baseApiUrl}/aitools/wellness/v2/health/scan/${userId}/report`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Report save API failed with status ${response.status}`);
+    }
+  };
+
   // Handle continue to results
   const handleContinue = async () => {
     if (!recordedVideo) {
@@ -1288,6 +1339,8 @@ const FaceScanner: React.FC = () => {
         metadata: {
           scanDurationSeconds: recordingTime,
           timestamp: new Date().toISOString(),
+          reportLanguage,
+          locale: reportLocale,
         },
       };
 
@@ -1295,6 +1348,8 @@ const FaceScanner: React.FC = () => {
       const nl = rppgData?.hrv.nonlinear;
       const re = rppgData?.hrv.respiratoryExtended;
       const sectionInput = {
+        language: reportLanguage,
+        locale: reportLocale,
         heartRate: rppgData?.vitals.heartRate?.value || Math.round(heartRate) || 72,
         heartRateStatus: rppgData?.vitals.heartRate?.status || 'NORMAL',
         signalQuality: rppgData?.vitals.signalQuality?.percentage || Math.round((sqi || 0.5) * 100),
@@ -1387,13 +1442,18 @@ const FaceScanner: React.FC = () => {
         : undefined,
     };
 
-    // Save to localStorage for persistence
-    localStorage.setItem('faceReportData', JSON.stringify(combinedData));
-
-    // Dispatch custom event to notify Header component
-    window.dispatchEvent(new Event('vitaScanUpdated'));
-
-    navigate('/face-report', { state: combinedData });
+    try {
+      setIsUploadingData(true);
+      setUploadError(null);
+      await saveBioCareReportToAPI(combinedData);
+      setBioCareReport(combinedData);
+      navigate('/face-report', { state: combinedData });
+    } catch (err) {
+      console.error('Error saving Bio Care report:', err);
+      setUploadError('Failed to save Bio Care report. Please try again.');
+    } finally {
+      setIsUploadingData(false);
+    }
   };
 
   // Stop recording manually
@@ -1445,14 +1505,6 @@ const FaceScanner: React.FC = () => {
     </svg>
   );
 
-  const SkipIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="5 4 15 12 5 20 5 4"></polygon>
-      <line x1="19" y1="5" x2="19" y2="19"></line>
-    </svg>
-  );
-
-
   const HeartIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -1472,7 +1524,7 @@ const FaceScanner: React.FC = () => {
 
         body {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: rgb(255, 255, 255);
+          background: #f5f8fb;
           color: #000;
           overflow-x: hidden;
         }
@@ -1484,19 +1536,21 @@ const FaceScanner: React.FC = () => {
         }
 
         .btn-primary {
-          background: #7DD3FC;
+          background: linear-gradient(135deg, #0891b2 0%, #0ea5e9 100%);
           color: #fff;
           border: none;
           padding: 0.875rem 2rem;
-          border-radius: 0.5rem;
+          border-radius: 0.875rem;
           font-size: 1rem;
-          font-weight: 500;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.2s ease;
+          box-shadow: 0 14px 30px rgba(14, 165, 233, 0.24);
         }
 
         .btn-primary:hover {
-          background: #38BDF8;
+          transform: translateY(-1px);
+          box-shadow: 0 18px 34px rgba(14, 165, 233, 0.3);
         }
 
         .btn-primary:disabled {
@@ -1506,13 +1560,13 @@ const FaceScanner: React.FC = () => {
         }
 
         .btn-secondary {
-          background: transparent;
-          border: 1px solid #2D3748;
-          color: #A0AEC0;
+          background: #ffffff;
+          border: 1px solid #D1D5DB;
+          color: #374151;
           padding: 0.875rem 1.5rem;
-          border-radius: 0.5rem;
+          border-radius: 0.875rem;
           font-size: 1rem;
-          font-weight: 500;
+          font-weight: 700;
           cursor: pointer;
           transition: all 0.2s ease;
           display: flex;
@@ -1521,8 +1575,9 @@ const FaceScanner: React.FC = () => {
         }
 
         .btn-secondary:hover {
-          border-color: #EF4444;
-          color: #EF4444;
+          border-color: #0891b2;
+          color: #0891b2;
+          background: #f0f9ff;
         }
 
         .btn-success {
@@ -1536,33 +1591,12 @@ const FaceScanner: React.FC = () => {
           cursor: default;
         }
 
-        .btn-skip {
-          background: transparent;
-          border: 1px solid #FCA5A5;
-          color: #000;
-          padding: 0.875rem 1.5rem;
-          border-radius: 0.5rem;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .btn-skip:hover {
-          border-color: #F87171;
-          color: #000;
-        }
-
         .card {
-          background: #fff;
-          border: 1px solid #e0e0e0;
-          border-top: 3px solid rgb(0, 184, 248);
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
-          border-radius: 1rem;
-          padding: 2rem;
+          background: rgba(255, 255, 255, 0.94);
+          border: 1px solid #dbeafe;
+          box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+          border-radius: 1.25rem;
+          padding: 1.5rem;
           min-height: 50vh;
           max-height: calc(100vh - 3rem);
           display: flex;
@@ -1570,22 +1604,24 @@ const FaceScanner: React.FC = () => {
         }
 
         .drop-zone {
-          border: 2px dashed #d1d5db;
+          border: 1px dashed #93c5fd;
           border-radius: 1rem;
           padding: 3rem 2rem;
           text-align: center;
           transition: all 0.2s ease;
           flex: 1;
+          background: linear-gradient(180deg, #f8fbff 0%, #eef8ff 100%);
         }
 
         .video-container {
           position: relative;
-          border-radius: 1rem;
+          border-radius: 1.125rem;
           overflow: hidden;
-          border: 4px solid #d1d5db;
-          background: #f9fafb;
+          border: 1px solid #dbeafe;
+          background: #0f172a;
           height: 45vh;
           max-height: 500px;
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05), 0 18px 40px rgba(15,23,42,0.16);
         }
 
         video {
@@ -1926,7 +1962,7 @@ const FaceScanner: React.FC = () => {
             border-radius: 0.75rem;
           }
 
-          .btn-primary, .btn-secondary, .btn-skip {
+          .btn-primary, .btn-secondary {
             padding: 0.75rem 1rem !important;
             font-size: 0.875rem !important;
           }
@@ -1937,7 +1973,7 @@ const FaceScanner: React.FC = () => {
           }
         }
       `}</style>
-      <div style={{ minHeight: '100vh', minWidth: '100vw', background: 'rgb(255, 255, 255)', color: '#000', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ minHeight: '100vh', minWidth: '100vw', background: 'linear-gradient(180deg, #f8fbff 0%, #eef6fb 100%)', color: '#000', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'auto' }}>
         {/* Blurred bubbles background */}
         <div style={{
           position: "absolute",
@@ -1945,6 +1981,7 @@ const FaceScanner: React.FC = () => {
           height: "100%",
           overflow: "hidden",
           zIndex: 0,
+          display: "none",
         }}>
           {/* Top left area */}
           <div style={{
@@ -2046,18 +2083,17 @@ const FaceScanner: React.FC = () => {
             right: "-3%",
           }} />
         </div>
-        <div style={{ padding: '3% 3%', flex: 1, display: 'flex', flexDirection: 'column', maxHeight: '100vh', overflow: 'hidden', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: 'clamp(72px, 7vh, 92px) 3% 3%', flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', position: 'relative', zIndex: 1 }}>
           {/* <div className="container"> */}
           {error && scanState === 'initial' && (
             <div className="error-message" style={{ marginBottom: '2rem' }}>
               {error}
               {error.includes('HTTPS') && (
                 <div style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
-                  <strong>Solution:</strong> Run your app on:
+                  <strong>{t.solution}:</strong> {t.localhost}
                   <ul style={{ margin: '0.5rem 0 0 1rem' }}>
-                    <li>Localhost (http://localhost:3000)</li>
-                    <li>HTTPS (https://yourdomain.com)</li>
-                    <li>Use Chrome flags: chrome://flags/#unsafely-treat-insecure-origin-as-secure</li>
+                    <li>Localhost (http://localhost:5179)</li>
+                    <li>HTTPS</li>
                   </ul>
                 </div>
               )}
@@ -2067,37 +2103,42 @@ const FaceScanner: React.FC = () => {
           <div className="main-container" style={{ display: 'flex', alignItems: 'flex-start', gap: '2rem', flex: 1, minHeight: 0 }}>
 
             {/* Left side - Info */}
-            <div className="left-side" style={{ width: '50%', paddingTop: '0.5rem', display: 'flex', flexDirection: 'column', minHeight: 0, maxHeight: '100%', overflowY: 'auto' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="left-side" style={{ width: '46%', paddingTop: '0.5rem', display: 'flex', flexDirection: 'column', minHeight: 0, maxHeight: '100%', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: '#ffffff', border: '1px solid #dbeafe', borderRadius: 20, padding: '28px', boxShadow: '0 18px 50px rgba(15, 23, 42, 0.08)' }}>
                 <h2 style={{
-                  color: '#00B8D4',
+                  color: '#0891b2',
                   fontSize: '0.875rem',
-                  fontWeight: 500,
+                  fontWeight: 800,
                   letterSpacing: '0.05em',
-                  marginBottom: '1rem'
+                  marginBottom: '0.25rem',
+                  textTransform: 'uppercase'
                 }}>
-                  Bio Care
+                  {t.bioCare}
                 </h2>
 
-                <h1 style={{ fontSize: '2.25rem', fontWeight: 400, lineHeight: 1.2, marginBottom: '0.5rem', color: '#000' }}>
-                  Scan yourself and see how health rate works
+                <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 800, lineHeight: 1.05, marginBottom: '0.5rem', color: '#0f172a', letterSpacing: 0 }}>
+                  {t.scanHeroTitle}
                 </h1>
 
                 <p style={{ color: '#6B7280', fontSize: '1rem', fontWeight: 400, lineHeight: 1.6 }}>
-                  "Research-driven. Precision-crafted. Eternal AI transforms your health journey."
+                  {t.scanHeroSubtitle}
                 </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginTop: 8 }}>
+                  {[t.lighting, t.stillPosture, t.noEyewear].map((item) => (
+                    <div key={item} style={{ padding: '10px 12px', borderRadius: 12, background: '#ecfeff', border: '1px solid #bae6fd', color: '#155e75', fontSize: 12, fontWeight: 800, textAlign: 'center' }}>
+                      {item}
+                    </div>
+                  ))}
+                </div>
 
                 {/* Do's Section */}
                 <div style={{ marginTop: '1rem' }}>
                   <h4 style={{ color: '#000', fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-                    Do's
+                    {t.doTitle}
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {[
-                      'Stay as still as possible, only gentle natural breathing, no talking or facial expressions.',
-                      'Keep your gaze fixed at a point near the camera to avoid eye/head movements.',
-                      'If you see "signal quality" dropping or "poor," stop and redo the scan after adjusting light and posture.',
-                    ].map((item, i) => (
+                    {scanDos.map((item, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
                         <div style={{
                           width: '24px',
@@ -2123,14 +2164,10 @@ const FaceScanner: React.FC = () => {
                 {/* Don'ts Section */}
                 <div style={{ marginTop: '1rem' }}>
                   <h4 style={{ color: '#000', fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-                    Don'ts
+                    {t.dontTitle}
                   </h4>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {[
-                      'Don\'t talk, smile, laugh, or move your jaw.',
-                      'Don\'t move the device, change distance, or turn your head during the measurement.',
-                      'Don\'t scan while walking, in a vehicle, or with a fan blowing directly on your face or hair & Don\'t wear specs or sunglass.',
-                    ].map((item, i) => (
+                    {scanDonts.map((item, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
                         <div style={{
                           width: '24px',
@@ -2158,8 +2195,8 @@ const FaceScanner: React.FC = () => {
             </div>
 
             {/* Right side - Scan Interface */}
-            <div className="right-side" style={{ width: '50%', display: 'flex', alignItems: 'stretch', justifyContent: 'center', minHeight: 0, maxHeight: '100%' }}>
-              <div className="card-wrapper" style={{ width: '80%', display: 'flex', flexDirection: 'column', minHeight: '60vh' }}>
+            <div className="right-side" style={{ width: '54%', display: 'flex', alignItems: 'stretch', justifyContent: 'center', minHeight: 0, maxHeight: '100%' }}>
+              <div className="card-wrapper" style={{ width: '92%', display: 'flex', flexDirection: 'column', minHeight: '60vh' }}>
                 <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflowY: 'auto' }}>
 
                   {/* Error message */}
@@ -2173,9 +2210,9 @@ const FaceScanner: React.FC = () => {
                   {/* rPPG Warning */}
                   {rppgError && (scanState === 'camera' || scanState === 'recording') && (
                     <div className="warning-message" style={{ marginBottom: '1rem' }}>
-                      <strong>rPPG Warning:</strong> {rppgError}
+                      <strong>{t.rppgWarning}:</strong> {rppgError}
                       <br />
-                      <small>Continuing with video recording only...</small>
+                      <small>{t.continuingVideoOnly}</small>
                     </div>
                   )}
 
@@ -2183,7 +2220,7 @@ const FaceScanner: React.FC = () => {
                   {scanState === 'initial' && (
                     <>
                       <h3 style={{ color: '#00B8D4', fontSize: '1.25rem', fontWeight: 500, textAlign: 'center', marginBottom: '1rem' }}>
-                        Scan your face
+                        {t.scanYourFace}
                       </h3>
 
                       <div
@@ -2209,30 +2246,20 @@ const FaceScanner: React.FC = () => {
                           disabled={!!error && error.includes('HTTPS')}
                         >
                           <CameraIcon />
-                          Open Camera
+                          {t.openCamera}
                         </button>
 
                         <p style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '1rem', textAlign: 'center' }}>
-                          Click above to start face scanning using your webcam
+                          {t.cameraHelp}
                         </p>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                        <button
-                          onClick={handleSkip}
-                          className="btn-skip"
-                          style={{ flex: 1, justifyContent: 'center' }}
-                        >
-                          <SkipIcon />
-                          Skip
-                        </button>
-                        <button
-                          disabled
-                          className="btn-primary"
-                          style={{ flex: 1 }}
-                        >
-                          Start Scan
-                        </button>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '0.75rem', marginTop: '1rem' }}>
+                        {[t.lighting, t.stillPosture, t.noEyewear].map((item) => (
+                          <div key={item} style={{ padding: '0.75rem', borderRadius: 12, background: '#f8fafc', border: '1px solid #e5e7eb', color: '#475569', fontSize: 12, fontWeight: 700, textAlign: 'center' }}>
+                            {item}
+                          </div>
+                        ))}
                       </div>
                     </>
                   )}
@@ -2241,7 +2268,7 @@ const FaceScanner: React.FC = () => {
                   {(scanState === 'camera' || scanState === 'recording') && (
                     <>
                       <h3 style={{ color: '#00B8D4', fontSize: '1.25rem', fontWeight: 500, textAlign: 'center', marginBottom: '1rem' }}>
-                        {scanState === 'camera' ? 'Camera Preview' : 'Recording...'}
+                        {scanState === 'camera' ? t.cameraPreview : t.recording}
                       </h3>
 
                       <div className="video-container" style={{ marginBottom: '1rem', position: 'relative' }}>
@@ -2269,7 +2296,7 @@ const FaceScanner: React.FC = () => {
                         {scanState === 'camera' && (
                           <div className="camera-preview-indicator">
                             <div className="camera-dot"></div>
-                            LIVE CAMERA
+                            {t.liveCamera}
                           </div>
                         )}
 
@@ -2278,7 +2305,7 @@ const FaceScanner: React.FC = () => {
                           <>
                             <div className="recording-indicator">
                               <div className="recording-dot"></div>
-                              REC {recordingTime}s / 40s
+                              {t.rec} {recordingTime}s / {RECORDING_DURATION}s
                             </div>
                             <div className="scan-line"></div>
                           </>
@@ -2294,7 +2321,7 @@ const FaceScanner: React.FC = () => {
                               <span style={{ fontSize: '0.875rem', fontWeight: 'normal' }}>BPM</span>
                             </div>
                             <div className="heart-rate-label">
-                              Signal Quality
+                              {t.signalQualityShort}
                             </div>
                             <div className="sqi-indicator">
                               <div className="sqi-bar">
@@ -2312,7 +2339,7 @@ const FaceScanner: React.FC = () => {
                             </div>
                             {!faceDetected && (
                               <div style={{ color: '#EF4444', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-                                No face detected
+                                {t.noFaceDetected}
                               </div>
                             )}
                           </div>
@@ -2341,7 +2368,7 @@ const FaceScanner: React.FC = () => {
                               borderRadius: '50%',
                               animation: 'spin 1s linear infinite'
                             }}></div>
-                            <p style={{ color: '#00B8D4', marginTop: '1rem' }}>Starting camera...</p>
+                            <p style={{ color: '#00B8D4', marginTop: '1rem' }}>{t.startCamera}</p>
                           </div>
                         )}
 
@@ -2428,7 +2455,7 @@ const FaceScanner: React.FC = () => {
                             alignItems: 'center',
                             minHeight: '80px'
                           }}>
-                            <span style={{ fontSize: '9px', color: '#6B7280', marginBottom: '2px' }}>Heart State</span>
+                            <span style={{ fontSize: '9px', color: '#6B7280', marginBottom: '2px' }}>{t.heartState}</span>
                             <canvas
                               ref={trajCanvasRef}
                               width={200}
@@ -2460,10 +2487,10 @@ const FaceScanner: React.FC = () => {
                             disabled={!isCameraReady}
                           >
                             <VideoIcon />
-                            Start Scan (Record 40s)
+                            {t.startScanRecord}
                           </button>
                           <p style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '1rem' }}>
-                            Position your face in the frame and click Start Scan to begin recording
+                            {t.scanPositionHelp}
                           </p>
                         </div>
                       )}
@@ -2486,10 +2513,10 @@ const FaceScanner: React.FC = () => {
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <rect x="6" y="6" width="12" height="12"></rect>
                             </svg>
-                            Stop Recording ({40 - recordingTime}s remaining)
+                            {t.stopRecording} ({RECORDING_DURATION - recordingTime}s {t.remaining})
                           </button>
                           <p style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '1rem' }}>
-                            Recording in progress. Please keep your face still and centered.
+                            {t.recordingHelp}
                           </p>
                         </div>
                       )}
@@ -2501,14 +2528,7 @@ const FaceScanner: React.FC = () => {
                           style={{ flex: 1, justifyContent: 'center' }}
                         >
                           <XIcon />
-                          {scanState === 'camera' ? 'Close Camera' : 'Cancel'}
-                        </button>
-                        <button
-                          disabled
-                          className="btn-primary"
-                          style={{ flex: 1 }}
-                        >
-                          Continue to spiritual journey
+                          {scanState === 'camera' ? t.closeCamera : t.cancel}
                         </button>
                       </div>
                     </>
@@ -2518,7 +2538,7 @@ const FaceScanner: React.FC = () => {
                   {scanState === 'processing' && (
                     <>
                       <h3 style={{ color: '#00B8D4', fontSize: '1.25rem', fontWeight: 500, textAlign: 'center', marginBottom: '1rem' }}>
-                        Processing Video
+                        {t.processingVideo}
                       </h3>
 
                       <div className="video-container" style={{ marginBottom: '1rem', position: 'relative' }}>
@@ -2581,12 +2601,12 @@ const FaceScanner: React.FC = () => {
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12 6 12 12 16 14"></polyline>
                           </svg>
-                          {progress === 100 ? 'Uploading data...' : `Processing Face Scan... ${progress}%`}
+                          {progress === 100 ? t.uploadingData : `${t.processingScan} ${progress}%`}
                         </button>
                         <p style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '1rem' }}>
                           {progress === 100
-                            ? 'Sending health data to server...'
-                            : 'Analyzing facial features and generating health insights...'}
+                            ? t.sendingHealthData
+                            : t.analyzingScan}
                         </p>
                       </div>
 
@@ -2597,14 +2617,7 @@ const FaceScanner: React.FC = () => {
                           style={{ flex: 1, justifyContent: 'center' }}
                         >
                           <XIcon />
-                          Cancel
-                        </button>
-                        <button
-                          disabled
-                          className="btn-primary"
-                          style={{ flex: 1 }}
-                        >
-                          Continue to spiritual journey
+                          {t.cancel}
                         </button>
                       </div>
                     </>
@@ -2614,7 +2627,7 @@ const FaceScanner: React.FC = () => {
                   {scanState === 'complete' && (
                     <>
                       <h3 style={{ color: '#00B8D4', fontSize: '1.25rem', fontWeight: 500, textAlign: 'center', marginBottom: '1rem' }}>
-                        Scan Complete!
+                        {t.scanComplete}
                       </h3>
 
                       <div className="video-container" style={{ marginBottom: '1rem', position: 'relative' }}>
@@ -2622,7 +2635,7 @@ const FaceScanner: React.FC = () => {
                           previewUrl.startsWith('blob:') ? (
                             <video src={previewUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} controls />
                           ) : (
-                            <img src={previewUrl} alt="Scanned face" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={previewUrl} alt={t.scanComplete} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           )
                         )}
 
@@ -2646,10 +2659,10 @@ const FaceScanner: React.FC = () => {
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                             <polyline points="22 4 12 14.01 9 11.01"></polyline>
                           </svg>
-                          Face Scanned Successfully!
+                          {t.scannedSuccessfully}
                         </button>
                         <p style={{ color: '#6B7280', fontSize: '0.875rem' }}>
-                          Your face scan is complete. View your report in the health AI dashboard.
+                          {t.completeHelp}
                         </p>
                         {uploadError && (
                           <p style={{ color: '#EF4444', fontSize: '0.875rem', marginTop: '0.5rem' }}>
@@ -2666,7 +2679,7 @@ const FaceScanner: React.FC = () => {
                           disabled={isUploadingData}
                         >
                           <XIcon />
-                          Scan Again
+                          {t.scanAgain}
                         </button>
                         <button
                           onClick={handleContinue}
@@ -2687,7 +2700,7 @@ const FaceScanner: React.FC = () => {
                               <svg className="spinner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                               </svg>
-                              Uploading...
+                              {t.uploading}
                             </>
                           ) : (
                             <>
@@ -2695,7 +2708,7 @@ const FaceScanner: React.FC = () => {
                                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
                               </svg>
-                              Continue to spiritual journey
+                              {t.viewBioCareReport}
                             </>
                           )}
                         </button>
