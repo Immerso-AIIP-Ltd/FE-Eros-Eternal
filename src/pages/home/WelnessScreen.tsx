@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import background from "@/assets/images/welcome-screen.jpg";
+import ErosClinicLogo from "@/assets/images/eros-wellness-ai-clinic-cropped.png";
 import { usePhcSession } from "@/context/PhcSessionContext";
 import { getPhcCopy } from "@/i18n/phcCopy";
 
@@ -51,17 +52,30 @@ const WellnessScreen = () => {
       {/* Footer content */}
       <div 
         style={{
-          width: '748px',
-          height: '104px',
+          width: 'min(748px, calc(100vw - 32px))',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: '24px',
+          gap: '18px',
           marginBottom: '50px', // Adjust as needed for positioning
           zIndex: 2,
         }}
       >
+        <div
+          style={{
+            background: "rgba(255,255,255,0.94)",
+            borderRadius: 16,
+            padding: "10px 16px",
+            boxShadow: "0 14px 34px rgba(0,0,0,0.22)",
+          }}
+        >
+          <img
+            src={ErosClinicLogo}
+            alt="EROS Wellness AI Clinic"
+            style={{ width: 230, maxWidth: "70vw", height: "auto", display: "block" }}
+          />
+        </div>
         <h2 
           style={{
             fontSize: '38px',

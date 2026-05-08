@@ -4,6 +4,7 @@ import Stars from '../ui/stars';
 import { baseApiUrl } from '@/config/api';
 import { usePhcSession } from '@/context/PhcSessionContext';
 import { getPhcCopy } from '@/i18n/phcCopy';
+import ErosClinicLogo from '@/assets/images/eros-wellness-ai-clinic-cropped.png';
 import type { CombinedReportData, HrHistoryPoint, RppgSignalPayload } from '../../types/rppg';
 import type { HealthData, SectionInsightsInput } from '../../services/openaiReport';
 import {
@@ -1317,7 +1318,7 @@ const FaceScanner: React.FC = () => {
         locale: reportLocale,
         data: {
           metadata: {
-            timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            timestamp: new Date().toISOString(),
             scan_duration_seconds: recordingTime,
             frames_processed: hrLogRef.current.length || 0,
             report_language: reportLanguage,
@@ -2116,6 +2117,11 @@ const FaceScanner: React.FC = () => {
             {/* Left side - Info */}
             <div className="left-side" style={{ width: '46%', paddingTop: '0.5rem', display: 'flex', flexDirection: 'column', minHeight: 0, maxHeight: '100%', overflowY: 'auto' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: '#ffffff', border: '1px solid #dbeafe', borderRadius: 20, padding: '28px', boxShadow: '0 18px 50px rgba(15, 23, 42, 0.08)' }}>
+                <img
+                  src={ErosClinicLogo}
+                  alt="EROS Wellness AI Clinic"
+                  style={{ width: 170, maxWidth: '55%', height: 'auto', objectFit: 'contain', marginBottom: 4 }}
+                />
                 <h2 style={{
                   color: '#0891b2',
                   fontSize: '0.875rem',

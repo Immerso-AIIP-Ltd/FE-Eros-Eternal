@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { baseApiUrl } from '@/config/api';
+import ErosClinicLogo from '@/assets/images/eros-wellness-ai-clinic-cropped.png';
+import { formatIstDateTime } from '@/lib/dateTime';
 
 import {
   AreaChart,
@@ -45,9 +47,9 @@ function clamp(n: number, lo: number, hi: number): number {
 
 interface StressPresentation {
   index: number;
-  metricBadge: 'NORMAL' | 'MODERATE' | 'HIGH' | 'UNKNOWN';
+  metricBadge: 'LOW' | 'NORMAL' | 'GOOD' | 'EXCELLENT' | 'MODERATE' | 'HIGH' | 'UNKNOWN';
   levelWord: string;
-  rowStatus: 'NORMAL' | 'MODERATE' | 'HIGH' | 'UNKNOWN';
+  rowStatus: 'LOW' | 'NORMAL' | 'GOOD' | 'EXCELLENT' | 'MODERATE' | 'HIGH' | 'UNKNOWN';
 }
 
 function getHeartRateBand(hr: number): string {
@@ -74,13 +76,25 @@ function getBpBand(systolic: number, diastolic: number) {
 
 function getStressPresentation(stress: CombinedReportData['rppg']['stress']): StressPresentation {
   const idx = Number(stress.index ?? 0);
-  const level = String(stress.level || 'unknown').toLowerCase();
+  const score = Number.isFinite(idx) ? clamp(idx, 0, 100) : 0;
   const metricBadge: StressPresentation['metricBadge'] =
-    level === 'low' ? 'NORMAL' : level === 'moderate' ? 'MODERATE' : level === 'high' ? 'HIGH' : 'UNKNOWN';
+    score >= 85 ? 'EXCELLENT' : score >= 70 ? 'GOOD' : score >= 50 ? 'NORMAL' : score >= 30 ? 'MODERATE' : score > 0 ? 'LOW' : 'UNKNOWN';
+  const levelWord =
+    metricBadge === 'EXCELLENT'
+      ? 'Excellent'
+      : metricBadge === 'GOOD'
+      ? 'Good'
+      : metricBadge === 'NORMAL'
+      ? 'Normal'
+      : metricBadge === 'MODERATE'
+      ? 'Moderate'
+      : metricBadge === 'LOW'
+      ? 'Low'
+      : 'Unknown';
   return {
-    index: Number.isFinite(idx) ? idx : 0,
+    index: score,
     metricBadge,
-    levelWord: level ? level.charAt(0).toUpperCase() + level.slice(1) : 'Unknown',
+    levelWord,
     rowStatus: metricBadge,
   };
 }
@@ -105,12 +119,8 @@ function buildBioCareActualLayer(report: CombinedReportData) {
 
   const sdnn = Number(rg.hrv.sdnn?.value ?? 0);
   const rmssd = Number(rg.hrv.rmssd?.value ?? 0);
-  const pnn20 = Number(rg.hrv.pnn20?.value ?? 0);
-  const pnn50 = Number(rg.hrv.pnn50?.value ?? 0);
   const sdnnStatus = rg.hrv.sdnn?.status ?? 'UNKNOWN';
   const rmssdStatus = rg.hrv.rmssd?.status ?? 'UNKNOWN';
-  const pnn20Status = rg.hrv.pnn20?.status ?? 'UNKNOWN';
-  const pnn50Status = rg.hrv.pnn50?.status ?? 'UNKNOWN';
 
   const sympathovagalBalance = rg.stress.sympathovagalBalance ?? null;
   const stress = getStressPresentation(rg.stress);
@@ -157,12 +167,8 @@ function buildBioCareActualLayer(report: CombinedReportData) {
     signalQualityStatus,
     sdnn,
     rmssd,
-    pnn20,
-    pnn50,
     sdnnStatus,
     rmssdStatus,
-    pnn20Status,
-    pnn50Status,
     stress,
     sympathovagalBalance,
     nlDisp,
@@ -709,7 +715,7 @@ const FaceReportPage: React.FC = () => {
       }}
     >
       {/* Back button (outside PDF capture area) */}
-      <div style={{ marginBottom: '16px' }}>
+      <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
         <button
           onClick={() => navigate('/facescan')}
           style={{
@@ -735,6 +741,11 @@ const FaceReportPage: React.FC = () => {
           <ArrowLeft size={18} />
           {t.back}
         </button>
+        <img
+          src={ErosClinicLogo}
+          alt="EROS Wellness AI Clinic"
+          style={{ width: 150, maxWidth: '42vw', height: 'auto', objectFit: 'contain' }}
+        />
       </div>
 
       {/* Report content (captured for PDF) */}
@@ -742,6 +753,11 @@ const FaceReportPage: React.FC = () => {
         {/* Header with title and download button */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div>
+            <img
+              src={ErosClinicLogo}
+              alt="EROS Wellness AI Clinic"
+              style={{ width: 160, height: 'auto', objectFit: 'contain', marginBottom: 14 }}
+            />
             <h1 style={{ color: '#111827', fontSize: '1.875rem', fontWeight: 700, margin: '0 0 4px 0' }}>
               {t.bioCareReport}
             </h1>
@@ -1099,8 +1115,6 @@ const FaceReportPage: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <HrvRow label="SDNN" value={actualLayer?.sdnn ?? rppg.hrv.sdnn.value} unit="ms" status={actualLayer?.sdnnStatus ?? rppg.hrv.sdnn.status} description={`${t.normalRange}: 50-100 ms`} />
               <HrvRow label="RMSSD" value={actualLayer?.rmssd ?? rppg.hrv.rmssd.value} unit="ms" status={actualLayer?.rmssdStatus ?? rppg.hrv.rmssd.status} description={`${t.normalRange}: 20-50 ms · ${t.parasympatheticIndicator}`} />
-              <HrvRow label="pNN20" value={actualLayer?.pnn20 ?? rppg.hrv.pnn20?.value ?? 0} unit="%" status={actualLayer?.pnn20Status ?? rppg.hrv.pnn20?.status ?? 'NORMAL'} description={`${t.normalRange}: 5-60% · ${t.beatVariationDescription}`} />
-              <HrvRow label="pNN50" value={actualLayer?.pnn50 ?? rppg.hrv.pnn50.value} unit="%" status={actualLayer?.pnn50Status ?? rppg.hrv.pnn50.status} description={`${t.normalRange}: 3-25% · ${t.shortRecordingNote}`} />
 
               {/* RR Interval Count */}
               {rppg.hrv.rrIntervalCount !== undefined && rppg.hrv.rrIntervalCount > 0 && (
@@ -1535,7 +1549,7 @@ const FaceReportPage: React.FC = () => {
           }}
         >
           <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
-            {t.scanDate}: {new Date(rppg.metadata.timestamp).toLocaleString()}
+            {t.scanDate}: {formatIstDateTime(rppg.metadata.timestamp)}
           </span>
           <span style={{ color: '#9CA3AF', fontSize: '0.75rem' }}>
             <Info size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
@@ -1670,8 +1684,9 @@ const FaceReportPage: React.FC = () => {
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
+          flexWrap: 'wrap',
           alignItems: 'center',
+          justifyContent: 'center',
           gap: '16px',
           padding: '32px 0',
           marginBottom: '24px',
@@ -1698,6 +1713,21 @@ const FaceReportPage: React.FC = () => {
           }}
         >
           {t.nextPerson}
+        </button>
+        <button
+          onClick={() => navigate('/reports')}
+          style={{
+            backgroundColor: '#E0F2FE',
+            color: '#0369A1',
+            border: 'none',
+            padding: '12px 28px',
+            borderRadius: '24px',
+            fontSize: '0.95rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          {t.reportHistory}
         </button>
       </div>
 

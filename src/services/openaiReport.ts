@@ -52,8 +52,6 @@ VITALS:
 HEART / RECOVERY PATTERN METRICS (time-domain wellness indicators—not medical diagnostics):
 - SDNN: ${data.hrv.sdnn.value} ${data.hrv.sdnn.unit} (${data.hrv.sdnn.status})
 - RMSSD: ${data.hrv.rmssd.value} ${data.hrv.rmssd.unit} (${data.hrv.rmssd.status})
-- pNN20: ${data.hrv.pnn20.value} ${data.hrv.pnn20.unit} (${data.hrv.pnn20.status})
-- pNN50: ${data.hrv.pnn50.value} ${data.hrv.pnn50.unit} (${data.hrv.pnn50.status})
 
 RELAXATION / RECOVERY (wellness screening score—not clinical stress testing):
 - Legacy level label (from device): ${data.stress.level}
@@ -164,8 +162,6 @@ SECTION 1 — RECOVERY PATTERN (time-domain indicators):
 - Heart rate (wellness): ${data.heartRate} BPM (${data.heartRateStatus})
 - SDNN: ${data.sdnn} ms (${data.sdnnStatus})
 - RMSSD: ${data.rmssd} ms (${data.rmssdStatus})
-- pNN20: ${data.pnn20}% (${data.pnn20Status})
-- pNN50: ${data.pnn50}% (${data.pnn50Status})
 - RR intervals captured: ${data.rrIntervalCount}
 - Recording: ${data.recordingClass}
 

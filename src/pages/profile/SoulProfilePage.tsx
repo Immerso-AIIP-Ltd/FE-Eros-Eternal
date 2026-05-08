@@ -1,19 +1,28 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import BackgroundImage from "../../assets/images/background.png";
-import { baseApiUrl } from "../../config/api";
+import ErosClinicLogo from "@/assets/images/eros-wellness-ai-clinic-cropped.png";
 import { usePhcSession } from "@/context/PhcSessionContext";
 import { getPhcCopy } from "@/i18n/phcCopy";
+import { loginPatient, signupPatient } from "@/lib/phcApi";
 
 interface FormData {
   name: string;
   phoneNumber: string;
+  aadhaarNumber: string;
   gender: string;
   placeOfBirth: string;
   currentLocation: string;
   dateOfBirth: string;
   timeOfBirth: string;
 }
+
+interface LoginFormData {
+  aadhaarNumber: string;
+  phoneNumber: string;
+}
+
+type AuthMode = "signup" | "login";
 
 /* ─── Icons ─── */
 const IcoLocation = () => (
@@ -80,7 +89,7 @@ const IcoChevronDown = () => (
 
 const SoulProfilePage: React.FC = () => {
   const navigate = useNavigate();
-  const { language, setPatient, setBioCareReport } = usePhcSession();
+  const { language, setLanguage, setPatient, setBioCareReport } = usePhcSession();
   const t = getPhcCopy(language);
   const dobRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
@@ -89,14 +98,20 @@ const SoulProfilePage: React.FC = () => {
   const periodRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<AuthMode>("signup");
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phoneNumber: "",
+    aadhaarNumber: "",
     gender: "",
     placeOfBirth: "",
     currentLocation: "",
     dateOfBirth: "",
     timeOfBirth: "",
+  });
+  const [loginData, setLoginData] = useState<LoginFormData>({
+    aadhaarNumber: "",
+    phoneNumber: "",
   });
 
   // Date picker state
@@ -212,6 +227,16 @@ const SoulProfilePage: React.FC = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const setLogin = (field: keyof LoginFormData, value: string) => {
+    setLoginData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const onlyDigits = (value: string) => value.replace(/\D/g, "");
+
+  const getAadhaarError = (value: string) => {
+    return onlyDigits(value).length === 12 ? null : t.aadhaarValidation;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -219,64 +244,59 @@ const SoulProfilePage: React.FC = () => {
     if (!/^\+?[0-9\s-]{7,15}$/.test(formData.phoneNumber.trim())) {
       return setErrorMsg("Please enter a valid phone number.");
     }
+    const aadhaarError = getAadhaarError(formData.aadhaarNumber);
+    if (aadhaarError) return setErrorMsg(aadhaarError);
     if (!formData.dateOfBirth)
       return setErrorMsg("Please select date of birth.");
     if (!formData.timeOfBirth)
       return setErrorMsg("Please select time of birth.");
 
-    const [y, m, d] = formData.dateOfBirth.split("-");
-    const fd = new FormData();
-    fd.append("gender", formData.gender);
-    fd.append("username", formData.name.trim());
-    fd.append("phone_number", formData.phoneNumber.trim());
-    fd.append("place_of_birth", formData.placeOfBirth.trim());
-    fd.append("current_location", formData.currentLocation.trim());
-    fd.append("date_of_birth", `${d}-${m}-${y}`);
-    fd.append("time_of_birth", formData.timeOfBirth);
+    setLoading(true);
+    try {
+      const patient = await signupPatient({
+        full_name: formData.name.trim(),
+        aadhaar_number: onlyDigits(formData.aadhaarNumber),
+        phone_number: formData.phoneNumber.trim(),
+        password: formData.phoneNumber.trim(),
+        gender: formData.gender,
+        place_of_birth: formData.placeOfBirth.trim(),
+        current_location: formData.currentLocation.trim(),
+        date_of_birth: formData.dateOfBirth,
+        time_of_birth: formData.timeOfBirth,
+        preferred_language: language,
+      });
+      if (patient.preferredLanguage) setLanguage(patient.preferredLanguage);
+      setBioCareReport(null);
+      setPatient(patient);
+      navigate("/facescan");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    const aadhaarError = getAadhaarError(loginData.aadhaarNumber);
+    if (aadhaarError) return setErrorMsg(aadhaarError);
+    if (!/^\+?[0-9\s-]{7,15}$/.test(loginData.phoneNumber.trim())) {
+      return setErrorMsg(t.phoneValidation);
+    }
 
     setLoading(true);
     try {
-      const res = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/users/profile`,
-        { method: "POST", body: fd },
-      );
-      const text = await res.text();
-      let result: any;
-      try {
-        result = JSON.parse(text);
-      } catch {
-        throw new Error(text || "Invalid response");
-      }
-      if (!res.ok)
-        throw new Error(result?.message || result?.error || "Server error");
-      if (result.success) {
-        const userId =
-          result.data?.user_id ??
-          result.data?.id ??
-          result.user_id ??
-          result.id;
-        if (!userId) {
-          throw new Error("Profile created, but user_id was not returned.");
-        }
-        setBioCareReport(null);
-        setPatient({
-          userId: String(userId),
-          username: result.data?.username ?? formData.name.trim(),
-          phoneNumber:
-            result.data?.phone_number ??
-            result.data?.phoneNumber ??
-            formData.phoneNumber.trim(),
-          gender: result.data?.gender ?? formData.gender,
-          dateOfBirth: result.data?.date_of_birth ?? formData.dateOfBirth,
-          timeOfBirth: result.data?.time_of_birth ?? formData.timeOfBirth,
-          placeOfBirth: result.data?.place_of_birth ?? formData.placeOfBirth,
-          currentLocation:
-            result.data?.current_location ?? formData.currentLocation,
-        });
-        navigate("/facescan");
-      } else throw new Error(result.message || "Profile creation failed");
+      const patient = await loginPatient({
+        aadhaar_number: onlyDigits(loginData.aadhaarNumber),
+        password: loginData.phoneNumber.trim(),
+      });
+      if (patient.preferredLanguage) setLanguage(patient.preferredLanguage);
+      setBioCareReport(null);
+      setPatient(patient);
+      navigate("/reports");
     } catch (err: any) {
-      setErrorMsg(err.message || "Something went wrong.");
+      setErrorMsg(err.message || t.loginFailed);
     } finally {
       setLoading(false);
     }
@@ -292,29 +312,31 @@ const SoulProfilePage: React.FC = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-        /* ── Reset & lock viewport ── */
+        /* ── Reset ── */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         html, body {
-          height: 100%;
+          min-height: 100%;
           width: 100%;
-          overflow: hidden;        /* no page scroll ever */
+          overflow-x: hidden;
+          overflow-y: auto;
           scrollbar-width: none;   /* Firefox */
         }
         html::-webkit-scrollbar,
         body::-webkit-scrollbar { display: none; }  /* Chrome/Safari */
 
-        /* ══════════ ROOT — full viewport, no overflow ══════════ */
+        /* ══════════ ROOT ══════════ */
         .sp-root {
           display: flex;
-          min-height: 100vh;
-          width: 100vw;
+          min-height: 100dvh;
+          width: 100%;
           overflow-y: auto;      /* allow page to scroll instead of cutting */
           overflow-x: hidden;
           font-family: 'DM Sans', sans-serif;
           background: #FFFFFF;
-          padding: 24px 28px;    /* white space top & bottom like design */
+          padding: clamp(14px, 2vh, 28px) clamp(16px, 2.8vw, 36px);
           gap: 0;
+          align-items: stretch;
         }
 
         /* ══════════ LEFT PANEL ══════════ */
@@ -327,8 +349,7 @@ const SoulProfilePage: React.FC = () => {
           border-radius: 20px;
           padding: 24px 0;        /* top & bottom breathing room */
           background: linear-gradient(180deg, #00a4de 0%, #6ec0de 50%, #a4ccdb 100%);           /* Solid blue end */
-);
-
+          min-height: calc(100dvh - clamp(28px, 4vh, 56px));
           position: relative;
           display: flex;
           flex-direction: column;
@@ -366,7 +387,25 @@ const SoulProfilePage: React.FC = () => {
           z-index: 2;
           text-align: center;
           padding: 0 1.75rem;
-          margin-top: clamp(1.5rem, 7%, 4.5rem);
+          margin-top: clamp(1.35rem, 6vh, 4rem);
+        }
+
+        .sp-left-brand {
+          position: relative;
+          z-index: 3;
+          width: clamp(180px, 18vw, 270px);
+          margin-top: clamp(20px, 3vh, 36px);
+          padding: 14px 20px;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.95);
+          box-shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+        }
+
+        .sp-left-brand img {
+          display: block;
+          width: 100%;
+          height: auto;
+          object-fit: contain;
         }
 
         .sp-datepicker-day.sp-disabled {
@@ -383,7 +422,7 @@ const SoulProfilePage: React.FC = () => {
           font-size: clamp(0.95rem, 1.8vw, 1.85rem);
           letter-spacing: -0.01em;
           margin-bottom: 0.35rem;
-          margin-top: clamp(40px, 8vw, 108px);
+          margin-top: 0;
         }
 
         .sp-sub {
@@ -429,11 +468,14 @@ const SoulProfilePage: React.FC = () => {
           flex: 1;
           max-width: 50%;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
-          padding-left: 32px;
-          overflow: hidden;        /* no scroll on right either */
+          padding-left: clamp(28px, 4vw, 72px);
+          padding-top: 0;
+          padding-bottom: 0;
+          overflow: visible;
           scrollbar-width: none;
+          min-height: 0;
         }
         .sp-right::-webkit-scrollbar { display: none; }
 
@@ -447,34 +489,95 @@ const SoulProfilePage: React.FC = () => {
             0 10px 30px rgba(15, 23, 42, 0.10),
             0 0 0 1px rgba(148, 163, 184, 0.18);
           /* Scale padding with viewport so card always fits */
-          padding: clamp(1.1rem, 2.2vh, 2rem) clamp(1.1rem, 2vw, 2rem);
+          padding: clamp(1.35rem, 2.4vh, 2.05rem) clamp(1.4rem, 2.6vw, 2.45rem);
           width: 100%;
-          max-width: 430px;
+          max-width: 540px;
+          max-height: calc(100dvh - clamp(28px, 4vh, 56px));
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(14, 165, 233, 0.35) transparent;
+        }
+        .sp-card::-webkit-scrollbar { width: 6px; }
+        .sp-card::-webkit-scrollbar-thumb {
+          background: rgba(14, 165, 233, 0.28);
+          border-radius: 999px;
         }
 
         .sp-card-title {
           font-family: 'Montserrat', sans-serif;
           font-weight: 700;
-          font-size: clamp(1rem, 1.5vw, 1.4rem);
+          font-size: clamp(1.2rem, 1.75vw, 1.65rem);
           color: #0f172a;
-          letter-spacing: -0.02em;
-          margin-bottom: clamp(0.9rem, 1.8vh, 1.5rem);
+          letter-spacing: 0;
+          margin: 0 0 0.7rem;
           line-height: 1.2;
+          text-align: center;
+        }
+
+        .sp-card-subtitle {
+          color: #6b7280;
+          font-size: 0.9rem;
+          line-height: 1.5;
+          margin: 0 auto 1.35rem;
+          text-align: center;
+          max-width: 420px;
+        }
+
+        .sp-mode-tabs {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 6px;
+          padding: 5px;
+          margin: 0 0 1.2rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          background: #f8fafc;
+        }
+
+        .sp-mode-tab {
+          border: none;
+          border-radius: 9px;
+          background: transparent;
+          color: #64748b;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.84rem;
+          font-weight: 700;
+          padding: 9px 10px;
+          transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+        }
+
+        .sp-mode-tab.sp-active {
+          background: #ffffff;
+          color: #0284c7;
+          box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        }
+
+        .sp-security-note {
+          border: 1px solid rgba(2, 132, 199, 0.16);
+          border-radius: 12px;
+          background: #f0f9ff;
+          color: #075985;
+          font-size: 0.76rem;
+          line-height: 1.45;
+          padding: 10px 12px;
+          margin: -2px 0 10px;
         }
 
         /* ══════════ FORM ══════════ */
         .sp-fields {
           display: flex;
           flex-direction: column;
-          gap: clamp(8px, 1.2vh, 14px);
+          gap: clamp(10px, 1.25vh, 14px);
         }
 
         .sp-field-label {
           display: block;
-          font-size: 0.78rem;
-          font-weight: 500;
+          font-size: 0.82rem;
+          font-weight: 700;
           color: #050505;
-          margin-bottom: 4px;
+          margin-bottom: 6px;
           font-family: 'DM Sans', sans-serif;
         }
 
@@ -483,11 +586,11 @@ const SoulProfilePage: React.FC = () => {
         .sp-input,
         .sp-select {
           width: 100%;
-          height: clamp(34px, 3.6vh, 40px);
+          height: clamp(40px, 4.2vh, 48px);
           border: 1.5px solid #e2e8f0;
           border-radius: 10px;
           padding: 0 14px 0 40px;
-          font-size: clamp(0.8rem, 1vw, 0.875rem);
+          font-size: clamp(0.88rem, 1vw, 0.95rem);
           font-family: 'DM Sans', sans-serif;
           color: #1e293b;
           background: #fff;
@@ -561,6 +664,24 @@ const SoulProfilePage: React.FC = () => {
         }
         .sp-btn:active:not(:disabled) { transform: translateY(0); }
         .sp-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+        .sp-link-btn {
+          border: none;
+          background: transparent;
+          color: #0284c7;
+          cursor: pointer;
+          font: inherit;
+          font-weight: 700;
+          padding: 0;
+        }
+
+        .sp-alt {
+          color: #64748b;
+          font-size: 0.78rem;
+          line-height: 1.45;
+          margin-top: 12px;
+          text-align: center;
+        }
 
         /* ══════════ DATE PICKER ══════════ */
 
@@ -855,16 +976,17 @@ const SoulProfilePage: React.FC = () => {
           }
           .sp-left {
             max-width: 40%;
+            min-height: calc(100dvh - 28px);
           }
           .sp-right {
             padding-left: 16px;
           }
           .sp-card {
-            max-width: 340px;
+            max-width: 430px;
+            max-height: calc(100dvh - 28px);
           }
           .sp-card-title {
-            font-size: 0.95rem;
-            margin-bottom: 0.7rem;
+            font-size: 1.1rem;
           }
           .sp-field-label {
             font-size: 0.75rem;
@@ -881,7 +1003,7 @@ const SoulProfilePage: React.FC = () => {
           .sp-root {
             flex-direction: column;
             height: auto;
-            min-height: 100vh;
+            min-height: 100dvh;
             padding: 20px;
             gap: 20px;
             overflow-y: auto;
@@ -906,20 +1028,32 @@ const SoulProfilePage: React.FC = () => {
           .sp-right {
             padding-left: 0;
             overflow-y: visible;
+            width: 100%;
+            max-width: 100%;
           }
 
-          .sp-card { max-width: 100%; }
+          .sp-card {
+            max-width: 100%;
+            max-height: none;
+            overflow: visible;
+          }
+          .sp-left-brand {
+            width: min(220px, 62vw);
+            margin-top: 18px;
+            padding: 12px 18px;
+          }
         }
 
         /* Mobile ≤480 */
         @media (max-width: 480px) {
           .sp-root { padding: 16px; gap: 16px; }
           .sp-left { min-height: 210px; border-radius: 14px; }
+          .sp-left-brand { width: min(190px, 66vw); }
           .sp-title { font-size: 1.15rem; }
           .sp-sub { font-size: 0.72rem; }
           .sp-wheel-wrap { width: 90%; margin-top: 22%; }
           .sp-card { border-radius: 14px; }
-          .sp-card-title { font-size: 1rem; }
+          .sp-card-title { font-size: 1.05rem; }
         }
 
         /* Small mobile ≤360 */
@@ -928,10 +1062,61 @@ const SoulProfilePage: React.FC = () => {
           .sp-card-title { font-size: 0.95rem; }
         }
 
+        /* Short desktop and laptop screens */
+        @media (max-height: 820px) and (min-width: 769px) {
+          .sp-root { padding-top: 12px; padding-bottom: 12px; }
+          .sp-left {
+            min-height: calc(100dvh - 24px);
+            padding-top: 14px;
+            padding-bottom: 14px;
+          }
+          .sp-left-brand {
+            width: clamp(150px, 15vw, 220px);
+            margin-top: 8px;
+            padding: 10px 16px;
+            border-radius: 14px;
+          }
+          .sp-left-text { margin-top: clamp(0.85rem, 4vh, 2.5rem); }
+          .sp-card {
+            padding: 1rem 1.35rem;
+            max-height: calc(100dvh - 24px);
+          }
+          .sp-card-title {
+            font-size: 1.08rem;
+            margin-bottom: 0.35rem;
+          }
+          .sp-card-subtitle {
+            font-size: 0.78rem;
+            line-height: 1.35;
+            margin-bottom: 0.75rem;
+          }
+          .sp-mode-tabs { margin-bottom: 0.75rem; }
+          .sp-mode-tab { padding: 7px 8px; }
+          .sp-fields { gap: 8px; }
+          .sp-field-label {
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+          }
+          .sp-input,
+          .sp-select {
+            height: 38px;
+            font-size: 0.84rem;
+          }
+          .sp-error {
+            padding: 6px 10px;
+            font-size: 0.74rem;
+          }
+          .sp-btn {
+            height: 40px;
+            margin-top: 2px;
+          }
+          .sp-alt { margin-top: 8px; }
+        }
+
         /* Large desktop 1440+ */
         @media (min-width: 1440px) {
           .sp-left { max-width: 46%; }
-          .sp-card { max-width: 480px; }
+          .sp-card { max-width: 560px; }
         }
 
         /* XL 1920+ */
@@ -939,7 +1124,7 @@ const SoulProfilePage: React.FC = () => {
           .sp-root { padding: 40px; }
           .sp-right { padding-left: 40px; }
           .sp-left { max-width: 42%; }
-          .sp-card { max-width: 540px; }
+          .sp-card { max-width: 610px; }
           .sp-card-title { font-size: 1.55rem; }
         }
       `}</style>
@@ -947,6 +1132,10 @@ const SoulProfilePage: React.FC = () => {
       <div className="sp-root">
         {/* ══════════ LEFT ══════════ */}
         <div className="sp-left">
+          <div className="sp-left-brand">
+            <img src={ErosClinicLogo} alt="EROS Wellness AI Clinic" />
+          </div>
+
           <div className="sp-left-text">
             <h1 className="sp-title">{t.welcomeTitle}</h1>
             <p className="sp-sub">{t.welcomeSubtitle}</p>
@@ -965,215 +1154,311 @@ const SoulProfilePage: React.FC = () => {
         {/* ══════════ RIGHT ══════════ */}
         <div className="sp-right">
           <div className="sp-card">
-            <h2 className="sp-card-title">{t.createProfile}</h2>
-            <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 18 }}>
-              {t.profileSubtitle}
+            <h2 className="sp-card-title">
+              {authMode === "signup" ? t.createProfile : t.signInTitle}
+            </h2>
+            <p className="sp-card-subtitle">
+              {authMode === "signup" ? t.profileSubtitle : t.signInSubtitle}
             </p>
+
+            <div className="sp-mode-tabs" role="tablist" aria-label={t.authMode}>
+              <button
+                type="button"
+                className={`sp-mode-tab${authMode === "signup" ? " sp-active" : ""}`}
+                onClick={() => {
+                  setErrorMsg(null);
+                  setAuthMode("signup");
+                }}
+              >
+                {t.newPatient}
+              </button>
+              <button
+                type="button"
+                className={`sp-mode-tab${authMode === "login" ? " sp-active" : ""}`}
+                onClick={() => {
+                  setErrorMsg(null);
+                  setAuthMode("login");
+                }}
+              >
+                {t.returningPatient}
+              </button>
+            </div>
 
             {errorMsg && <div className="sp-error">{errorMsg}</div>}
 
-            <form onSubmit={handleSubmit} noValidate>
-              <div className="sp-fields">
-                {/* Gender */}
-                <div>
-                  <label className="sp-field-label">{t.gender}</label>
-                  <div className="sp-wrap">
-                    <span className="sp-ico">
-                      <IcoChevronDown />
-                    </span>
-                    <select
-                      className="sp-select"
-                      value={formData.gender}
-                      onChange={(e) => set("gender", e.target.value)}
-                    >
-                      <option value="">--</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                    <span className="sp-arr">
-                      <IcoChevronDown />
-                    </span>
+            {authMode === "signup" ? (
+              <form onSubmit={handleSubmit} noValidate>
+                <div className="sp-fields">
+                  {/* Gender */}
+                  <div>
+                    <label className="sp-field-label">{t.gender}</label>
+                    <div className="sp-wrap">
+                      <span className="sp-ico">
+                        <IcoChevronDown />
+                      </span>
+                      <select
+                        className="sp-select"
+                        value={formData.gender}
+                        onChange={(e) => set("gender", e.target.value)}
+                      >
+                        <option value="">--</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <span className="sp-arr">
+                        <IcoChevronDown />
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                {/* Name */}
-                <div>
-                  <label className="sp-field-label">{t.fullName}</label>
-                  <div className="sp-wrap">
-                    <input
-                      className="sp-input no-icon"
-                      type="text"
-                      placeholder={t.fullName}
-                      value={formData.name}
-                      onChange={(e) => set("name", e.target.value)}
-                      required
-                    />
+                  {/* Name */}
+                  <div>
+                    <label className="sp-field-label">{t.fullName}</label>
+                    <div className="sp-wrap">
+                      <input
+                        className="sp-input no-icon"
+                        type="text"
+                        placeholder={t.fullName}
+                        value={formData.name}
+                        onChange={(e) => set("name", e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {/* Phone */}
-                <div>
-                  <label className="sp-field-label">{t.phoneNumber}</label>
-                  <div className="sp-wrap">
-                    <input
-                      className="sp-input no-icon"
-                      type="tel"
-                      inputMode="tel"
-                      placeholder={t.phoneNumber}
-                      value={formData.phoneNumber}
-                      onChange={(e) => set("phoneNumber", e.target.value)}
-                      required
-                    />
+                  {/* Phone */}
+                  <div>
+                    <label className="sp-field-label">{t.mobilePassword}</label>
+                    <div className="sp-wrap">
+                      <input
+                        className="sp-input no-icon"
+                        type="tel"
+                        inputMode="tel"
+                        placeholder={t.phoneNumber}
+                        value={formData.phoneNumber}
+                        onChange={(e) => set("phoneNumber", e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {/* Place of Birth */}
-                <div>
-                  <label className="sp-field-label">{t.placeOfBirth}</label>
-                  <div className="sp-wrap">
-                    <span className="sp-ico">
-                      <IcoLocation />
-                    </span>
-                    <input
-                      className="sp-input"
-                      type="text"
-                      placeholder={t.placeOfBirth}
-                      value={formData.placeOfBirth}
-                      onChange={(e) => set("placeOfBirth", e.target.value)}
-                    />
+                  {/* Aadhaar */}
+                  <div>
+                    <label className="sp-field-label">{t.aadhaarNumber}</label>
+                    <div className="sp-wrap">
+                      <input
+                        className="sp-input no-icon"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        maxLength={12}
+                        placeholder={t.aadhaarNumber}
+                        value={formData.aadhaarNumber}
+                        onChange={(e) => set("aadhaarNumber", onlyDigits(e.target.value).slice(0, 12))}
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {/* Current Location */}
-                <div>
-                  <label className="sp-field-label">{t.currentLocation}</label>
-                  <div className="sp-wrap">
-                    <span className="sp-ico">
-                      <IcoLocation />
-                    </span>
-                    <input
-                      className="sp-input"
-                      type="text"
-                      placeholder={t.currentLocation}
-                      value={formData.currentLocation}
-                      onChange={(e) => set("currentLocation", e.target.value)}
-                    />
+                  {/* Place of Birth */}
+                  <div>
+                    <label className="sp-field-label">{t.placeOfBirth}</label>
+                    <div className="sp-wrap">
+                      <span className="sp-ico">
+                        <IcoLocation />
+                      </span>
+                      <input
+                        className="sp-input"
+                        type="text"
+                        placeholder={t.placeOfBirth}
+                        value={formData.placeOfBirth}
+                        onChange={(e) => set("placeOfBirth", e.target.value)}
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {/* Date of Birth */}
-                <div>
-                  <label className="sp-field-label">{t.dateOfBirth}</label>
-                  <div className="sp-wrap">
-                    <span
-                      className="sp-ico sp-ico-btn"
-                      onClick={() => {
-                        const existing = formData.dateOfBirth;
-                        if (existing) {
-                          const [y, m, d] = existing.split("-").map(Number);
-                          const dt = new Date(y, (m || 1) - 1, d || 1);
-                          setPickerSelected(dt);
-                          setPickerMonth(dt.getMonth());
-                          setPickerYear(dt.getFullYear());
-                        } else {
-                          const today = new Date();
-                          setPickerSelected(today);
-                          setPickerMonth(today.getMonth());
-                          setPickerYear(today.getFullYear());
+                  {/* Current Location */}
+                  <div>
+                    <label className="sp-field-label">{t.currentLocation}</label>
+                    <div className="sp-wrap">
+                      <span className="sp-ico">
+                        <IcoLocation />
+                      </span>
+                      <input
+                        className="sp-input"
+                        type="text"
+                        placeholder={t.currentLocation}
+                        value={formData.currentLocation}
+                        onChange={(e) => set("currentLocation", e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Date of Birth */}
+                  <div>
+                    <label className="sp-field-label">{t.dateOfBirth}</label>
+                    <div className="sp-wrap">
+                      <span
+                        className="sp-ico sp-ico-btn"
+                        onClick={() => {
+                          const existing = formData.dateOfBirth;
+                          if (existing) {
+                            const [y, m, d] = existing.split("-").map(Number);
+                            const dt = new Date(y, (m || 1) - 1, d || 1);
+                            setPickerSelected(dt);
+                            setPickerMonth(dt.getMonth());
+                            setPickerYear(dt.getFullYear());
+                          } else {
+                            const today = new Date();
+                            setPickerSelected(today);
+                            setPickerMonth(today.getMonth());
+                            setPickerYear(today.getFullYear());
+                          }
+                          setShowDatePicker(true);
+                        }}
+                      >
+                        <IcoCalendar />
+                      </span>
+                      <input
+                        ref={dobRef}
+                        className="sp-input"
+                        type="text"
+                        readOnly
+                        placeholder="dd-mm-yyyy"
+                        value={
+                          formData.dateOfBirth
+                            ? formData.dateOfBirth.split("-").reverse().join("-")
+                            : ""
                         }
-                        setShowDatePicker(true);
-                      }}
-                    >
-                      <IcoCalendar />
-                    </span>
-                    <input
-                      ref={dobRef}
-                      className="sp-input"
-                      type="text"
-                      readOnly
-                      placeholder="dd-mm-yyyy"
-                      value={
-                        formData.dateOfBirth
-                          ? formData.dateOfBirth.split("-").reverse().join("-")
-                          : ""
-                      }
-                      onClick={() => {
-                        const existing = formData.dateOfBirth;
-                        if (existing) {
-                          const [y, m, d] = existing.split("-").map(Number);
-                          const dt = new Date(y, (m || 1) - 1, d || 1);
-                          setPickerSelected(dt);
-                          setPickerMonth(dt.getMonth());
-                          setPickerYear(dt.getFullYear());
-                        } else {
-                          const today = new Date();
-                          setPickerSelected(today);
-                          setPickerMonth(today.getMonth());
-                          setPickerYear(today.getFullYear());
-                        }
-                        setShowDatePicker(true);
-                      }}
-                      required
-                    />
+                        onClick={() => {
+                          const existing = formData.dateOfBirth;
+                          if (existing) {
+                            const [y, m, d] = existing.split("-").map(Number);
+                            const dt = new Date(y, (m || 1) - 1, d || 1);
+                            setPickerSelected(dt);
+                            setPickerMonth(dt.getMonth());
+                            setPickerYear(dt.getFullYear());
+                          } else {
+                            const today = new Date();
+                            setPickerSelected(today);
+                            setPickerMonth(today.getMonth());
+                            setPickerYear(today.getFullYear());
+                          }
+                          setShowDatePicker(true);
+                        }}
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {/* Time of Birth */}
-                <div>
-                  <label className="sp-field-label">{t.timeOfBirth}</label>
-                  <div className="sp-wrap">
-                    <span
-                      className="sp-ico sp-ico-btn"
-                      onClick={() => {
-                        const t = formData.timeOfBirth || "12:00";
-                        const [hhStr, mmStr] = t.split(":");
-                        let hh = parseInt(hhStr || "12", 10);
-                        const mm = parseInt(mmStr || "0", 10);
-                        const period = hh >= 12 ? "PM" : "AM";
-                        let displayHour = hh % 12;
-                        if (displayHour === 0) displayHour = 12;
-                        setTpHour(displayHour);
-                        setTpMinute(isNaN(mm) ? 0 : mm);
-                        setTpPeriod(period as "AM" | "PM");
-                        setTpActive("hour");
-                        setShowTimePicker(true);
-                      }}
-                    >
-                      <IcoClock />
-                    </span>
-                    <input
-                      ref={timeRef}
-                      className="sp-input"
-                      type="text"
-                      readOnly
-                      placeholder="hh:mm --"
-                      value={formatTimeDisplay(formData.timeOfBirth)}
-                      onClick={() => {
-                        const t = formData.timeOfBirth || "12:00";
-                        const [hhStr, mmStr] = t.split(":");
-                        let hh = parseInt(hhStr || "12", 10);
-                        const mm = parseInt(mmStr || "0", 10);
-                        const period = hh >= 12 ? "PM" : "AM";
-                        let displayHour = hh % 12;
-                        if (displayHour === 0) displayHour = 12;
-                        setTpHour(displayHour);
-                        setTpMinute(isNaN(mm) ? 0 : mm);
-                        setTpPeriod(period as "AM" | "PM");
-                        setTpActive("minute");
-                        setShowTimePicker(true);
-                      }}
-                      required
-                    />
+                  {/* Time of Birth */}
+                  <div>
+                    <label className="sp-field-label">{t.timeOfBirth}</label>
+                    <div className="sp-wrap">
+                      <span
+                        className="sp-ico sp-ico-btn"
+                        onClick={() => {
+                          const t = formData.timeOfBirth || "12:00";
+                          const [hhStr, mmStr] = t.split(":");
+                          let hh = parseInt(hhStr || "12", 10);
+                          const mm = parseInt(mmStr || "0", 10);
+                          const period = hh >= 12 ? "PM" : "AM";
+                          let displayHour = hh % 12;
+                          if (displayHour === 0) displayHour = 12;
+                          setTpHour(displayHour);
+                          setTpMinute(isNaN(mm) ? 0 : mm);
+                          setTpPeriod(period as "AM" | "PM");
+                          setTpActive("hour");
+                          setShowTimePicker(true);
+                        }}
+                      >
+                        <IcoClock />
+                      </span>
+                      <input
+                        ref={timeRef}
+                        className="sp-input"
+                        type="text"
+                        readOnly
+                        placeholder="hh:mm --"
+                        value={formatTimeDisplay(formData.timeOfBirth)}
+                        onClick={() => {
+                          const t = formData.timeOfBirth || "12:00";
+                          const [hhStr, mmStr] = t.split(":");
+                          let hh = parseInt(hhStr || "12", 10);
+                          const mm = parseInt(mmStr || "0", 10);
+                          const period = hh >= 12 ? "PM" : "AM";
+                          let displayHour = hh % 12;
+                          if (displayHour === 0) displayHour = 12;
+                          setTpHour(displayHour);
+                          setTpMinute(isNaN(mm) ? 0 : mm);
+                          setTpPeriod(period as "AM" | "PM");
+                          setTpActive("minute");
+                          setShowTimePicker(true);
+                        }}
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {/* Submit */}
-                <button type="submit" className="sp-btn" disabled={loading}>
-                  {loading ? t.creating : t.createAndStart}
-                </button>
-              </div>
-            </form>
+                  {/* Submit */}
+                  <button type="submit" className="sp-btn" disabled={loading}>
+                    {loading ? t.creating : t.createAndStart}
+                  </button>
+                  <p className="sp-alt">
+                    {t.alreadyRegistered}{" "}
+                    <button type="button" className="sp-link-btn" onClick={() => setAuthMode("login")}>
+                      {t.signIn}
+                    </button>
+                  </p>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleLogin} noValidate>
+                <div className="sp-fields">
+                  <div className="sp-security-note">{t.loginSecurityNote}</div>
+                  <div>
+                    <label className="sp-field-label">{t.aadhaarNumber}</label>
+                    <div className="sp-wrap">
+                      <input
+                        className="sp-input no-icon"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        maxLength={12}
+                        placeholder={t.aadhaarNumber}
+                        value={loginData.aadhaarNumber}
+                        onChange={(e) => setLogin("aadhaarNumber", onlyDigits(e.target.value).slice(0, 12))}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="sp-field-label">{t.mobileAsPassword}</label>
+                    <div className="sp-wrap">
+                      <input
+                        className="sp-input no-icon"
+                        type="tel"
+                        inputMode="tel"
+                        placeholder={t.phoneNumber}
+                        value={loginData.phoneNumber}
+                        onChange={(e) => setLogin("phoneNumber", e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <button type="submit" className="sp-btn" disabled={loading}>
+                    {loading ? t.signingIn : t.signInAndContinue}
+                  </button>
+                  <p className="sp-alt">
+                    {t.newToPhc}{" "}
+                    <button type="button" className="sp-link-btn" onClick={() => setAuthMode("signup")}>
+                      {t.createProfile}
+                    </button>
+                  </p>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </div>

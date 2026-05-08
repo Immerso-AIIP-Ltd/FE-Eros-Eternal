@@ -7,11 +7,15 @@ export interface PhcPatient {
   userId: string;
   username: string;
   phoneNumber: string;
+  aadhaarLast4?: string;
   gender?: string;
   dateOfBirth?: string;
   timeOfBirth?: string;
   placeOfBirth?: string;
   currentLocation?: string;
+  preferredLanguage?: AppLanguage;
+  hasBioCareReports?: boolean;
+  isFirstScanRequired?: boolean;
 }
 
 interface PhcSessionContextValue {
@@ -65,4 +69,3 @@ export function usePhcSession() {
   }
   return ctx;
 }
-

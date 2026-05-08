@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import ErosClinicLogo from "@/assets/images/eros-wellness-ai-clinic-cropped.png";
 
 /**
  * Temporary password gate — until real auth lands.
@@ -83,35 +84,17 @@ export default function PasswordGate({ children }: PasswordGateProps) {
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
-          <div
+          <img
+            src={ErosClinicLogo}
+            alt="EROS Wellness AI Clinic"
             style={{
-              width: "56px",
-              height: "56px",
-              borderRadius: "50%",
-              background:
-                "linear-gradient(135deg, rgba(157,202,230,0.25), rgba(72,147,252,0.15))",
-              border: "1px solid rgba(157,202,230,0.4)",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: "16px",
+              width: "220px",
+              maxWidth: "80%",
+              height: "auto",
+              objectFit: "contain",
+              marginBottom: "18px",
             }}
-            aria-hidden
-          >
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </div>
+          />
           <h1
             style={{
               fontSize: "22px",
