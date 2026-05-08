@@ -2,6 +2,11 @@ name: Dev Workflow
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build and deploy'
+        required: true
+        default: 'master'
 
 concurrency:
   group: dev-deploy
@@ -14,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
