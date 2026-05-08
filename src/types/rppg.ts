@@ -24,17 +24,48 @@ export interface RppgVitals {
   };
 }
 
+export interface RppgFrequencyDomain {
+  vlf: number;
+  lf: number;
+  hf: number;
+  tp: number;
+  lfHfRatio: number;
+}
+
+export interface RppgNonlinear {
+  sd1: { value: number; unit: 'ms'; description: string };
+  sd2: { value: number; unit: 'ms'; description: string };
+  sd1Sd2Ratio: number;
+  sampleEntropy: { value: number | null; description: string };
+  dfaAlpha1: { value: number | null; reliable: boolean; description: string };
+}
+
+export interface RppgRespiratoryExtended {
+  breathingRateMean: { value: number; unit: 'breaths/min' };
+  breathingRateSd: { value: number; unit: 'breaths/min' };
+  breathingRateCv: number;
+  stability: 'stable' | 'variable' | 'unstable';
+  breathCyclesDetected: number;
+}
+
 export interface RppgHrv {
   sdnn: { value: number; unit: 'ms'; status: string };
   rmssd: { value: number; unit: 'ms'; status: string };
   pnn50: { value: number; unit: '%'; status: string };
+  pnn20: { value: number; unit: '%'; status: string };
   recordingClass: 'insufficient_data' | 'ultra-short' | 'short-term' | 'standard';
+  frequencyDomain?: RppgFrequencyDomain;
+  nonlinear?: RppgNonlinear;
+  respiratoryExtended?: RppgRespiratoryExtended;
+  rrIntervalCount?: number;
 }
 
 export interface RppgStress {
   level: 'low' | 'moderate' | 'high' | 'unknown';
   index: number;
   description: string;
+  sympathovagalBalance?: number | null;
+  components?: { sdnn: number; rmssd: number };
 }
 
 export interface RppgMetadata {
@@ -58,6 +89,8 @@ export interface HrHistoryPoint {
 export interface RppgReportData extends RppgMetrics {
   metadata: RppgMetadata;
   hrHistory: HrHistoryPoint[];
+  rrIntervals?: number[];
+  poincareData?: { x: number; y: number }[];
 }
 
 // ============================================
@@ -109,6 +142,7 @@ export interface TimeDomainHRV {
   sdnn: VitalMeasurement;
   rmssd: VitalMeasurement;
   pnn50: VitalMeasurement;
+  pnn20: VitalMeasurement;
 }
 
 /**
@@ -238,6 +272,28 @@ export interface CombinedReportData {
   rppg: RppgReportData;
   /** Full FacePhys report data (new comprehensive structure) */
   facephysReport?: CompleteReportData;
+  /** AI-generated health report from OpenAI */
+  aiReport?: {
+    summary: string;
+    insights: string[];
+    recommendations: string[];
+    riskFactors: string[];
+    disclaimer: string;
+  };
+  /** Per-section GPT insights */
+  sectionInsights?: {
+    timeDomain: string;
+    frequencyDomain: string;
+    nonlinear: string;
+    stressRespiratory: string;
+  };
+  /** Health data from backend API (merged after scan) */
+  apiHealthData?: {
+    heart_rate: number;
+    bp_systolic: number;
+    bp_diastolic: number;
+    scan_duration_seconds: number;
+  };
 }
 
 // ============================================

@@ -2,7 +2,7 @@
 import React from "react";
 
 type VoiceMessageProps = {
-  url: string;      // blob: or data: url created after recording
+  url: string; // blob: or data: url created after recording
   duration: number; // seconds
 };
 
@@ -17,11 +17,20 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
     durationRef.current = duration || 0;
   }, [duration]);
 
-  // attach src when url changes
   React.useEffect(() => {
     if (!audioRef.current) return;
     audioRef.current.src = url;
     audioRef.current.load();
+
+    const onMeta = () => {
+      const d = audioRef.current?.duration;
+      if (d && !isNaN(d) && d < 86400) {
+        durationRef.current = Math.floor(d);
+      }
+    };
+    audioRef.current.addEventListener("loadedmetadata", onMeta);
+    return () =>
+      audioRef.current?.removeEventListener("loadedmetadata", onMeta);
   }, [url]);
 
   // timeupdate / play / pause / ended handlers
@@ -32,7 +41,10 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
     const onTime = () => setCurrent(a.currentTime || 0);
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
-    const onEnded = () => setIsPlaying(false);
+    const onEnded = () => {
+      setIsPlaying(false);
+      setCurrent(0);
+    };
 
     a.addEventListener("timeupdate", onTime);
     a.addEventListener("play", onPlay);
@@ -93,11 +105,13 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
         a.pause();
       }
     },
-    []
+    [],
   );
 
   const progressPct =
-    durationRef.current > 0 ? Math.min(100, (current / durationRef.current) * 100) : 0;
+    durationRef.current > 0
+      ? Math.min(100, (current / durationRef.current) * 100)
+      : 0;
 
   // static bars generator
   const bars = React.useMemo(() => Array.from({ length: 40 }), []);
@@ -118,7 +132,7 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
         alignItems: "center",
         gap: 12,
         // background: "#00b8f8",
-        color: "#fff",
+        // color: "#fff",
         padding: "4px 4px",
         borderRadius: 24,
         maxWidth: 250,
@@ -150,7 +164,14 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
       <div style={{ flex: 1, minWidth: 140 }}>
         <div style={{ position: "relative", height: 22 }}>
           {/* background bars (unplayed) */}
-          <div style={{ display: "flex", gap: 4, alignItems: "end", height: "100%" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 4,
+              alignItems: "end",
+              height: "100%",
+            }}
+          >
             {bars.map((_, i) => {
               const h = 6 + ((i * 7) % 12);
               return (
@@ -159,7 +180,7 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
                   style={{
                     width: 3,
                     height: h,
-                    background: "rgba(255,255,255,0.28)",
+                    background: "black",
                     borderRadius: 2,
                   }}
                 />
@@ -179,7 +200,14 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
               pointerEvents: "none",
             }}
           >
-            <div style={{ display: "flex", gap: 4, alignItems: "end", height: "100%" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 4,
+                alignItems: "end",
+                height: "100%",
+              }}
+            >
               {bars.map((_, i) => {
                 const h = 6 + ((i * 7) % 12);
                 return (
@@ -188,7 +216,7 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
                     style={{
                       width: 3,
                       height: h,
-                      background: "rgba(255,255,255,0.95)",
+                      background: "#00B8DB",
                       borderRadius: 2,
                     }}
                   />
@@ -199,8 +227,19 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
         </div>
 
         {/* duration + speaker aligned right */}
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6, fontSize: 13 }}>
-          <div style={{ marginRight: 8 }}>{formatTime(durationRef.current || 0)}</div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginTop: 6,
+            fontSize: 13,
+          }}
+        >
+          <div style={{ marginRight: 8 }}>
+            {isPlaying
+              ? formatTime(current)
+              : formatTime(durationRef.current || 0)}
+          </div>
           <div>🔊</div>
         </div>
       </div>
@@ -211,8 +250,9 @@ const VoiceMessage: React.FC<VoiceMessageProps> = ({ url, duration }) => {
         preload="auto"
         style={{ position: "absolute", left: -9999, width: 0, height: 0 }}
       >
+        <source src={url} type="audio/wav" />
         <source src={url} type="audio/webm;codecs=opus" />
-        {/* keep other sources as needed */}
+        <source src={url} type="audio/mpeg" />
       </audio>
     </div>
   );

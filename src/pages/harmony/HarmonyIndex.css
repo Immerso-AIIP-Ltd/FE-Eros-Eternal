@@ -1,0 +1,35 @@
+/* HarmonyIndex - Laptop view centering fixes */
+
+@media (max-height: 900px), (max-width: 1440px) {
+  .harmony-intro-screen {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding-top: 3rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .harmony-intro-image-section {
+    height: 50vh !important;
+    flex-shrink: 0;
+  }
+
+  .harmony-intro-content-section {
+    height: auto !important;
+    min-height: auto !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+    flex: 1;
+    justify-content: center !important;
+  }
+
+  .harmony-intro-title {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .harmony-intro-desc {
+    font-size: 0.85rem !important;
+    margin-bottom: 1rem !important;
+  }
+}

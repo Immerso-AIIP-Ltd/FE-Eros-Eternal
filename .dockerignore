@@ -1,0 +1,34 @@
+# Dependencies (installed in image)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Git
+.git
+
+# Secrets and local env (pass at runtime: --env-file / -e)
+.env
+.env.*
+!.env.example
+
+# Build output
+dist
+build
+*.local
+
+# Tests and coverage
+coverage
+.nyc_output
+
+# Caches
+.cache
+.parcel-cache
+*.tsbuildinfo
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea
+.vscode

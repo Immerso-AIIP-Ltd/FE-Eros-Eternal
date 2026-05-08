@@ -1,0 +1,38 @@
+/* TarotCardSelector - Laptop view: compact header, cards centered */
+
+/* Laptop/smaller screens: compact header, cards stay centered */
+@media (max-height: 900px), (max-width: 1440px) {
+  .tarot-selector-header {
+    top: 1.5rem !important;
+  }
+
+  .tarot-selector-header .tarot-selector-title {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .tarot-selector-header .tarot-selector-subtitle {
+    font-size: 0.75rem !important;
+  }
+
+  .tarot-selector-header .tarot-counter-badge {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    font-size: 0.95rem !important;
+  }
+}
+
+/* Extra small laptop screens */
+@media (max-height: 768px), (max-width: 1280px) {
+  .tarot-selector-header {
+    top: 1rem !important;
+  }
+
+  .tarot-selector-header .tarot-selector-title {
+    font-size: 1.1rem !important;
+  }
+
+  .tarot-selector-header .tarot-selector-subtitle {
+    font-size: 0.7rem !important;
+  }
+}

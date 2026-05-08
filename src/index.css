@@ -26,8 +26,6 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -119,4 +117,77 @@ button:focus-visible {
   /* background-image: url('./header-bg.png'); */
   /* -webkit-mask-image:-webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)));
       mask-image: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0)); */
+}
+
+/* Viewport Management Utilities */
+.viewport-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.viewport-header {
+  flex-shrink: 0;
+}
+
+.viewport-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  overflow-y: auto;
+  scrollbar-width: none; /* Hide scrollbar for cleaner look */
+}
+
+.viewport-content::-webkit-scrollbar {
+  display: none;
+}
+
+.responsive-card {
+  width: 90%;
+  max-width: 600px;
+  max-height: 90%;
+  display: flex;
+  flex-direction: column;
+  background: white !important;
+  border-radius: 12px;
+  box-sizing: border-box;
+  margin: auto;
+}
+
+.responsive-card .card-body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1.5rem !important;
+}
+
+/* Dynamic resizing for drag-drop and preview areas */
+.dynamic-area {
+  flex-grow: 1;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+@media (max-height: 700px) {
+  .viewport-content {
+    padding: 0.5rem;
+  }
+  .responsive-card {
+    width: 95%;
+  }
+  .dynamic-area {
+    min-height: 100px;
+    margin: 0.5rem 0;
+  }
 }

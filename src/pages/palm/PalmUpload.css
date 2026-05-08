@@ -1,0 +1,105 @@
+/* PalmUpload - Fit on screen without scrolling */
+
+/* Base: ensure page fills viewport, no scroll */
+.palm-upload-page {
+  overflow: hidden !important;
+}
+
+.palm-upload-content {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Laptop/small screens: compact layout to fit in viewport */
+@media (max-height: 900px), (max-width: 1440px) {
+  .palm-upload-page .d-flex.px-4.py-3 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  .palm-upload-title-section {
+    margin-bottom: 0.5rem !important;
+    padding: 0 0.5rem !important;
+  }
+
+  .palm-upload-title-section h2 {
+    font-size: 1.35rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .palm-upload-title-section p {
+    font-size: 0.8rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .palm-upload-content {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 0.75rem !important;
+  }
+
+  .palm-upload-card {
+    padding: 1.5rem !important;
+    max-height: 100% !important;
+  }
+
+  .palm-upload-card .card-body {
+    padding: 0 !important;
+  }
+
+  .palm-upload-card h6 {
+    margin-bottom: 0.75rem !important;
+    font-size: 0.95rem !important;
+  }
+
+  .palm-upload-drop-zone {
+    padding: 24px 16px !important;
+    min-height: 120px !important;
+  }
+
+  .palm-upload-drop-zone .bi-upload {
+    font-size: 2rem !important;
+  }
+
+  .palm-upload-drop-zone .mb-4 {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .palm-upload-drop-zone p,
+  .palm-upload-drop-zone span {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .palm-upload-preview-box {
+    min-height: 120px !important;
+  }
+
+  .palm-upload-card .mt-4 {
+    margin-top: 0.75rem !important;
+  }
+
+  .palm-upload-card small {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Very short screens (e.g. 768px height) */
+@media (max-height: 768px) {
+  .palm-upload-drop-zone {
+    padding: 16px 12px !important;
+    min-height: 100px !important;
+  }
+
+  .palm-upload-drop-zone .bi-upload {
+    font-size: 1.75rem !important;
+  }
+
+  .palm-upload-title-section h2 {
+    font-size: 1.2rem !important;
+  }
+
+  .palm-upload-title-section p {
+    font-size: 0.75rem !important;
+  }
+}

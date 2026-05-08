@@ -1,0 +1,236 @@
+/* RasiChartPage - Slightly reduced desktop sizes */
+
+/* Desktop: slightly smaller overall */
+.rasi-chart-page {
+  padding: 0.75rem 1rem !important;
+}
+
+/* Top bar — Figma: arrow + title left, refresh right */
+.rasi-chart-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0 4px;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.rasi-chart-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px 8px 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: #0a0a0a;
+  font-family: "Inter", "Poppins", system-ui, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.rasi-chart-back:hover {
+  opacity: 0.72;
+}
+
+.rasi-chart-back:focus-visible {
+  outline: 2px solid #9dcae6;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.rasi-chart-back-icon {
+  flex-shrink: 0;
+  color: #0a0a0a;
+}
+
+.rasi-chart-back-title {
+  line-height: 1.2;
+}
+
+.rasi-chart-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #0a0a0a;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.rasi-chart-refresh:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.rasi-chart-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rasi-chart-refresh:focus-visible {
+  outline: 2px solid #9dcae6;
+  outline-offset: 2px;
+}
+
+@keyframes rasi-refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rasi-chart-refresh-spin {
+  animation: rasi-refresh-spin 0.85s linear infinite;
+}
+
+.rasi-chart-page .rasi-chart-user-info {
+  margin-bottom: 1rem !important;
+}
+
+.rasi-chart-page .rasi-chart-user-info h3 {
+  font-size: 1.35rem !important;
+}
+
+.rasi-chart-page .rasi-chart-user-info p {
+  font-size: 0.9rem !important;
+}
+
+.rasi-chart-page .rasi-chart-card .card-body {
+  padding: 0.75rem !important;
+}
+
+.rasi-chart-page .rasi-chart-card .card-title {
+  font-size: 1rem !important;
+}
+
+.rasi-chart-page .rasi-chart-card .card-body > p {
+  font-size: 0.8rem !important;
+}
+
+.rasi-chart-page .rasi-chart-card .rasi-chart-img,
+.rasi-chart-page .rasi-chart-card .chart-iframe-wrapper img {
+  max-height: 480px !important;
+  object-fit: contain !important;
+}
+
+.rasi-chart-page .row.g-4 {
+  --bs-gutter-y: 0.75rem;
+  --bs-gutter-x: 0.75rem;
+}
+
+/* Laptop viewport: typical 1366x768 or 1440x900 */
+@media (max-height: 900px) {
+  .rasi-chart-page {
+    height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0.5rem 1rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-top-bar {
+    margin-bottom: 0.5rem !important;
+    flex-shrink: 0;
+  }
+
+  .rasi-chart-page .rasi-chart-user-info {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-user-info h3 {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-user-info p {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-cards-wrapper {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .rasi-chart-page .rasi-chart-cards-wrapper .row {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .card {
+    height: 100% !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .card-body {
+    padding: 0.5rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .card-title {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.1rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .card-body > p {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .chart-iframe-wrapper {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .rasi-chart-img,
+  .rasi-chart-page .rasi-chart-card .chart-iframe-wrapper img {
+    max-height: 280px !important;
+    object-fit: contain !important;
+  }
+
+  .rasi-chart-page .rasi-chart-card .btn-group-row {
+    margin-top: 0.35rem !important;
+    flex-shrink: 0;
+  }
+
+  .rasi-chart-page .row.g-4 {
+    --bs-gutter-y: 0.5rem !important;
+    --bs-gutter-x: 0.5rem !important;
+    height: 100% !important;
+  }
+
+  .rasi-chart-page .row.g-4 [class*="col-"] {
+    flex: 1 1 50%;
+    min-width: 0;
+    min-height: 0;
+  }
+}
+
+/* Extra constraint for shorter laptops (e.g. 768px height) */
+@media (max-height: 768px) {
+  .rasi-chart-page .rasi-chart-card .rasi-chart-img,
+  .rasi-chart-page .rasi-chart-card .chart-iframe-wrapper img {
+    max-height: 220px !important;
+  }
+
+  .rasi-chart-page .rasi-chart-user-info h3 {
+    font-size: 1.1rem !important;
+  }
+
+  .rasi-chart-page .rasi-chart-user-info p {
+    font-size: 0.75rem !important;
+  }
+}

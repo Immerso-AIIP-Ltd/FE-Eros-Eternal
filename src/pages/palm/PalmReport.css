@@ -1,0 +1,408 @@
+/* Palm report — responsive layout (content unchanged) */
+
+.palm-report-page {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.palm-report-page .palm-report-inner {
+  width: 100%;
+  max-width: min(100%, 1480px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(16px, 4vw, 40px);
+  padding-right: clamp(16px, 4vw, 40px);
+  padding-top: clamp(12px, 2vw, 20px);
+  padding-bottom: clamp(24px, 4vw, 40px);
+}
+
+.palm-report-page .palm-report-header {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.palm-report-page .palm-report-back {
+  position: relative;
+  z-index: 10;
+}
+
+/* Stacked white tiles — title, thin rule, body */
+.palm-report-page .palm-tile {
+  background: #fff;
+  border-radius: 12px;
+  padding: clamp(20px, 4vw, 24px);
+  box-shadow:
+    0 4px 22px rgba(15, 23, 42, 0.06),
+    0 2px 10px rgba(59, 130, 246, 0.07);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-sizing: border-box;
+}
+
+.palm-report-page .palm-tile__head {
+  margin: 0;
+}
+
+.palm-report-page .palm-tile__head--center {
+  text-align: center;
+}
+
+.palm-report-page .palm-tile__title {
+  margin: 0 0 0.25rem;
+  font-size: clamp(1.1rem, 3.2vw, 1.35rem);
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.palm-report-page .palm-tile__head:not(.palm-tile__head--center) .palm-tile__title {
+  margin-bottom: 0.5rem;
+}
+
+.palm-report-page .palm-tile__subtitle {
+  margin: 0 0 0.6rem;
+  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+  font-weight: 500;
+  color: #64748b;
+}
+
+.palm-report-page .palm-tile__divider {
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: #e2e8f0;
+}
+
+.palm-report-page .palm-tile__body {
+  margin-top: 1rem;
+  color: #334155;
+  font-size: clamp(0.875rem, 2.8vw, 1rem);
+  line-height: 1.75;
+}
+
+.palm-report-page .palm-tile__body--media {
+  margin-top: 1rem;
+}
+
+.palm-report-page .palm-tile--media .palm-report-image-wrap {
+  margin-bottom: 0;
+}
+
+/* Reading sections only (Hand shape, Palm lines, lists…) — match stacked report cards */
+.palm-report-page .palm-tile--report-section {
+  box-shadow:
+    0 3px 18px rgba(15, 23, 42, 0.055),
+    0 1px 6px rgba(59, 130, 246, 0.06);
+}
+
+.palm-report-page .palm-tile--report-section .palm-tile__head {
+  text-align: left;
+}
+
+.palm-report-page .palm-tile--report-section .palm-tile__title {
+  margin-bottom: 0.45rem;
+  font-size: clamp(1rem, 2.85vw, 1.2rem);
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.palm-report-page .palm-tile--report-section .palm-tile__divider {
+  margin-top: 0;
+}
+
+.palm-report-page .palm-tile--report-section .palm-tile__body {
+  margin-top: 0.875rem;
+  color: #475569;
+  font-size: clamp(0.875rem, 2.65vw, 0.98rem);
+  line-height: 1.72;
+}
+
+.palm-report-page .palm-tile--report-section .palm-prose,
+.palm-report-page .palm-tile--report-section .palm-detail-bullets {
+  color: #475569;
+}
+
+.palm-report-page .palm-tile--report-section .palm-prose-paragraph {
+  font-size: clamp(0.875rem, 2.65vw, 0.98rem);
+  line-height: 1.72;
+  margin-bottom: 0.85rem;
+}
+
+.palm-report-page .palm-tile--report-section .palm-detail-bullets {
+  font-size: clamp(0.875rem, 2.65vw, 0.98rem);
+  line-height: 1.68;
+}
+
+.palm-report-page .palm-tile--header-only .palm-tile__divider {
+  margin-top: 0.65rem;
+}
+
+.palm-report-page .palm-tile__body--solo {
+  margin-top: 0;
+}
+
+.palm-report-page .palm-tile__body--profile {
+  margin-top: 1rem;
+}
+
+.palm-report-page .palm-tile__profile-name {
+  font-size: clamp(1rem, 3vw, 1.15rem);
+  font-weight: 600;
+  color: #334155;
+}
+
+.palm-report-page .palm-detail-bullets {
+  margin: 0;
+  padding-left: 1.35rem;
+  list-style-type: disc;
+  list-style-position: outside;
+  color: #334155;
+  font-size: clamp(0.875rem, 2.8vw, 1rem);
+  line-height: 1.65;
+}
+
+.palm-report-page .palm-detail-bullets li {
+  margin-bottom: 0.55rem;
+  padding-left: 0.2rem;
+}
+
+.palm-report-page .palm-detail-bullets li:last-child {
+  margin-bottom: 0;
+}
+
+.palm-report-page .palm-report-header .btn {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  padding: 0.45rem 0.85rem;
+}
+
+.palm-report-page .palm-report-user h2 {
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+}
+
+.palm-report-page .palm-report-user h6 {
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
+}
+
+.palm-report-page .palm-report-image-wrap {
+  width: 100%;
+  max-width: min(340px, 88vw);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 clamp(4px, 2vw, 12px);
+}
+
+.palm-report-page .palm-report-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: min(260px, 42vh);
+  object-fit: contain;
+}
+
+/* Face analysis — circular photo inside same tile pattern as palm */
+.palm-report-page .face-report-avatar-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0 clamp(4px, 2vw, 12px);
+}
+
+.palm-report-page .face-report-avatar {
+  width: min(160px, 42vw);
+  height: min(160px, 42vw);
+  max-width: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e8ecf1;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+}
+
+.palm-report-page .palm-report-container {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Match Relationship Compatibility results: centered max width + 2-col grid */
+.palm-report-page .palm-report-detail-grid {
+  width: 100%;
+  max-width: min(100%, 1000px);
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 1rem;
+}
+
+.palm-report-page .palm-tile--compat-grid {
+  border-radius: 16px;
+  border: 0;
+  padding: 1rem 1.1rem 1.15rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.palm-report-page .palm-tile--compat-grid .palm-tile__divider {
+  display: none;
+}
+
+.palm-report-page .palm-tile--compat-grid .palm-tile__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.palm-report-page .palm-tile--compat-grid .palm-tile__body {
+  margin-top: 0.75rem;
+  color: #4b5563;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.palm-report-page .palm-tile--compat-grid .palm-prose,
+.palm-report-page .palm-tile--compat-grid .palm-prose-paragraph {
+  color: #4b5563;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.palm-report-page .palm-tile--compat-grid .palm-prose-paragraph {
+  margin-bottom: 0.65rem;
+}
+
+.palm-report-page .palm-detail-bullets--compat {
+  color: #374151;
+  font-size: 0.875rem;
+  line-height: 1.8;
+  padding-left: 1.25rem;
+}
+
+.palm-report-page .palm-detail-bullets--compat li {
+  margin-bottom: 0.75rem;
+}
+
+.palm-report-page .palm-detail-bullets--compat li:last-child {
+  margin-bottom: 0;
+}
+
+.palm-report-page .palm-report-card .card-body {
+  padding: clamp(1rem, 3vw, 1.5rem) !important;
+}
+
+.palm-report-page .palm-report-card .card-title {
+  font-size: clamp(1.1rem, 3.5vw, 1.5rem) !important;
+  word-break: break-word;
+}
+
+.palm-report-page .palm-report-card li,
+.palm-report-page .palm-report-detail li {
+  font-size: clamp(0.875rem, 2.8vw, 1rem);
+  line-height: 1.7;
+  margin-left: 0 !important;
+  padding-left: 0.25rem;
+  color: #0a0a0a;
+}
+
+/* Detailed Analysis — space between main bullets */
+.palm-report-page .palm-report-detail > li.palm-detail-main {
+  margin-bottom: 1.65rem;
+  padding-bottom: 0.5rem;
+  list-style-position: outside;
+  color: #0a0a0a;
+}
+
+.palm-report-page .palm-report-detail > li.palm-detail-main:last-child {
+  margin-bottom: 0;
+}
+
+/* Sub-bullets — black dots, no blue */
+.palm-report-page .palm-star-sublist {
+  list-style: none;
+  margin: 1rem 0 0 0;
+  padding: 0 0 0 0.25rem;
+}
+
+.palm-report-page .palm-star-sublist li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 1.15rem;
+  line-height: 1.7;
+  color: #0a0a0a;
+}
+
+.palm-report-page .palm-star-sublist li:last-child {
+  margin-bottom: 0;
+}
+
+.palm-report-page .palm-star-sublist li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0a0a0a;
+  box-shadow: none;
+}
+
+.palm-report-page .palm-report-card .card-title,
+.palm-report-page .palm-report-card strong {
+  color: #0a0a0a;
+}
+
+.palm-report-page .palm-tile__body .palm-report-detail-root,
+.palm-report-page .palm-tile__body .palm-prose {
+  width: 100%;
+  max-width: 100%;
+  color: #334155;
+}
+
+/* Full-width section cards (stacked) */
+.palm-report-page .palm-report-full-col {
+  width: 100%;
+}
+
+.palm-report-page .palm-report-detail {
+  font-size: clamp(0.875rem, 2.8vw, 1rem);
+  line-height: 1.75;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  color: #0a0a0a;
+}
+
+/* Top-level analysis list — visible bullets for main points */
+.palm-report-page ul.palm-report-detail-root {
+  list-style: disc;
+  list-style-position: outside;
+  padding-left: 1.35rem;
+  margin: 0;
+}
+
+.palm-report-page .palm-report-detail p {
+  margin-bottom: 0.65rem;
+}
+
+/* Slightly reduce hover lift on touch / small screens */
+@media (max-width: 576px) {
+  .palm-report-page .card:hover {
+    transform: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .palm-report-page .palm-report-image-wrap {
+    max-width: min(380px, 42vw);
+  }
+  .palm-report-page .palm-report-image {
+    max-height: min(300px, 36vh);
+  }
+}
+
+@media (min-width: 1200px) {
+  .palm-report-page .palm-report-inner {
+    max-width: min(100%, 1480px);
+  }
+}
