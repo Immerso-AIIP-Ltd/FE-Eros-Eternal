@@ -1,14 +1,14 @@
 /**
  * API base URL
  *
- * - Local dev: default "" so requests are same-origin `/aitools/...` and Vite proxies (see vite.config).
- * - Set VITE_API_DIRECT=true only if the gateway allowlists your origin for CORS.
- * - Production / direct mode: VITE_API_BASE_URL or local backend default.
+ * - Default: browser calls the configured API gateway directly.
+ * - Set VITE_API_DIRECT=false only when you intentionally want local dev to use the Vite proxy.
+ * - VITE_API_BASE_URL can override the default gateway at build/dev time.
  */
 
-const localBackendDefault = "http://localhost:8080";
+const defaultApiBaseUrl = "https://eu-dev-apigateway.erosuniverse.com";
 
 export const baseApiUrl =
-  import.meta.env.DEV && import.meta.env.VITE_API_DIRECT !== "true"
+  import.meta.env.DEV && import.meta.env.VITE_API_DIRECT === "false"
     ? ""
-    : import.meta.env.VITE_API_BASE_URL || localBackendDefault;
+    : import.meta.env.VITE_API_BASE_URL || defaultApiBaseUrl;

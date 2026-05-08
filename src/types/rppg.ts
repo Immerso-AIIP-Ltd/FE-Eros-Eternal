@@ -93,6 +93,32 @@ export interface RppgReportData extends RppgMetrics {
   poincareData?: { x: number; y: number }[];
 }
 
+export interface RppgSignalSample {
+  index: number;
+  timestamp_ms: number;
+  value: number;
+}
+
+export interface RppgHeartRateSample {
+  index: number;
+  timestamp_ms: number;
+  heart_rate_bpm: number;
+  sqi: number;
+}
+
+export interface RppgSignalPayload {
+  sample_rate_hz: number;
+  scan_duration_seconds: number;
+  bvp_signal: RppgSignalSample[];
+  ppg_signal: number[];
+  heart_rate_samples: RppgHeartRateSample[];
+  model_metadata: {
+    input_buffer_size: number;
+    sqi_threshold: number;
+    target_fps: number;
+  };
+}
+
 // ============================================
 // NEW COMPREHENSIVE TYPES (FacePhys JSON Structure)
 // ============================================
@@ -294,6 +320,8 @@ export interface CombinedReportData {
     bp_diastolic: number;
     scan_duration_seconds: number;
   };
+  /** Raw model-derived rPPG signal series sent to backend for DB persistence. */
+  rppgSignals?: RppgSignalPayload;
 }
 
 // ============================================

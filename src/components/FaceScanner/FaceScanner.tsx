@@ -4,7 +4,8 @@ import Stars from '../ui/stars';
 import { baseApiUrl } from '@/config/api';
 import { usePhcSession } from '@/context/PhcSessionContext';
 import { getPhcCopy } from '@/i18n/phcCopy';
-import type { CombinedReportData, HrHistoryPoint } from '../../types/rppg';
+import type { CombinedReportData, HrHistoryPoint, RppgSignalPayload } from '../../types/rppg';
+import type { HealthData, SectionInsightsInput } from '../../services/openaiReport';
 import {
   KalmanFilter1D,
   generateVitals,
@@ -55,6 +56,7 @@ const FaceScanner: React.FC = () => {
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isUploadingData, setIsUploadingData] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [preparedReport, setPreparedReport] = useState<CombinedReportData | null>(null);
   const navigate = useNavigate();
   const { language, patient, setBioCareReport } = usePhcSession();
   const t = getPhcCopy(language);
@@ -955,6 +957,8 @@ const FaceScanner: React.FC = () => {
     setProgress(0);
     setRecordedVideo(null);
     setPreviewUrl(null);
+    setPreparedReport(null);
+    setUploadError(null);
     setRecordingTime(0);
     setError(null);
     setIsCameraReady(false);
@@ -1125,9 +1129,160 @@ const FaceScanner: React.FC = () => {
     }
   };
 
+  const buildRppgSignalPayload = (): RppgSignalPayload => {
+    const bvpSamples = bvpLogRef.current
+      .filter(([, value]) => Number.isFinite(value) && value !== 0)
+      .map(([timestamp, value], index) => ({
+        index,
+        timestamp_ms: timestamp,
+        value,
+      }));
+
+    return {
+      sample_rate_hz: TARGET_FPS,
+      scan_duration_seconds: recordingTime,
+      bvp_signal: bvpSamples,
+      ppg_signal: bvpSamples.map((sample) => sample.value),
+      heart_rate_samples: hrLogRef.current.map(([timestamp, hr, sqi], index) => ({
+        index,
+        timestamp_ms: timestamp,
+        heart_rate_bpm: Math.round(hr),
+        sqi,
+      })),
+      model_metadata: {
+        input_buffer_size: INPUT_BUFFER_SIZE,
+        sqi_threshold: SQI_THRESHOLD,
+        target_fps: TARGET_FPS,
+      },
+    };
+  };
+
+  const buildHealthReportInput = (rppgData: CombinedReportData['rppg'] | null): HealthData => ({
+    vitals: {
+      heartRate: rppgData?.vitals.heartRate || { value: Math.round(heartRate) || 72, unit: 'BPM', status: 'NORMAL' },
+      signalQuality: rppgData?.vitals.signalQuality || { value: sqi || 0.5, percentage: Math.round((sqi || 0.5) * 100), status: 'FAIR' },
+      breathingRate: rppgData?.vitals.breathingRate || { value: 15, unit: 'breaths/min', status: 'NORMAL' },
+    },
+    hrv: {
+      sdnn: rppgData?.hrv.sdnn || { value: 45, unit: 'ms', status: 'NORMAL' },
+      rmssd: rppgData?.hrv.rmssd || { value: 35, unit: 'ms', status: 'NORMAL' },
+      pnn50: rppgData?.hrv.pnn50 || { value: 15, unit: '%', status: 'NORMAL' },
+      pnn20: rppgData?.hrv.pnn20 || { value: 25, unit: '%', status: 'NORMAL' },
+    },
+    stress: {
+      level: rppgData?.stress.level || 'moderate',
+      index: rppgData?.stress.index || 50,
+    },
+    metadata: {
+      scanDurationSeconds: recordingTime,
+      timestamp: new Date().toISOString(),
+      reportLanguage,
+      locale: reportLocale,
+    },
+  });
+
+  const buildSectionInsightsInput = (rppgData: CombinedReportData['rppg'] | null): SectionInsightsInput => {
+    const nl = rppgData?.hrv.nonlinear;
+    const re = rppgData?.hrv.respiratoryExtended;
+    return {
+      language: reportLanguage,
+      locale: reportLocale,
+      heartRate: rppgData?.vitals.heartRate?.value || Math.round(heartRate) || 72,
+      heartRateStatus: rppgData?.vitals.heartRate?.status || 'NORMAL',
+      signalQuality: rppgData?.vitals.signalQuality?.percentage || Math.round((sqi || 0.5) * 100),
+      breathingRate: rppgData?.vitals.breathingRate?.value || 15,
+      breathingRateStatus: rppgData?.vitals.breathingRate?.status || 'NORMAL',
+      sdnn: rppgData?.hrv.sdnn?.value || 0,
+      sdnnStatus: rppgData?.hrv.sdnn?.status || 'NORMAL',
+      rmssd: rppgData?.hrv.rmssd?.value || 0,
+      rmssdStatus: rppgData?.hrv.rmssd?.status || 'NORMAL',
+      pnn50: rppgData?.hrv.pnn50?.value || 0,
+      pnn50Status: rppgData?.hrv.pnn50?.status || 'NORMAL',
+      pnn20: rppgData?.hrv.pnn20?.value || 0,
+      pnn20Status: rppgData?.hrv.pnn20?.status || 'NORMAL',
+      rrIntervalCount: rppgData?.hrv.rrIntervalCount || 0,
+      recordingClass: rppgData?.hrv.recordingClass || 'insufficient_data',
+      sd1: nl?.sd1?.value,
+      sd2: nl?.sd2?.value,
+      sd1Sd2Ratio: nl?.sd1Sd2Ratio,
+      sampleEntropy: nl?.sampleEntropy?.value,
+      dfaAlpha1: nl?.dfaAlpha1?.value,
+      stressLevel: rppgData?.stress.level || 'unknown',
+      stressIndex: rppgData?.stress.index || 0,
+      sympathovagalBalance: rppgData?.stress.sympathovagalBalance,
+      breathingRateSd: re?.breathingRateSd?.value,
+      breathingStability: re?.stability,
+      breathCyclesDetected: re?.breathCyclesDetected,
+    };
+  };
+
+  const buildFallbackRppgReport = (): CombinedReportData['rppg'] => ({
+    vitals: {
+      heartRate: { value: Math.round(heartRate) || 72, unit: 'BPM', status: 'NORMAL' },
+      signalQuality: { value: sqi || 0.5, percentage: Math.round((sqi || 0.5) * 100), status: 'FAIR' },
+      breathingRate: { value: 15, unit: 'breaths/min', status: 'NORMAL' },
+    },
+    hrv: {
+      sdnn: { value: 45, unit: 'ms', status: 'NORMAL' },
+      rmssd: { value: 35, unit: 'ms', status: 'NORMAL' },
+      pnn50: { value: 15, unit: '%', status: 'NORMAL' },
+      pnn20: { value: 25, unit: '%', status: 'NORMAL' },
+      recordingClass: 'ultra-short',
+    },
+    stress: {
+      level: 'moderate',
+      index: 50,
+      description: 'Balanced autonomic state with healthy adaptability to stress.',
+    },
+    metadata: {
+      timestamp: new Date().toISOString(),
+      scanDurationSeconds: recordingTime,
+      samplesCollected: hrLogRef.current.length || 0,
+    },
+    hrHistory: hrLogRef.current.map(([time, hr, sqi]) => ({ time, hr: Math.round(hr), sqi })),
+  });
+
+  const buildCombinedReportData = (
+    rppgData: CombinedReportData['rppg'] | null,
+    aiReport: CombinedReportData['aiReport'] | null,
+    sectionInsights: CombinedReportData['sectionInsights'] | null,
+    rppgSignals: RppgSignalPayload,
+  ): CombinedReportData => {
+    const apiRes = apiResponseRef.current;
+    return {
+      success: true,
+      uploadedImage: previewUrl || '',
+      data: {
+        face_analysis_text: '',
+        spiritual_interpretation: '',
+      },
+      rppg: rppgData || buildFallbackRppgReport(),
+      aiReport: apiRes?.ai_report
+        ? {
+          summary: apiRes.ai_report.summary || '',
+          insights: apiRes.ai_report.insights || [],
+          recommendations: apiRes.ai_report.recommendations || [],
+          riskFactors: aiReport?.riskFactors || [],
+          disclaimer: aiReport?.disclaimer || 'This report is AI-generated and for informational purposes only.',
+        }
+        : aiReport || undefined,
+      sectionInsights: sectionInsights || undefined,
+      apiHealthData: apiRes
+        ? {
+          heart_rate: apiRes.heart_rate,
+          bp_systolic: apiRes.bp_systolic,
+          bp_diastolic: apiRes.bp_diastolic,
+          scan_duration_seconds: apiRes.scan_duration_seconds,
+        }
+        : undefined,
+      rppgSignals,
+    };
+  };
+
   const sendScanDataToAPI = async () => {
     setIsUploadingData(true);
     setUploadError(null);
+    setPreparedReport(null);
 
     try {
       // Get rPPG metrics and BP prediction in parallel
@@ -1135,39 +1290,23 @@ const FaceScanner: React.FC = () => {
         getFinalRppgMetrics(),
         predictBP(),
       ]);
+      const rppgSignals = buildRppgSignalPayload();
 
       const bpSystolic = bpResult?.bp_systolic ?? 0;
       const bpDiastolic = bpResult?.bp_diastolic ?? 0;
       const bpConfidence = bpResult?.confidence ?? 0;
 
-      // Generate AI health report
+      // Generate the full report before showing the completed state.
       let aiReport = null;
+      let sectionInsights = null;
       try {
-        const { generateHealthReport } = await import('../../services/openaiReport');
-        const healthData = {
-          vitals: {
-            heartRate: rppgData?.vitals.heartRate || { value: Math.round(heartRate) || 72, unit: 'BPM', status: 'NORMAL' },
-            signalQuality: rppgData?.vitals.signalQuality || { value: sqi || 0.5, percentage: Math.round((sqi || 0.5) * 100), status: 'FAIR' },
-            breathingRate: rppgData?.vitals.breathingRate || { value: 15, unit: 'breaths/min', status: 'NORMAL' },
-          },
-          hrv: {
-            sdnn: rppgData?.hrv.sdnn || { value: 45, unit: 'ms', status: 'NORMAL' },
-            rmssd: rppgData?.hrv.rmssd || { value: 35, unit: 'ms', status: 'NORMAL' },
-            pnn50: rppgData?.hrv.pnn50 || { value: 15, unit: '%', status: 'NORMAL' },
-            pnn20: rppgData?.hrv.pnn20 || { value: 25, unit: '%', status: 'NORMAL' },
-          },
-          stress: {
-            level: rppgData?.stress.level || 'moderate',
-            index: rppgData?.stress.index || 50,
-          },
-          metadata: {
-            scanDurationSeconds: recordingTime,
-            timestamp: new Date().toISOString(),
-            reportLanguage,
-            locale: reportLocale,
-          },
-        };
-        aiReport = await generateHealthReport(healthData);
+        const { generateHealthReport, generateSectionInsights } = await import('../../services/openaiReport');
+        const [reportResult, insightsResult] = await Promise.allSettled([
+          generateHealthReport(buildHealthReportInput(rppgData)),
+          generateSectionInsights(buildSectionInsightsInput(rppgData)),
+        ]);
+        aiReport = reportResult.status === 'fulfilled' ? reportResult.value : null;
+        sectionInsights = insightsResult.status === 'fulfilled' ? insightsResult.value : null;
       } catch (err) {
         console.error('Failed to generate AI report:', err);
       }
@@ -1184,6 +1323,7 @@ const FaceScanner: React.FC = () => {
             report_language: reportLanguage,
             locale: reportLocale,
           },
+          rppg_signals: rppgSignals,
           vitals: {
             heart_rate: {
               value_bpm: rppgData?.vitals.heartRate?.value || Math.round(heartRate) || 72,
@@ -1257,12 +1397,22 @@ const FaceScanner: React.FC = () => {
         };
       }
 
-      // Set scan state to complete after successful API call
+      const combinedData = buildCombinedReportData(
+        rppgData,
+        aiReport,
+        sectionInsights,
+        rppgSignals,
+      );
+      await saveBioCareReportToAPI(combinedData);
+      setPreparedReport(combinedData);
+      setBioCareReport(combinedData);
+
+      // Show the report button only after scan, report assembly, and DB save are complete.
       setScanState('complete');
     } catch (err) {
       console.error('Error sending data to API:', err);
-      setUploadError('Failed to upload scan data. You can still continue.');
-      // Still set to complete even if API fails
+      setPreparedReport(null);
+      setUploadError(t.reportSaveFailed);
       setScanState('complete');
     } finally {
       setIsUploadingData(false);
@@ -1283,6 +1433,7 @@ const FaceScanner: React.FC = () => {
       scan_timestamp: reportData.rppg.metadata.timestamp,
       report_data: {
         rppg: reportData.rppg,
+        rppg_signals: reportData.rppgSignals ?? null,
         ai_report: reportData.aiReport ?? null,
         section_insights: reportData.sectionInsights ?? null,
         api_health_data: reportData.apiHealthData ?? null,
@@ -1306,154 +1457,14 @@ const FaceScanner: React.FC = () => {
   };
 
   // Handle continue to results
-  const handleContinue = async () => {
-    if (!recordedVideo) {
-      setError('No video recorded');
+  const handleContinue = () => {
+    if (!preparedReport) {
+      setUploadError(t.reportNotReady);
       return;
     }
 
-    // Get rPPG metrics for navigation state
-    const rppgData = await getFinalRppgMetrics();
-
-    // Generate AI health report + section insights in parallel
-    let aiReport = null;
-    let sectionInsights = null;
-    try {
-      const { generateHealthReport, generateSectionInsights } = await import('../../services/openaiReport');
-      const healthData = {
-        vitals: {
-          heartRate: rppgData?.vitals.heartRate || { value: Math.round(heartRate) || 72, unit: 'BPM', status: 'NORMAL' },
-          signalQuality: rppgData?.vitals.signalQuality || { value: sqi || 0.5, percentage: Math.round((sqi || 0.5) * 100), status: 'FAIR' },
-          breathingRate: rppgData?.vitals.breathingRate || { value: 15, unit: 'breaths/min', status: 'NORMAL' },
-        },
-        hrv: {
-          sdnn: rppgData?.hrv.sdnn || { value: 45, unit: 'ms', status: 'NORMAL' },
-          rmssd: rppgData?.hrv.rmssd || { value: 35, unit: 'ms', status: 'NORMAL' },
-          pnn50: rppgData?.hrv.pnn50 || { value: 15, unit: '%', status: 'NORMAL' },
-          pnn20: rppgData?.hrv.pnn20 || { value: 25, unit: '%', status: 'NORMAL' },
-        },
-        stress: {
-          level: rppgData?.stress.level || 'moderate',
-          index: rppgData?.stress.index || 50,
-        },
-        metadata: {
-          scanDurationSeconds: recordingTime,
-          timestamp: new Date().toISOString(),
-          reportLanguage,
-          locale: reportLocale,
-        },
-      };
-
-      // Build section insights input
-      const nl = rppgData?.hrv.nonlinear;
-      const re = rppgData?.hrv.respiratoryExtended;
-      const sectionInput = {
-        language: reportLanguage,
-        locale: reportLocale,
-        heartRate: rppgData?.vitals.heartRate?.value || Math.round(heartRate) || 72,
-        heartRateStatus: rppgData?.vitals.heartRate?.status || 'NORMAL',
-        signalQuality: rppgData?.vitals.signalQuality?.percentage || Math.round((sqi || 0.5) * 100),
-        breathingRate: rppgData?.vitals.breathingRate?.value || 15,
-        breathingRateStatus: rppgData?.vitals.breathingRate?.status || 'NORMAL',
-        sdnn: rppgData?.hrv.sdnn?.value || 0,
-        sdnnStatus: rppgData?.hrv.sdnn?.status || 'NORMAL',
-        rmssd: rppgData?.hrv.rmssd?.value || 0,
-        rmssdStatus: rppgData?.hrv.rmssd?.status || 'NORMAL',
-        pnn50: rppgData?.hrv.pnn50?.value || 0,
-        pnn50Status: rppgData?.hrv.pnn50?.status || 'NORMAL',
-        pnn20: rppgData?.hrv.pnn20?.value || 0,
-        pnn20Status: rppgData?.hrv.pnn20?.status || 'NORMAL',
-        rrIntervalCount: rppgData?.hrv.rrIntervalCount || 0,
-        recordingClass: rppgData?.hrv.recordingClass || 'insufficient_data',
-        sd1: nl?.sd1?.value, sd2: nl?.sd2?.value, sd1Sd2Ratio: nl?.sd1Sd2Ratio,
-        sampleEntropy: nl?.sampleEntropy?.value, dfaAlpha1: nl?.dfaAlpha1?.value,
-        stressLevel: rppgData?.stress.level || 'unknown',
-        stressIndex: rppgData?.stress.index || 0,
-        sympathovagalBalance: rppgData?.stress.sympathovagalBalance,
-        breathingRateSd: re?.breathingRateSd?.value,
-        breathingStability: re?.stability,
-        breathCyclesDetected: re?.breathCyclesDetected,
-      };
-
-      // Run both GPT calls in parallel
-      const [reportResult, insightsResult] = await Promise.allSettled([
-        generateHealthReport(healthData),
-        generateSectionInsights(sectionInput),
-      ]);
-
-      aiReport = reportResult.status === 'fulfilled' ? reportResult.value : null;
-      sectionInsights = insightsResult.status === 'fulfilled' ? insightsResult.value : null;
-    } catch (err) {
-      console.error('Failed to generate AI report:', err);
-    }
-
-    // Get stored API response data
-    const apiRes = apiResponseRef.current;
-
-    const combinedData: CombinedReportData = {
-      success: true,
-      uploadedImage: previewUrl || '',
-      data: {
-        face_analysis_text: '',
-        spiritual_interpretation: '',
-      },
-      rppg: rppgData || {
-        vitals: {
-          heartRate: { value: Math.round(heartRate) || 72, unit: 'BPM', status: 'NORMAL' },
-          signalQuality: { value: sqi || 0.5, percentage: Math.round((sqi || 0.5) * 100), status: 'FAIR' },
-          breathingRate: { value: 15, unit: 'breaths/min', status: 'NORMAL' },
-        },
-        hrv: {
-          sdnn: { value: 45, unit: 'ms', status: 'NORMAL' },
-          rmssd: { value: 35, unit: 'ms', status: 'NORMAL' },
-          pnn50: { value: 15, unit: '%', status: 'NORMAL' },
-          pnn20: { value: 25, unit: '%', status: 'NORMAL' },
-          recordingClass: 'ultra-short',
-        },
-        stress: {
-          level: 'moderate',
-          index: 50,
-          description: 'Balanced autonomic state with healthy adaptability to stress.',
-        },
-        metadata: {
-          timestamp: new Date().toISOString(),
-          scanDurationSeconds: recordingTime,
-          samplesCollected: hrLogRef.current.length || 0,
-        },
-        hrHistory: hrLogRef.current.map(([time, hr, sqi]) => ({ time, hr: Math.round(hr), sqi })),
-      },
-      aiReport: apiRes?.ai_report
-        ? {
-          summary: apiRes.ai_report.summary || '',
-          insights: apiRes.ai_report.insights || [],
-          recommendations: apiRes.ai_report.recommendations || [],
-          riskFactors: (aiReport as any)?.riskFactors || [],
-          disclaimer: 'This report is AI-generated and for informational purposes only.',
-        }
-        : aiReport || undefined,
-      sectionInsights: sectionInsights || undefined,
-      apiHealthData: apiRes
-        ? {
-          heart_rate: apiRes.heart_rate,
-          bp_systolic: apiRes.bp_systolic,
-          bp_diastolic: apiRes.bp_diastolic,
-          scan_duration_seconds: apiRes.scan_duration_seconds,
-        }
-        : undefined,
-    };
-
-    try {
-      setIsUploadingData(true);
-      setUploadError(null);
-      await saveBioCareReportToAPI(combinedData);
-      setBioCareReport(combinedData);
-      navigate('/face-report', { state: combinedData });
-    } catch (err) {
-      console.error('Error saving Bio Care report:', err);
-      setUploadError('Failed to save Bio Care report. Please try again.');
-    } finally {
-      setIsUploadingData(false);
-    }
+    setBioCareReport(preparedReport);
+    navigate('/face-report', { state: preparedReport });
   };
 
   // Stop recording manually
@@ -2647,7 +2658,7 @@ const FaceScanner: React.FC = () => {
                       </div>
 
                       <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                        <button className="btn-success" style={{
+                        <button className={preparedReport ? 'btn-success' : 'btn-secondary'} style={{
                           marginBottom: '0.75rem',
                           display: 'flex',
                           alignItems: 'center',
@@ -2659,10 +2670,10 @@ const FaceScanner: React.FC = () => {
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                             <polyline points="22 4 12 14.01 9 11.01"></polyline>
                           </svg>
-                          {t.scannedSuccessfully}
+                          {preparedReport ? t.scannedSuccessfully : t.scanComplete}
                         </button>
                         <p style={{ color: '#6B7280', fontSize: '0.875rem' }}>
-                          {t.completeHelp}
+                          {preparedReport ? t.completeHelp : t.reportSaveFailed}
                         </p>
                         {uploadError && (
                           <p style={{ color: '#EF4444', fontSize: '0.875rem', marginTop: '0.5rem' }}>
@@ -2681,37 +2692,26 @@ const FaceScanner: React.FC = () => {
                           <XIcon />
                           {t.scanAgain}
                         </button>
-                        <button
-                          onClick={handleContinue}
-                          className="btn-primary"
-                          disabled={isUploadingData}
-                          style={{
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.5rem',
-                            padding: '1rem',
-                            opacity: isUploadingData ? 0.7 : 1,
-                          }}
-                        >
-                          {isUploadingData ? (
-                            <>
-                              <svg className="spinner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                              </svg>
-                              {t.uploading}
-                            </>
-                          ) : (
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                              </svg>
-                              {t.viewBioCareReport}
-                            </>
-                          )}
-                        </button>
+                        {preparedReport && (
+                          <button
+                            onClick={handleContinue}
+                            className="btn-primary"
+                            style={{
+                              flex: 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.5rem',
+                              padding: '1rem',
+                            }}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                            {t.viewBioCareReport}
+                          </button>
+                        )}
                       </div>
                     </>
                   )}
