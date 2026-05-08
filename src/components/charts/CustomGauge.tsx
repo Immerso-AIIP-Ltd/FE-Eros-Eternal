@@ -11,7 +11,7 @@ import {
   Chip,
 } from "@mui/material";
 import { FaFire, FaInfoCircle, FaTimes } from "react-icons/fa";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 // Define interfaces for the API response
 interface CurrentAssessment {
@@ -85,12 +85,12 @@ const VibrationalFrequencyGauge: React.FC = () => {
 
       try {
         const response = await fetch(
-          `${baseApiUrl}/aitools/wellness/v2/reports/individual_report?report_type=vibrational_frequency&user_id=${userId}`,
+          `${wellnessApiUrl("/reports/individual_report")}?report_type=vibrational_frequency`,
           {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: eternalUserIdHeaders(userId, {
+              extra: { "Content-Type": "application/json" },
+            }),
           }
         );
 

@@ -20,7 +20,7 @@ import flameScoreBg from "@/assets/reports/flame.png";
 import auraBg from "@/assets/reports/aura.png";
 import koshaBg from "@/assets/reports/kosha.png";
 import longevityBg from "@/assets/reports/longevity.png";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 import { hasWellnessIndividualReport } from "@/lib/wellnessReportPayload";
 import { getWellnessStoredUserId } from "@/lib/wellnessUserId";
 
@@ -30,7 +30,7 @@ const StatsCards = () => {
   const [loading, setLoading] = useState(true);
 
   const userId = getWellnessStoredUserId();
-  const reportsApiUrl = `${baseApiUrl}/aitools/wellness/v2/reports/individual_report`;
+  const reportsApiUrl = wellnessApiUrl("/reports/individual_report");
 
   const reportCards = [
     {
@@ -100,7 +100,8 @@ const StatsCards = () => {
         const promises = reportCards.map(async (card) => {
           try {
             const response = await fetch(
-              `${reportsApiUrl}?user_id=${userId}&report_type=${card.reportType}`
+              `${reportsApiUrl}?report_type=${card.reportType}`,
+              { headers: eternalUserIdHeaders(userId) }
             );
             const data = await response.json();
             const hasReport = hasWellnessIndividualReport(data);

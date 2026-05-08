@@ -5,8 +5,13 @@ import "../palm/PalmReport.css";
 
 type FaceAnalyseReportState = {
   success?: boolean;
+  message?: string;
   data?: {
+    reading_id?: string;
+    user_id?: string;
     spiritual_interpretation?: string;
+    image_url?: string;
+    reading_timestamp?: string;
   };
   uploadedImage?: string;
 };
@@ -134,11 +139,70 @@ function parsedSectionsToTiles(sections: ParsedSection[]): FaceDetailTile[] {
   });
 }
 
+/** API returns `spiritual_interpretation` as a JSON string of snake_case keys → prose. */
+const SPIRITUAL_JSON_SECTION_ORDER: { key: string; label: string }[] = [
+  { key: "spiritual_energy", label: "Spiritual energy" },
+  { key: "personal_development", label: "Personal development" },
+  { key: "life_journey", label: "Life journey" },
+  { key: "emotional_wellness", label: "Emotional wellness" },
+  { key: "growth_opportunities", label: "Growth opportunities" },
+];
+
+function humanizeSnakeKey(key: string): string {
+  return key
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function tryParseSpiritualInterpretationJson(
+  raw: string,
+): Record<string, string> | null {
+  const t = raw.trim();
+  if (!t.startsWith("{")) return null;
+  try {
+    const parsed = JSON.parse(t) as unknown;
+    if (parsed == null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return null;
+    }
+    const out: Record<string, string> = {};
+    for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
+      if (typeof v === "string" && v.trim()) {
+        out[k] = v.trim();
+      }
+    }
+    return Object.keys(out).length > 0 ? out : null;
+  } catch {
+    return null;
+  }
+}
+
+function spiritualJsonRecordToTiles(obj: Record<string, string>): FaceDetailTile[] {
+  const seen = new Set<string>();
+  const tiles: FaceDetailTile[] = [];
+  for (const { key, label } of SPIRITUAL_JSON_SECTION_ORDER) {
+    const prose = obj[key];
+    if (prose) {
+      tiles.push({ key, title: label, prose });
+      seen.add(key);
+    }
+  }
+  for (const [key, prose] of Object.entries(obj)) {
+    if (seen.has(key)) continue;
+    tiles.push({ key, title: humanizeSnakeKey(key), prose });
+  }
+  return tiles;
+}
+
 function buildFaceDetailTiles(
   spiritualInterpretation: string | undefined,
 ): FaceDetailTile[] {
   const raw = spiritualInterpretation?.trim() ?? "";
   if (!raw) return [];
+
+  const jsonObj = tryParseSpiritualInterpretationJson(raw);
+  if (jsonObj) {
+    return spiritualJsonRecordToTiles(jsonObj);
+  }
 
   const parsed = parseInterpretation(raw);
   if (parsed.length === 0) {
@@ -153,7 +217,6 @@ const FaceAnalyseReport: React.FC = () => {
   const [report, setReport] = useState<FaceAnalyseReportState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [username, setUsername] = useState<string>("");
 
   useEffect(() => {
     const state = location.state as FaceAnalyseReportState | null;
@@ -164,11 +227,6 @@ const FaceAnalyseReport: React.FC = () => {
       }
     } else {
       setError("No report data found. Please upload a face image first.");
-    }
-
-    const storedUsername = localStorage.getItem("username");
-    if (storedUsername) {
-      setUsername(storedUsername);
     }
   }, [location.state]);
 
@@ -214,6 +272,8 @@ const FaceAnalyseReport: React.FC = () => {
 
   const spiritual = report.data?.spiritual_interpretation;
   const detailTiles = buildFaceDetailTiles(spiritual);
+  const faceImageSrc =
+    uploadedImage?.trim() || report.data?.image_url?.trim() || null;
 
   return (
     <div
@@ -246,14 +306,14 @@ const FaceAnalyseReport: React.FC = () => {
               </article>
             </Col>
 
-            {uploadedImage ? (
+            {faceImageSrc ? (
               <Col xs={12}>
                 <article className="palm-tile--media mb-3">
                   <div className="palm-tile__body palm-tile__body--media">
                     <div className="face-report-avatar-wrap">
                       <img
-                        src={uploadedImage}
-                        alt="Uploaded face for analysis"
+                        src={faceImageSrc}
+                        alt="Face analyzed for this reading"
                         className="face-report-avatar img-fluid"
                       />
                     </div>

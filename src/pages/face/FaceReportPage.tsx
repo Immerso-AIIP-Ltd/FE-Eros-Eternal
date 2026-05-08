@@ -3,7 +3,7 @@ import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { baseApiUrl } from '@/config/api';
+import { eternalUserIdHeaders, wellnessApiUrl } from '@/config/api';
 
 import {
   AreaChart,
@@ -291,9 +291,9 @@ const FaceReportPage: React.FC = () => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(
-          `${baseApiUrl}/aitools/wellness/v2/users/profile/${userId}`,
-        );
+        const res = await fetch(wellnessApiUrl('/users/profile/'), {
+          headers: eternalUserIdHeaders(userId),
+        });
         if (!res.ok) return;
         const json = await res.json();
         const name: string | undefined = json?.data?.username ?? json?.username;

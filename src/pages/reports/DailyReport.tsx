@@ -10,7 +10,7 @@ import sparkle from "@/assets/images/sparkle.png";
 import Stars from "@/components/ui/stars";
 import VoiceMessage from "@/VoiceMessage";
 import MicVisualizer from "@/MicVisualizer";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 const DailyReport: React.FC = () => {
   const navigate = useNavigate();
@@ -60,9 +60,7 @@ const DailyReport: React.FC = () => {
   useEffect(() => {
     const fetchWelcome = async () => {
       try {
-        const res = await fetch(
-          `${baseApiUrl}/aitools/wellness/v2/welcome/welcome`
-        );
+        const res = await fetch(wellnessApiUrl("/welcome/welcome"));
         const data = await res.json();
 
         if (data?.message) {
@@ -102,7 +100,6 @@ const DailyReport: React.FC = () => {
 
   const sendMessage = async (textArg?: string) => {
     const message = (textArg ?? inputValue ?? "").toString();
-    const BASE_URL = baseApiUrl;
     if (!message.trim()) return;
 
     // Show user bubble
@@ -117,8 +114,10 @@ const DailyReport: React.FC = () => {
         const form = new FormData();
         form.append("user_message", message);
 
-        const res = await fetch(`${baseApiUrl}/aitools/wellness/v2/welcome/process_message`, {
+        const uid = localStorage.getItem("user_id");
+        const res = await fetch(wellnessApiUrl("/welcome/process_message"), {
           method: "POST",
+          headers: eternalUserIdHeaders(uid),
           body: form,
         });
 
@@ -145,18 +144,16 @@ const DailyReport: React.FC = () => {
 
   const generateReport = async (finalAnswers?: string[]) => {
     try {
-      const BASE_URL = baseApiUrl;
       const userId = localStorage.getItem("user_id") || "0";
 
       const body = {
-        user_id: userId,
         report_type: reportType,
         process_message_report: finalAnswers ?? answers,
       };
 
-      const res = await fetch(`${baseApiUrl}/aitools/wellness/v2/welcome/generate_report`, {
+      const res = await fetch(wellnessApiUrl("/welcome/generate_report"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: eternalUserIdHeaders(userId, { json: true }),
         body: JSON.stringify(body),
       });
 
@@ -461,8 +458,6 @@ const DailyReport: React.FC = () => {
   };
 
   const handleSuggestionClick = async (question: string) => {
-    const BASE_URL = baseApiUrl;
-
     const reportTypes: Record<string, string> = {
       "What's my vibe right now?": "vibrational_frequency",
       "What's my aura saying?": "aura_profile",
@@ -482,9 +477,11 @@ const DailyReport: React.FC = () => {
       const form = new FormData();
       form.append("user_message", question);
 
-      const res = await fetch(`${baseApiUrl}/aitools/wellness/v2/welcome/process_message`, {
+      const uid = localStorage.getItem("user_id");
+      const res = await fetch(wellnessApiUrl("/welcome/process_message"), {
         method: "POST",
-        body: form, // ✅ Browser sets Content-Type automatically
+        headers: eternalUserIdHeaders(uid),
+        body: form,
       });
 
       const data = await res.json();

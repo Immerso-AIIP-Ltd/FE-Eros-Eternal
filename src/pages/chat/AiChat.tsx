@@ -28,9 +28,12 @@ import MicVisualizer from "@/MicVisualizer";
 import eroslogo from "@/assets/eros-logo.png";
 import credits from "@/assets/credits.png";
 import { useNavigate, useLocation } from "react-router-dom";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 import { PanelLeft } from "lucide-react";
 import { getAndClearPendingAttachments } from "@/lib/pendingChatAttachments";
+
+const SPIRITUAL_WELCOME_TEXT =
+  "🌟  WELCOME TO YOUR SPIRITUAL GUIDE  🌟\n\nI'm here to offer wisdom, guidance, and spiritual reflection.\nAsk me anything about your spiritual journey, meditation, life purpose,\ninner peace, or any other spiritual topic that's on your heart.\n\nType 'help' for commands, or just start chatting!\n\n🧘 Spiritual Guide: Welcome, dear soul. I invite you to share the whispers of your heart. What stirs within you today?";
 
 const AiChat: React.FC = () => {
   const [inputValue, setInputValue] = useState("");
@@ -44,9 +47,9 @@ const AiChat: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const initialMessageSentRef = useRef(false);
   /** Cleared synchronously on "New Chat" so the next send opens a new session (no session_id). */
-  const sessionIdRef = useRef<number | null>(null);
+  const sessionIdRef = useRef<number | string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sessionId, setSessionId] = useState<number | null>(null);
+  const [sessionId, setSessionId] = useState<number | string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -259,32 +262,24 @@ const AiChat: React.FC = () => {
   useEffect(() => {
     if (
       isInitialized &&
-      messages.length === 1 &&
+      messages.length === 0 &&
       !sessionId &&
       !initialMessageSentRef.current &&
       inputValue
     ) {
-      const hasUserMessage = messages.some((m) => m.sender === "user");
-      if (!hasUserMessage) {
-        initialMessageSentRef.current = true;
-        const timer = setTimeout(() => {
-          sendMessage();
-        }, 800);
-        return () => clearTimeout(timer);
-      }
+      initialMessageSentRef.current = true;
+      const timer = setTimeout(() => {
+        sendMessage();
+      }, 800);
+      return () => clearTimeout(timer);
     }
   }, [isInitialized, messages.length, inputValue, sessionId]);
 
   const initializeChat = async () => {
     if (isInitialized) return;
     setIsInitialized(true);
-    setMessages([
-      {
-        sender: "ai",
-        text: "🌟  WELCOME TO YOUR SPIRITUAL GUIDE  🌟\n\nI'm here to offer wisdom, guidance, and spiritual reflection.\nAsk me anything about your spiritual journey, meditation, life purpose,\ninner peace, or any other spiritual topic that's on your heart.\n\nType 'help' for commands, or just start chatting!\n\n🧘 Spiritual Guide: Welcome, dear soul. I invite you to share the whispers of your heart. What stirs within you today?",
-        centered: true,
-      },
-    ]);
+    // Welcome copy lives only in the centered hero (not as a first AI bubble).
+    setMessages([]);
   };
 
   const handleNewChat = async () => {
@@ -299,13 +294,7 @@ const AiChat: React.FC = () => {
     setAttachedVoices([]);
     setIsLoading(false);
     setIsInitialized(true);
-    setMessages([
-      {
-        sender: "ai",
-        text: "🌟  WELCOME TO YOUR SPIRITUAL GUIDE  🌟\n\nI'm here to offer wisdom, guidance, and spiritual reflection.\nAsk me anything about your spiritual journey, meditation, life purpose,\ninner peace, or any other spiritual topic that's on your heart.\n\nType 'help' for commands, or just start chatting!\n\n🧘 Spiritual Guide: Welcome, dear soul. I invite you to share the whispers of your heart. What stirs within you today?",
-        centered: true,
-      },
-    ]);
+    setMessages([]);
     fetchSessions();
   };
 
@@ -340,9 +329,9 @@ const AiChat: React.FC = () => {
 
     setSessionsLoading(true);
     try {
-      const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/chat/sessions?user_id=${userId}`,
-      );
+      const response = await fetch(wellnessApiUrl("/chat/spiritual/sessions"), {
+        headers: eternalUserIdHeaders(userId),
+      });
       const data = await response.json();
       if (
         data.success &&
@@ -362,34 +351,50 @@ const AiChat: React.FC = () => {
     }
   };
 
-  const loadConversation = async (sessionId: number | string) => {
+  const loadConversation = async (sid: number | string) => {
     const userId = localStorage.getItem("user_id");
     if (!userId) return;
 
     try {
       const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/chat/conversation/${sessionId}`,
+        wellnessApiUrl(
+          `/chat/spiritual/sessions/${encodeURIComponent(String(sid))}`,
+        ),
+        {
+          method: "GET",
+          headers: eternalUserIdHeaders(userId),
+        },
       );
       const data = await response.json();
-      if (
-        data.success &&
-        data.data &&
-        data.data.conversation_history &&
-        Array.isArray(data.data.conversation_history)
-      ) {
-        const formattedMessages = data.data.conversation_history.map(
-          (msg: any) => ({
-            sender: msg.role === "assistant" ? "ai" : "user",
-            text: msg.content,
-          }),
-        );
+      const rawHistory =
+        data?.data?.conversation_history ??
+        data?.data?.messages ??
+        data?.data?.chat_history ??
+        data?.conversation_history;
+      if (data.success && Array.isArray(rawHistory)) {
+        const formattedMessages = rawHistory.map((msg: any) => {
+          const role = (msg.role ?? msg.sender ?? "").toString().toLowerCase();
+          const isAi =
+            role === "assistant" ||
+            role === "ai" ||
+            role === "bot" ||
+            msg.sender === "assistant";
+          const text =
+            typeof msg.content === "string"
+              ? msg.content
+              : msg.text != null
+                ? String(msg.text)
+                : msg.message != null
+                  ? String(msg.message)
+                  : "";
+          return {
+            sender: isAi ? "ai" : "user",
+            text,
+          };
+        });
         setMessages(formattedMessages);
-        const sid =
-          typeof sessionId === "string"
-            ? parseInt(sessionId, 10)
-            : sessionId;
         setSessionId(sid);
-        sessionIdRef.current = Number.isFinite(sid) ? sid : null;
+        sessionIdRef.current = sid;
       }
     } catch (error) {
       console.error("Error loading conversation:", error);
@@ -614,25 +619,15 @@ const AiChat: React.FC = () => {
         (hadImages ? "[Image attached]" : "") ||
         (hadVoices ? "[Voice message]" : "");
 
-      const messageParams: Record<string, string> = {
-        user_id: userId,
-        message: messageText,
-      };
-      if (reportType) {
-        messageParams.report_type = reportType;
-      }
-      if (currentSessionId != null) {
-        messageParams.session_id = String(currentSessionId);
-      }
+      const body: Record<string, unknown> = { message: messageText };
+      if (reportType) body.report_type = reportType;
+      if (currentSessionId != null) body.session_id = currentSessionId;
 
-      const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/chat/spiritual/${userId}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams(messageParams),
-        },
-      );
+      const response = await fetch(wellnessApiUrl("/chat/spiritual"), {
+        method: "POST",
+        headers: eternalUserIdHeaders(userId, { json: true }),
+        body: JSON.stringify(body),
+      });
 
       const data = await response.json();
       if (data.success) {
@@ -943,15 +938,18 @@ const AiChat: React.FC = () => {
                   </span>
                 </div>
               ) : Array.isArray(sessions) && sessions.length > 0 ? (
-                sessions.map((session) => (
+                sessions.map((session) => {
+                  const sid = session.session_id ?? session.id;
+                  return (
                   <div
-                    key={session.id}
+                    key={sid}
                     className="text-xs hover:text-gray-700 hover:bg-gray-100 cursor-pointer py-1.5 px-3 rounded-md transition-all duration-200 truncate"
-                    onClick={() => loadConversation(session.id)}
+                    onClick={() => loadConversation(sid)}
                   >
                     {session.session_name}
                   </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-xs text-gray-500">No recent chats</div>
               )}
@@ -1033,10 +1031,9 @@ const AiChat: React.FC = () => {
                         `}</style>
 
             {messages.filter((m) => m.sender === "user").length === 0 &&
-            messages.length === 1 &&
-            messages[0].centered ? (
-              <div className="flex-1 flex items-center justify-center h-full min-h-[60vh]">
-                <div className="text-center">
+            messages.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center h-full min-h-[60vh] px-2">
+                <div className="text-center w-full max-w-xl">
                   <div className="mb-4">
                     <div
                       className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
@@ -1055,12 +1052,9 @@ const AiChat: React.FC = () => {
                       ></i>
                     </div>
                   </div>
-                  <div className="leading-relaxed">
-                    <div className="text-xl font-semibold text-gray-800 mb-3">
-                      Hi, I'm EROS Wellness AI
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      How can I help you today?
+                  <div className="leading-relaxed text-center mx-auto">
+                    <div className="text-sm sm:text-base text-gray-700 whitespace-pre-wrap">
+                      {formatTextWithBold(SPIRITUAL_WELCOME_TEXT)}
                     </div>
                   </div>
                 </div>

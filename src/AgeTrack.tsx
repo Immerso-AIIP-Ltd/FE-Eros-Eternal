@@ -10,6 +10,7 @@ import sparkle from "./sparkle.png";
 import Stars from "./components/stars";
 import VoiceMessage from "./VoiceMessage";
 import MicVisualizer from "./MicVisualizer";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 interface Message {
     sender: "user" | "ai";
@@ -60,7 +61,6 @@ const AgeTrack: React.FC = () => {
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
 
-    const baseApiUrl = 'http://164.52.205.108:8500';
 
     const convertToMp3 = async (audioBlob: Blob): Promise<Blob> => {
         return new Promise((resolve, reject) => {
@@ -244,16 +244,15 @@ const AgeTrack: React.FC = () => {
             formData.append('stool_pattern', collectedData.stoolPattern || '');
             formData.append('daily_routine', collectedData.dailyRoutine || '');
             formData.append('additional_info', collectedData.additionalInfo || '');
-            formData.append('user_id', userId || '123');
-
             // Log FormData contents for debugging
             for (let [key, value] of formData.entries()) {
                 console.log(key, typeof value === 'string' ? value : 'Non-string value');
             }
 
-            const reportUrl = `${baseApiUrl}/aitools/wellness/v2/bio/holistic-analyze`;
+            const reportUrl = wellnessApiUrl("/bio/holistic-analyze");
             const response = await fetch(reportUrl, {
                 method: 'POST',
+                headers: eternalUserIdHeaders(userId),
                 body: formData,
             });
 

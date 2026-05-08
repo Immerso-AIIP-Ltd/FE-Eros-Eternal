@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Stars from '../ui/stars';
-import { baseApiUrl } from '@/config/api';
+import { eternalUserIdHeaders, wellnessApiUrl } from '@/config/api';
 import type { CombinedReportData, HrHistoryPoint } from '../../types/rppg';
 import {
   KalmanFilter1D,
@@ -1091,19 +1091,15 @@ const FaceScanner: React.FC = () => {
       }
 
       const userId = localStorage.getItem('user_id');
-      const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/health/bp-predict`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ppg_signal: ppgSignal,
-            sample_rate: 30,
-            scan_duration_seconds: recordingTime,
-            user_id: userId || undefined,
-          }),
-        }
-      );
+      const response = await fetch(wellnessApiUrl('/health/bp-predict'), {
+        method: 'POST',
+        headers: eternalUserIdHeaders(userId, { json: true }),
+        body: JSON.stringify({
+          ppg_signal: ppgSignal,
+          sample_rate: 30,
+          scan_duration_seconds: recordingTime,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`BP API returned ${response.status}`);
@@ -1215,16 +1211,11 @@ const FaceScanner: React.FC = () => {
 
       // Send data to API
       const userId = localStorage.getItem('user_id');
-      const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/health/scan/${userId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(apiPayload),
-        }
-      );
+      const response = await fetch(wellnessApiUrl('/health/scan'), {
+        method: 'POST',
+        headers: eternalUserIdHeaders(userId, { json: true }),
+        body: JSON.stringify(apiPayload),
+      });
 
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);

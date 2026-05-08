@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import BackgroundImage from "../../assets/images/background.png";
-import { baseApiUrl } from "../../config/api";
+import { wellnessApiUrl } from "../../config/api";
 
 interface FormData {
   name: string;
@@ -241,20 +241,22 @@ const SoulProfilePage: React.FC = () => {
       return setErrorMsg("Please select time of birth.");
 
     const [y, m, d] = formData.dateOfBirth.split("-");
-    const fd = new FormData();
-    fd.append("gender", formData.gender);
-    fd.append("username", formData.name.trim());
-    fd.append("place_of_birth", formData.placeOfBirth.trim());
-    fd.append("current_location", formData.currentLocation.trim());
-    fd.append("date_of_birth", `${d}-${m}-${y}`);
-    fd.append("time_of_birth", formData.timeOfBirth);
+    const payload = {
+      gender: formData.gender,
+      username: formData.name.trim(),
+      place_of_birth: formData.placeOfBirth.trim(),
+      current_location: formData.currentLocation.trim(),
+      date_of_birth: `${d}-${m}-${y}`,
+      time_of_birth: formData.timeOfBirth,
+    };
 
     setLoading(true);
     try {
-      const res = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/users/profile`,
-        { method: "POST", body: fd },
-      );
+      const res = await fetch(wellnessApiUrl("/users/profile"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
       const text = await res.text();
       let result: any;
       try {

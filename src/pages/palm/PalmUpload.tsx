@@ -3,7 +3,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Card, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import Stars from "@/components/ui/stars";
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 import "./PalmUpload.css";
 
 type PageState = "upload" | "preview" | "loading";
@@ -131,16 +131,13 @@ const PalmUploadPage: React.FC = () => {
     try {
       const userId = localStorage.getItem("user_id");
       const formData = new FormData();
-      formData.append("user_id", userId || "");
-      formData.append("image_data", selectedFile);
+      formData.append("image", selectedFile);
 
-      const response = await fetch(
-        `${baseApiUrl}/aitools/wellness/v2/analysis/palm`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      const response = await fetch(wellnessApiUrl("/analysis/palm"), {
+        method: "POST",
+        headers: eternalUserIdHeaders(userId),
+        body: formData,
+      });
 
       const data = await response.json().catch(() => ({}));
 

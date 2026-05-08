@@ -37,7 +37,7 @@ const formatKey = (key: string): string => {
     .replace("Hz", "Hz");
 };
 
-import { baseApiUrl } from "@/config/api";
+import { eternalUserIdHeaders, wellnessApiUrl } from "@/config/api";
 
 const DailyReportsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -56,15 +56,12 @@ const DailyReportsPage: React.FC = () => {
       }
 
       try {
-        const response = await fetch(
-          `${baseApiUrl}/aitools/wellness/v2/reports/user_reports/${userId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(wellnessApiUrl("/reports/user_reports"), {
+          method: "GET",
+          headers: eternalUserIdHeaders(userId, {
+            extra: { "Content-Type": "application/json" },
+          }),
+        });
 
         if (!response.ok) {
           throw new Error(`Failed to fetch reports: ${response.status}`);
