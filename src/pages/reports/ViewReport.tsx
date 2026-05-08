@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Gauge } from "@mui/x-charts/Gauge";
 import { Box, Typography } from "@mui/material";
@@ -129,17 +131,149 @@ function hasDetailedAnalysisContent(detail: unknown): boolean {
   return detailedAnalysisToParagraphs(detail).length > 0;
 }
 
+/** API star_map (and others) return Markdown; legacy reports use plain section labels. */
+function looksLikeMarkdown(raw: string): boolean {
+  const norm = normalizeReportNewlines(raw).trim();
+  if (/^#{1,6}\s/m.test(norm)) return true;
+  if (/\*\*[\s\S]+?\*\*/.test(norm)) return true;
+  if (/^\s*[-*+]\s+/m.test(norm)) return true;
+  return false;
+}
+
+const viewReportMarkdownComponents: Components = {
+  h1: ({ children }) => (
+    <h5
+      className="fw-bold mt-3 mb-2"
+      style={{ color: "#111827", fontSize: "17px", marginTop: "1rem" }}
+    >
+      {children}
+    </h5>
+  ),
+  h2: ({ children }) => (
+    <h5
+      className="fw-bold mt-3 mb-2"
+      style={{ color: "#111827", fontSize: "16px", marginTop: "1rem" }}
+    >
+      {children}
+    </h5>
+  ),
+  h3: ({ children }) => (
+    <h5
+      className="fw-bold mt-3 mb-2"
+      style={{ color: "#111827", fontSize: "15px", marginTop: "0.875rem" }}
+    >
+      {children}
+    </h5>
+  ),
+  h4: ({ children }) => (
+    <h6 className="fw-bold mt-2 mb-2" style={{ color: "#111827", fontSize: "14px" }}>
+      {children}
+    </h6>
+  ),
+  p: ({ children }) => (
+    <p className="mb-3" style={{ color: "#4B5563", fontSize: "14px", lineHeight: 1.6 }}>
+      {children}
+    </p>
+  ),
+  ul: ({ children }) => (
+    <ul
+      className="mb-3 ps-3"
+      style={{
+        color: "#4B5563",
+        fontSize: "14px",
+        lineHeight: 1.6,
+        paddingLeft: "1.25rem",
+      }}
+    >
+      {children}
+    </ul>
+  ),
+  ol: ({ children }) => (
+    <ol
+      className="mb-3 ps-3"
+      style={{
+        color: "#4B5563",
+        fontSize: "14px",
+        lineHeight: 1.6,
+        paddingLeft: "1.25rem",
+      }}
+    >
+      {children}
+    </ol>
+  ),
+  li: ({ children }) => <li className="mb-1">{children}</li>,
+  strong: ({ children }) => (
+    <strong style={{ color: "#111827", fontWeight: 700 }}>{children}</strong>
+  ),
+  em: ({ children }) => <em style={{ color: "#374151" }}>{children}</em>,
+};
+
+function ViewReportMarkdown({ text }: { text: string }) {
+  return (
+    <div className="view-report-markdown">
+      <ReactMarkdown components={viewReportMarkdownComponents}>
+        {normalizeReportNewlines(text).trim()}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
+function detailedAnalysisToRenderableText(detail: unknown): string | null {
+  if (detail == null) return null;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const joined = detailedAnalysisToParagraphs(detail).join("\n\n");
+    return joined.length > 0 ? joined : null;
+  }
+  return null;
+}
+
+function renderDetailedAnalysisBody(detail: unknown): React.ReactNode {
+  if (detail == null) return null;
+
+  if (typeof detail === "object" && !Array.isArray(detail)) {
+    return (
+      <ul
+        className="mb-0"
+        style={{ paddingLeft: "20px", listStyleType: "disc" }}
+      >
+        {detailedAnalysisToParagraphs(detail).map((paragraph, index) => (
+          <li
+            key={index}
+            className="mb-3"
+            style={{
+              color: "#4B5563",
+              fontSize: "14px",
+              lineHeight: "1.6",
+            }}
+          >
+            {paragraph}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  const text = detailedAnalysisToRenderableText(detail);
+  if (text == null) return null;
+  const norm = normalizeReportNewlines(text).trim();
+  if (looksLikeMarkdown(norm)) {
+    return <ViewReportMarkdown text={norm} />;
+  }
+  return <ViewReportDetailedAnalysisFormatted text={text} />;
+}
+
 /** Split before the next section: `A. ...:` or ALL-CAPS `WORD WORD:`. */
 function splitDetailedAnalysisSections(norm: string): string[] {
   return norm
-    .split(/\n(?=[A-Z](?:\.\s+[^:]+:\s*|[A-Z0-9\s,&\-]+:))/g)
+    .split(/\n(?=[A-Z](?:\.\s+[^:]+:\s*|[A-Z0-9\s,&-]+:))/g)
     .map((s) => s.trim())
     .filter(Boolean);
 }
 
 function isAllCapsHeaderLine(s: string): boolean {
   const t = s.replace(/\s+/g, " ").trim();
-  if (!/^[A-Z0-9][A-Z0-9\s,&\-]+$/.test(t)) return false;
+  if (!/^[A-Z0-9][A-Z0-9\s,&-]+$/.test(t)) return false;
   return t === t.toUpperCase();
 }
 
@@ -176,7 +310,7 @@ function ViewReportDetailedAnalysisFormatted({ text }: { text: string }) {
             </div>
           );
         }
-        const caps = seg.match(/^([A-Z][A-Z0-9\s,&\-]+):\s*([\s\S]*)$/);
+        const caps = seg.match(/^([A-Z][A-Z0-9\s,&-]+):\s*([\s\S]*)$/);
         if (caps && isAllCapsHeaderLine(caps[1])) {
           return (
             <div key={i} className="mb-3">
@@ -357,60 +491,9 @@ const ViewReport = () => {
     );
   };
 
-  const getLevel = () => {
-    const assessment = reportData?.report_data?.assessment;
-    if (!assessment) return "High";
-
-    const statusText = [
-      assessment.current_energy_state,
-      (assessment as { current_status?: string }).current_status,
-    ]
-      .filter(Boolean)
-      .join(" ");
-    if (statusText) {
-      const s = statusText.toLowerCase();
-      if (s.includes("high") || s.includes("strong") || s.includes("excellent"))
-        return "High";
-      if (s.includes("low") || s.includes("heavy burden")) return "Low";
-      if (
-        s.includes("medium") ||
-        s.includes("balanced") ||
-        s.includes("moderate") ||
-        s.includes("slightly")
-      )
-        return "Medium";
-    }
-
-    const energyState = assessment.current_energy_state || "";
-    if (energyState.toLowerCase().includes("high")) return "High";
-    if (energyState.toLowerCase().includes("low")) return "Low";
-    if (energyState.toLowerCase().includes("medium")) return "Medium";
-
-    const frequency = getFrequencyValue();
-    if (typeof frequency === "number" && !Number.isNaN(frequency)) {
-      if (frequency > 70) return "High";
-      if (frequency > 40) return "Medium";
-      return "Low";
-    }
-    return "Medium";
-  };
-
   const getGaugeValue = () => {
     const frequency = getFrequencyValue();
     return Math.max(0, Math.min(100, frequency));
-  };
-
-  const getReportItems = () => {
-    const paragraphs = detailedAnalysisToParagraphs(
-      reportData?.report_data?.detailed_analysis,
-    );
-    if (paragraphs.length === 0) return [];
-    const joined = paragraphs.join(" ");
-    return joined
-      .split(/[.!?]+/)
-      .map((sentence) => sentence.trim())
-      .filter((sentence) => sentence.length > 20)
-      .slice(0, 6);
   };
 
   const getRecommendations = () => {
@@ -487,9 +570,7 @@ const ViewReport = () => {
 
   const displayTitle = getDisplayTitle();
   const frequency = getFrequencyValue();
-  const level = getLevel();
   const gaugeValue = getGaugeValue();
-  const reportItems = getReportItems();
   const detailedAnalysisRaw = reportData?.report_data?.detailed_analysis;
   const showDetailedAnalysis = hasDetailedAnalysisContent(detailedAnalysisRaw);
   const recommendationSections = getRecommendations();
@@ -652,30 +733,7 @@ const ViewReport = () => {
                   Report
                 </h4>
                 <div className="card-body p-0">
-                  {typeof detailedAnalysisRaw === "string" ? (
-                    <ViewReportDetailedAnalysisFormatted text={detailedAnalysisRaw} />
-                  ) : (
-                    <ul
-                      className="mb-0"
-                      style={{ paddingLeft: "20px", listStyleType: "disc" }}
-                    >
-                      {detailedAnalysisToParagraphs(detailedAnalysisRaw).map(
-                        (paragraph, index) => (
-                          <li
-                            key={index}
-                            className="mb-3"
-                            style={{
-                              color: "#4B5563",
-                              fontSize: "14px",
-                              lineHeight: "1.6",
-                            }}
-                          >
-                            {paragraph}
-                          </li>
-                        ),
-                      )}
-                    </ul>
-                  )}
+                  {renderDetailedAnalysisBody(detailedAnalysisRaw)}
                 </div>
               </div>
             )}
