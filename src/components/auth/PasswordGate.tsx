@@ -62,10 +62,10 @@ export default function PasswordGate({ children }: PasswordGateProps) {
         alignItems: "center",
         justifyContent: "center",
         background:
-          "radial-gradient(circle at 30% 20%, #1f1147 0%, #0a0a14 60%, #000 100%)",
-        color: "#fff",
+          "linear-gradient(135deg, rgba(240,249,255,0.96), rgba(255,255,255,0.98)), radial-gradient(circle at 18% 12%, rgba(0,184,248,0.16), transparent 34%)",
+        color: "#0f172a",
         fontFamily:
-          "'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+          "'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
         padding: "24px",
       }}
     >
@@ -74,33 +74,46 @@ export default function PasswordGate({ children }: PasswordGateProps) {
         autoComplete="off"
         style={{
           width: "100%",
-          maxWidth: "420px",
-          background: "rgba(255, 255, 255, 0.04)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
+          maxWidth: "440px",
+          background: "#ffffff",
+          border: "1px solid rgba(148, 163, 184, 0.22)",
+          borderTop: "4px solid #00b8f8",
           borderRadius: "18px",
-          padding: "40px 32px",
-          backdropFilter: "blur(14px)",
-          boxShadow: "0 12px 40px rgba(0,0,0,0.45)",
+          padding: "38px 34px",
+          boxShadow: "0 22px 55px rgba(15, 23, 42, 0.10)",
         }}
       >
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
-          <img
-            src={ErosClinicLogo}
-            alt="EROS Wellness AI Clinic"
+          <div
             style={{
               width: "220px",
-              maxWidth: "80%",
-              height: "auto",
-              objectFit: "contain",
-              marginBottom: "18px",
+              maxWidth: "78%",
+              margin: "0 auto 22px",
+              padding: "10px 18px",
+              borderRadius: "16px",
+              background: "#ffffff",
+              border: "1px solid #dbeafe",
+              boxShadow: "0 10px 28px rgba(14, 165, 233, 0.10)",
             }}
-          />
+          >
+            <img
+              src={ErosClinicLogo}
+              alt="EROS Wellness AI Clinic"
+              style={{
+                width: "100%",
+                height: "auto",
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
+          </div>
           <h1
             style={{
-              fontSize: "22px",
-              fontWeight: 600,
+              fontSize: "24px",
+              fontWeight: 800,
               margin: 0,
-              letterSpacing: "-0.01em",
+              letterSpacing: "0",
+              color: "#0f172a",
             }}
           >
             Restricted Access
@@ -110,7 +123,7 @@ export default function PasswordGate({ children }: PasswordGateProps) {
               marginTop: "8px",
               marginBottom: 0,
               fontSize: "14px",
-              color: "rgba(255,255,255,0.65)",
+              color: "#64748b",
               lineHeight: 1.5,
             }}
           >
@@ -123,8 +136,8 @@ export default function PasswordGate({ children }: PasswordGateProps) {
           style={{
             display: "block",
             fontSize: "13px",
-            fontWeight: 500,
-            color: "rgba(255,255,255,0.8)",
+            fontWeight: 800,
+            color: "#0f172a",
             marginBottom: "8px",
           }}
         >
@@ -150,9 +163,9 @@ export default function PasswordGate({ children }: PasswordGateProps) {
               borderRadius: "10px",
               border: error
                 ? "1px solid rgba(239,68,68,0.6)"
-                : "1px solid rgba(255,255,255,0.18)",
-              background: "rgba(0,0,0,0.4)",
-              color: "#fff",
+                : "1.5px solid #dbeafe",
+              background: "#ffffff",
+              color: "#0f172a",
               fontSize: "15px",
               outline: "none",
               transition: "border-color 0.2s",
@@ -160,12 +173,12 @@ export default function PasswordGate({ children }: PasswordGateProps) {
             onFocus={(e) => {
               e.currentTarget.style.borderColor = error
                 ? "rgba(239,68,68,0.8)"
-                : "rgba(157,202,230,0.7)";
+                : "#00b8f8";
             }}
             onBlur={(e) => {
               e.currentTarget.style.borderColor = error
                 ? "rgba(239,68,68,0.6)"
-                : "rgba(255,255,255,0.18)";
+                : "#dbeafe";
             }}
           />
           <button
@@ -179,7 +192,7 @@ export default function PasswordGate({ children }: PasswordGateProps) {
               transform: "translateY(-50%)",
               background: "transparent",
               border: "none",
-              color: "rgba(255,255,255,0.6)",
+              color: "#64748b",
               cursor: "pointer",
               padding: "6px",
               borderRadius: "6px",
@@ -203,7 +216,7 @@ export default function PasswordGate({ children }: PasswordGateProps) {
           <p
             role="alert"
             style={{
-              color: "#fca5a5",
+              color: "#ef4444",
               fontSize: "13px",
               margin: "10px 0 0",
             }}
@@ -220,12 +233,13 @@ export default function PasswordGate({ children }: PasswordGateProps) {
             height: "46px",
             borderRadius: "10px",
             border: "none",
-            background: "linear-gradient(135deg, #4893fc 0%, #1f5fcf 100%)",
+            background: "#00b8f8",
             color: "#fff",
             fontSize: "15px",
-            fontWeight: 600,
+            fontWeight: 800,
             cursor: "pointer",
             letterSpacing: "0.01em",
+            boxShadow: "0 10px 24px rgba(0, 184, 248, 0.26)",
             transition: "opacity 0.18s, transform 0.18s",
           }}
           onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.99)")}

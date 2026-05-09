@@ -8,14 +8,15 @@ export default function ReportsHomeButton() {
   const location = useLocation();
   const { language } = usePhcSession();
   const t = getPhcCopy(language);
-  const isReportsPage = location.pathname === "/reports";
+  const shouldShow = location.pathname === "/facescan";
+
+  if (!shouldShow) return null;
 
   return (
     <button
       type="button"
       onClick={() => navigate("/reports")}
       aria-label={t.home}
-      aria-current={isReportsPage ? "page" : undefined}
       style={{
         position: "fixed",
         left: 18,
@@ -29,8 +30,8 @@ export default function ReportsHomeButton() {
         padding: "10px 16px",
         borderRadius: 999,
         border: "1px solid rgba(14, 165, 233, 0.28)",
-        background: isReportsPage ? "#0f172a" : "rgba(255, 255, 255, 0.96)",
-        color: isReportsPage ? "#ffffff" : "#0369a1",
+        background: "rgba(255, 255, 255, 0.96)",
+        color: "#0369a1",
         boxShadow: "0 14px 34px rgba(15, 23, 42, 0.16)",
         cursor: "pointer",
         fontFamily: "'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",

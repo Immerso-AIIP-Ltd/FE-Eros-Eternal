@@ -708,14 +708,15 @@ const FaceReportPage: React.FC = () => {
   return (
 
     <div
+      className="face-report-root"
       style={{
         minHeight: '100vh',
         backgroundColor: '#F9FAFB',
-        padding: '24px',
+        padding: '84px 24px 24px',
       }}
     >
       {/* Back button (outside PDF capture area) */}
-      <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+      <div className="report-topbar" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 16 }}>
         <button
           onClick={() => navigate('/facescan')}
           style={{
@@ -741,23 +742,13 @@ const FaceReportPage: React.FC = () => {
           <ArrowLeft size={18} />
           {t.back}
         </button>
-        <img
-          src={ErosClinicLogo}
-          alt="EROS Wellness AI Clinic"
-          style={{ width: 150, maxWidth: '42vw', height: 'auto', objectFit: 'contain' }}
-        />
       </div>
 
       {/* Report content (captured for PDF) */}
-      <div ref={reportRef} style={{ margin: '0 auto' }}>
+      <div ref={reportRef} className="report-pdf-content" style={{ margin: '0 auto' }}>
         {/* Header with title and download button */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div className="report-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '18px', marginBottom: '24px' }}>
           <div>
-            <img
-              src={ErosClinicLogo}
-              alt="EROS Wellness AI Clinic"
-              style={{ width: 160, height: 'auto', objectFit: 'contain', marginBottom: 14 }}
-            />
             <h1 style={{ color: '#111827', fontSize: '1.875rem', fontWeight: 700, margin: '0 0 4px 0' }}>
               {t.bioCareReport}
             </h1>
@@ -777,33 +768,41 @@ const FaceReportPage: React.FC = () => {
               {t.biometricAnalysis}
             </p>
           </div>
-          <button
-            onClick={handleDownloadPdf}
-            disabled={downloading}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              backgroundColor: downloading ? '#9CA3AF' : '#00B8D4',
-              color: '#fff',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '12px',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              cursor: downloading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              if (!downloading) e.currentTarget.style.backgroundColor = '#00A0BC';
-            }}
-            onMouseLeave={(e) => {
-              if (!downloading) e.currentTarget.style.backgroundColor = '#00B8D4';
-            }}
-          >
-            <Download size={16} />
-            {downloading ? t.generatingPdf : t.downloadPdf}
-          </button>
+          <div className="report-header-actions" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '16px', flexShrink: 0 }}>
+            <img
+              src={ErosClinicLogo}
+              alt="EROS Wellness AI Clinic"
+              style={{ width: 150, maxWidth: '34vw', height: 'auto', objectFit: 'contain', display: 'block' }}
+            />
+            <button
+              className="pdf-hide"
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                backgroundColor: downloading ? '#9CA3AF' : '#00B8D4',
+                color: '#fff',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '12px',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                cursor: downloading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                if (!downloading) e.currentTarget.style.backgroundColor = '#00A0BC';
+              }}
+              onMouseLeave={(e) => {
+                if (!downloading) e.currentTarget.style.backgroundColor = '#00B8D4';
+              }}
+            >
+              <Download size={16} />
+              {downloading ? t.generatingPdf : t.downloadPdf}
+            </button>
+          </div>
         </div>
 
         <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -1405,17 +1404,8 @@ const FaceReportPage: React.FC = () => {
                   {re && breathingRateSdShown > 0 && (
                     <HrvRow label={t.breathingRateSd} value={breathingRateSdShown.toFixed(1)} unit="breaths/min" />
                   )}
-                  {re && (
-                    <>
-                      <HrvRow
-                        label={t.breathingStability}
-                        value={re.stability.charAt(0).toUpperCase() + re.stability.slice(1)}
-                        status={re.stability === 'stable' ? 'NORMAL' : re.stability === 'variable' ? 'MODERATE' : 'HIGH'}
-                      />
-                      {re.breathCyclesDetected > 0 && (
-                        <HrvRow label={t.breathCycles} value={re.breathCyclesDetected} />
-                      )}
-                    </>
+                  {re?.breathCyclesDetected > 0 && (
+                    <HrvRow label={t.breathCycles} value={re.breathCyclesDetected} />
                   )}
                 </div>
               </div>
@@ -1733,6 +1723,18 @@ const FaceReportPage: React.FC = () => {
 
       {/* Responsive styles */}
       <style>{`
+        .report-topbar,
+        .report-pdf-content {
+          width: min(1120px, 100%);
+        }
+
+        .report-pdf-content {
+          background: #ffffff;
+          border-radius: 18px;
+          padding: 28px;
+          box-shadow: 0 16px 42px rgba(15, 23, 42, 0.06);
+        }
+
         @media (max-width: 1024px) {
           .metrics-grid {
             grid-template-columns: repeat(2, 1fr) !important;
@@ -1747,6 +1749,21 @@ const FaceReportPage: React.FC = () => {
           }
           .clinical-grid {
             grid-template-columns: 1fr !important;
+          }
+          .report-header-row {
+            flex-direction: column;
+          }
+          .report-header-actions {
+            align-items: flex-start !important;
+          }
+        }
+
+        @media (max-width: 520px) {
+          .face-report-root {
+            padding: 78px 16px 20px !important;
+          }
+          .report-pdf-content {
+            padding: 20px !important;
           }
         }
       `}</style>
