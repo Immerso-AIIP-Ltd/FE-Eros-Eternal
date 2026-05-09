@@ -13,9 +13,8 @@ type ApiEnvelope<T> = {
 
 export interface SignupPayload {
   full_name: string;
-  aadhaar_number: string;
   phone_number: string;
-  password: string;
+  otp_verification_token: string;
   gender?: string;
   date_of_birth?: string;
   time_of_birth?: string;
@@ -24,9 +23,31 @@ export interface SignupPayload {
   preferred_language: AppLanguage;
 }
 
-export interface LoginPayload {
-  aadhaar_number: string;
-  password: string;
+export type OtpPurpose = "signup" | "login";
+
+export interface SendOtpPayload {
+  phone_number: string;
+  purpose: OtpPurpose;
+  preferred_language?: AppLanguage;
+}
+
+export interface SendOtpResult {
+  otpRequestId: string;
+  expiresInSeconds?: number;
+  resendAfterSeconds?: number;
+  isRegistered?: boolean;
+}
+
+export interface VerifyOtpPayload {
+  phone_number: string;
+  otp: string;
+  otp_request_id?: string;
+  purpose: OtpPurpose;
+}
+
+export interface VerifyOtpResult {
+  otpVerificationToken?: string;
+  patient?: PhcPatient;
 }
 
 export interface BioCareReportListItem {
@@ -68,6 +89,10 @@ function pickUserId(data: Record<string, any>) {
   return data.user_id ?? data.userId ?? data.id;
 }
 
+function pickPatientPayload(data: Record<string, any>) {
+  return data.patient ?? data.user ?? data.profile ?? data;
+}
+
 export function normalizePatient(
   raw: Record<string, any>,
   fallback: Partial<PhcPatient> = {},
@@ -91,7 +116,6 @@ export function normalizePatient(
       data.phoneNumber ??
       fallback.phoneNumber ??
       "",
-    aadhaarLast4: data.aadhaar_last4 ?? fallback.aadhaarLast4,
     gender: data.gender ?? fallback.gender,
     dateOfBirth:
       data.date_of_birth ??
@@ -124,6 +148,56 @@ export function normalizePatient(
   };
 }
 
+export async function sendOtp(payload: SendOtpPayload): Promise<SendOtpResult> {
+  const response = await fetch(endpoint("/auth/otp/send"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const result = await parseJsonResponse<Record<string, any>>(response);
+  const data = result.data ?? {};
+  const otpRequestId =
+    data.otp_request_id ??
+    data.otpRequestId ??
+    data.request_id ??
+    data.requestId ??
+    data.verification_id ??
+    data.verificationId ??
+    "";
+
+  return {
+    otpRequestId: String(otpRequestId),
+    expiresInSeconds:
+      data.expires_in_seconds ?? data.expiresInSeconds ?? data.expires_in ?? data.expiresIn,
+    resendAfterSeconds:
+      data.resend_after_seconds ?? data.resendAfterSeconds ?? data.resend_after ?? data.resendAfter,
+    isRegistered: data.is_registered ?? data.isRegistered,
+  };
+}
+
+export async function verifyOtp(payload: VerifyOtpPayload): Promise<VerifyOtpResult> {
+  const response = await fetch(endpoint("/auth/otp/verify"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const result = await parseJsonResponse<Record<string, any>>(response);
+  const data = result.data ?? {};
+  const patientPayload = pickPatientPayload(data);
+  const hasPatient = patientPayload && typeof patientPayload === "object" && pickUserId(patientPayload);
+
+  return {
+    otpVerificationToken:
+      data.otp_verification_token ??
+      data.otpVerificationToken ??
+      data.verification_token ??
+      data.verificationToken,
+    patient: hasPatient
+      ? normalizePatient(patientPayload, { phoneNumber: payload.phone_number })
+      : undefined,
+  };
+}
+
 export async function signupPatient(payload: SignupPayload): Promise<PhcPatient> {
   const response = await fetch(endpoint("/auth/signup"), {
     method: "POST",
@@ -131,10 +205,10 @@ export async function signupPatient(payload: SignupPayload): Promise<PhcPatient>
     body: JSON.stringify(payload),
   });
   const result = await parseJsonResponse<Record<string, any>>(response);
-  return normalizePatient(result.data ?? {}, {
+  const data = result.data ?? {};
+  return normalizePatient(pickPatientPayload(data), {
     username: payload.full_name,
     phoneNumber: payload.phone_number,
-    aadhaarLast4: payload.aadhaar_number.slice(-4),
     gender: payload.gender,
     dateOfBirth: payload.date_of_birth,
     timeOfBirth: payload.time_of_birth,
@@ -142,19 +216,6 @@ export async function signupPatient(payload: SignupPayload): Promise<PhcPatient>
     currentLocation: payload.current_location,
     preferredLanguage: payload.preferred_language,
     isFirstScanRequired: true,
-  });
-}
-
-export async function loginPatient(payload: LoginPayload): Promise<PhcPatient> {
-  const response = await fetch(endpoint("/auth/login"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const result = await parseJsonResponse<Record<string, any>>(response);
-  return normalizePatient(result.data ?? {}, {
-    aadhaarLast4: payload.aadhaar_number.slice(-4),
-    phoneNumber: payload.password,
   });
 }
 

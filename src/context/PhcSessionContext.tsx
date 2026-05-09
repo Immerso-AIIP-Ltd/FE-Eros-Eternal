@@ -7,7 +7,6 @@ export interface PhcPatient {
   userId: string;
   username: string;
   phoneNumber: string;
-  aadhaarLast4?: string;
   gender?: string;
   dateOfBirth?: string;
   timeOfBirth?: string;

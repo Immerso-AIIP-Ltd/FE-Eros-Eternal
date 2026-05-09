@@ -4,12 +4,11 @@ import BackgroundImage from "../../assets/images/background.png";
 import ErosClinicLogo from "@/assets/images/eros-wellness-ai-clinic-cropped.png";
 import { usePhcSession } from "@/context/PhcSessionContext";
 import { getPhcCopy } from "@/i18n/phcCopy";
-import { loginPatient, signupPatient } from "@/lib/phcApi";
+import { sendOtp, signupPatient, verifyOtp } from "@/lib/phcApi";
 
 interface FormData {
   name: string;
   phoneNumber: string;
-  aadhaarNumber: string;
   gender: string;
   placeOfBirth: string;
   currentLocation: string;
@@ -18,11 +17,32 @@ interface FormData {
 }
 
 interface LoginFormData {
-  aadhaarNumber: string;
   phoneNumber: string;
 }
 
 type AuthMode = "signup" | "login";
+
+interface OtpFlowState {
+  requestId: string;
+  otp: string;
+  sent: boolean;
+  verifiedToken: string;
+  verifiedPhone: string;
+  sending: boolean;
+  verifying: boolean;
+  message: string | null;
+}
+
+const createOtpState = (): OtpFlowState => ({
+  requestId: "",
+  otp: "",
+  sent: false,
+  verifiedToken: "",
+  verifiedPhone: "",
+  sending: false,
+  verifying: false,
+  message: null,
+});
 
 /* ─── Icons ─── */
 const IcoLocation = () => (
@@ -102,7 +122,6 @@ const SoulProfilePage: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phoneNumber: "",
-    aadhaarNumber: "",
     gender: "",
     placeOfBirth: "",
     currentLocation: "",
@@ -110,9 +129,10 @@ const SoulProfilePage: React.FC = () => {
     timeOfBirth: "",
   });
   const [loginData, setLoginData] = useState<LoginFormData>({
-    aadhaarNumber: "",
     phoneNumber: "",
   });
+  const [signupOtp, setSignupOtp] = useState<OtpFlowState>(createOtpState);
+  const [loginOtp, setLoginOtp] = useState<OtpFlowState>(createOtpState);
 
   // Date picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -232,20 +252,114 @@ const SoulProfilePage: React.FC = () => {
   };
 
   const onlyDigits = (value: string) => value.replace(/\D/g, "");
+  const withoutNumbers = (value: string) => value.replace(/[0-9\u0660-\u0669\u06F0-\u06F9\u0966-\u096F]/g, "");
 
-  const getAadhaarError = (value: string) => {
-    return onlyDigits(value).length === 12 ? null : t.aadhaarValidation;
+  const getPhoneError = (value: string) => {
+    return onlyDigits(value).length === 10 ? null : t.phoneValidation;
+  };
+
+  const updateSignupPhone = (value: string) => {
+    const phone = onlyDigits(value).slice(0, 10);
+    set("phoneNumber", phone);
+    setSignupOtp(createOtpState());
+  };
+
+  const updateLoginPhone = (value: string) => {
+    const phone = onlyDigits(value).slice(0, 10);
+    setLogin("phoneNumber", phone);
+    setLoginOtp(createOtpState());
+  };
+
+  const sendSignupOtp = async () => {
+    setErrorMsg(null);
+    const phoneError = getPhoneError(formData.phoneNumber);
+    if (phoneError) return setErrorMsg(phoneError);
+
+    setSignupOtp((prev) => ({ ...prev, sending: true, message: null }));
+    try {
+      const result = await sendOtp({
+        phone_number: formData.phoneNumber,
+        purpose: "signup",
+        preferred_language: language,
+      });
+      setSignupOtp((prev) => ({
+        ...prev,
+        requestId: result.otpRequestId,
+        sent: true,
+        verifiedToken: "",
+        verifiedPhone: "",
+        sending: false,
+        message: t.otpSent,
+      }));
+    } catch (err: any) {
+      setSignupOtp((prev) => ({ ...prev, sending: false }));
+      setErrorMsg(err.message || t.otpSendFailed);
+    }
+  };
+
+  const verifySignupOtp = async () => {
+    setErrorMsg(null);
+    if (!signupOtp.sent) return setErrorMsg(t.sendOtpFirst);
+    if (onlyDigits(signupOtp.otp).length < 4) return setErrorMsg(t.otpValidation);
+
+    setSignupOtp((prev) => ({ ...prev, verifying: true, message: null }));
+    try {
+      const result = await verifyOtp({
+        phone_number: formData.phoneNumber,
+        otp: onlyDigits(signupOtp.otp),
+        otp_request_id: signupOtp.requestId,
+        purpose: "signup",
+      });
+      if (!result.otpVerificationToken) {
+        throw new Error(t.otpVerifyFailed);
+      }
+      setSignupOtp((prev) => ({
+        ...prev,
+        verifiedToken: result.otpVerificationToken ?? "",
+        verifiedPhone: formData.phoneNumber,
+        verifying: false,
+        message: t.otpVerified,
+      }));
+    } catch (err: any) {
+      setSignupOtp((prev) => ({ ...prev, verifying: false }));
+      setErrorMsg(err.message || t.otpVerifyFailed);
+    }
+  };
+
+  const sendLoginOtp = async () => {
+    setErrorMsg(null);
+    const phoneError = getPhoneError(loginData.phoneNumber);
+    if (phoneError) return setErrorMsg(phoneError);
+
+    setLoginOtp((prev) => ({ ...prev, sending: true, message: null }));
+    try {
+      const result = await sendOtp({
+        phone_number: loginData.phoneNumber,
+        purpose: "login",
+        preferred_language: language,
+      });
+      setLoginOtp((prev) => ({
+        ...prev,
+        requestId: result.otpRequestId,
+        sent: true,
+        sending: false,
+        message: t.otpSent,
+      }));
+    } catch (err: any) {
+      setLoginOtp((prev) => ({ ...prev, sending: false }));
+      setErrorMsg(err.message || t.otpSendFailed);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     if (!formData.name.trim()) return setErrorMsg("Please enter your name.");
-    if (!/^\+?[0-9\s-]{7,15}$/.test(formData.phoneNumber.trim())) {
-      return setErrorMsg("Please enter a valid phone number.");
+    const phoneError = getPhoneError(formData.phoneNumber);
+    if (phoneError) return setErrorMsg(phoneError);
+    if (!signupOtp.verifiedToken || signupOtp.verifiedPhone !== formData.phoneNumber) {
+      return setErrorMsg(t.verifyOtpFirst);
     }
-    const aadhaarError = getAadhaarError(formData.aadhaarNumber);
-    if (aadhaarError) return setErrorMsg(aadhaarError);
     if (!formData.dateOfBirth)
       return setErrorMsg("Please select date of birth.");
     if (!formData.timeOfBirth)
@@ -255,9 +369,8 @@ const SoulProfilePage: React.FC = () => {
     try {
       const patient = await signupPatient({
         full_name: formData.name.trim(),
-        aadhaar_number: onlyDigits(formData.aadhaarNumber),
-        phone_number: formData.phoneNumber.trim(),
-        password: formData.phoneNumber.trim(),
+        phone_number: formData.phoneNumber,
+        otp_verification_token: signupOtp.verifiedToken,
         gender: formData.gender,
         place_of_birth: formData.placeOfBirth.trim(),
         current_location: formData.currentLocation.trim(),
@@ -279,18 +392,22 @@ const SoulProfilePage: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
-    const aadhaarError = getAadhaarError(loginData.aadhaarNumber);
-    if (aadhaarError) return setErrorMsg(aadhaarError);
-    if (!/^\+?[0-9\s-]{7,15}$/.test(loginData.phoneNumber.trim())) {
-      return setErrorMsg(t.phoneValidation);
-    }
+    const phoneError = getPhoneError(loginData.phoneNumber);
+    if (phoneError) return setErrorMsg(phoneError);
+    if (!loginOtp.sent) return setErrorMsg(t.sendOtpFirst);
+    if (onlyDigits(loginOtp.otp).length < 4) return setErrorMsg(t.otpValidation);
 
     setLoading(true);
+    setLoginOtp((prev) => ({ ...prev, verifying: true, message: null }));
     try {
-      const patient = await loginPatient({
-        aadhaar_number: onlyDigits(loginData.aadhaarNumber),
-        password: loginData.phoneNumber.trim(),
+      const result = await verifyOtp({
+        phone_number: loginData.phoneNumber,
+        otp: onlyDigits(loginOtp.otp),
+        otp_request_id: loginOtp.requestId,
+        purpose: "login",
       });
+      const patient = result.patient;
+      if (!patient) throw new Error(t.loginFailed);
       if (patient.preferredLanguage) setLanguage(patient.preferredLanguage);
       setBioCareReport(null);
       setPatient(patient);
@@ -298,6 +415,7 @@ const SoulProfilePage: React.FC = () => {
     } catch (err: any) {
       setErrorMsg(err.message || t.loginFailed);
     } finally {
+      setLoginOtp((prev) => ({ ...prev, verifying: false }));
       setLoading(false);
     }
   };
@@ -664,6 +782,43 @@ const SoulProfilePage: React.FC = () => {
         }
         .sp-btn:active:not(:disabled) { transform: translateY(0); }
         .sp-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+        .sp-otp-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+
+        .sp-otp-grid-verify {
+          grid-template-columns: minmax(0, 1fr) auto;
+          margin-top: 8px;
+        }
+
+        .sp-secondary-btn {
+          min-height: 40px;
+          border: 1px solid #bae6fd;
+          border-radius: 10px;
+          background: #e0f2fe;
+          color: #0369a1;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 0.82rem;
+          font-weight: 800;
+          padding: 0 14px;
+          white-space: nowrap;
+        }
+
+        .sp-secondary-btn:disabled {
+          opacity: 0.62;
+          cursor: not-allowed;
+        }
+
+        .sp-otp-message {
+          margin: 7px 0 0;
+          color: #047857;
+          font-size: 0.76rem;
+          font-weight: 700;
+        }
 
         .sp-link-btn {
           border: none;
@@ -1054,6 +1209,8 @@ const SoulProfilePage: React.FC = () => {
           .sp-wheel-wrap { width: 90%; margin-top: 22%; }
           .sp-card { border-radius: 14px; }
           .sp-card-title { font-size: 1.05rem; }
+          .sp-otp-grid-verify { grid-template-columns: 1fr; }
+          .sp-secondary-btn { width: 100%; }
         }
 
         /* Small mobile ≤360 */
@@ -1221,7 +1378,7 @@ const SoulProfilePage: React.FC = () => {
                         type="text"
                         placeholder={t.fullName}
                         value={formData.name}
-                        onChange={(e) => set("name", e.target.value)}
+                        onChange={(e) => set("name", withoutNumbers(e.target.value))}
                         required
                       />
                     </div>
@@ -1235,30 +1392,61 @@ const SoulProfilePage: React.FC = () => {
                         className="sp-input no-icon"
                         type="tel"
                         inputMode="tel"
+                        maxLength={10}
                         placeholder={t.phoneNumber}
                         value={formData.phoneNumber}
-                        onChange={(e) => set("phoneNumber", e.target.value)}
+                        onChange={(e) => updateSignupPhone(e.target.value)}
                         required
                       />
                     </div>
                   </div>
 
-                  {/* Aadhaar */}
+                  {/* Signup OTP */}
                   <div>
-                    <label className="sp-field-label">{t.aadhaarNumber}</label>
-                    <div className="sp-wrap">
-                      <input
-                        className="sp-input no-icon"
-                        type="text"
-                        inputMode="numeric"
-                        autoComplete="off"
-                        maxLength={12}
-                        placeholder={t.aadhaarNumber}
-                        value={formData.aadhaarNumber}
-                        onChange={(e) => set("aadhaarNumber", onlyDigits(e.target.value).slice(0, 12))}
-                        required
-                      />
+                    <label className="sp-field-label">{t.otpVerification}</label>
+                    <div className="sp-otp-grid">
+                      <button
+                        type="button"
+                        className="sp-secondary-btn"
+                        onClick={sendSignupOtp}
+                        disabled={signupOtp.sending || loading}
+                      >
+                        {signupOtp.sending ? t.sendingOtp : signupOtp.sent ? t.resendOtp : t.sendOtp}
+                      </button>
                     </div>
+                    {signupOtp.sent && (
+                      <div className="sp-otp-grid sp-otp-grid-verify">
+                        <div className="sp-wrap">
+                          <input
+                            className="sp-input no-icon"
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            maxLength={6}
+                            placeholder={t.enterOtp}
+                            value={signupOtp.otp}
+                            onChange={(e) =>
+                              setSignupOtp((prev) => ({
+                                ...prev,
+                                otp: onlyDigits(e.target.value).slice(0, 6),
+                                verifiedToken: "",
+                                verifiedPhone: "",
+                              }))
+                            }
+                            required
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          className="sp-secondary-btn"
+                          onClick={verifySignupOtp}
+                          disabled={signupOtp.verifying || loading}
+                        >
+                          {signupOtp.verifying ? t.verifyingOtp : t.verifyOtp}
+                        </button>
+                      </div>
+                    )}
+                    {signupOtp.message && <p className="sp-otp-message">{signupOtp.message}</p>}
                   </div>
 
                   {/* Place of Birth */}
@@ -1418,37 +1606,58 @@ const SoulProfilePage: React.FC = () => {
                 <div className="sp-fields">
                   <div className="sp-security-note">{t.loginSecurityNote}</div>
                   <div>
-                    <label className="sp-field-label">{t.aadhaarNumber}</label>
-                    <div className="sp-wrap">
-                      <input
-                        className="sp-input no-icon"
-                        type="text"
-                        inputMode="numeric"
-                        autoComplete="off"
-                        maxLength={12}
-                        placeholder={t.aadhaarNumber}
-                        value={loginData.aadhaarNumber}
-                        onChange={(e) => setLogin("aadhaarNumber", onlyDigits(e.target.value).slice(0, 12))}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="sp-field-label">{t.mobileAsPassword}</label>
+                    <label className="sp-field-label">{t.phoneNumber}</label>
                     <div className="sp-wrap">
                       <input
                         className="sp-input no-icon"
                         type="tel"
                         inputMode="tel"
+                        maxLength={10}
                         placeholder={t.phoneNumber}
                         value={loginData.phoneNumber}
-                        onChange={(e) => setLogin("phoneNumber", e.target.value)}
+                        onChange={(e) => updateLoginPhone(e.target.value)}
                         required
                       />
                     </div>
                   </div>
+                  <div>
+                    <label className="sp-field-label">{t.otpVerification}</label>
+                    <div className="sp-otp-grid">
+                      <button
+                        type="button"
+                        className="sp-secondary-btn"
+                        onClick={sendLoginOtp}
+                        disabled={loginOtp.sending || loading}
+                      >
+                        {loginOtp.sending ? t.sendingOtp : loginOtp.sent ? t.resendOtp : t.sendOtp}
+                      </button>
+                    </div>
+                    {loginOtp.sent && (
+                      <div className="sp-otp-grid sp-otp-grid-verify">
+                        <div className="sp-wrap">
+                          <input
+                            className="sp-input no-icon"
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            maxLength={6}
+                            placeholder={t.enterOtp}
+                            value={loginOtp.otp}
+                            onChange={(e) =>
+                              setLoginOtp((prev) => ({
+                                ...prev,
+                                otp: onlyDigits(e.target.value).slice(0, 6),
+                              }))
+                            }
+                            required
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {loginOtp.message && <p className="sp-otp-message">{loginOtp.message}</p>}
+                  </div>
                   <button type="submit" className="sp-btn" disabled={loading}>
-                    {loading ? t.signingIn : t.signInAndContinue}
+                    {loading || loginOtp.verifying ? t.verifyingOtp : t.signInAndContinue}
                   </button>
                   <p className="sp-alt">
                     {t.newToPhc}{" "}

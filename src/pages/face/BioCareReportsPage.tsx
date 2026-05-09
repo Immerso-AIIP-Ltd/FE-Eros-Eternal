@@ -477,10 +477,6 @@ const BioCareReportsPage: React.FC = () => {
               <strong>{patient?.phoneNumber ?? "—"}</strong>
             </div>
             <div className="phc-history-patient-row">
-              <span>{t.aadhaarEnding}</span>
-              <strong>{patient?.aadhaarLast4 ? `•••• ${patient.aadhaarLast4}` : "—"}</strong>
-            </div>
-            <div className="phc-history-patient-row">
               <span>{t.reportLanguage}</span>
               <strong>{language === "gu" ? t.gujarati : t.english}</strong>
             </div>
