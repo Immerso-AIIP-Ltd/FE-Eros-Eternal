@@ -17,7 +17,8 @@ import {
   calculateAverage,
   getStatusColorCode
 } from '../../utils/rppgHelpers';
-import { drawFaceBbox, drawHeatmap, drawTrajectory, HeatmapRange, TrajPoint } from './visualizations';
+import { drawFaceBbox, drawHeatmap, drawTrajectory } from './visualizations';
+import type { HeatmapRange, TrajPoint } from './visualizations';
 
 type ScanState = 'initial' | 'camera' | 'recording' | 'processing' | 'complete';
 
@@ -42,6 +43,8 @@ const SQI_THRESHOLD = 0.38;
 const TARGET_FPS = 30;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
 const RECORDING_DURATION = 60; // seconds
+const MIN_VALID_HR_SAMPLES_FOR_REPORT = 10;
+const MIN_VALID_BVP_SAMPLES_FOR_REPORT = 150;
 
 const FaceScanner: React.FC = () => {
   const [scanState, setScanState] = useState<ScanState>('initial');
@@ -91,6 +94,7 @@ const FaceScanner: React.FC = () => {
   const hrLogRef = useRef<Array<[number, number, number]>>([]); // [timestamp, hr, sqi]
   const apiResponseRef = useRef<any>(null); // Store API PUT response for report page
   const bvpLogRef = useRef<Array<[number, number]>>([]); // [timestamp, bvp_value]
+  const faceDetectionFrameCountRef = useRef<number>(0);
   const lastFaceDetectTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number>(0);
@@ -553,6 +557,7 @@ const FaceScanner: React.FC = () => {
         const det = detections.detections[0] as FaceDetection;
         let { originX, originY, width, height } = det.boundingBox;
         lastFaceDetectTimeRef.current = now;
+        faceDetectionFrameCountRef.current += 1;
         setFaceDetected(true);
 
         // Apply Kalman filtering for stability
@@ -766,10 +771,16 @@ const FaceScanner: React.FC = () => {
       return;
     }
 
+    if (!rppgInitialized) {
+      setError(t.preparingScanner);
+      return;
+    }
+
     chunksRef.current = [];
 
     hrLogRef.current = [];
     bvpLogRef.current = [];
+    faceDetectionFrameCountRef.current = 0;
     bufferPtrRef.current = 0;
     bufferFullRef.current = false;
     inputBufferRef.current = new Float32Array(INPUT_BUFFER_SIZE);
@@ -970,6 +981,7 @@ const FaceScanner: React.FC = () => {
     setFaceDetected(false);
     hrLogRef.current = [];
     bvpLogRef.current = [];
+    faceDetectionFrameCountRef.current = 0;
     kalmanFiltersRef.current = {};
 
     // Reset visualization refs
@@ -993,18 +1005,19 @@ const FaceScanner: React.FC = () => {
           const { metrics, rrIntervals: rrData, poincareData } = e.data.payload;
 
           // Filter out any warm-up readings below 45 BPM
-          const stableReadings = hrLogRef.current.filter(([_, hr]) => hr >= 45);
+          const stableReadings = hrLogRef.current.filter(([, hr]) => hr >= 45);
 
           // Calculate average HR from valid readings
-          const validHr = stableReadings.filter(([_, __, s]) => s > SQI_THRESHOLD);
-          const avgHr = validHr.length > 0
-            ? calculateAverage(validHr.map(([_, hr]) => hr))
-            : heartRate || 72;
+          const validHr = stableReadings.filter(([, , s]) => s > SQI_THRESHOLD);
+          if (validHr.length < MIN_VALID_HR_SAMPLES_FOR_REPORT) {
+            resolve(null);
+            return;
+          }
+
+          const avgHr = calculateAverage(validHr.map(([, hr]) => hr));
 
           // Calculate average SQI
-          const avgSqi = stableReadings.length > 0
-            ? calculateAverage(stableReadings.map(([_, __, s]) => s))
-            : sqi || 0.5;
+          const avgSqi = calculateAverage(validHr.map(([, , s]) => s));
 
           // Generate report data
           const hrHistory: HrHistoryPoint[] = stableReadings.map(([time, hr, sqi]) => ({
@@ -1040,7 +1053,7 @@ const FaceScanner: React.FC = () => {
             vitals: generateVitals(
               avgHr,
               avgSqi,
-              metrics.respiratoryRate || 15
+              metrics.respiratoryRate ?? 0
             ),
             hrv: generateHrv(
               metrics.sdnn || 0,
@@ -1089,8 +1102,8 @@ const FaceScanner: React.FC = () => {
   const predictBP = async (): Promise<{ bp_systolic: number; bp_diastolic: number; confidence: number; method: string } | null> => {
     try {
       const ppgSignal = bvpLogRef.current
-        .filter(([_, v]) => v !== 0) // skip zero-init values
-        .map(([_, v]) => v);
+        .filter(([, v]) => v !== 0) // skip zero-init values
+        .map(([, v]) => v);
 
       if (ppgSignal.length < 150) { // need at least 5 seconds at 30fps
         console.warn('PPG signal too short for BP prediction:', ppgSignal.length);
@@ -1158,21 +1171,50 @@ const FaceScanner: React.FC = () => {
     };
   };
 
-  const buildHealthReportInput = (rppgData: CombinedReportData['rppg'] | null): HealthData => ({
+  const validateFaceScanForReport = (
+    rppgData: CombinedReportData['rppg'] | null,
+    rppgSignals: RppgSignalPayload,
+  ): string | null => {
+    if (!rppgData) {
+      return t.invalidFaceScan;
+    }
+
+    const validHrSamples = hrLogRef.current.filter(
+      ([, hr, sampleSqi]) => hr >= 45 && sampleSqi >= SQI_THRESHOLD,
+    );
+    const averageSqi = validHrSamples.length > 0
+      ? calculateAverage(validHrSamples.map(([, , sampleSqi]) => sampleSqi))
+      : 0;
+    const rrIntervalCount = rppgData.hrv.rrIntervalCount ?? 0;
+
+    if (
+      faceDetectionFrameCountRef.current === 0 ||
+      validHrSamples.length < MIN_VALID_HR_SAMPLES_FOR_REPORT ||
+      rppgSignals.ppg_signal.length < MIN_VALID_BVP_SAMPLES_FOR_REPORT ||
+      averageSqi < SQI_THRESHOLD ||
+      rrIntervalCount < MIN_VALID_HR_SAMPLES_FOR_REPORT
+    ) {
+      return t.invalidFaceScan;
+    }
+
+    return null;
+  };
+
+  const buildHealthReportInput = (rppgData: CombinedReportData['rppg']): HealthData => ({
     vitals: {
-      heartRate: rppgData?.vitals.heartRate || { value: Math.round(heartRate) || 72, unit: 'BPM', status: 'NORMAL' },
-      signalQuality: rppgData?.vitals.signalQuality || { value: sqi || 0.5, percentage: Math.round((sqi || 0.5) * 100), status: 'FAIR' },
-      breathingRate: rppgData?.vitals.breathingRate || { value: 15, unit: 'breaths/min', status: 'NORMAL' },
+      heartRate: rppgData.vitals.heartRate,
+      signalQuality: rppgData.vitals.signalQuality,
+      breathingRate: rppgData.vitals.breathingRate,
     },
     hrv: {
-      sdnn: rppgData?.hrv.sdnn || { value: 45, unit: 'ms', status: 'NORMAL' },
-      rmssd: rppgData?.hrv.rmssd || { value: 35, unit: 'ms', status: 'NORMAL' },
-      pnn50: rppgData?.hrv.pnn50 || { value: 15, unit: '%', status: 'NORMAL' },
-      pnn20: rppgData?.hrv.pnn20 || { value: 25, unit: '%', status: 'NORMAL' },
+      sdnn: rppgData.hrv.sdnn,
+      rmssd: rppgData.hrv.rmssd,
+      pnn50: rppgData.hrv.pnn50,
+      pnn20: rppgData.hrv.pnn20,
     },
     stress: {
-      level: rppgData?.stress.level || 'moderate',
-      index: rppgData?.stress.index || 50,
+      level: rppgData.stress.level,
+      index: rppgData.stress.index,
     },
     metadata: {
       scanDurationSeconds: recordingTime,
@@ -1182,69 +1224,43 @@ const FaceScanner: React.FC = () => {
     },
   });
 
-  const buildSectionInsightsInput = (rppgData: CombinedReportData['rppg'] | null): SectionInsightsInput => {
-    const nl = rppgData?.hrv.nonlinear;
-    const re = rppgData?.hrv.respiratoryExtended;
+  const buildSectionInsightsInput = (rppgData: CombinedReportData['rppg']): SectionInsightsInput => {
+    const nl = rppgData.hrv.nonlinear;
+    const re = rppgData.hrv.respiratoryExtended;
     return {
       language: reportLanguage,
       locale: reportLocale,
-      heartRate: rppgData?.vitals.heartRate?.value || Math.round(heartRate) || 72,
-      heartRateStatus: rppgData?.vitals.heartRate?.status || 'NORMAL',
-      signalQuality: rppgData?.vitals.signalQuality?.percentage || Math.round((sqi || 0.5) * 100),
-      breathingRate: rppgData?.vitals.breathingRate?.value || 15,
-      breathingRateStatus: rppgData?.vitals.breathingRate?.status || 'NORMAL',
-      sdnn: rppgData?.hrv.sdnn?.value || 0,
-      sdnnStatus: rppgData?.hrv.sdnn?.status || 'NORMAL',
-      rmssd: rppgData?.hrv.rmssd?.value || 0,
-      rmssdStatus: rppgData?.hrv.rmssd?.status || 'NORMAL',
-      pnn50: rppgData?.hrv.pnn50?.value || 0,
-      pnn50Status: rppgData?.hrv.pnn50?.status || 'NORMAL',
-      pnn20: rppgData?.hrv.pnn20?.value || 0,
-      pnn20Status: rppgData?.hrv.pnn20?.status || 'NORMAL',
-      rrIntervalCount: rppgData?.hrv.rrIntervalCount || 0,
-      recordingClass: rppgData?.hrv.recordingClass || 'insufficient_data',
+      heartRate: rppgData.vitals.heartRate.value,
+      heartRateStatus: rppgData.vitals.heartRate.status,
+      signalQuality: rppgData.vitals.signalQuality.percentage,
+      breathingRate: rppgData.vitals.breathingRate.value,
+      breathingRateStatus: rppgData.vitals.breathingRate.status,
+      sdnn: rppgData.hrv.sdnn.value,
+      sdnnStatus: rppgData.hrv.sdnn.status,
+      rmssd: rppgData.hrv.rmssd.value,
+      rmssdStatus: rppgData.hrv.rmssd.status,
+      pnn50: rppgData.hrv.pnn50.value,
+      pnn50Status: rppgData.hrv.pnn50.status,
+      pnn20: rppgData.hrv.pnn20.value,
+      pnn20Status: rppgData.hrv.pnn20.status,
+      rrIntervalCount: rppgData.hrv.rrIntervalCount || 0,
+      recordingClass: rppgData.hrv.recordingClass,
       sd1: nl?.sd1?.value,
       sd2: nl?.sd2?.value,
       sd1Sd2Ratio: nl?.sd1Sd2Ratio,
       sampleEntropy: nl?.sampleEntropy?.value,
       dfaAlpha1: nl?.dfaAlpha1?.value,
-      stressLevel: rppgData?.stress.level || 'unknown',
-      stressIndex: rppgData?.stress.index || 0,
-      sympathovagalBalance: rppgData?.stress.sympathovagalBalance,
+      stressLevel: rppgData.stress.level,
+      stressIndex: rppgData.stress.index,
+      sympathovagalBalance: rppgData.stress.sympathovagalBalance,
       breathingRateSd: re?.breathingRateSd?.value,
       breathingStability: re?.stability,
       breathCyclesDetected: re?.breathCyclesDetected,
     };
   };
 
-  const buildFallbackRppgReport = (): CombinedReportData['rppg'] => ({
-    vitals: {
-      heartRate: { value: Math.round(heartRate) || 72, unit: 'BPM', status: 'NORMAL' },
-      signalQuality: { value: sqi || 0.5, percentage: Math.round((sqi || 0.5) * 100), status: 'FAIR' },
-      breathingRate: { value: 15, unit: 'breaths/min', status: 'NORMAL' },
-    },
-    hrv: {
-      sdnn: { value: 45, unit: 'ms', status: 'NORMAL' },
-      rmssd: { value: 35, unit: 'ms', status: 'NORMAL' },
-      pnn50: { value: 15, unit: '%', status: 'NORMAL' },
-      pnn20: { value: 25, unit: '%', status: 'NORMAL' },
-      recordingClass: 'ultra-short',
-    },
-    stress: {
-      level: 'moderate',
-      index: 50,
-      description: 'Balanced autonomic state with healthy adaptability to stress.',
-    },
-    metadata: {
-      timestamp: new Date().toISOString(),
-      scanDurationSeconds: recordingTime,
-      samplesCollected: hrLogRef.current.length || 0,
-    },
-    hrHistory: hrLogRef.current.map(([time, hr, sqi]) => ({ time, hr: Math.round(hr), sqi })),
-  });
-
   const buildCombinedReportData = (
-    rppgData: CombinedReportData['rppg'] | null,
+    rppgData: CombinedReportData['rppg'],
     aiReport: CombinedReportData['aiReport'] | null,
     sectionInsights: CombinedReportData['sectionInsights'] | null,
     rppgSignals: RppgSignalPayload,
@@ -1257,7 +1273,7 @@ const FaceScanner: React.FC = () => {
         face_analysis_text: '',
         spiritual_interpretation: '',
       },
-      rppg: rppgData || buildFallbackRppgReport(),
+      rppg: rppgData,
       aiReport: apiRes?.ai_report
         ? {
           summary: apiRes.ai_report.summary || '',
@@ -1286,12 +1302,18 @@ const FaceScanner: React.FC = () => {
     setPreparedReport(null);
 
     try {
-      // Get rPPG metrics and BP prediction in parallel
-      const [rppgData, bpResult] = await Promise.all([
-        getFinalRppgMetrics(),
-        predictBP(),
-      ]);
+      const rppgData = await getFinalRppgMetrics();
       const rppgSignals = buildRppgSignalPayload();
+      const validationError = validateFaceScanForReport(rppgData, rppgSignals);
+
+      if (validationError || !rppgData) {
+        setPreparedReport(null);
+        setUploadError(validationError || t.invalidFaceScan);
+        setScanState('complete');
+        return;
+      }
+
+      const bpResult = await predictBP();
 
       const bpSystolic = bpResult?.bp_systolic ?? 0;
       const bpDiastolic = bpResult?.bp_diastolic ?? 0;
@@ -1327,10 +1349,10 @@ const FaceScanner: React.FC = () => {
           rppg_signals: rppgSignals,
           vitals: {
             heart_rate: {
-              value_bpm: rppgData?.vitals.heartRate?.value || Math.round(heartRate) || 72,
+              value_bpm: rppgData.vitals.heartRate.value,
             },
             signal_quality: {
-              value: rppgData?.vitals.signalQuality?.value || sqi || 0.5,
+              value: rppgData.vitals.signalQuality.value,
             },
             blood_pressure: {
               systolic_mmHg: bpSystolic,
@@ -1339,26 +1361,26 @@ const FaceScanner: React.FC = () => {
             },
           },
           hrv: {
-            sdnn: rppgData?.hrv.sdnn?.value || 45,
-            rmssd: rppgData?.hrv.rmssd?.value || 35,
-            pnn50: rppgData?.hrv.pnn50?.value ? rppgData.hrv.pnn50.value / 100 : 0.15,
-            breathing_rate: rppgData?.vitals.breathingRate?.value || 15,
-            frequency_domain: rppgData?.hrv.frequencyDomain || undefined,
-            nonlinear: rppgData?.hrv.nonlinear ? {
+            sdnn: rppgData.hrv.sdnn.value,
+            rmssd: rppgData.hrv.rmssd.value,
+            pnn50: rppgData.hrv.pnn50.value / 100,
+            breathing_rate: rppgData.vitals.breathingRate.value,
+            frequency_domain: rppgData.hrv.frequencyDomain || undefined,
+            nonlinear: rppgData.hrv.nonlinear ? {
               sd1: rppgData.hrv.nonlinear.sd1.value,
               sd2: rppgData.hrv.nonlinear.sd2.value,
               sd1_sd2_ratio: rppgData.hrv.nonlinear.sd1Sd2Ratio,
               sample_entropy: rppgData.hrv.nonlinear.sampleEntropy.value,
               dfa_alpha1: rppgData.hrv.nonlinear.dfaAlpha1.value,
             } : undefined,
-            rr_interval_count: rppgData?.hrv.rrIntervalCount || 0,
+            rr_interval_count: rppgData.hrv.rrIntervalCount || 0,
           },
-          stress_analysis: rppgData ? {
+          stress_analysis: {
             sympathovagal_balance: rppgData.stress.sympathovagalBalance,
             stress_level: rppgData.stress.level,
             stress_description: rppgData.stress.description,
             components: rppgData.stress.components,
-          } : undefined,
+          },
           latency: 0.0,
           ai_report: aiReport || "Health assessment completed successfully.",
           report_language: reportLanguage,
@@ -2501,13 +2523,13 @@ const FaceScanner: React.FC = () => {
                               padding: '0.75rem 1.5rem',
                               fontSize: '1rem'
                             }}
-                            disabled={!isCameraReady}
+                            disabled={!isCameraReady || !rppgInitialized}
                           >
                             <VideoIcon />
                             {t.startScanRecord}
                           </button>
                           <p style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '1rem' }}>
-                            {t.scanPositionHelp}
+                            {rppgInitialized ? t.scanPositionHelp : t.preparingScanner}
                           </p>
                         </div>
                       )}
@@ -2676,16 +2698,11 @@ const FaceScanner: React.FC = () => {
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                             <polyline points="22 4 12 14.01 9 11.01"></polyline>
                           </svg>
-                          {preparedReport ? t.scannedSuccessfully : t.scanComplete}
+                          {preparedReport ? t.scannedSuccessfully : t.scanNeedsRetry}
                         </button>
                         <p style={{ color: '#6B7280', fontSize: '0.875rem' }}>
-                          {preparedReport ? t.completeHelp : t.reportSaveFailed}
+                          {preparedReport ? t.completeHelp : uploadError || t.reportSaveFailed}
                         </p>
-                        {uploadError && (
-                          <p style={{ color: '#EF4444', fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                            {uploadError}
-                          </p>
-                        )}
                       </div>
 
                       <div style={{ display: 'flex', gap: '1rem' }}>
