@@ -33,6 +33,7 @@ export default defineConfig({
       'shakticloud.ai',  // Your specific ngrok
       'ungrammatical-skimpily-doretha.ngrok-free.dev',
       'removable-nervily-ervin.ngrok-free.dev'
+      'wellness-phc.erosuniverse.com'
     ]
   },
   worker: {
