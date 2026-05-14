@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   // Proxy `/aitools` (and other API paths) here in dev. Default matches wellness API gateway host.
   const GATEWAY_ORIGIN =
     env.VITE_DEV_PROXY_TARGET ||
-    'https://test.apigateway.erosuniverse.com'
+    'https://eu-dev-apigateway.erosuniverse.com'
 
   return {
   base: '/wellness/',
