@@ -1,7 +1,7 @@
 /**
  * Wellness gateway HTTP API
  *
- * **Production:** requests go to the EU dev gateway (absolute URL below).
+ * **Production:** requests go to the wellness API gateway (absolute URL below).
  *
  * **Local dev (`vite`):** defaults to same-origin `/aitools/wellness/prod/...` so the
  * browser talks to the Vite dev server only; Vite proxies `/aitools` to your backend
@@ -14,7 +14,7 @@
  */
 
 const wellnessApiBaseDefault =
-  "https://eu-dev-apigateway.erosuniverse.com/aitools/wellness/prod";
+  "https://apigateway.erosuniverse.com/aitools/wellness/prod";
 
 function resolveWellnessApiBaseUrl(): string {
   const fromEnv = import.meta.env.VITE_WELLNESS_API_BASE_URL;
