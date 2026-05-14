@@ -6,10 +6,10 @@ import react from '@vitejs/plugin-react-swc'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  // Proxy `/aitools` (and other API paths) here in dev. Default matches wellness prod base host.
+  // Proxy `/aitools` (and other API paths) here in dev. Default matches wellness API gateway host.
   const GATEWAY_ORIGIN =
     env.VITE_DEV_PROXY_TARGET ||
-    'https://apigateway.erosuniverse.com'
+    'https://test.apigateway.erosuniverse.com'
 
   return {
   base: '/wellness/',
